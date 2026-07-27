@@ -1,0 +1,33 @@
+로컬 개발용 Next.js 16 + Prisma 7 + SQLite 프로젝트 셋업을 완료했습니다. 개발 서버는 http://localhost:3000에서 동작 중이며, DB 연결도 확인했습니다.
+
+구성 내용
+항목	설정
+프레임워크
+Next.js 16 (App Router, TypeScript, Tailwind CSS)
+ORM
+Prisma 7 + SQLite (dev.db)
+DB 어댑터
+@prisma/adapter-better-sqlite3
+샘플 모델
+User (id, email, name, timestamps)
+주요 파일
+prisma/schema.prisma — DB 스키마
+src/lib/prisma.ts — Prisma Client 싱글톤
+src/app/page.tsx — User 목록 표시 홈 페이지
+src/app/api/health/route.ts — DB 연결 상태 API
+src/app/api/users/route.ts — User CRUD API
+.env.example — 환경 변수 예시
+실행 방법
+npm install
+cp .env.example .env
+npm run db:migrate   # 최초 1회
+npm run db:seed      # (선택) 데모 데이터
+npm run dev          # http://localhost:3000
+유용한 명령어
+npm run db:studio — Prisma Studio (localhost:5555)
+npm run db:push — 스키마를 DB에 바로 반영
+npm run build — 프로덕션 빌드
+확인된 동작
+GET /api/health → {"status":"ok","database":"connected","userCount":1}
+GET /api/users → 시드 데이터 1건 반환
+

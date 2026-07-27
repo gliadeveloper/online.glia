@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Online Glia Test
 
-## Getting Started
+Next.js + Prisma 기반 로컬 개발 프로젝트입니다.
 
-First, run the development server:
+## 기술 스택
+
+- **Next.js 16** (App Router, TypeScript, Tailwind CSS)
+- **Prisma 7** + **SQLite** (로컬 파일 DB, 별도 서버 불필요)
+- 개발 서버: `http://localhost:3000`
+
+## 시작하기
 
 ```bash
+# 의존성 설치
+npm install
+
+# 환경 변수 설정
+cp .env.example .env
+
+# DB 마이그레이션
+npm run db:migrate
+
+# (선택) 시드 데이터
+npm run db:seed
+
+# 개발 서버 실행
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 [http://localhost:3000](http://localhost:3000) 을 열면 Prisma로 조회한 User 목록을 확인할 수 있습니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 주요 스크립트
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 명령어 | 설명 |
+|--------|------|
+| `npm run dev` | Next.js 개발 서버 (localhost:3000) |
+| `npm run build` | Prisma Client 생성 후 프로덕션 빌드 |
+| `npm run db:migrate` | 마이그레이션 생성 및 적용 |
+| `npm run db:push` | 스키마를 DB에 바로 반영 (프로토타입용) |
+| `npm run db:studio` | Prisma Studio (localhost:5555) |
+| `npm run db:seed` | 시드 데이터 삽입 |
 
-## Learn More
+## API
 
-To learn more about Next.js, take a look at the following resources:
+- `GET /api/health` — DB 연결 상태 확인
+- `GET /api/users` — 사용자 목록
+- `POST /api/users` — 사용자 생성 (`{ "email": "...", "name": "..." }`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## PostgreSQL로 전환하기
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+로컬 PostgreSQL을 쓰려면 `prisma/schema.prisma`의 `provider`를 `postgresql`로 바꾸고, `.env`의 `DATABASE_URL`을 아래처럼 설정하세요.
 
-## Deploy on Vercel
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/online_glia_test?schema=public"
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+그다음 `npm run db:migrate`를 다시 실행하면 됩니다.
