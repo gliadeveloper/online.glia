@@ -3,4 +3,5 @@ export const lessonTypeLabels: Record<string, string> = {
   TEXT: "텍스트",
   QUIZ: "퀴즈",
   ASSIGNMENT: "과제",
+  LIVE: "라이브",
 };

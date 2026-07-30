@@ -6,6 +6,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Agent guidelines
 
+## Policy hub
+
+**전체 정책 한 페이지:** [docs/policies.md](docs/policies.md) — 구역·역할·Commerce·Coach·Live·문서 인덱스.  
+**User 화면 명세:** [docs/screens/README.md](docs/screens/README.md) — URL·구성·상태 매트릭스·플로우. 작성 틀: [SCREEN-SPEC-GUIDE.md](docs/screens/SCREEN-SPEC-GUIDE.md).
+
 ## `(app)` UI — App Tone v1
 
 Customer-facing routes under `src/app/(app)/` follow **App Tone v1** (neutral chrome + subtle motion).

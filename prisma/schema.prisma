@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
@@ -179,6 +179,19 @@ enum CoachingMessageAuthorRole {
   COACH
 }
 
+enum CheckInShareScopeType {
+  WEEK
+  RANGE
+}
+
+enum CheckInShareGrantStatus {
+  PENDING
+  GRANTED
+  DECLINED
+  CANCELLED
+  EXPIRED
+}
+
 enum RefundStatus {
   PENDING
   COMPLETED
@@ -279,6 +292,10 @@ model User {
   coachingConversationsAsCoach   CoachingSessionConversation[] @relation("CoachingConversationCoach")
   coachingSessionMessages        CoachingSessionMessage[]
   coachingSessionProgress        CoachingSessionProgress[]
+  checkInShareGrantsAsCoach      CheckInShareGrant[]           @relation("CheckInShareGrantCoach")
+  checkInShareGrantsAsStudent    CheckInShareGrant[]           @relation("CheckInShareGrantStudent")
+  checkInShareReportsAsCoach     CheckInShareReport[]          @relation("CheckInShareReportCoach")
+  checkInShareReportsAsStudent   CheckInShareReport[]          @relation("CheckInShareReportStudent")
   auditLogs            AuditLog[]
   createdForms         Form[]             @relation("FormCreator")
   formSubmissions      FormSubmission[]
@@ -1152,6 +1169,8 @@ model CoachingEntitlement {
   enrollment       Enrollment?        @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
   grants           EntitlementGrant[]
   sessions         CoachingSession[]
+  checkInShareGrants CheckInShareGrant[]
+  checkInShareReports CheckInShareReport[]
 
   @@index([userId, status])
   @@index([coachingOfferingId])
@@ -1187,6 +1206,8 @@ model CoachingSession {
   publishedBy  User?                         @relation("CoachingSessionPublisher", fields: [publishedById], references: [id], onDelete: SetNull)
   conversation CoachingSessionConversation?
   progress     CoachingSessionProgress?
+  checkInShareGrant  CheckInShareGrant?
+  checkInShareReport CheckInShareReport?
 
   @@unique([entitlementId, sessionNo])
   @@index([userId, sessionNo])
@@ -1244,6 +1265,73 @@ model CoachingSessionMessage {
 
   @@index([conversationId, createdAt])
   @@map("coaching_session_messages")
+}
+
+// ─── Check-in share (coach request → member accept → immutable report) ─────────
+
+model CheckInShareGrant {
+  id            String                  @id @default(cuid())
+  entitlementId String
+  sessionId     String                  @unique
+  coachId       String
+  userId        String
+
+  scopeType     CheckInShareScopeType
+  weekPeriodKey String?
+  startDate     String?
+  endDate       String?
+
+  coachMessage  String?
+  status        CheckInShareGrantStatus @default(PENDING)
+
+  requestedAt   DateTime                @default(now())
+  respondedAt   DateTime?
+
+  entitlement CoachingEntitlement @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  session     CoachingSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  coach       User                @relation("CheckInShareGrantCoach", fields: [coachId], references: [id], onDelete: Restrict)
+  user        User                @relation("CheckInShareGrantStudent", fields: [userId], references: [id], onDelete: Cascade)
+  report      CheckInShareReport?
+
+  @@index([userId, status])
+  @@index([coachId, status])
+  @@index([entitlementId])
+  @@map("check_in_share_grants")
+}
+
+model CheckInShareReport {
+  id                    String                @id @default(cuid())
+  grantId               String                @unique
+  entitlementId         String
+  sessionId             String                @unique
+  userId                String
+  coachId               String
+
+  scopeType             CheckInShareScopeType
+  weekPeriodKey         String?
+  startDate             String?
+  endDate               String?
+
+  scopeLabel            String
+  generatedAt           DateTime              @default(now())
+
+  dailyRecorded         Int
+  dailyInScope          Int
+  weeklyIncluded        Boolean
+  weeklyCount           Int                   @default(0)
+
+  contentJson           Json
+  snapshotSubmissionIds Json
+
+  grant       CheckInShareGrant       @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  entitlement CoachingEntitlement     @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  session     CoachingSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  coach       User                    @relation("CheckInShareReportCoach", fields: [coachId], references: [id], onDelete: Restrict)
+  user        User                    @relation("CheckInShareReportStudent", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([coachId])
+  @@index([userId])
+  @@map("check_in_share_reports")
 }
 
 // ─── Ops: Audit & Idempotency ──────────────────────────────────────────────────

@@ -9,11 +9,13 @@ import {
   LessonNavFooter,
   LessonPlayerHeader,
 } from "@/components/learning/lesson/lesson-player-sections";
+import { LessonLivePanel } from "@/components/learning/lesson/lesson-live-panel";
 import { QuizPlayer } from "@/components/learning/lesson/quiz-player";
 import { EnrollmentExpiredNotice } from "@/components/learning/enrollment-expired-notice";
 import { ProgressStatusPill } from "@/components/learning/progress-status-pill";
 import { ApiError } from "@/lib/api";
 import { getLessonPlayerContext } from "@/lib/learning";
+import { buildLiveSessionView, getLiveContentMetadataFromLesson } from "@/lib/live-session";
 import { getEnrolledCourseDetail } from "@/lib/learning-course-detail";
 import { getCourseShopStateBySlug } from "@/lib/shop-purchase-state";
 import { StackNavTitle } from "@/lib/stack-nav-context";
@@ -67,6 +69,10 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
 
   const { lesson, progress, prevLesson, nextLesson, quizAttempt, assignmentSubmission } = context;
   const status = progress?.status ?? "NOT_STARTED";
+  const liveSession =
+    lesson.type === "LIVE"
+      ? buildLiveSessionView(getLiveContentMetadataFromLesson(lesson.contents))
+      : null;
 
   return (
     <AppStackPage>
@@ -85,7 +91,25 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
 
       {(lesson.type === "VIDEO" || lesson.type === "TEXT") && (
         <>
-          <LessonContentSection lessonTitle={lesson.title} contents={lesson.contents} />
+          <LessonContentSection
+            lessonId={lesson.id}
+            courseSlug={slug}
+            lessonTitle={lesson.title}
+            contents={lesson.contents}
+          />
+          {status !== "COMPLETED" && (
+            <CompleteLessonButton lessonId={lesson.id} courseSlug={slug} />
+          )}
+        </>
+      )}
+
+      {lesson.type === "LIVE" && liveSession && (
+        <>
+          <LessonLivePanel
+            lessonId={lesson.id}
+            courseSlug={slug}
+            initialSession={liveSession}
+          />
           {status !== "COMPLETED" && (
             <CompleteLessonButton lessonId={lesson.id} courseSlug={slug} />
           )}

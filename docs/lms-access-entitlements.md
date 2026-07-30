@@ -3,7 +3,8 @@
 > **목표:** 강의(VOD) 상품에 **기간 기반 수강 권한**을 부여하고, **학습 완료(`COMPLETED`)** 와 **접근 만료(`EXPIRED`)** 를 분리한다.  
 > 코칭(`CoachingEntitlement`)과 동일한 **Catalog → Instance → Grant** 패턴을 따른다.
 >
-> **구현 정책 (2026-07):** [lms-access-implementation.md](./lms-access-implementation.md)
+> **구현 정책 (2026-07):** [lms-access-implementation.md](./lms-access-implementation.md)  
+> **전체 정책 허브:** [policies.md](./policies.md)
 
 ---
 

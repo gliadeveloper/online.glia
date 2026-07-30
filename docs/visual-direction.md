@@ -2,7 +2,7 @@
 
 `(app)` customer-facing UI의 **기본 시각 방향**. 신규 UI·디자인 요청 시 이 문서(또는 “**App Tone v1**”)만 언급하면 된다.
 
-**상세 토큰·패턴:** [design-system.md](./design-system.md) · [typography.md](./typography.md) · [navigation-chrome-policy.md](./navigation-chrome-policy.md)
+**상세 토큰·패턴:** [design-system.md](./design-system.md) · [typography.md](./typography.md) · [navigation-chrome-policy.md](./navigation-chrome-policy.md) · [policies.md](./policies.md)
 
 ---
 

@@ -62,6 +62,36 @@ export function CommunityIcon({ className, filled }: NavIconProps) {
   );
 }
 
+export function CoachingIcon({ className, filled }: NavIconProps) {
+  if (filled) {
+    return (
+      <svg {...SVG_BASE} className={className} fill="currentColor">
+        <path d="M12 3.25a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5Z" />
+        <path d="M5.75 19.75c0-2.75 2.65-4.5 6.25-4.5s6.25 1.75 6.25 4.5v.5H5.75v-.5Z" />
+        <path d="M18.25 8.75a2.25 2.25 0 0 1 2.25 2.25v1.75h1.25a1.25 1.25 0 0 1 0 2.5H20.5v2.25a1.25 1.25 0 0 1-2.5 0V15.25h-1.25a1.25 1.25 0 0 1 0-2.5h1.25v-1.75a2.25 2.25 0 0 1 2.25-2.25Z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      {...SVG_BASE}
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 4.25a2.75 2.75 0 1 0 0 5.5 2.75 2.75 0 0 0 0-5.5Z" />
+      <path d="M5.75 19.75v-.75a4.25 4.25 0 0 1 4.25-4.25H12" />
+      <path d="M17.5 9.25h2.25" />
+      <path d="M19.125 7.625v3.25" />
+      <path d="M16.25 14.25a3.75 3.75 0 0 1 3.25 3.5v1.25" />
+    </svg>
+  );
+}
+
 export function LearningIcon({ className, filled }: NavIconProps) {
   if (filled) {
     return (

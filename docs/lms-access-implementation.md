@@ -1,7 +1,7 @@
 # LMS 수강 권한 · Shop 정책 (구현 완료 범위)
 
 > **문서 목적:** 2026-07 기준, 수강 기간(Access) · Shop CTA · Fulfillment 정책 중 **결정·적용된 사항**을 한곳에 정리한다.  
-> **관련 문서:** [lms-access-entitlements.md](./lms-access-entitlements.md) (DB/도메인 설계 원본)  
+> **관련 문서:** [lms-access-entitlements.md](./lms-access-entitlements.md) (DB/도메인 설계 원본) · [policies.md](./policies.md) (정책 허브)  
 > **범위 밖:** 케이스별 할인 SKU, 쿠폰, Admin ProductItem UI, 차액 결제
 
 ---

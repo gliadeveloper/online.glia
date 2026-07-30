@@ -11,7 +11,7 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 
 | 업계 패턴 | 우리 구현 | 비고 |
 |-----------|-----------|------|
-| **Root tabs / Primary destinations** | Tab mode `(tabs)/` | 홈·커뮤니티·내학습 |
+| **Root tabs / Primary destinations** | Tab mode `(tabs)/` | 홈·커뮤니티·코칭·내학습 |
 | **Hierarchical nav / Drill-down stack** | Stack mode `(stack)/` | 상세·폼·마이페이지 |
 | **Bottom tab bar** | `PrimaryNavBottom` | Mobile Tab only |
 | **Top navigation / Unified app header** | `UnifiedHeader` | Desktop Tab & Stack |
@@ -39,13 +39,14 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 
 ### 2.1 1차 메뉴 (Primary Navigation)
 
-고정 3개. 추가·변경 시 이 문서를 먼저 갱신한다.
+고정 4개. 추가·변경 시 이 문서를 먼저 갱신한다.
 
 | 메뉴 | 경로 | 역할 |
 |------|------|------|
 | 홈 | `/` | 진입·요약·주요 CTA |
 | 커뮤니티 | `/community` | 공지·Q&A 등 (확장 예정) |
-| 내학습 | `/learning` | 수강·코칭·체크인 등 학습 허브 (확장 예정) |
+| 코칭 | `/coaching` | 보유 코칭 상품·회차 허브 |
+| 내학습 | `/learning` | 수강 코스 허브 |
 
 ### 2.2 내비게이션 모드 (Navigation Mode)
 
@@ -56,7 +57,7 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 
 **Tab에 둘 화면**
 
-- 1차 메뉴 3개에 해당하는 루트 페이지
+- 1차 메뉴 4개에 해당하는 루트 페이지
 - 사용자가 섹션 간 이동을 기대하는 허브
 
 **Stack에 둘 화면**
@@ -85,7 +86,7 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 | 레이어 | ID (개념) | 구성 | 역할 |
 |--------|-----------|------|------|
 | **L0 Global** | global | 로고(placeholder) · 슬로건(placeholder) · 인증(로그인/마이페이지) | 앱 정체성·전역 계정 |
-| **L1 Primary** | primary | 홈 · 커뮤니티 · 내학습 | 섹션 간 이동 |
+| **L1 Primary** | primary | 홈 · 커뮤니티 · 코칭 · 내학습 | 섹션 간 이동 |
 | **L2 Context** | context | ← 뒤로 · 페이지 제목 | 계층 내 이전 단계 |
 | **L3 Content** | main | 페이지 본문 | 과업·정보 |
 
@@ -94,7 +95,7 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 | Variant | 경로 | Surface | 구현 |
 |---------|------|---------|------|
 | **`on-hero`** | `/` only | Hero gradient에 integrated, border 없음 | `MobileGlobalHeader variant="on-hero"` in `HomeBrandHero` |
-| **`separated`** | `/community`, `/learning` | elevated bar + `border-b` | `MobileGlobalHeader` in shell |
+| **`separated`** | `/community`, `/coaching`, `/learning` | elevated bar + `border-b` | `MobileGlobalHeader` in shell |
 | *(off)* | Stack | L0 숨김 | — |
 
 ---
@@ -109,7 +110,7 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 |--------|--------|---------------|
 | L0 Global `[로고 + 인증]` | ✅ 상단 variant **`separated`** (**홈 `/` 제외**) | — |
 | **Home Brand Hero** | ✅ **`/` only** — L0 **`on-hero`** + hero copy/CTA + **`radius-hero-bottom`** → feed | — (contained hero band) |
-| L1 Primary `[홈·커뮤니티·내학습]` | ✅ **하단 탭** | ✅ **헤더 내 인라인** |
+| L1 Primary `[홈·커뮤니티·코칭·내학습]` | ✅ **하단 탭** | ✅ **헤더 내 인라인** |
 | L0+L1 통합 `[로고 + 메뉴 + 인증]` | — | ✅ **단일 헤더 한 줄** |
 | L2 Context `← + 제목` | ❌ | ❌ |
 | 본문 스크롤 | `#main-content` 단일 scroll (§4.4) | document scroll |
@@ -225,7 +226,7 @@ L2 Context Nav는 **Mobile Stack에서만** 노출한다.
 
 ## 9. 신규 화면 추가 시 결정 절차
 
-1. **1차 메뉴 3개에 넣을 수 있는가?**  
+1. **1차 메뉴 4개에 넣을 수 있는가?**  
    - Yes → Tab `(tabs)/`  
    - No → 2번
 
@@ -272,6 +273,7 @@ L2 Context Nav는 **Mobile Stack에서만** 노출한다.
 
 ## 12. 관련 문서
 
+- [policies.md](./policies.md) — **프로젝트 정책 허브 (전체 진입점)**
 - [visual-direction.md](./visual-direction.md) — App Tone v1 visual direction
 - [design-system.md](./design-system.md) — 색·타이포·컴포넌트 패턴·접근성 (시각 디자인 시스템)
 - KRDS v1.0 — https://www.krds.go.kr

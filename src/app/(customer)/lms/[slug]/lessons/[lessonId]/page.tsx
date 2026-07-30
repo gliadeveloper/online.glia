@@ -66,7 +66,12 @@ export default async function LmsLessonPlayerPage({ params }: Props) {
 
       {(lesson.type === "VIDEO" || lesson.type === "TEXT") && (
         <section className="space-y-4">
-          <LessonContentSection lessonTitle={lesson.title} contents={lesson.contents} />
+          <LessonContentSection
+            lessonId={lesson.id}
+            courseSlug={slug}
+            lessonTitle={lesson.title}
+            contents={lesson.contents}
+          />
           {status !== "COMPLETED" && (
             <CompleteLessonButton lessonId={lesson.id} courseSlug={slug} />
           )}

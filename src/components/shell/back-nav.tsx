@@ -7,6 +7,7 @@ import { Typography } from "@/components/typography/typography";
 import { typoRoleClass } from "@/lib/typography";
 import { resolveStackNav } from "@/lib/stack-nav";
 import {
+  useStackNavBackOverride,
   useStackNavTitleOverride,
   useStackNavTrailingLabel,
 } from "@/lib/stack-nav-context";
@@ -14,7 +15,11 @@ import {
 /** Mobile stack: sole chrome — back + page title. */
 export function BackNav() {
   const pathname = usePathname();
-  const { backHref, backLabel, title, immersive } = resolveStackNav(pathname);
+  const resolved = resolveStackNav(pathname);
+  const { backHrefOverride, backLabelOverride } = useStackNavBackOverride();
+  const backHref = backHrefOverride ?? resolved.backHref;
+  const backLabel = backLabelOverride ?? resolved.backLabel;
+  const { title, immersive } = resolved;
   const titleOverride = useStackNavTitleOverride();
   const trailingLabel = useStackNavTrailingLabel();
   const displayTitle = titleOverride ?? title;

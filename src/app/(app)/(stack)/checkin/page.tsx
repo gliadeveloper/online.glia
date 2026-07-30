@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { CheckInHubPanel } from "@/components/checkin/check-in-hub-panel";
+import { CheckInSharePendingBanner } from "@/components/checkin/check-in-share-pending-banner";
 import { Typography } from "@/components/typography/typography";
+import { listPendingShareGrantsForUser } from "@/lib/checkin-share/grants";
 import { getCheckInHubData } from "@/lib/checkin-hub";
 import { getCurrentUser } from "@/lib/session";
 
@@ -13,6 +15,7 @@ export default async function CheckInHubPage() {
   }
 
   const data = await getCheckInHubData(user.id);
+  const pendingShareGrants = await listPendingShareGrantsForUser(user.id);
 
   const headlineRole =
     data.streakHeadline.kind === "continuing"
@@ -44,6 +47,8 @@ export default async function CheckInHubPage() {
           이번 주도 짧게 돌아보고 주간 체크를 남겨보세요
         </Typography>
       </header>
+
+      <CheckInSharePendingBanner grants={pendingShareGrants} />
 
       <CheckInHubPanel data={data} />
     </div>

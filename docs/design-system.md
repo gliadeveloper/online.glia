@@ -444,6 +444,9 @@ Primary nav: Home / Community / Learning — outline (inactive) / filled (active
 
 ## 11. 관련 문서
 
+- [policies.md](./policies.md) — **프로젝트 정책 허브**
+- [visual-direction.md](./visual-direction.md) — App Tone v1
+
 - [visual-direction.md](./visual-direction.md) — **App Tone v1** (한 페이지 요약·요청 문구)
 - [typography.md](./typography.md) — typo 토큰·WebView 스케일·`<Typography>` API
 - [navigation-chrome-policy.md](./navigation-chrome-policy.md) — chrome 노출 정책 (Tab/Stack × Mobile/Desktop)

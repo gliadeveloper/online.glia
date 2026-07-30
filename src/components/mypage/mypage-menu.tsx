@@ -50,11 +50,19 @@ export function MyPageMenu({ stats, role }: MyPageMenuProps) {
     });
   }
 
-  if (role === "ADMIN" || role === "COACH") {
+  if (role === "ADMIN") {
     items.push({
       href: "/admin",
       label: "관리 콘솔",
-      hint: role === "ADMIN" ? "관리자" : "코치",
+      hint: "관리자",
+    });
+  }
+
+  if (role === "COACH") {
+    items.push({
+      href: "/coach",
+      label: "코치 포털",
+      hint: "세션·공유·피드백",
     });
   }
 

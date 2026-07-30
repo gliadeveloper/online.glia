@@ -57,3 +57,14 @@ export async function assertAdmin(userId: string) {
 
   return user;
 }
+
+export async function assertCoach(userId: string) {
+  const { prisma } = await import("@/lib/prisma");
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+
+  if (!user || user.role !== "COACH") {
+    throw new ApiError("Coach access required", 403, "FORBIDDEN");
+  }
+
+  return user;
+}

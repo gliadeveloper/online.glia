@@ -187,6 +187,7 @@ export async function createContent(params: {
   title?: string;
   url?: string;
   body?: string;
+  metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
 }) {
   const maxOrder = await prisma.content.aggregate({
     where: { lessonId: params.lessonId },
@@ -200,6 +201,7 @@ export async function createContent(params: {
       title: params.title?.trim(),
       url: params.url?.trim(),
       body: params.body?.trim(),
+      metadata: params.metadata,
       order: (maxOrder._max.order ?? 0) + 1,
     },
   });
@@ -222,6 +224,7 @@ export async function updateContent(params: {
   url?: string;
   body?: string;
   type?: ContentType;
+  metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
 }) {
   const content = await prisma.content.update({
     where: { id: params.contentId },
@@ -230,6 +233,7 @@ export async function updateContent(params: {
       url: params.url?.trim(),
       body: params.body?.trim(),
       type: params.type,
+      metadata: params.metadata,
     },
   });
 

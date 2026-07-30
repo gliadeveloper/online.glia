@@ -1,6 +1,10 @@
 import Link from "next/link";
 
+import { PostMarkdown } from "@/components/community/post-markdown";
+import { LessonVideoPlayer } from "@/components/learning/lesson/lesson-video-player";
+import type { Prisma } from "@/generated/prisma/client";
 import { lessonTypeLabels } from "@/lib/lesson-labels";
+import { isR2VideoMetadata, parseContentMetadata } from "@/lib/media/content-metadata";
 
 type LessonContent = {
   id: string;
@@ -8,54 +12,73 @@ type LessonContent = {
   title: string | null;
   body: string | null;
   url: string | null;
+  metadata?: Prisma.JsonValue | null;
 };
 
 type LessonContentSectionProps = {
+  lessonId: string;
+  courseSlug: string;
   lessonTitle: string;
   contents: LessonContent[];
 };
 
-export function LessonContentSection({ lessonTitle, contents }: LessonContentSectionProps) {
+export function LessonContentSection({
+  lessonId,
+  courseSlug,
+  lessonTitle,
+  contents,
+}: LessonContentSectionProps) {
   return (
     <section className="space-y-4" aria-label="학습 콘텐츠">
-      {contents.map((content) => (
-        <article
-          key={content.id}
-          className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-sm"
-        >
-          {content.type === "VIDEO" && content.url && (
-            <div className="aspect-video bg-zinc-950">
-              <iframe
-                src={content.url}
+      {contents.map((content) => {
+        const metadata = parseContentMetadata(content.metadata);
+        const showVideo =
+          content.type === "VIDEO" && (isR2VideoMetadata(metadata) || Boolean(content.url));
+
+        return (
+          <article
+            key={content.id}
+            className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-sm"
+          >
+            {showVideo && (
+              <LessonVideoPlayer
+                lessonId={lessonId}
+                courseSlug={courseSlug}
+                contentId={content.id}
                 title={content.title ?? lessonTitle}
-                className="h-full w-full"
-                allowFullScreen
+                fallbackUrl={isR2VideoMetadata(metadata) ? null : content.url}
               />
+            )}
+            <div className="p-6">
+              {content.title && (
+                <h2 className="font-medium text-[var(--color-text-primary)]">{content.title}</h2>
+              )}
+              {content.body && content.type === "HTML" && (
+                <PostMarkdown
+                  content={content.body}
+                  className="prose prose-zinc mt-3 max-w-none typo-subTypography11 text-[var(--color-text-secondary)]"
+                />
+              )}
+              {content.body && content.type !== "HTML" && (
+                <div
+                  className="prose prose-zinc mt-3 max-w-none typo-subTypography11 text-[var(--color-text-secondary)]"
+                  dangerouslySetInnerHTML={{ __html: content.body }}
+                />
+              )}
+              {content.url && content.type !== "VIDEO" && (
+                <a
+                  href={content.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="shell-focus-ring mt-3 inline-flex min-h-11 items-center typo-subTypography11 font-medium text-[var(--color-action-primary)]"
+                >
+                  자료 열기 →
+                </a>
+              )}
             </div>
-          )}
-          <div className="p-6">
-            {content.title && (
-              <h2 className="font-medium text-[var(--color-text-primary)]">{content.title}</h2>
-            )}
-            {content.body && (
-              <div
-                className="prose prose-zinc mt-3 max-w-none typo-subTypography11 text-[var(--color-text-secondary)]"
-                dangerouslySetInnerHTML={{ __html: content.body }}
-              />
-            )}
-            {content.url && content.type !== "VIDEO" && (
-              <a
-                href={content.url}
-                target="_blank"
-                rel="noreferrer"
-                className="shell-focus-ring mt-3 inline-flex min-h-11 items-center typo-subTypography11 font-medium text-[var(--color-action-primary)]"
-              >
-                자료 열기 →
-              </a>
-            )}
-          </div>
-        </article>
-      ))}
+          </article>
+        );
+      })}
     </section>
   );
 }

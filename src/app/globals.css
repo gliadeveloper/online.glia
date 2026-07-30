@@ -1180,6 +1180,67 @@ body {
   height: calc(var(--radius-md) * 4.25);
 }
 
+.user-avatar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.user-avatar--md {
+  width: calc(var(--radius-md) * 5.5);
+  height: calc(var(--radius-md) * 5.5);
+}
+
+.user-avatar--sm {
+  width: calc(var(--radius-md) * 4.25);
+  height: calc(var(--radius-md) * 4.25);
+}
+
+.user-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coaching-coach-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--home-stack-md);
+  margin-top: var(--home-stack-md);
+}
+
+.coaching-coach-profile__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.coaching-qna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-md);
+}
+
+.coaching-qna__empty {
+  padding: var(--home-stack-md);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.coaching-qna__pending {
+  margin-top: 4px;
+}
+
+.coaching-qna__composer {
+  margin-top: var(--home-stack-sm);
+}
+
 .community-author-row {
   display: flex;
   align-items: center;
@@ -2895,4 +2956,194 @@ body {
   .check-in-report__footer-btn--primary:active {
     transform: none;
   }
+}
+
+/* ─── Check-in share (member preview + coach report) ─────────────────────── */
+
+.check-in-share-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-xl);
+  padding-bottom: var(--home-stack-2xl);
+}
+
+.check-in-share-banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-sm);
+  margin-bottom: var(--home-stack-lg);
+  border-color: color-mix(in srgb, var(--color-teal-500) 25%, var(--color-border-subtle));
+  background: color-mix(in srgb, var(--color-teal-50) 55%, var(--color-surface-elevated));
+}
+
+.check-in-share-banner__link {
+  align-self: flex-start;
+  margin-top: var(--home-stack-xs);
+}
+
+.check-in-share-respond {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-xl);
+}
+
+.check-in-share-respond__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-sm);
+}
+
+.check-in-share-respond__message {
+  padding: var(--home-stack-md) var(--home-stack-lg);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  line-height: var(--typo-subTypography11-line-height, 1.5);
+}
+
+.check-in-share-respond__warn {
+  padding: var(--home-stack-md) var(--home-stack-lg);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-orange-50) 80%, var(--color-surface));
+  border: 1px solid var(--color-border-subtle);
+}
+
+.check-in-share-respond__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-md);
+}
+
+.check-in-share-respond__btn {
+  display: flex;
+  min-height: calc(var(--radius-md) * 5.5);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.check-in-share-respond__btn--accept {
+  background: var(--color-action-primary);
+  color: #ffffff;
+}
+
+.check-in-share-respond__btn--accept:hover:not(:disabled) {
+  background: var(--color-action-primary-hover);
+}
+
+.check-in-share-respond__btn--accept:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.check-in-share-respond__btn--decline {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border-subtle);
+}
+
+.check-in-share-respond__btn--decline:hover:not(:disabled) {
+  background: var(--color-row-hover);
+}
+
+.check-in-share-respond__done {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-md);
+}
+
+.check-in-share-respond__error {
+  color: var(--color-red-600);
+}
+
+.check-in-share-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-xl);
+  padding: var(--home-stack-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-elevated);
+}
+
+.check-in-share-report__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-xs);
+  padding-bottom: var(--home-stack-md);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.check-in-share-report__summary {
+  letter-spacing: var(--typo-tracking-caption);
+}
+
+.check-in-share-report__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-md);
+}
+
+.check-in-share-report__section-label {
+  letter-spacing: var(--typo-tracking-caption);
+}
+
+.check-in-share-report__daily-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-md);
+}
+
+.check-in-share-report__day,
+.check-in-share-report__week {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-sm);
+  padding: var(--home-stack-md);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.check-in-share-report__day-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--home-stack-sm);
+}
+
+.check-in-share-report__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--home-stack-sm);
+  margin: 0;
+}
+
+.check-in-share-report__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.check-in-share-report__value {
+  margin: 0;
+}
+
+.check-in-share-report__footnote {
+  padding-top: var(--home-stack-md);
+  border-top: 1px dashed var(--color-border);
+  line-height: var(--typo-subTypography11-line-height, 1.5);
+}
+
+/* Coach portal — curriculum editor */
+.coach-curriculum-type-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  background: rgb(236 253 245);
+  border: 1px solid rgb(167 243 208);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgb(4 120 87);
 }

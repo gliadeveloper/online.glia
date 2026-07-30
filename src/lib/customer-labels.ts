@@ -57,6 +57,13 @@ export const productKindLabels: Record<ProductKind, string> = {
   BUNDLE: "번들",
 };
 
+export function getProductDisplayPrice(product: {
+  listPrice: number;
+  salePrice: number | null;
+}) {
+  return product.salePrice ?? product.listPrice;
+}
+
 export const submissionStatusLabels: Record<SubmissionStatus, string> = {
   DRAFT: "임시 저장",
   SUBMITTED: "제출됨",

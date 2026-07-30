@@ -1,6 +1,54 @@
 import { ensureUserCoachingSessionsProvisioned } from "@/lib/coaching-provision";
+import { coachProfileSelect } from "@/lib/coaching-display";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+
+const entitlementListInclude = {
+  coachingOffering: {
+    select: {
+      title: true,
+      slug: true,
+      totalSessions: true,
+      validDays: true,
+      coach: { select: coachProfileSelect },
+    },
+  },
+  course: { select: { title: true, slug: true } },
+  sessions: {
+    orderBy: { sessionNo: "asc" as const },
+    take: 1,
+    include: {
+      coach: { select: coachProfileSelect },
+    },
+  },
+} satisfies Prisma.CoachingEntitlementInclude;
+
+const entitlementDetailInclude = {
+  coachingOffering: {
+    select: {
+      title: true,
+      slug: true,
+      totalSessions: true,
+      validDays: true,
+      coach: { select: coachProfileSelect },
+    },
+  },
+  course: { select: { title: true, slug: true } },
+  sessions: {
+    orderBy: { sessionNo: "asc" as const },
+    include: {
+      coach: { select: coachProfileSelect },
+      conversation: {
+        select: {
+          messages: {
+            where: { awaitingReply: true },
+            select: { id: true },
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.CoachingEntitlementInclude;
 
 export async function getUserCoachingEntitlements(userId: string) {
   await ensureUserCoachingSessionsProvisioned(userId);
@@ -8,36 +56,26 @@ export async function getUserCoachingEntitlements(userId: string) {
   return prisma.coachingEntitlement.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    include: {
-      coachingOffering: {
-        select: {
-          title: true,
-          totalSessions: true,
-          validDays: true,
-        },
-      },
-      course: { select: { title: true, slug: true } },
-      sessions: {
-        orderBy: { sessionNo: "asc" },
-        include: {
-          coach: { select: { name: true, email: true } },
-          conversation: {
-            select: {
-              messages: {
-                where: { awaitingReply: true },
-                select: { id: true },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: entitlementListInclude,
+  });
+}
+
+export async function getCoachingEntitlementForUser(userId: string, entitlementId: string) {
+  await ensureUserCoachingSessionsProvisioned(userId);
+
+  return prisma.coachingEntitlement.findFirst({
+    where: { id: entitlementId, userId },
+    include: entitlementDetailInclude,
   });
 }
 
 export type UserCoachingEntitlement = Awaited<
   ReturnType<typeof getUserCoachingEntitlements>
 >[number];
+
+export type UserCoachingEntitlementDetail = NonNullable<
+  Awaited<ReturnType<typeof getCoachingEntitlementForUser>>
+>;
 
 const homeFeedSessionInclude = {
   coach: { select: { name: true, email: true } },

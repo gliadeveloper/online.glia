@@ -4,6 +4,7 @@ import type {
 } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
+import { coachProfileSelect } from "@/lib/coaching-display";
 import { prisma } from "@/lib/prisma";
 
 export type CoachingSessionDisplayState = "UPCOMING" | "PREPARING" | "PUBLISHED";
@@ -59,7 +60,7 @@ export const sessionListInclude = {
 } satisfies Prisma.CoachingSessionInclude;
 
 export const sessionDetailInclude = {
-  coach: { select: { id: true, name: true, email: true } },
+  coach: { select: coachProfileSelect },
   progress: true,
   entitlement: {
     select: {

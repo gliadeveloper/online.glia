@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import {
   AppButtonLink,
   AppEmptyState,
@@ -8,12 +6,8 @@ import {
   AppStatusBanner,
   AppTabScreen,
 } from "@/components/app";
-import { CoachingEntitlementSummary } from "@/components/coaching/coaching-entitlement-summary";
-import { CoachingSessionCard } from "@/components/coaching/coaching-session-card";
 import { EnrollmentCourseCard } from "@/components/learning/enrollment-course-card";
 import { HeaderAuthAction } from "@/components/shell/header-auth-action";
-import { Typography } from "@/components/typography/typography";
-import { getUserCoachingEntitlements } from "@/lib/coaching-customer";
 import { getUserEnrollments } from "@/lib/learning-enrollments";
 import { getCurrentUser } from "@/lib/session";
 
@@ -36,10 +30,10 @@ export default async function LearningPage({ searchParams }: LearningPageProps) 
     );
   }
 
-  const [enrollments, entitlements] = await Promise.all([
-    getUserEnrollments(user.id),
-    getUserCoachingEntitlements(user.id),
-  ]);
+  const enrollments = await getUserEnrollments(user.id);
+  const inProgress = enrollments.filter((item) => item.status === "ACTIVE");
+  const completed = enrollments.filter((item) => item.status === "COMPLETED");
+  const expired = enrollments.filter((item) => item.status === "EXPIRED");
 
   return (
     <AppTabScreen title="내 학습">
@@ -47,58 +41,57 @@ export default async function LearningPage({ searchParams }: LearningPageProps) 
         <AppStatusBanner>구매가 완료되었습니다. 첫 레슨부터 학습을 시작해 보세요.</AppStatusBanner>
       )}
 
-      {enrollments.length === 0 ? (
-        <AppEmptyState
-          message="아직 수강 중인 강의가 없습니다."
-          action={<AppButtonLink href="/shop">상품 둘러보기</AppButtonLink>}
+      <AppSection labelledBy="learning-continue-heading">
+        <AppSectionHeader
+          title="이어보기"
+          titleId="learning-continue-heading"
+          description="현재 수강 중인 클래스"
         />
-      ) : (
-        <AppSection labelledBy="enrollment-list-heading">
-          <Typography as="h2" id="enrollment-list-heading" role="sectionTitle" weight="semibold" color="primary" className="sr-only">
-            수강 중인 강의
-          </Typography>
+
+        {inProgress.length === 0 ? (
+          <AppEmptyState
+            message="수강 중인 클래스가 없습니다."
+            action={<AppButtonLink href="/shop">클래스 둘러보기</AppButtonLink>}
+          />
+        ) : (
           <ul className="app-grid app-grid--2">
-            {enrollments.map((enrollment) => (
+            {inProgress.map((enrollment) => (
               <EnrollmentCourseCard key={enrollment.id} enrollment={enrollment} />
             ))}
           </ul>
-        </AppSection>
-      )}
+        )}
+      </AppSection>
 
-      {entitlements.length > 0 && (
-        <AppSection labelledBy="coaching-list-heading">
+      <AppSection labelledBy="learning-completed-heading">
+        <AppSectionHeader
+          title="전체 목록"
+          titleId="learning-completed-heading"
+          description="수강 완료한 클래스"
+        />
+
+        {completed.length === 0 ? (
+          <AppEmptyState message="수강 완료한 클래스가 없습니다." />
+        ) : (
+          <ul className="app-grid app-grid--2">
+            {completed.map((enrollment) => (
+              <EnrollmentCourseCard key={enrollment.id} enrollment={enrollment} />
+            ))}
+          </ul>
+        )}
+      </AppSection>
+
+      {expired.length > 0 && (
+        <AppSection labelledBy="learning-expired-heading">
           <AppSectionHeader
-            title="코칭"
-            titleId="coaching-list-heading"
-            description="회차별 코칭 콘텐츠와 Q&A"
-            action={
-              <Link href="/coaching" className="app-btn app-btn--secondary shell-focus-ring">
-                <Typography as="span" role="bodySecondary" weight="medium" color="primary">
-                  전체 보기
-                </Typography>
-              </Link>
-            }
+            title="만료된 클래스"
+            titleId="learning-expired-heading"
+            description="수강 기간이 지난 클래스"
           />
-
-          {entitlements.slice(0, 1).map((entitlement) => (
-            <div key={entitlement.id} className="app-section">
-              <CoachingEntitlementSummary entitlement={entitlement} />
-              <ul className="app-section">
-                {entitlement.sessions.slice(0, 3).map((session) => (
-                  <CoachingSessionCard
-                    key={session.id}
-                    sessionId={session.id}
-                    sessionNo={session.sessionNo}
-                    title={session.title}
-                    coachName={session.coach.name ?? session.coach.email}
-                    scheduledAt={session.scheduledAt.toISOString()}
-                    publicationStatus={session.publicationStatus}
-                    pendingReplyCount={session.conversation?.messages.length ?? 0}
-                  />
-                ))}
-              </ul>
-            </div>
-          ))}
+          <ul className="app-grid app-grid--2">
+            {expired.map((enrollment) => (
+              <EnrollmentCourseCard key={enrollment.id} enrollment={enrollment} />
+            ))}
+          </ul>
         </AppSection>
       )}
     </AppTabScreen>
