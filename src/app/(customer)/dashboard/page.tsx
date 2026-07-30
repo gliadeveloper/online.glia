@@ -52,7 +52,7 @@ export default async function DashboardPage() {
       accent: "emerald" as const,
     },
     {
-      href: "/checkin",
+      href: "/checkin/daily",
       title: "체크인",
       description: "데일리 · 주간 상태 기록",
       stat:
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
         <StatCard
           label="데일리 체크인"
           value={daily?.hasSubmission ? "완료" : "미완료"}
-          href="/checkin?tab=daily"
+          href="/checkin/daily"
           accent={daily?.hasSubmission ? "emerald" : "amber"}
         />
         <StatCard

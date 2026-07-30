@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function updateEnrollment(params: {
   actorId: string;
   enrollmentId: string;
-  status?: "ACTIVE" | "COMPLETED" | "DROPPED" | "SUSPENDED";
+  status?: "ACTIVE" | "COMPLETED" | "EXPIRED" | "DROPPED" | "SUSPENDED";
   progressPercent?: number;
 }) {
   const enrollment = await prisma.enrollment.update({
@@ -35,7 +35,7 @@ export async function updateEnrollment(params: {
 export async function updateCoachingEntitlementAdmin(params: {
   actorId: string;
   entitlementId: string;
-  status?: "ACTIVE" | "SUSPENDED" | "REVOKED" | "EXPIRED" | "EXHAUSTED";
+  status?: "ACTIVE" | "SUSPENDED" | "REVOKED" | "EXPIRED" | "COMPLETED";
   totalSessions?: number;
   validUntil?: Date;
   extendDays?: number;

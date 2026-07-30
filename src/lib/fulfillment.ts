@@ -2,7 +2,18 @@ import type { Prisma } from "@/generated/prisma/client";
 
 import { addDays, ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
+import { provisionCoachingSessions } from "@/lib/coaching-provision";
+import {
+  computeEnrollmentAccessGrant,
+  evaluateCourseGrantAction,
+  mergeEnrollmentAccessRenewal,
+  resolveCourseAccessPolicyFromCourse,
+  resolveCourseAccessPolicyFromProductItem,
+  type CourseAccessPolicy,
+  type CourseGrantAction,
+} from "@/lib/enrollment-access";
 import { prisma } from "@/lib/prisma";
+import { assessProductCheckout, type CoachingGrantAction } from "@/lib/shop-purchase-state";
 
 type TransactionClient = Prisma.TransactionClient;
 
@@ -37,8 +48,7 @@ const orderInclude = {
             select: {
               id: true,
               totalSessions: true,
-              usedSessions: true,
-              reservedSessions: true,
+              completedSessions: true,
               validUntil: true,
               status: true,
             },
@@ -57,8 +67,7 @@ const orderInclude = {
             select: {
               id: true,
               totalSessions: true,
-              usedSessions: true,
-              reservedSessions: true,
+              completedSessions: true,
               validUntil: true,
               status: true,
             },
@@ -81,22 +90,47 @@ async function grantCourseAccess(
     fulfillmentId: string;
     orderLineId: string;
     productItemId: string;
+    policy: CourseAccessPolicy;
+    action: CourseGrantAction;
+    now: Date;
   },
 ) {
-  const enrollment = await tx.enrollment.upsert({
+  const existing = await tx.enrollment.findUnique({
     where: {
       userId_courseId: {
         userId: params.userId,
         courseId: params.courseId,
       },
     },
-    update: {},
-    create: {
-      userId: params.userId,
-      courseId: params.courseId,
-      status: "ACTIVE",
-    },
   });
+
+  let enrollment;
+
+  if (params.action === "skip" && existing) {
+    enrollment = existing;
+  } else {
+    const accessData =
+      existing && params.action !== "grant"
+        ? mergeEnrollmentAccessRenewal(existing, params.policy, params.now)
+        : computeEnrollmentAccessGrant({
+            existing,
+            policy: params.policy,
+            now: params.now,
+          });
+
+    enrollment = existing
+      ? await tx.enrollment.update({
+          where: { id: existing.id },
+          data: accessData,
+        })
+      : await tx.enrollment.create({
+          data: {
+            userId: params.userId,
+            courseId: params.courseId,
+            ...accessData,
+          },
+        });
+  }
 
   await tx.entitlementGrant.create({
     data: {
@@ -120,9 +154,14 @@ async function grantCoachingAccess(
     orderLineId: string;
     productItemId: string;
     enrollmentId?: string | null;
+    action: CoachingGrantAction;
     now: Date;
   },
 ) {
+  if (params.action === "skip") {
+    return null;
+  }
+
   const offering = await tx.coachingOffering.findUniqueOrThrow({
     where: { id: params.coachingOfferingId },
   });
@@ -139,6 +178,19 @@ async function grantCoachingAccess(
       validUntil: addDays(params.now, offering.validDays),
       status: "ACTIVE",
     },
+  });
+
+  if (!offering.coachId) {
+    throw new Error("COACH_NOT_ASSIGNED");
+  }
+
+  await provisionCoachingSessions(tx, {
+    entitlementId: entitlement.id,
+    userId: params.userId,
+    coachId: offering.coachId,
+    offeringId: offering.id,
+    totalSessions: offering.totalSessions,
+    validFrom: params.now,
   });
 
   await tx.entitlementGrant.create({
@@ -165,6 +217,14 @@ async function fulfillOrderLine(
       kind: "COURSE_ACCESS" | "COACHING_ACCESS";
       courseId: string | null;
       coachingOfferingId: string | null;
+      accessDuration: "LIFETIME" | "FIXED_DAYS";
+      accessDays: number | null;
+      course: {
+        defaultAccessDuration: "LIFETIME" | "FIXED_DAYS";
+        defaultAccessDays: number | null;
+      } | null;
+      courseAction?: CourseGrantAction;
+      coachingAction?: CoachingGrantAction;
     }>;
     now: Date;
   },
@@ -173,12 +233,35 @@ async function fulfillOrderLine(
 
   for (const item of params.items) {
     if (item.kind === "COURSE_ACCESS" && item.courseId) {
+      const policy = resolveCourseAccessPolicyFromProductItem({
+        accessDuration: item.accessDuration,
+        accessDays: item.accessDays,
+        course: item.course,
+      });
+      const action =
+        item.courseAction ??
+        evaluateCourseGrantAction({
+          enrollment: await tx.enrollment.findUnique({
+            where: {
+              userId_courseId: {
+                userId: params.userId,
+                courseId: item.courseId,
+              },
+            },
+          }),
+          policy,
+          now: params.now,
+        });
+
       enrollmentId = await grantCourseAccess(tx, {
         userId: params.userId,
         courseId: item.courseId,
         fulfillmentId: params.fulfillmentId,
         orderLineId: params.orderLineId,
         productItemId: item.id,
+        policy,
+        action,
+        now: params.now,
       });
     }
   }
@@ -192,6 +275,7 @@ async function fulfillOrderLine(
         orderLineId: params.orderLineId,
         productItemId: item.id,
         enrollmentId,
+        action: item.coachingAction ?? "grant",
         now: params.now,
       });
     }
@@ -219,6 +303,20 @@ export async function checkout(params: {
     include: {
       items: {
         orderBy: { sortOrder: "asc" },
+        include: {
+          course: {
+            select: {
+              id: true,
+              slug: true,
+              title: true,
+              defaultAccessDuration: true,
+              defaultAccessDays: true,
+            },
+          },
+          coachingOffering: {
+            select: { id: true, title: true },
+          },
+        },
       },
     },
   });
@@ -232,8 +330,25 @@ export async function checkout(params: {
     throw new Error("USER_NOT_FOUND");
   }
 
-  const unitPrice = getProductPrice(product);
   const now = new Date();
+  const checkoutAssessment = await assessProductCheckout(params.userId, product, now);
+
+  if (!checkoutAssessment.canCheckout) {
+    throw new ApiError(
+      checkoutAssessment.blockMessage ?? "Already owned",
+      409,
+      checkoutAssessment.blockCode ?? "ALREADY_OWNED",
+    );
+  }
+
+  const courseActionByItemId = new Map(
+    checkoutAssessment.courseItems.map((item) => [item.productItemId, item.action]),
+  );
+  const coachingActionByItemId = new Map(
+    checkoutAssessment.coachingItems.map((item) => [item.productItemId, item.action]),
+  );
+
+  const unitPrice = getProductPrice(product);
   const providerRef = `demo-${crypto.randomUUID()}`;
 
   const order = await prisma.$transaction(async (tx) => {
@@ -289,6 +404,11 @@ export async function checkout(params: {
         kind: item.kind,
         courseId: item.courseId,
         coachingOfferingId: item.coachingOfferingId,
+        accessDuration: item.accessDuration,
+        accessDays: item.accessDays,
+        course: item.course,
+        courseAction: courseActionByItemId.get(item.id),
+        coachingAction: coachingActionByItemId.get(item.id),
       })),
       now,
     });
@@ -315,13 +435,6 @@ export async function checkout(params: {
   return order;
 }
 
-const ACTIVE_SESSION_STATUSES = new Set([
-  "SCHEDULED",
-  "CONFIRMED",
-  "IN_PROGRESS",
-  "RESCHEDULED",
-]);
-
 export async function revokeFulfillment(params: {
   orderId: string;
   actorId: string;
@@ -336,17 +449,7 @@ export async function revokeFulfillment(params: {
           grants: {
             include: {
               enrollment: true,
-              coachingEntitlement: {
-                include: {
-                  sessions: {
-                    where: {
-                      status: {
-                        in: ["SCHEDULED", "CONFIRMED", "IN_PROGRESS", "RESCHEDULED"],
-                      },
-                    },
-                  },
-                },
-              },
+              coachingEntitlement: true,
             },
           },
         },
@@ -371,44 +474,17 @@ export async function revokeFulfillment(params: {
 
       for (const grant of fulfillment.grants) {
         if (grant.enrollmentId) {
+          const now = new Date();
           await tx.enrollment.update({
             where: { id: grant.enrollmentId },
-            data: { status: "DROPPED" },
+            data: { status: "DROPPED", validUntil: now, expiredAt: now },
           });
         }
 
-        if (grant.coachingEntitlement) {
-          const entitlement = grant.coachingEntitlement;
-
-          const cancelledCount = entitlement.sessions.length;
-
-          for (const session of entitlement.sessions) {
-            await tx.coachingSession.update({
-              where: { id: session.id },
-              data: {
-                status: "CANCELLED_BY_COACH",
-                cancelledAt: new Date(),
-                cancelReason: params.reason ?? "Revoked due to refund",
-              },
-            });
-
-            await tx.coachingSessionEvent.create({
-              data: {
-                sessionId: session.id,
-                actorId: params.actorId,
-                fromStatus: session.status,
-                toStatus: "CANCELLED_BY_COACH",
-                note: "Cancelled on entitlement revoke",
-              },
-            });
-          }
-
+        if (grant.coachingEntitlementId) {
           await tx.coachingEntitlement.update({
-            where: { id: entitlement.id },
-            data: {
-              reservedSessions: Math.max(0, entitlement.reservedSessions - cancelledCount),
-              status: "REVOKED",
-            },
+            where: { id: grant.coachingEntitlementId },
+            data: { status: "REVOKED" },
           });
         }
       }
@@ -506,32 +582,66 @@ export async function adminGrantCourseAccess(params: {
   actorId: string;
   userId: string;
   courseId: string;
+  accessDays?: number;
 }) {
-  const enrollment = await prisma.enrollment.upsert({
+  const course = await prisma.course.findUniqueOrThrow({
+    where: { id: params.courseId },
+    select: {
+      id: true,
+      defaultAccessDuration: true,
+      defaultAccessDays: true,
+    },
+  });
+
+  const policy = params.accessDays
+    ? { accessDuration: "FIXED_DAYS" as const, accessDays: params.accessDays }
+    : resolveCourseAccessPolicyFromCourse(course);
+
+  const now = new Date();
+  const existing = await prisma.enrollment.findUnique({
     where: {
       userId_courseId: {
         userId: params.userId,
         courseId: params.courseId,
       },
     },
-    update: { status: "ACTIVE" },
-    create: {
-      userId: params.userId,
-      courseId: params.courseId,
-      status: "ACTIVE",
-    },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-      course: { select: { id: true, title: true, slug: true } },
-    },
   });
+
+  const accessData = computeEnrollmentAccessGrant({ existing, policy, now });
+
+  const enrollment = existing
+    ? await prisma.enrollment.update({
+        where: { id: existing.id },
+        data: accessData,
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          course: { select: { id: true, title: true, slug: true } },
+        },
+      })
+    : await prisma.enrollment.create({
+        data: {
+          userId: params.userId,
+          courseId: params.courseId,
+          ...accessData,
+        },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          course: { select: { id: true, title: true, slug: true } },
+        },
+      });
 
   await writeAuditLog({
     actorId: params.actorId,
     entityType: "Enrollment",
     entityId: enrollment.id,
     action: "ENROLLMENT_GRANTED",
-    metadata: { userId: params.userId, courseId: params.courseId },
+    metadata: {
+      userId: params.userId,
+      courseId: params.courseId,
+      accessDuration: policy.accessDuration,
+      accessDays: policy.accessDays,
+      validUntil: enrollment.validUntil?.toISOString() ?? null,
+    },
   });
 
   return enrollment;
@@ -548,26 +658,47 @@ export async function adminGrantCoachingEntitlement(params: {
     where: { id: params.coachingOfferingId },
   });
 
+  if (!offering.coachId) {
+    throw new ApiError("Coaching offering has no coach assigned", 409, "COACH_NOT_ASSIGNED");
+  }
+
   const now = new Date();
   const validDays = params.validDays ?? offering.validDays;
+  const totalSessions = params.totalSessions ?? offering.totalSessions;
 
-  const entitlement = await prisma.coachingEntitlement.create({
-    data: {
-      userId: params.userId,
-      coachingOfferingId: offering.id,
-      coachId: offering.coachId,
-      courseId: offering.courseId,
-      totalSessions: params.totalSessions ?? offering.totalSessions,
-      validFrom: now,
-      validUntil: addDays(now, validDays),
-      status: "ACTIVE",
-    },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-      coachingOffering: {
-        select: { id: true, title: true, slug: true, coach: { select: { name: true, email: true } } },
+  const entitlement = await prisma.$transaction(async (tx) => {
+    const created = await tx.coachingEntitlement.create({
+      data: {
+        userId: params.userId,
+        coachingOfferingId: offering.id,
+        coachId: offering.coachId,
+        courseId: offering.courseId,
+        totalSessions,
+        validFrom: now,
+        validUntil: addDays(now, validDays),
+        status: "ACTIVE",
       },
-    },
+    });
+
+    await provisionCoachingSessions(tx, {
+      entitlementId: created.id,
+      userId: params.userId,
+      coachId: offering.coachId!,
+      offeringId: offering.id,
+      totalSessions,
+      validFrom: now,
+    });
+
+    return tx.coachingEntitlement.findUniqueOrThrow({
+      where: { id: created.id },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        coachingOffering: {
+          select: { id: true, title: true, slug: true, coach: { select: { name: true, email: true } } },
+        },
+        sessions: { orderBy: { sessionNo: "asc" } },
+      },
+    });
   });
 
   await writeAuditLog({

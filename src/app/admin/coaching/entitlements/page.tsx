@@ -56,7 +56,7 @@ export default async function AdminEntitlementsPage() {
                 </td>
                 <td className="px-5 py-4">{e.coachingOffering.title}</td>
                 <td className="px-5 py-4">
-                  {e.usedSessions + e.reservedSessions}/{e.totalSessions}
+                  {e.completedSessions}/{e.totalSessions}
                 </td>
                 <td className="px-5 py-4"><StatusBadge value={e.status} /></td>
                 <td className="px-5 py-4 text-zinc-500">{formatDateTime(e.validUntil)}</td>

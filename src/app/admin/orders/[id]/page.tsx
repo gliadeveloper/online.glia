@@ -36,8 +36,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   id: true,
                   status: true,
                   totalSessions: true,
-                  usedSessions: true,
-                  reservedSessions: true,
+                  completedSessions: true,
                 },
               },
             },
@@ -103,7 +102,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       {grant.enrollment
                         ? `수강권 · ${grant.enrollment.status}`
                         : grant.coachingEntitlement
-                          ? `코칭권 · ${grant.coachingEntitlement.usedSessions}/${grant.coachingEntitlement.totalSessions}회`
+                          ? `코칭권 · ${grant.coachingEntitlement.completedSessions}/${grant.coachingEntitlement.totalSessions}회`
                           : grant.grantType}
                     </li>
                   ))}

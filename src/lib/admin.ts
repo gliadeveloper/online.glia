@@ -74,7 +74,7 @@ export async function getAdminOverview() {
     prisma.course.count({ where: { status: "PUBLISHED" } }),
     prisma.coachingSession.count({
       where: {
-        status: { in: ["SCHEDULED", "CONFIRMED", "RESCHEDULED"] },
+        publicationStatus: { not: "PUBLISHED" },
         scheduledAt: { gte: new Date() },
       },
     }),

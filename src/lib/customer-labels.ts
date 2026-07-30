@@ -1,6 +1,7 @@
 import type {
   CoachingEntitlementStatus,
-  CoachingSessionStatus,
+  CoachingSessionPublicationStatus,
+  CoachingSessionProgressStatus,
   EnrollmentStatus,
   OrderStatus,
   ProductKind,
@@ -17,27 +18,29 @@ export const progressStatusLabels: Record<ProgressStatus, string> = {
 export const enrollmentStatusLabels: Record<EnrollmentStatus, string> = {
   ACTIVE: "수강 중",
   COMPLETED: "수료",
+  EXPIRED: "기간 만료",
   DROPPED: "중단",
   SUSPENDED: "정지",
 };
 
 export const coachingEntitlementLabels: Record<CoachingEntitlementStatus, string> = {
   ACTIVE: "사용 가능",
-  EXHAUSTED: "회차 소진",
+  COMPLETED: "회차 완료",
   EXPIRED: "만료",
   REVOKED: "회수됨",
   SUSPENDED: "정지",
 };
 
-export const coachingSessionLabels: Record<CoachingSessionStatus, string> = {
-  SCHEDULED: "예약됨",
-  CONFIRMED: "확정",
+export const coachingPublicationLabels: Record<CoachingSessionPublicationStatus, string> = {
+  EMPTY: "미등록",
+  DRAFT: "작성 중",
+  PUBLISHED: "오픈",
+};
+
+export const coachingSessionProgressLabels: Record<CoachingSessionProgressStatus, string> = {
+  NOT_STARTED: "시작 전",
   IN_PROGRESS: "진행 중",
   COMPLETED: "완료",
-  CANCELLED_BY_USER: "고객 취소",
-  CANCELLED_BY_COACH: "코치 취소",
-  NO_SHOW: "노쇼",
-  RESCHEDULED: "일정 변경",
 };
 
 export const orderStatusLabels: Record<OrderStatus, string> = {

@@ -21,7 +21,6 @@ export async function GET() {
                 title: true,
                 totalSessions: true,
                 validDays: true,
-                sessionMinutes: true,
               },
             },
           },

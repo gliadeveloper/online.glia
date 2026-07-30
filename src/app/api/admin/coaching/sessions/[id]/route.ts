@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
-import { adminUpdateCoachingSession, sessionInclude } from "@/lib/coaching-admin";
-import { prisma } from "@/lib/prisma";
+import { adminUpdateCoachingSession } from "@/lib/coaching-admin";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -14,6 +13,9 @@ export async function GET(request: Request, context: RouteContext) {
       userId: url.searchParams.get("userId") ?? undefined,
     });
     await assertAdmin(userId);
+
+    const { sessionInclude } = await import("@/lib/coaching-admin");
+    const { prisma } = await import("@/lib/prisma");
 
     const session = await prisma.coachingSession.findUnique({
       where: { id },
@@ -35,28 +37,26 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { id } = await context.params;
     const body = (await request.json()) as {
       userId?: string;
-      action?: "cancel" | "complete" | "reschedule" | "set_meeting";
-      cancelReason?: string;
+      title?: string;
+      summary?: string | null;
       scheduledAt?: string;
-      meetingUrl?: string;
-      meetingProvider?: string;
+      bodyMarkdown?: string | null;
+      publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
+      progressStatus?: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
     };
 
     const userId = await resolveUserId(request, body);
     await assertAdmin(userId);
 
-    if (!body.action) {
-      throw new ApiError("action is required", 400, "VALIDATION_ERROR");
-    }
-
     const session = await adminUpdateCoachingSession({
       actorId: userId,
       sessionId: id,
-      action: body.action,
-      cancelReason: body.cancelReason,
+      title: body.title,
+      summary: body.summary,
       scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : undefined,
-      meetingUrl: body.meetingUrl,
-      meetingProvider: body.meetingProvider,
+      bodyMarkdown: body.bodyMarkdown,
+      publicationStatus: body.publicationStatus,
+      progressStatus: body.progressStatus,
     });
 
     return NextResponse.json(session);

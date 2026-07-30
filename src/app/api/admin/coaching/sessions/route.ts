@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
 import { sessionInclude } from "@/lib/coaching-admin";
-import type { CoachingSessionStatus } from "@/generated/prisma/client";
+import type { CoachingSessionPublicationStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
@@ -13,17 +13,17 @@ export async function GET(request: Request) {
     });
     await assertAdmin(userId);
 
-    const status = url.searchParams.get("status") as CoachingSessionStatus | null;
-    const coachId = url.searchParams.get("coachId");
-    const limit = Number(url.searchParams.get("limit") ?? 50);
+    const publicationStatus = url.searchParams.get(
+      "publicationStatus",
+    ) as CoachingSessionPublicationStatus | null;
+    const entitlementId = url.searchParams.get("entitlementId");
 
     const sessions = await prisma.coachingSession.findMany({
       where: {
-        ...(status ? { status } : {}),
-        ...(coachId ? { coachId } : {}),
+        ...(publicationStatus ? { publicationStatus } : {}),
+        ...(entitlementId ? { entitlementId } : {}),
       },
-      orderBy: { scheduledAt: "desc" },
-      take: limit,
+      orderBy: [{ scheduledAt: "asc" }, { sessionNo: "asc" }],
       include: sessionInclude,
     });
 

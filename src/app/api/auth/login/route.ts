@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { attachSessionCookie } from "@/lib/auth-session";
 import { ApiError, jsonError } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
-import {
-  getSessionCookieOptions,
-  SESSION_COOKIE,
-  signSession,
-} from "@/lib/session";
 
 export async function POST(request: Request) {
   try {
@@ -30,10 +26,11 @@ export async function POST(request: Request) {
         name: true,
         role: true,
         password: true,
+        status: true,
       },
     });
 
-    if (!user || user.password !== password) {
+    if (!user || user.status !== "ACTIVE" || !user.password || user.password !== password) {
       throw new ApiError("Invalid email or password", 401, "INVALID_CREDENTIALS");
     }
 
@@ -46,11 +43,7 @@ export async function POST(request: Request) {
       },
     });
 
-    response.cookies.set(
-      SESSION_COOKIE,
-      await signSession(user.id),
-      getSessionCookieOptions(),
-    );
+    await attachSessionCookie(response, user.id, request);
 
     return response;
   } catch (error) {

@@ -1,0 +1,27 @@
+import { NextResponse } from "next/server";
+
+import { buildKakaoAuthorizeUrl, getKakaoConfig } from "@/lib/kakao-auth";
+import {
+  createOAuthState,
+  getOAuthStateCookieOptions,
+  OAUTH_STATE_COOKIE,
+} from "@/lib/oauth-state";
+
+export async function GET(request: Request) {
+  const config = getKakaoConfig();
+  if (!config) {
+    return NextResponse.json(
+      { error: "Kakao OAuth is not configured", code: "KAKAO_NOT_CONFIGURED" },
+      { status: 503 },
+    );
+  }
+
+  const { searchParams } = new URL(request.url);
+  const next = searchParams.get("next");
+  const state = await createOAuthState(next);
+  const response = NextResponse.redirect(buildKakaoAuthorizeUrl(state));
+
+  response.cookies.set(OAUTH_STATE_COOKIE, state, getOAuthStateCookieOptions());
+
+  return response;
+}

@@ -5,7 +5,7 @@ import { OfferingActions } from "@/app/admin/coaching-offerings/[id]/offering-ac
 import { OfferingEditPanel } from "@/app/admin/coaching-offerings/[id]/offering-edit-panel";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { requireAdmin } from "@/lib/admin";
-import { coachingOfferingInclude, deliveryModeLabels } from "@/lib/coaching-admin";
+import { coachingOfferingInclude } from "@/lib/coaching-admin";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -41,20 +41,14 @@ export default async function AdminCoachingOfferingDetailPage({ params }: Props)
           description={offering.description}
           totalSessions={offering.totalSessions}
           validDays={offering.validDays}
-          sessionMinutes={offering.sessionMinutes}
-          maxQuestions={offering.maxQuestions}
-          responseDays={offering.responseDays}
-          cancelPolicy={offering.cancelPolicy}
-          refundPolicy={offering.refundPolicy}
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[
-          { label: "배달", value: deliveryModeLabels[offering.deliveryMode] },
           { label: "회차", value: `${offering.totalSessions}회` },
           { label: "유효기간", value: `${offering.validDays}일` },
-          { label: "세션", value: `${offering.sessionMinutes}분` },
+          { label: "템플릿", value: `${offering.sessionTemplates.length}개` },
         ].map((item) => (
           <div key={item.label} className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
             <p className="text-xs text-zinc-500">{item.label}</p>
@@ -82,31 +76,31 @@ export default async function AdminCoachingOfferingDetailPage({ params }: Props)
         </div>
       </div>
 
+      {offering.sessionTemplates.length > 0 && (
+        <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          <div className="border-b border-zinc-100 px-5 py-4">
+            <h2 className="font-semibold">회차 템플릿</h2>
+          </div>
+          <ul className="divide-y divide-zinc-100">
+            {offering.sessionTemplates.map((template) => (
+              <li key={template.id} className="px-5 py-4 text-sm">
+                <p className="font-medium">
+                  {template.sessionNo}회 · {template.title}
+                </p>
+                <p className="mt-1 text-zinc-500">
+                  오픈 +{template.scheduledOffsetDays}일
+                  {template.summary ? ` · ${template.summary}` : ""}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <StatusBadge
         value={offering.isActive ? "PUBLISHED" : "ARCHIVED"}
         label={offering.isActive ? "활성" : "비활성"}
       />
-
-      {(offering.cancelPolicy || offering.refundPolicy) && (
-        <section className="grid gap-4 sm:grid-cols-2">
-          {offering.cancelPolicy && (
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <p className="text-xs text-zinc-500">취소 정책</p>
-              <pre className="mt-2 overflow-x-auto text-xs text-zinc-700">
-                {JSON.stringify(offering.cancelPolicy, null, 2)}
-              </pre>
-            </div>
-          )}
-          {offering.refundPolicy && (
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <p className="text-xs text-zinc-500">환불 정책</p>
-              <pre className="mt-2 overflow-x-auto text-xs text-zinc-700">
-                {JSON.stringify(offering.refundPolicy, null, 2)}
-              </pre>
-            </div>
-          )}
-        </section>
-      )}
     </div>
   );
 }

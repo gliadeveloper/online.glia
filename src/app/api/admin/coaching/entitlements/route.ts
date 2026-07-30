@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const status = url.searchParams.get("status");
 
     const entitlements = await prisma.coachingEntitlement.findMany({
-      where: status ? { status: status as "ACTIVE" | "REVOKED" | "SUSPENDED" | "EXHAUSTED" | "EXPIRED" } : undefined,
+      where: status ? { status: status as "ACTIVE" | "REVOKED" | "SUSPENDED" | "COMPLETED" | "EXPIRED" } : undefined,
       orderBy: { createdAt: "desc" },
       take: Number(url.searchParams.get("limit") ?? 100),
       include: {

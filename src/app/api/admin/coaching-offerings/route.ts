@@ -5,7 +5,6 @@ import {
   coachingOfferingInclude,
   createCoachingOffering,
 } from "@/lib/coaching-admin";
-import type { CoachingDeliveryMode } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
@@ -34,12 +33,11 @@ export async function POST(request: Request) {
       title?: string;
       slug?: string;
       description?: string;
-      deliveryMode?: CoachingDeliveryMode;
       totalSessions?: number;
       validDays?: number;
-      sessionMinutes?: number;
       coachId?: string;
       courseId?: string;
+      sessionTitles?: string[];
     };
 
     const userId = await resolveUserId(request, body);
@@ -58,12 +56,11 @@ export async function POST(request: Request) {
       title: body.title,
       slug: body.slug,
       description: body.description,
-      deliveryMode: body.deliveryMode,
       totalSessions: body.totalSessions,
       validDays: body.validDays,
-      sessionMinutes: body.sessionMinutes,
       coachId: body.coachId,
       courseId: body.courseId,
+      sessionTitles: body.sessionTitles,
     });
 
     return NextResponse.json(offering, { status: 201 });

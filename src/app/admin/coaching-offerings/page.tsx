@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { StatusBadge } from "@/components/admin/status-badge";
 import { requireAdmin } from "@/lib/admin";
-import { coachingOfferingInclude, deliveryModeLabels } from "@/lib/coaching-admin";
+import { coachingOfferingInclude } from "@/lib/coaching-admin";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminCoachingOfferingsPage() {
@@ -51,9 +51,7 @@ export default async function AdminCoachingOfferingsPage() {
                   >
                     {offering.title}
                   </Link>
-                  <p className="text-xs text-zinc-500">
-                    {deliveryModeLabels[offering.deliveryMode]} · {offering.sessionMinutes}분
-                  </p>
+                  <p className="text-xs text-zinc-500">{offering.totalSessions}회 · {offering.validDays}일</p>
                 </td>
                 <td className="px-5 py-4 text-zinc-600">
                   {offering.coach?.name ?? offering.coach?.email ?? "—"}

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { EntitlementActions } from "@/app/admin/coaching/entitlements/[id]/entitlement-actions";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, requireAdmin } from "@/lib/admin";
+import { coachingPublicationLabels } from "@/lib/customer-labels";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -47,9 +48,8 @@ export default async function AdminEntitlementDetailPage({ params }: Props) {
 
       <div className="grid gap-4 sm:grid-cols-4">
         {[
+          { label: "완료", value: String(entitlement.completedSessions) },
           { label: "총 회차", value: String(entitlement.totalSessions) },
-          { label: "사용", value: String(entitlement.usedSessions) },
-          { label: "예약", value: String(entitlement.reservedSessions) },
           { label: "만료", value: formatDateTime(entitlement.validUntil) },
         ].map((item) => (
           <div key={item.label} className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -69,7 +69,7 @@ export default async function AdminEntitlementDetailPage({ params }: Props) {
               <Link href={`/admin/coaching/sessions/${session.id}`} className="font-medium hover:text-violet-700">
                 {session.sessionNo}회 · {formatDateTime(session.scheduledAt)}
               </Link>
-              <StatusBadge value={session.status} />
+              <StatusBadge value={coachingPublicationLabels[session.publicationStatus]} />
             </li>
           ))}
         </ul>

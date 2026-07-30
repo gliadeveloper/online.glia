@@ -1,4 +1,7 @@
+import { provisionCoachingSessions, ensureCoachingSessionsProvisioned } from "../src/lib/coaching-provision";
+import { computeEnrollmentAccessGrant, resolveCourseAccessPolicyFromProductItem } from "../src/lib/enrollment-access";
 import { prisma } from "../src/lib/prisma";
+import { seedCommunityPosts } from "./seed-community";
 
 function addDays(date: Date, days: number) {
   const result = new Date(date);
@@ -6,12 +9,20 @@ function addDays(date: Date, days: number) {
   return result;
 }
 
+function verifiedEmailUserFields() {
+  return {
+    emailKind: "VERIFIED" as const,
+    emailVerifiedAt: new Date(),
+  };
+}
+
 async function main() {
   const admin = await prisma.user.upsert({
     where: { email: "admin@localhost" },
-    update: {},
+    update: verifiedEmailUserFields(),
     create: {
       email: "admin@localhost",
+      ...verifiedEmailUserFields(),
       password: "demo-password",
       name: "Admin",
       role: "ADMIN",
@@ -26,9 +37,10 @@ async function main() {
 
   const coach = await prisma.user.upsert({
     where: { email: "coach@localhost" },
-    update: {},
+    update: verifiedEmailUserFields(),
     create: {
       email: "coach@localhost",
+      ...verifiedEmailUserFields(),
       password: "demo-password",
       name: "Coach Kim",
       role: "COACH",
@@ -43,9 +55,10 @@ async function main() {
 
   const student = await prisma.user.upsert({
     where: { email: "demo@localhost" },
-    update: {},
+    update: verifiedEmailUserFields(),
     create: {
       email: "demo@localhost",
+      ...verifiedEmailUserFields(),
       password: "demo-password",
       name: "Demo User",
       role: "USER",
@@ -59,9 +72,10 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "customer@localhost" },
-    update: {},
+    update: verifiedEmailUserFields(),
     create: {
       email: "customer@localhost",
+      ...verifiedEmailUserFields(),
       password: "demo-password",
       name: "New Customer",
       role: "USER",
@@ -235,16 +249,19 @@ async function main() {
     create: {
       title: "Next.js 1:1 코칭 2회",
       slug: "nextjs-coaching-2sessions",
-      description: "Zoom 기반 1:1 라이브 코칭 (회당 30분, 30일 이내 사용)",
-      deliveryMode: "LIVE",
+      description: "회차별 코칭 콘텐츠와 Q&A",
       totalSessions: 2,
       validDays: 30,
-      sessionMinutes: 30,
       coachId: coach.id,
       courseId: course.id,
-      cancelPolicy: { cancelBeforeHours: 24, countReservedAsUsed: true },
-      refundPolicy: { fullRefundDays: 7, requiresNoReservations: true },
+      sessionTemplates: {
+        create: [
+          { sessionNo: 1, title: "목표 설정", scheduledOffsetDays: 0, sortOrder: 1 },
+          { sessionNo: 2, title: "코드 리뷰", scheduledOffsetDays: 7, sortOrder: 2 },
+        ],
+      },
     },
+    include: { sessionTemplates: true },
   });
 
   const standaloneCoachingOffering = await prisma.coachingOffering.upsert({
@@ -254,14 +271,18 @@ async function main() {
       title: "1:1 코칭 3회권",
       slug: "coaching-3sessions-standalone",
       description: "코스 없이 구매 가능한 범용 코칭 3회권",
-      deliveryMode: "LIVE",
       totalSessions: 3,
       validDays: 30,
-      sessionMinutes: 30,
       coachId: coach.id,
-      cancelPolicy: { cancelBeforeHours: 24 },
-      refundPolicy: { fullRefundDays: 7 },
+      sessionTemplates: {
+        create: [
+          { sessionNo: 1, title: "1회차", scheduledOffsetDays: 0, sortOrder: 1 },
+          { sessionNo: 2, title: "2회차", scheduledOffsetDays: 7, sortOrder: 2 },
+          { sessionNo: 3, title: "3회차", scheduledOffsetDays: 14, sortOrder: 3 },
+        ],
+      },
     },
+    include: { sessionTemplates: true },
   });
 
   const courseOnlyProduct = await prisma.product.upsert({
@@ -280,6 +301,8 @@ async function main() {
           {
             kind: "COURSE_ACCESS",
             courseId: course.id,
+            accessDuration: "FIXED_DAYS",
+            accessDays: 90,
             sortOrder: 1,
           },
         ],
@@ -329,6 +352,7 @@ async function main() {
           {
             kind: "COURSE_ACCESS",
             courseId: course.id,
+            accessDuration: "LIFETIME",
             sortOrder: 1,
           },
           {
@@ -403,6 +427,20 @@ async function main() {
 
     for (const item of bundleProduct.items) {
       if (item.kind === "COURSE_ACCESS" && item.courseId) {
+        const policy = resolveCourseAccessPolicyFromProductItem({
+          accessDuration: item.accessDuration,
+          accessDays: item.accessDays,
+          course: {
+            defaultAccessDuration: "LIFETIME",
+            defaultAccessDays: null,
+          },
+        });
+        const accessData = computeEnrollmentAccessGrant({
+          existing: null,
+          policy,
+          now,
+        });
+
         const enrollment = await prisma.enrollment.upsert({
           where: {
             userId_courseId: {
@@ -414,7 +452,7 @@ async function main() {
           create: {
             userId: student.id,
             courseId: item.courseId,
-            status: "ACTIVE",
+            ...accessData,
             progressPercent: 25,
             lastAccessedAt: now,
           },
@@ -454,18 +492,72 @@ async function main() {
 
       if (item.kind === "COACHING_ACCESS" && item.coachingOfferingId) {
         const offering = bundleCoachingOffering;
-        const entitlement = await prisma.coachingEntitlement.create({
-          data: {
+
+        const entitlement = await prisma.$transaction(async (tx) => {
+          const created = await tx.coachingEntitlement.create({
+            data: {
+              userId: student.id,
+              coachingOfferingId: item.coachingOfferingId!,
+              coachId: offering.coachId,
+              courseId: offering.courseId,
+              enrollmentId: enrollmentId ?? undefined,
+              totalSessions: offering.totalSessions,
+              validFrom: now,
+              validUntil,
+              status: "ACTIVE",
+            },
+          });
+
+          await provisionCoachingSessions(tx, {
+            entitlementId: created.id,
             userId: student.id,
-            coachingOfferingId: item.coachingOfferingId,
-            coachId: offering.coachId,
-            courseId: offering.courseId,
-            enrollmentId: enrollmentId ?? undefined,
+            coachId: coach.id,
+            offeringId: offering.id,
             totalSessions: offering.totalSessions,
             validFrom: now,
-            validUntil,
-            status: "ACTIVE",
-          },
+          });
+
+          const firstSession = await tx.coachingSession.findFirstOrThrow({
+            where: { entitlementId: created.id, sessionNo: 1 },
+            include: { conversation: true },
+          });
+
+          await tx.coachingSession.update({
+            where: { id: firstSession.id },
+            data: {
+              publicationStatus: "PUBLISHED",
+              publishedAt: now,
+              publishedById: coach.id,
+              bodyMarkdown: [
+                "## 1회차: 목표 설정",
+                "",
+                "이번 회차에서는 App Router 프로젝트 구조를 점검합니다.",
+                "",
+                "### 체크리스트",
+                "- Server/Client Component 경계",
+                "- 라우트 그룹 구성",
+              ].join("\n"),
+            },
+          });
+
+          if (firstSession.conversation) {
+            await tx.coachingSessionMessage.create({
+              data: {
+                conversationId: firstSession.conversation.id,
+                authorId: student.id,
+                authorRole: "STUDENT",
+                bodyMarkdown: "Server Component에서 fetch 캐싱 전략이 헷갈립니다.",
+                awaitingReply: true,
+              },
+            });
+
+            await tx.coachingSessionConversation.update({
+              where: { id: firstSession.conversation.id },
+              data: { lastMessageAt: now },
+            });
+          }
+
+          return created;
         });
 
         await prisma.entitlementGrant.create({
@@ -475,48 +567,6 @@ async function main() {
             productItemId: item.id,
             grantType: "COACHING",
             coachingEntitlementId: entitlement.id,
-          },
-        });
-
-        const sessionAt = addDays(now, 3);
-        sessionAt.setHours(14, 0, 0, 0);
-
-        const session = await prisma.coachingSession.create({
-          data: {
-            entitlementId: entitlement.id,
-            coachId: coach.id,
-            userId: student.id,
-            sessionNo: 1,
-            status: "CONFIRMED",
-            scheduledAt: sessionAt,
-            durationMinutes: offering.sessionMinutes,
-            meetingProvider: "zoom",
-            meetingUrl: "https://zoom.us/j/demo-session",
-          },
-        });
-
-        await prisma.coachingEntitlement.update({
-          where: { id: entitlement.id },
-          data: { reservedSessions: 1 },
-        });
-
-        await prisma.coachingIntake.create({
-          data: {
-            entitlementId: entitlement.id,
-            sessionId: session.id,
-            answers: {
-              goal: "App Router 프로젝트 구조 점검",
-              blockers: "Server/Client Component 경계",
-            },
-          },
-        });
-
-        await prisma.coachingSessionEvent.create({
-          data: {
-            sessionId: session.id,
-            actorId: student.id,
-            toStatus: "CONFIRMED",
-            note: "Seed: initial booking",
           },
         });
       }
@@ -555,8 +605,273 @@ async function main() {
   await seedDailyCheckInForm(admin.id, organization.id);
   await seedWeeklyCheckInForm(admin.id, organization.id);
 
+  const entitlementsMissingSessions = await prisma.coachingEntitlement.findMany({
+    include: { _count: { select: { sessions: true } } },
+  });
+
+  for (const entitlement of entitlementsMissingSessions) {
+    if (entitlement._count.sessions < entitlement.totalSessions) {
+      await ensureCoachingSessionsProvisioned(entitlement.id);
+    }
+  }
+
+  await seedPublishedCoachingDemo({
+    coachId: coach.id,
+    studentEmail: "demo@localhost",
+    offeringSlug: "nextjs-coaching-2sessions",
+  });
+
+  await seedAccessQaPersonas({
+    courseId: course.id,
+    courseOnlyProductId: courseOnlyProduct.id,
+    demoUserId: student.id,
+  });
+
+  await seedCommunityPosts({
+    demoId: student.id,
+    coachId: coach.id,
+    customerId: (
+      await prisma.user.findUniqueOrThrow({ where: { email: "customer@localhost" }, select: { id: true } })
+    ).id,
+    adminId: admin.id,
+  });
+
   console.log("High-end LMS seed completed.");
   console.log(`Products: ${courseOnlyProduct.slug}, ${coachingOnlyProduct.slug}, ${bundleProduct.slug}`);
+  console.log("");
+  console.log("── Access QA accounts (password: demo-password) ──");
+  console.log("  demo@localhost            번들 평생 · 수료 · 코칭 (메인 데모)");
+  console.log("  customer@localhost        미구매 · Shop 신규 구매 QA");
+  console.log("  qa-vod-active@localhost   VOD 90일 · D-45 · 수강 중");
+  console.log("  qa-expired@localhost      VOD 90일 · 만료 · 연장 QA");
+  console.log("  (admin / kakao 계정은 수강권·주문 없음)");
+  console.log("");
+  console.log("── Community (/community) ──");
+  console.log("  5 root posts · 3 child posts · comments · likes");
+}
+
+const demoCoachingBodyMarkdown = [
+  "## 1회차: 목표 설정",
+  "",
+  "이번 회차에서는 App Router 프로젝트 구조를 점검합니다.",
+  "",
+  "### 이번 주 목표",
+  "1. Server / Client Component 경계 정리",
+  "2. 라우트 그룹과 레이아웃 중첩 이해",
+  "3. 데이터 fetching 전략 점검",
+  "",
+  "### 참고",
+  "궁금한 점은 아래 **질의응답**에 남겨주세요. 코치가 확인 후 답변드립니다.",
+].join("\n");
+
+async function seedAccessQaPersonas(params: {
+  courseId: string;
+  courseOnlyProductId: string;
+  demoUserId: string;
+}) {
+  const now = new Date();
+  const qaPassword = "demo-password";
+
+  async function resetCommerceForUser(userId: string) {
+    await prisma.coachingEntitlement.deleteMany({ where: { userId } });
+    await prisma.enrollment.deleteMany({
+      where: { userId, courseId: params.courseId },
+    });
+    await prisma.order.deleteMany({ where: { userId } });
+  }
+
+  async function ensureQaUser(email: string, name: string) {
+    return prisma.user.upsert({
+      where: { email },
+      update: verifiedEmailUserFields(),
+      create: {
+        email,
+        ...verifiedEmailUserFields(),
+        password: qaPassword,
+        name,
+        role: "USER",
+        profile: { create: { headline: "Access QA persona" } },
+      },
+    });
+  }
+
+  const customer = await prisma.user.findUnique({ where: { email: "customer@localhost" } });
+  if (customer) {
+    await resetCommerceForUser(customer.id);
+  }
+
+  for (const email of ["admin@localhost"]) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      await resetCommerceForUser(user.id);
+    }
+  }
+
+  const oauthUsers = await prisma.user.findMany({
+    where: { email: { endsWith: "@oauth.local" } },
+    select: { id: true, email: true },
+  });
+  for (const user of oauthUsers) {
+    await resetCommerceForUser(user.id);
+  }
+
+  const vodOnlyOrders = await prisma.order.findMany({
+    where: {
+      userId: params.demoUserId,
+      lines: { some: { productId: params.courseOnlyProductId } },
+    },
+    select: { id: true },
+  });
+  for (const order of vodOnlyOrders) {
+    await prisma.order.delete({ where: { id: order.id } });
+  }
+
+  const demoEnrollment = await prisma.enrollment.findUnique({
+    where: {
+      userId_courseId: {
+        userId: params.demoUserId,
+        courseId: params.courseId,
+      },
+    },
+  });
+
+  if (demoEnrollment) {
+    await prisma.enrollment.update({
+      where: { id: demoEnrollment.id },
+      data: {
+        accessDuration: "LIFETIME",
+        accessDays: null,
+        validUntil: null,
+        expiredAt: null,
+        status: demoEnrollment.progressPercent >= 100 ? "COMPLETED" : "ACTIVE",
+      },
+    });
+  }
+
+  const vodActiveUser = await ensureQaUser("qa-vod-active@localhost", "QA VOD Active");
+  await resetCommerceForUser(vodActiveUser.id);
+
+  const vodActiveValidUntil = addDays(now, 45);
+  const vodActiveValidFrom = addDays(vodActiveValidUntil, -45);
+
+  await prisma.enrollment.create({
+    data: {
+      userId: vodActiveUser.id,
+      courseId: params.courseId,
+      status: "ACTIVE",
+      progressPercent: 35,
+      accessDuration: "FIXED_DAYS",
+      accessDays: 90,
+      validFrom: vodActiveValidFrom,
+      validUntil: vodActiveValidUntil,
+      lastAccessedAt: now,
+    },
+  });
+
+  const expiredUser = await ensureQaUser("qa-expired@localhost", "QA Expired");
+  await resetCommerceForUser(expiredUser.id);
+
+  const expiredAt = addDays(now, -14);
+  const expiredValidFrom = addDays(expiredAt, -90);
+
+  await prisma.enrollment.create({
+    data: {
+      userId: expiredUser.id,
+      courseId: params.courseId,
+      status: "EXPIRED",
+      progressPercent: 72,
+      completedAt: null,
+      accessDuration: "FIXED_DAYS",
+      accessDays: 90,
+      validFrom: expiredValidFrom,
+      validUntil: expiredAt,
+      expiredAt,
+      lastAccessedAt: expiredAt,
+    },
+  });
+}
+
+async function seedPublishedCoachingDemo(params: {
+  coachId: string;
+  studentEmail: string;
+  offeringSlug: string;
+}) {
+  const student = await prisma.user.findUnique({
+    where: { email: params.studentEmail },
+  });
+
+  if (!student) {
+    return;
+  }
+
+  const offering = await prisma.coachingOffering.findUnique({
+    where: { slug: params.offeringSlug },
+  });
+
+  if (!offering) {
+    return;
+  }
+
+  const entitlement = await prisma.coachingEntitlement.findFirst({
+    where: {
+      userId: student.id,
+      coachingOfferingId: offering.id,
+    },
+  });
+
+  if (!entitlement) {
+    return;
+  }
+
+  await ensureCoachingSessionsProvisioned(entitlement.id);
+
+  const now = new Date();
+
+  const session = await prisma.coachingSession.findFirst({
+    where: { entitlementId: entitlement.id, sessionNo: 1 },
+    include: { conversation: { include: { messages: true } } },
+  });
+
+  if (!session) {
+    return;
+  }
+
+  await prisma.coachingSession.update({
+    where: { id: session.id },
+    data: {
+      title: "목표 설정",
+      summary: "App Router 프로젝트 구조 점검",
+      publicationStatus: "PUBLISHED",
+      publishedAt: now,
+      publishedById: params.coachId,
+      bodyMarkdown: demoCoachingBodyMarkdown,
+    },
+  });
+
+  if (!session.conversation) {
+    return;
+  }
+
+  const hasStudentMessage = session.conversation.messages.some(
+    (message) => message.authorRole === "STUDENT",
+  );
+
+  if (!hasStudentMessage) {
+    await prisma.coachingSessionMessage.create({
+      data: {
+        conversationId: session.conversation.id,
+        authorId: student.id,
+        authorRole: "STUDENT",
+        bodyMarkdown: "Server Component에서 fetch 캐싱 전략이 헷갈립니다.",
+        awaitingReply: true,
+      },
+    });
+
+    await prisma.coachingSessionConversation.update({
+      where: { id: session.conversation.id },
+      data: { lastMessageAt: now },
+    });
+  }
 }
 
 async function seedDailyCheckInForm(adminId: string, organizationId: string) {

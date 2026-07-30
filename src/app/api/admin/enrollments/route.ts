@@ -14,7 +14,9 @@ export async function GET(request: Request) {
 
     const status = url.searchParams.get("status");
     const enrollments = await prisma.enrollment.findMany({
-      where: status ? { status: status as "ACTIVE" | "DROPPED" | "SUSPENDED" | "COMPLETED" } : undefined,
+      where: status
+        ? { status: status as "ACTIVE" | "COMPLETED" | "EXPIRED" | "DROPPED" | "SUSPENDED" }
+        : undefined,
       orderBy: { enrolledAt: "desc" },
       take: Number(url.searchParams.get("limit") ?? 100),
       include: {

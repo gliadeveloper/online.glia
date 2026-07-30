@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AssignmentForm } from "@/app/(customer)/lms/[slug]/lessons/[lessonId]/assignment-form";
-import { CompleteLessonButton } from "@/app/(customer)/lms/[slug]/lessons/[lessonId]/complete-lesson-button";
-import { LessonStartedMarker } from "@/app/(customer)/lms/[slug]/lessons/[lessonId]/lesson-started-marker";
-import { QuizPlayer } from "@/app/(customer)/lms/[slug]/lessons/[lessonId]/quiz-player";
+import { AssignmentForm } from "@/components/learning/lesson/assignment-form";
+import { CompleteLessonButton } from "@/components/learning/lesson/complete-lesson-button";
+import { LessonStartedMarker } from "@/components/learning/lesson/lesson-started-marker";
+import {
+  LessonContentSection,
+  LessonNavFooter,
+  LessonPlayerHeader,
+} from "@/components/learning/lesson/lesson-player-sections";
+import { QuizPlayer } from "@/components/learning/lesson/quiz-player";
 import { ProgressPill } from "@/components/customer/progress-pill";
 import { getCurrentUser } from "@/lib/session";
 import { getLessonPlayerContext } from "@/lib/learning";
@@ -13,7 +18,8 @@ type Props = {
   params: Promise<{ slug: string; lessonId: string }>;
 };
 
-export default async function LessonPlayerPage({ params }: Props) {
+/** @deprecated Use `/learning/[slug]/lessons/[lessonId]` */
+export default async function LmsLessonPlayerPage({ params }: Props) {
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -60,43 +66,7 @@ export default async function LessonPlayerPage({ params }: Props) {
 
       {(lesson.type === "VIDEO" || lesson.type === "TEXT") && (
         <section className="space-y-4">
-          {lesson.contents.map((content) => (
-            <article
-              key={content.id}
-              className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm"
-            >
-              {content.type === "VIDEO" && content.url && (
-                <div className="aspect-video bg-zinc-950">
-                  <iframe
-                    src={content.url}
-                    title={content.title ?? lesson.title}
-                    className="h-full w-full"
-                    allowFullScreen
-                  />
-                </div>
-              )}
-              <div className="p-6">
-                {content.title && <h2 className="font-medium">{content.title}</h2>}
-                {content.body && (
-                  <div
-                    className="prose prose-zinc mt-3 max-w-none text-sm"
-                    dangerouslySetInnerHTML={{ __html: content.body }}
-                  />
-                )}
-                {content.url && content.type !== "VIDEO" && (
-                  <a
-                    href={content.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex text-sm font-medium text-violet-600"
-                  >
-                    자료 열기 →
-                  </a>
-                )}
-              </div>
-            </article>
-          ))}
-
+          <LessonContentSection lessonTitle={lesson.title} contents={lesson.contents} />
           {status !== "COMPLETED" && (
             <CompleteLessonButton lessonId={lesson.id} courseSlug={slug} />
           )}

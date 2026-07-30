@@ -1,19 +1,12 @@
-import { Prisma, type CoachingDeliveryMode } from "@/generated/prisma/client";
-
-import { ApiError } from "@/lib/api";
+import { ApiError, addDays } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
+import { provisionCoachingSessions, syncOfferingSessionTemplates } from "@/lib/coaching-provision";
 import { prisma } from "@/lib/prisma";
-
-const ACTIVE_SESSION_STATUSES = new Set<string>([
-  "SCHEDULED",
-  "CONFIRMED",
-  "IN_PROGRESS",
-  "RESCHEDULED",
-]);
 
 export const coachingOfferingInclude = {
   coach: { select: { id: true, name: true, email: true } },
   course: { select: { id: true, slug: true, title: true } },
+  sessionTemplates: { orderBy: { sessionNo: "asc" as const } },
   _count: {
     select: {
       entitlements: true,
@@ -22,39 +15,43 @@ export const coachingOfferingInclude = {
   },
 };
 
-export const deliveryModeLabels: Record<CoachingDeliveryMode, string> = {
-  LIVE: "라이브",
-  ASYNC: "비동기",
-  HYBRID: "하이브리드",
-};
-
 export async function createCoachingOffering(params: {
   actorId: string;
   title: string;
   slug: string;
   description?: string;
-  deliveryMode?: CoachingDeliveryMode;
   totalSessions: number;
   validDays: number;
-  sessionMinutes?: number;
   coachId?: string;
   courseId?: string;
   isActive?: boolean;
+  sessionTitles?: string[];
 }) {
-  const offering = await prisma.coachingOffering.create({
-    data: {
-      title: params.title.trim(),
-      slug: params.slug.trim(),
-      description: params.description?.trim(),
-      deliveryMode: params.deliveryMode ?? "LIVE",
-      totalSessions: params.totalSessions,
-      validDays: params.validDays,
-      sessionMinutes: params.sessionMinutes ?? 30,
-      coachId: params.coachId,
-      courseId: params.courseId,
-      isActive: params.isActive ?? true,
-    },
-    include: coachingOfferingInclude,
+  const offering = await prisma.$transaction(async (tx) => {
+    const created = await tx.coachingOffering.create({
+      data: {
+        title: params.title.trim(),
+        slug: params.slug.trim(),
+        description: params.description?.trim(),
+        totalSessions: params.totalSessions,
+        validDays: params.validDays,
+        coachId: params.coachId,
+        courseId: params.courseId,
+        isActive: params.isActive ?? true,
+      },
+    });
+
+    await syncOfferingSessionTemplates(
+      tx,
+      created.id,
+      params.totalSessions,
+      params.sessionTitles,
+    );
+
+    return tx.coachingOffering.findUniqueOrThrow({
+      where: { id: created.id },
+      include: coachingOfferingInclude,
+    });
   });
 
   await writeAuditLog({
@@ -75,14 +72,10 @@ export async function updateCoachingOffering(params: {
   description?: string;
   totalSessions?: number;
   validDays?: number;
-  sessionMinutes?: number;
-  maxQuestions?: number | null;
-  responseDays?: number | null;
-  cancelPolicy?: Prisma.InputJsonValue | null;
-  refundPolicy?: Prisma.InputJsonValue | null;
   coachId?: string | null;
   courseId?: string | null;
   isActive?: boolean;
+  sessionTitles?: string[];
 }) {
   const existing = await prisma.coachingOffering.findUnique({
     where: { id: params.offeringId },
@@ -91,33 +84,33 @@ export async function updateCoachingOffering(params: {
     throw new ApiError("Coaching offering not found", 404, "OFFERING_NOT_FOUND");
   }
 
-  const offering = await prisma.coachingOffering.update({
-    where: { id: params.offeringId },
-    data: {
-      title: params.title?.trim(),
-      description: params.description?.trim(),
-      totalSessions: params.totalSessions,
-      validDays: params.validDays,
-      sessionMinutes: params.sessionMinutes,
-      maxQuestions: params.maxQuestions,
-      responseDays: params.responseDays,
-      cancelPolicy:
-        params.cancelPolicy === undefined
-          ? undefined
-          : params.cancelPolicy === null
-            ? Prisma.DbNull
-            : params.cancelPolicy,
-      refundPolicy:
-        params.refundPolicy === undefined
-          ? undefined
-          : params.refundPolicy === null
-            ? Prisma.DbNull
-            : params.refundPolicy,
-      coachId: params.coachId,
-      courseId: params.courseId,
-      isActive: params.isActive,
-    },
-    include: coachingOfferingInclude,
+  const offering = await prisma.$transaction(async (tx) => {
+    const updated = await tx.coachingOffering.update({
+      where: { id: params.offeringId },
+      data: {
+        title: params.title?.trim(),
+        description: params.description?.trim(),
+        totalSessions: params.totalSessions,
+        validDays: params.validDays,
+        coachId: params.coachId,
+        courseId: params.courseId,
+        isActive: params.isActive,
+      },
+    });
+
+    if (params.totalSessions !== undefined || params.sessionTitles) {
+      await syncOfferingSessionTemplates(
+        tx,
+        updated.id,
+        params.totalSessions ?? updated.totalSessions,
+        params.sessionTitles,
+      );
+    }
+
+    return tx.coachingOffering.findUniqueOrThrow({
+      where: { id: updated.id },
+      include: coachingOfferingInclude,
+    });
   });
 
   await writeAuditLog({
@@ -134,33 +127,37 @@ export async function updateCoachingOffering(params: {
 export const sessionInclude = {
   user: { select: { id: true, name: true, email: true } },
   coach: { select: { id: true, name: true, email: true } },
+  publishedBy: { select: { id: true, name: true, email: true } },
   entitlement: {
     select: {
       id: true,
       totalSessions: true,
-      usedSessions: true,
-      reservedSessions: true,
+      completedSessions: true,
       coachingOffering: { select: { title: true, slug: true } },
     },
   },
-  events: {
-    orderBy: { createdAt: "desc" as const },
+  progress: true,
+  conversation: {
     include: {
-      actor: { select: { id: true, name: true, email: true } },
+      messages: {
+        orderBy: { createdAt: "asc" as const },
+        include: {
+          author: { select: { id: true, name: true, email: true } },
+        },
+      },
     },
   },
-  intake: true,
-  feedback: true,
 };
 
 export async function adminUpdateCoachingSession(params: {
   actorId: string;
   sessionId: string;
-  action: "cancel" | "complete" | "reschedule" | "set_meeting";
-  cancelReason?: string;
+  title?: string;
+  summary?: string | null;
   scheduledAt?: Date;
-  meetingUrl?: string;
-  meetingProvider?: string;
+  bodyMarkdown?: string | null;
+  publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
+  progressStatus?: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
 }) {
   const session = await prisma.coachingSession.findUnique({
     where: { id: params.sessionId },
@@ -171,152 +168,69 @@ export async function adminUpdateCoachingSession(params: {
     throw new ApiError("Coaching session not found", 404, "SESSION_NOT_FOUND");
   }
 
-  if (params.action === "set_meeting") {
-    const updated = await prisma.coachingSession.update({
+  const bodyMarkdown =
+    params.bodyMarkdown === undefined
+      ? undefined
+      : params.bodyMarkdown === null
+        ? null
+        : params.bodyMarkdown.trim();
+
+  let publicationStatus = params.publicationStatus;
+  if (publicationStatus === "PUBLISHED") {
+    const nextBody = bodyMarkdown ?? session.bodyMarkdown;
+    if (!nextBody?.trim()) {
+      throw new ApiError("bodyMarkdown is required to publish", 400, "VALIDATION_ERROR");
+    }
+  }
+
+  const now = new Date();
+  const publishing =
+    publicationStatus === "PUBLISHED" && session.publicationStatus !== "PUBLISHED";
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const next = await tx.coachingSession.update({
       where: { id: session.id },
       data: {
-        meetingUrl: params.meetingUrl?.trim() || null,
-        meetingProvider: params.meetingProvider?.trim() || null,
+        title: params.title?.trim(),
+        summary: params.summary === undefined ? undefined : params.summary,
+        scheduledAt: params.scheduledAt,
+        bodyMarkdown,
+        publicationStatus,
+        publishedAt: publishing ? now : publicationStatus === "EMPTY" ? null : undefined,
+        publishedById: publishing ? params.actorId : publicationStatus === "EMPTY" ? null : undefined,
+        progressStatus: params.progressStatus,
+        completedAt:
+          params.progressStatus === "COMPLETED"
+            ? now
+            : params.progressStatus
+              ? null
+              : undefined,
       },
       include: sessionInclude,
     });
 
-    await prisma.coachingSessionEvent.create({
-      data: {
-        sessionId: session.id,
-        actorId: params.actorId,
-        fromStatus: session.status,
-        toStatus: session.status,
-        note: "Meeting link updated by admin",
-      },
-    });
-
-    await writeAuditLog({
-      actorId: params.actorId,
-      entityType: "CoachingSession",
-      entityId: session.id,
-      action: "MEETING_URL_SET",
-    });
-
-    return updated;
-  }
-
-  if (params.action === "reschedule") {
-    if (!params.scheduledAt) {
-      throw new ApiError("scheduledAt is required", 400, "VALIDATION_ERROR");
-    }
-
-    const updated = await prisma.$transaction(async (tx) => {
-      const next = await tx.coachingSession.update({
-        where: { id: session.id },
-        data: {
-          scheduledAt: params.scheduledAt,
-          status: "RESCHEDULED",
-        },
-        include: sessionInclude,
+    if (params.progressStatus === "COMPLETED" && session.progressStatus !== "COMPLETED") {
+      await tx.coachingSessionProgress.update({
+        where: { sessionId: session.id },
+        data: { status: "COMPLETED", completedAt: now },
       });
 
-      await tx.coachingSessionEvent.create({
-        data: {
-          sessionId: session.id,
-          actorId: params.actorId,
-          fromStatus: session.status,
-          toStatus: "RESCHEDULED",
-          note: "Rescheduled by admin",
+      const completedCount = await tx.coachingSession.count({
+        where: {
+          entitlementId: session.entitlementId,
+          progressStatus: "COMPLETED",
         },
-      });
-
-      return next;
-    });
-
-    await writeAuditLog({
-      actorId: params.actorId,
-      entityType: "CoachingSession",
-      entityId: session.id,
-      action: "SESSION_RESCHEDULED",
-      metadata: { scheduledAt: params.scheduledAt.toISOString() },
-    });
-
-    return updated;
-  }
-
-  if (!ACTIVE_SESSION_STATUSES.has(session.status)) {
-    throw new ApiError(`Session is already ${session.status}`, 409, "SESSION_NOT_ACTIVE");
-  }
-
-  if (params.action === "cancel") {
-    const updated = await prisma.$transaction(async (tx) => {
-      const next = await tx.coachingSession.update({
-        where: { id: session.id },
-        data: {
-          status: "CANCELLED_BY_COACH",
-          cancelledAt: new Date(),
-          cancelReason: params.cancelReason ?? "Cancelled by admin",
-        },
-        include: sessionInclude,
       });
 
       await tx.coachingEntitlement.update({
         where: { id: session.entitlementId },
-        data: { reservedSessions: { decrement: 1 } },
-      });
-
-      await tx.coachingSessionEvent.create({
         data: {
-          sessionId: session.id,
-          actorId: params.actorId,
-          fromStatus: session.status,
-          toStatus: "CANCELLED_BY_COACH",
-          note: params.cancelReason ?? "Cancelled by admin",
+          completedSessions: completedCount,
+          status:
+            completedCount >= session.entitlement.totalSessions ? "COMPLETED" : session.entitlement.status,
         },
       });
-
-      return next;
-    });
-
-    await writeAuditLog({
-      actorId: params.actorId,
-      entityType: "CoachingSession",
-      entityId: session.id,
-      action: "SESSION_CANCELLED_BY_ADMIN",
-    });
-
-    return updated;
-  }
-
-  const updated = await prisma.$transaction(async (tx) => {
-    const entitlement = session.entitlement;
-    const nextUsedSessions = entitlement.usedSessions + 1;
-    const nextEntitlementStatus =
-      nextUsedSessions >= entitlement.totalSessions ? "EXHAUSTED" : entitlement.status;
-
-    const next = await tx.coachingSession.update({
-      where: { id: session.id },
-      data: {
-        status: "COMPLETED",
-        completedAt: new Date(),
-      },
-      include: sessionInclude,
-    });
-
-    await tx.coachingEntitlement.update({
-      where: { id: session.entitlementId },
-      data: {
-        reservedSessions: { decrement: 1 },
-        usedSessions: { increment: 1 },
-        status: nextEntitlementStatus,
-      },
-    });
-
-    await tx.coachingSessionEvent.create({
-      data: {
-        sessionId: session.id,
-        actorId: params.actorId,
-        fromStatus: session.status,
-        toStatus: "COMPLETED",
-        note: "Completed by admin",
-      },
-    });
+    }
 
     return next;
   });
@@ -325,8 +239,82 @@ export async function adminUpdateCoachingSession(params: {
     actorId: params.actorId,
     entityType: "CoachingSession",
     entityId: session.id,
-    action: "SESSION_COMPLETED",
+    action: publishing ? "SESSION_PUBLISHED" : "SESSION_UPDATED",
+    metadata: {
+      publicationStatus: updated.publicationStatus,
+      sessionNo: updated.sessionNo,
+    },
   });
 
   return updated;
+}
+
+export async function adminGrantCoachingEntitlementWithSessions(params: {
+  actorId: string;
+  userId: string;
+  coachingOfferingId: string;
+  totalSessions?: number;
+  validDays?: number;
+}) {
+  const offering = await prisma.coachingOffering.findUniqueOrThrow({
+    where: { id: params.coachingOfferingId },
+  });
+
+  if (!offering.coachId) {
+    throw new ApiError("Coaching offering has no coach assigned", 409, "COACH_NOT_ASSIGNED");
+  }
+
+  const now = new Date();
+  const validDays = params.validDays ?? offering.validDays;
+  const totalSessions = params.totalSessions ?? offering.totalSessions;
+
+  const entitlement = await prisma.$transaction(async (tx) => {
+    const created = await tx.coachingEntitlement.create({
+      data: {
+        userId: params.userId,
+        coachingOfferingId: offering.id,
+        coachId: offering.coachId,
+        courseId: offering.courseId,
+        totalSessions,
+        validFrom: now,
+        validUntil: addDays(now, validDays),
+        status: "ACTIVE",
+      },
+    });
+
+    await provisionCoachingSessions(tx, {
+      entitlementId: created.id,
+      userId: params.userId,
+      coachId: offering.coachId!,
+      offeringId: offering.id,
+      totalSessions,
+      validFrom: now,
+    });
+
+    return tx.coachingEntitlement.findUniqueOrThrow({
+      where: { id: created.id },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        coachingOffering: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            coach: { select: { name: true, email: true } },
+          },
+        },
+        sessions: { orderBy: { sessionNo: "asc" } },
+      },
+    });
+  });
+
+  await writeAuditLog({
+    actorId: params.actorId,
+    entityType: "CoachingEntitlement",
+    entityId: entitlement.id,
+    action: "ENTITLEMENT_GRANTED",
+    metadata: { userId: params.userId, offeringId: offering.id },
+  });
+
+  return entitlement;
 }

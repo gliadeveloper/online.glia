@@ -1,6 +1,11 @@
 import type { ProgressStatus } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
+import {
+  canAccessEnrollment,
+  materializeEnrollmentExpiry,
+  resolveEnrollmentProgressStatus,
+} from "@/lib/enrollment-access";
 import { prisma } from "@/lib/prisma";
 
 export const lessonPlayerInclude = {
@@ -36,27 +41,58 @@ export const lessonPlayerInclude = {
   assignment: true,
 };
 
-export async function getEnrollmentForCourse(userId: string, courseSlug: string) {
+const enrollmentInclude = {
+  course: {
+    include: {
+      modules: {
+        orderBy: { order: "asc" as const },
+        include: {
+          lessons: { orderBy: { order: "asc" as const }, select: { id: true, order: true, title: true } },
+        },
+      },
+    },
+  },
+  progress: true,
+} as const;
+
+async function findEnrollmentRecord(userId: string, courseSlug: string) {
   return prisma.enrollment.findFirst({
     where: {
       userId,
       course: { slug: courseSlug },
-      status: "ACTIVE",
+      status: { in: ["ACTIVE", "COMPLETED", "EXPIRED"] },
     },
-    include: {
-      course: {
-        include: {
-          modules: {
-            orderBy: { order: "asc" },
-            include: {
-              lessons: { orderBy: { order: "asc" }, select: { id: true, order: true, title: true } },
-            },
-          },
-        },
-      },
-      progress: true,
-    },
+    include: enrollmentInclude,
   });
+}
+
+export async function getEnrollmentAccessState(userId: string, courseSlug: string) {
+  const enrollment = await findEnrollmentRecord(userId, courseSlug);
+  if (!enrollment) {
+    return { kind: "none" as const };
+  }
+
+  const materialized = await materializeEnrollmentExpiry(enrollment);
+  const accessible = canAccessEnrollment(materialized);
+
+  if (accessible) {
+    return { kind: "active" as const, enrollment: { ...enrollment, ...materialized } };
+  }
+
+  if (materialized.status === "EXPIRED") {
+    return { kind: "expired" as const, enrollment: { ...enrollment, ...materialized } };
+  }
+
+  return { kind: "blocked" as const, enrollment: { ...enrollment, ...materialized } };
+}
+
+export async function getEnrollmentForCourse(userId: string, courseSlug: string) {
+  const state = await getEnrollmentAccessState(userId, courseSlug);
+  if (state.kind !== "active") {
+    return null;
+  }
+
+  return state.enrollment;
 }
 
 export async function getLessonPlayerContext(params: {
@@ -64,10 +100,18 @@ export async function getLessonPlayerContext(params: {
   courseSlug: string;
   lessonId: string;
 }) {
-  const enrollment = await getEnrollmentForCourse(params.userId, params.courseSlug);
-  if (!enrollment) {
+  const state = await getEnrollmentAccessState(params.userId, params.courseSlug);
+  if (state.kind === "none") {
     throw new ApiError("Enrollment not found", 404, "ENROLLMENT_NOT_FOUND");
   }
+  if (state.kind === "expired") {
+    throw new ApiError("Enrollment access expired", 403, "ENROLLMENT_EXPIRED");
+  }
+  if (state.kind === "blocked") {
+    throw new ApiError("Enrollment not accessible", 403, "ENROLLMENT_BLOCKED");
+  }
+
+  const enrollment = state.enrollment;
 
   const lesson = await prisma.lesson.findFirst({
     where: {
@@ -151,14 +195,19 @@ async function recalculateEnrollmentProgress(enrollmentId: string) {
   );
   const completedLessons = enrollment.progress.length;
   const progressPercent = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+  const now = new Date();
+  const accessActive = canAccessEnrollment(enrollment, now);
 
   await prisma.enrollment.update({
     where: { id: enrollmentId },
     data: {
       progressPercent,
-      lastAccessedAt: new Date(),
-      completedAt: progressPercent >= 100 ? new Date() : null,
-      status: progressPercent >= 100 ? "COMPLETED" : "ACTIVE",
+      lastAccessedAt: now,
+      completedAt: progressPercent >= 100 ? enrollment.completedAt ?? now : null,
+      status: resolveEnrollmentProgressStatus(
+        { progressPercent, completedAt: enrollment.completedAt },
+        accessActive,
+      ),
     },
   });
 
@@ -173,6 +222,10 @@ export async function updateLessonProgress(params: {
 }) {
   const enrollment = await getEnrollmentForCourse(params.userId, params.courseSlug);
   if (!enrollment) {
+    const state = await getEnrollmentAccessState(params.userId, params.courseSlug);
+    if (state.kind === "expired") {
+      throw new ApiError("Enrollment access expired", 403, "ENROLLMENT_EXPIRED");
+    }
     throw new ApiError("Enrollment not found", 404, "ENROLLMENT_NOT_FOUND");
   }
 
@@ -208,7 +261,7 @@ export async function updateLessonProgress(params: {
 }
 
 export async function getContinueLearning(userId: string) {
-  const enrollment = await prisma.enrollment.findFirst({
+  const enrollments = await prisma.enrollment.findMany({
     where: { userId, status: { in: ["ACTIVE", "COMPLETED"] } },
     orderBy: { lastAccessedAt: "desc" },
     include: {
@@ -217,33 +270,42 @@ export async function getContinueLearning(userId: string) {
     },
   });
 
-  if (!enrollment) return null;
+  for (const enrollment of enrollments) {
+    const materialized = await materializeEnrollmentExpiry(enrollment);
+    if (!canAccessEnrollment(materialized)) {
+      continue;
+    }
 
-  const completedIds = new Set(
-    enrollment.progress.filter((p) => p.status === "COMPLETED").map((p) => p.lessonId),
-  );
+    const completedIds = new Set(
+      enrollment.progress.filter((p) => p.status === "COMPLETED").map((p) => p.lessonId),
+    );
 
-  const nextLesson = await prisma.lesson.findFirst({
-    where: {
-      module: { courseId: enrollment.courseId },
-      id: { notIn: [...completedIds] },
-    },
-    orderBy: [{ module: { order: "asc" } }, { order: "asc" }],
-    select: {
-      id: true,
-      title: true,
-      type: true,
-      module: { select: { title: true } },
-    },
-  });
+    const nextLesson = await prisma.lesson.findFirst({
+      where: {
+        module: { courseId: enrollment.courseId },
+        id: { notIn: [...completedIds] },
+      },
+      orderBy: [{ module: { order: "asc" } }, { order: "asc" }],
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        module: { select: { title: true } },
+      },
+    });
 
-  if (!nextLesson) return null;
+    if (!nextLesson) {
+      continue;
+    }
 
-  return {
-    courseSlug: enrollment.course.slug,
-    courseTitle: enrollment.course.title,
-    thumbnailUrl: enrollment.course.thumbnailUrl,
-    progressPercent: enrollment.progressPercent,
-    lesson: nextLesson,
-  };
+    return {
+      courseSlug: enrollment.course.slug,
+      courseTitle: enrollment.course.title,
+      thumbnailUrl: enrollment.course.thumbnailUrl,
+      progressPercent: enrollment.progressPercent,
+      lesson: nextLesson,
+    };
+  }
+
+  return null;
 }

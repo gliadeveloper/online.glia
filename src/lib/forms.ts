@@ -2,6 +2,10 @@ import { Prisma } from "@/generated/prisma/client";
 import type { Form, FormQuestion } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
+import {
+  isFutureDailyDate,
+  isFutureWeeklyPeriod,
+} from "@/lib/checkin-dates";
 import { prisma } from "@/lib/prisma";
 
 export const formDetailInclude = {
@@ -31,7 +35,7 @@ export function getCheckInDate(timezone = "Asia/Seoul", date = new Date()) {
   }).format(date);
 }
 
-/** 해당 주의 일요일 날짜 (주간 체크인 period key) */
+/** 해당 주의 월요일 날짜 (주간 체크인 period key, 캘린더 주 월~일) */
 export function getWeekPeriodKey(timezone = "Asia/Seoul", date = new Date()) {
   const anchor = getCheckInDate(timezone, date);
   let probe = new Date(`${anchor}T12:00:00`);
@@ -42,7 +46,7 @@ export function getWeekPeriodKey(timezone = "Asia/Seoul", date = new Date()) {
       weekday: "short",
     }).format(probe);
 
-    if (weekday === "Sun") {
+    if (weekday === "Mon") {
       return getCheckInDate(timezone, probe);
     }
 
@@ -286,6 +290,14 @@ export async function upsertFormSubmission(params: {
     form.schedule === "WEEKLY"
       ? getWeekPeriodKey(form.timezone, referenceDate)
       : params.periodDate ?? getCheckInDate(form.timezone, referenceDate);
+
+  if (form.schedule === "WEEKLY") {
+    if (params.periodDate && isFutureWeeklyPeriod(params.periodDate, form.timezone)) {
+      throw new ApiError("Cannot submit check-in for a future week", 409, "FUTURE_PERIOD");
+    }
+  } else if (params.periodDate && isFutureDailyDate(params.periodDate, form.timezone)) {
+    throw new ApiError("Cannot submit check-in for a future date", 409, "FUTURE_PERIOD");
+  }
 
   const answerRows = buildAnswerRows(form.questions, params.answers);
 

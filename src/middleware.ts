@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/session-token";
+import { hasSessionTokenFormat, SESSION_COOKIE } from "@/lib/session-cookie";
 
-const protectedPrefixes = ["/dashboard", "/shop", "/lms", "/coaching", "/checkin", "/orders", "/admin"];
+const protectedPrefixes = ["/dashboard", "/shop", "/lms", "/learning", "/coaching", "/checkin", "/orders", "/admin", "/mypage"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,8 +11,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const userId = await verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
-  if (userId) {
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  if (hasSessionTokenFormat(token)) {
     return NextResponse.next();
   }
 
@@ -27,9 +27,12 @@ export const config = {
     "/dashboard/:path*",
     "/shop/:path*",
     "/lms/:path*",
+    "/learning/:path*",
     "/coaching/:path*",
     "/checkin/:path*",
     "/orders/:path*",
     "/admin/:path*",
+    "/mypage",
+    "/mypage/:path*",
   ],
 };

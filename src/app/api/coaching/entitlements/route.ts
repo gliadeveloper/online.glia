@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
 import { jsonError, resolveUserId } from "@/lib/api";
-import { getRemainingSessions } from "@/lib/coaching";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
@@ -20,31 +19,27 @@ export async function GET(request: Request) {
             id: true,
             slug: true,
             title: true,
-            deliveryMode: true,
-            sessionMinutes: true,
+            totalSessions: true,
           },
         },
         course: { select: { id: true, slug: true, title: true } },
         enrollment: { select: { id: true, status: true } },
         sessions: {
-          orderBy: { scheduledAt: "asc" },
+          orderBy: { sessionNo: "asc" },
           select: {
             id: true,
             sessionNo: true,
-            status: true,
+            title: true,
+            publicationStatus: true,
             scheduledAt: true,
+            progressStatus: true,
             completedAt: true,
           },
         },
       },
     });
 
-    return NextResponse.json(
-      entitlements.map((entitlement) => ({
-        ...entitlement,
-        remainingSessions: getRemainingSessions(entitlement),
-      })),
-    );
+    return NextResponse.json(entitlements);
   } catch (error) {
     return jsonError(error);
   }

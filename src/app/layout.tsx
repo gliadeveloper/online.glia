@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { TypographyRootProvider } from "@/components/typography/typography-root-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Glia Academy",
-  description: "LMS · 코칭 · 데일리 체크인",
+  title: "온라인 학습",
+  description: "온라인 학습 플랫폼",
 };
 
 export default function RootLayout({
@@ -27,7 +28,9 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <TypographyRootProvider>{children}</TypographyRootProvider>
+      </body>
     </html>
   );
 }
