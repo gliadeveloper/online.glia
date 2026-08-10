@@ -1,9 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
-import { AppPanel, AppStackBackLink, AppStackPage } from "@/components/app";
 import { CreatePostForm } from "@/components/community/create-post-form";
-import { Typography } from "@/components/typography/typography";
-import { getPublishedPostSummaryBySlug } from "@/lib/posts";
+import { getChildPostParentBySlug } from "@/lib/posts";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
@@ -20,7 +18,7 @@ export default async function CommunityNewPostPage({ searchParams }: CommunityNe
     redirect(`/login?next=${encodeURIComponent(next)}`);
   }
 
-  const parentPost = parentSlug ? await getPublishedPostSummaryBySlug(parentSlug) : null;
+  const parentPost = parentSlug ? await getChildPostParentBySlug(parentSlug) : null;
 
   if (parentSlug && !parentPost) {
     notFound();
@@ -29,27 +27,19 @@ export default async function CommunityNewPostPage({ searchParams }: CommunityNe
   const isChild = !!parentPost;
 
   return (
-    <AppStackPage>
+    <div className="community-write-page">
       <StackNavTitle title={isChild ? "하위 글 작성" : "글 작성"} />
 
-      <AppStackBackLink href={isChild ? `/community/${parentPost.slug}` : "/community"}>
-        {isChild ? "← 부모 글로" : "← 커뮤니티 목록"}
-      </AppStackBackLink>
-
-      <header className="app-section">
-        <Typography as="h1" role="pageTitle" weight="semibold" color="primary">
-          {isChild ? "하위 글 작성" : "글 작성"}
-        </Typography>
-        <Typography as="p" role="bodySecondary" color="secondary">
+      <header className="community-write-page__header">
+        <h1 className="community-write-page__title">{isChild ? "하위 글 작성" : "글 작성"}</h1>
+        <p className="community-write-page__desc">
           {isChild
-            ? "부모 글에 연결되는 새 글을 Markdown으로 작성합니다."
+            ? "부모 글에 연결되는 Markdown 글을 작성합니다."
             : "Markdown으로 학습 노트·질문·후기를 공유하세요."}
-        </Typography>
+        </p>
       </header>
 
-      <AppPanel>
-        <CreatePostForm parentPost={parentPost ?? undefined} />
-      </AppPanel>
-    </AppStackPage>
+      <CreatePostForm parentPost={parentPost ?? undefined} />
+    </div>
   );
 }

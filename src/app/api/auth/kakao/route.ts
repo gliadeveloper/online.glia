@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { AUTH_ERROR_MESSAGES } from "@/lib/auth-errors";
 import { buildKakaoAuthorizeUrl, getKakaoConfig } from "@/lib/kakao-auth";
 import {
   createOAuthState,
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
   const config = getKakaoConfig();
   if (!config) {
     return NextResponse.json(
-      { error: "Kakao OAuth is not configured", code: "KAKAO_NOT_CONFIGURED" },
+      { error: AUTH_ERROR_MESSAGES.KAKAO_NOT_CONFIGURED, code: "KAKAO_NOT_CONFIGURED" },
       { status: 503 },
     );
   }

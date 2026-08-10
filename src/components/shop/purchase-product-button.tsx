@@ -71,17 +71,20 @@ export function PurchaseProductButton({
         type="button"
         onClick={handlePurchase}
         disabled={disabled || loading}
-        className={`shell-focus-ring w-full rounded-[var(--radius-md)] bg-[var(--color-action-primary)] font-medium text-white hover:bg-[var(--color-action-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50 ${
-          compact ? "min-h-11 px-4 py-2 typo-subTypography11" : "min-h-11 px-5 py-3 typo-subTypography11"
-        }`}
+        className={[
+          "corp-trust-btn-primary corp-trust-focus w-full",
+          compact ? "min-h-11 px-4 py-2 text-sm" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
         {loading ? "결제 처리 중..." : `${label} · ${priceLabel}`}
       </button>
-      {error && (
-        <p role="alert" className="typo-subTypography11 text-red-800">
+      {error ? (
+        <p role="alert" className="corp-trust-alert-error">
           {error}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

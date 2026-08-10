@@ -13,7 +13,7 @@ export function PrimaryNavBottom() {
       id="primary-nav"
       aria-label="주요 메뉴"
       data-slot="primary-nav-bottom"
-      className="nav-tab-bar app-shell__chrome z-50 shrink-0 lg:hidden"
+      className="primary-nav-trust nav-tab-bar nav-tab-bar-trust app-shell__chrome z-50 shrink-0 lg:hidden"
       style={{
         paddingBottom: "env(safe-area-inset-bottom)",
       }}

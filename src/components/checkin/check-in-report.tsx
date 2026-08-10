@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { Typography } from "@/components/typography/typography";
+import { CheckInReportSavedNotice } from "@/components/checkin/check-in-report-saved-notice";
+import { TrustButtonLink } from "@/components/corporate-trust/app-trust-ui";
 import type { CheckInReportItem } from "@/lib/checkin-report";
 import type { CheckInSchedule } from "@/lib/checkin-routes";
 import { checkInFormPath } from "@/lib/checkin-routes";
@@ -11,6 +12,12 @@ type CheckInReportProps = {
   periodLabel: string;
   items: CheckInReportItem[];
   hubHref: string;
+  showSavedNotice?: boolean;
+};
+
+const SCHEDULE_KIND_LABEL: Record<CheckInSchedule, string> = {
+  daily: "데일리 체크",
+  weekly: "주간 체크",
 };
 
 export function CheckInReport({
@@ -19,62 +26,35 @@ export function CheckInReport({
   periodLabel,
   items,
   hubHref,
+  showSavedNotice = false,
 }: CheckInReportProps) {
+  const kindLabel = SCHEDULE_KIND_LABEL[schedule];
+
   return (
     <div className="check-in-report-page">
       <div className="check-in-report-page__body">
-        <div className="check-in-report__hero">
-          <div className="check-in-report__icon" aria-hidden="true">
-            <svg
-              width={32}
-              height={32}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-            </svg>
-          </div>
+        <CheckInReportSavedNotice showInitially={showSavedNotice} />
 
-          <Typography as="h1" role="pageTitle" weight="semibold" color="primary" className="check-in-report__title">
-            기록 완료
-          </Typography>
-          <Typography as="p" role="bodySecondary" color="secondary" className="check-in-report__period">
-            {periodLabel}
-          </Typography>
-        </div>
+        <p className="check-in-report__context">
+          {periodLabel} · {kindLabel}
+        </p>
 
         <section aria-labelledby="check-in-report-summary-heading" className="check-in-report__summary">
-          <Typography
-            as="h2"
-            id="check-in-report-summary-heading"
-            role="label"
-            weight="semibold"
-            color="secondary"
-            className="check-in-report__section-label"
-          >
+          <h2 id="check-in-report-summary-heading" className="check-in-report__section-label">
             기록 요약
-          </Typography>
+          </h2>
 
           <dl className="check-in-report__list">
             {items.map((item) => (
               <div key={item.questionId} className="check-in-report__item">
-                <Typography as="dt" role="caption" color="secondary">
-                  {item.prompt}
-                </Typography>
+                <dt>{item.prompt}</dt>
                 <dd className="check-in-report__value">
                   {item.emoji ? (
-                    <Typography as="span" role="bodyCompact" aria-label={item.displayValue}>
+                    <span role="img" aria-label={item.displayValue}>
                       {item.emoji}
-                    </Typography>
+                    </span>
                   ) : (
-                    <Typography as="span" role="bodyCompact" weight="semibold" color="primary">
-                      {item.displayValue}
-                    </Typography>
+                    <span>{item.displayValue}</span>
                   )}
                 </dd>
               </div>
@@ -83,39 +63,28 @@ export function CheckInReport({
         </section>
 
         <section aria-labelledby="check-in-report-insight-heading" className="check-in-report__insight">
-          <Typography
-            as="h2"
-            id="check-in-report-insight-heading"
-            role="label"
-            weight="semibold"
-            color="secondary"
-            className="check-in-report__section-label"
-          >
+          <h2 id="check-in-report-insight-heading" className="check-in-report__section-label">
             리포트
-          </Typography>
-          <Typography as="p" role="bodySecondary" color="secondary" className="check-in-report__placeholder">
+          </h2>
+          <p className="check-in-report__placeholder">
             맞춤 리포트를 준비 중입니다. 곧 이곳에서 더 자세한 인사이트를 확인할 수 있습니다.
-          </Typography>
+          </p>
         </section>
       </div>
 
       <div className="check-in-report__footer">
         <Link
           href={checkInFormPath(schedule, periodKey, { redo: true })}
-          className="check-in-report__footer-btn check-in-report__footer-btn--ghost shell-focus-ring"
+          className="corp-trust-btn-ghost corp-trust-focus shell-focus-ring trust-btn check-in-report__footer-btn check-in-report__footer-btn--ghost"
         >
-          <Typography as="span" role="bodySecondary" weight="medium">
-            다시하기
-          </Typography>
+          다시하기
         </Link>
-        <Link
+        <TrustButtonLink
           href={hubHref}
-          className="check-in-report__footer-btn check-in-report__footer-btn--primary shell-focus-ring"
+          className="check-in-report__footer-btn check-in-report__footer-btn--primary"
         >
-          <Typography as="span" role="bodySecondary" weight="semibold">
-            체크인 목록
-          </Typography>
-        </Link>
+          체크인 목록
+        </TrustButtonLink>
       </div>
     </div>
   );

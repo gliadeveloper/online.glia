@@ -12,15 +12,11 @@ function readEnv(primary: string, fallback?: string) {
 }
 
 export function getR2Config(): R2Config | null {
-  const bucket = readEnv("R2_BUCKET", process.env.LIVEKIT_EGRESS_S3_BUCKET);
-  const endpoint = readEnv("R2_ENDPOINT", process.env.LIVEKIT_EGRESS_S3_ENDPOINT);
-  const accessKeyId = readEnv("R2_ACCESS_KEY_ID", process.env.LIVEKIT_EGRESS_S3_ACCESS_KEY);
-  const secretAccessKey = readEnv(
-    "R2_SECRET_ACCESS_KEY",
-    process.env.LIVEKIT_EGRESS_S3_SECRET,
-  );
-  const publicBaseUrl =
-    readEnv("R2_PUBLIC_BASE_URL", process.env.LIVEKIT_EGRESS_PUBLIC_BASE_URL) || null;
+  const bucket = readEnv("R2_BUCKET");
+  const endpoint = readEnv("R2_ENDPOINT");
+  const accessKeyId = readEnv("R2_ACCESS_KEY_ID");
+  const secretAccessKey = readEnv("R2_SECRET_ACCESS_KEY");
+  const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL") || null;
   const region = readEnv("R2_REGION", "auto") || "auto";
 
   if (!bucket || !endpoint || !accessKeyId || !secretAccessKey) {

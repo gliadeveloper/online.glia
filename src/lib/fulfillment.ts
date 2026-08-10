@@ -282,6 +282,306 @@ async function fulfillOrderLine(
   }
 }
 
+const checkoutProductInclude = {
+  items: {
+    orderBy: { sortOrder: "asc" as const },
+    include: {
+      course: {
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          defaultAccessDuration: true,
+          defaultAccessDays: true,
+        },
+      },
+      coachingOffering: {
+        select: { id: true, title: true },
+      },
+    },
+  },
+} satisfies Prisma.ProductInclude;
+
+type CheckoutProduct = Prisma.ProductGetPayload<{ include: typeof checkoutProductInclude }>;
+
+async function loadActiveProductBySlug(productSlug: string): Promise<CheckoutProduct | null> {
+  return prisma.product.findFirst({
+    where: { slug: productSlug, isActive: true },
+    include: checkoutProductInclude,
+  });
+}
+
+async function runOrderFulfillment(
+  tx: TransactionClient,
+  params: {
+    actorId: string;
+    orderId: string;
+    userId: string;
+    orderLineId: string;
+    product: CheckoutProduct;
+    courseActionByItemId: Map<string, CourseGrantAction | undefined>;
+    coachingActionByItemId: Map<string, CoachingGrantAction | undefined>;
+    now: Date;
+  },
+) {
+  const fulfillment = await tx.fulfillment.create({
+    data: {
+      orderId: params.orderId,
+      status: "COMPLETED",
+      fulfilledAt: params.now,
+    },
+  });
+
+  await fulfillOrderLine(tx, {
+    userId: params.userId,
+    fulfillmentId: fulfillment.id,
+    orderLineId: params.orderLineId,
+    items: params.product.items.map((item) => ({
+      id: item.id,
+      kind: item.kind,
+      courseId: item.courseId,
+      coachingOfferingId: item.coachingOfferingId,
+      accessDuration: item.accessDuration,
+      accessDays: item.accessDays,
+      course: item.course,
+      courseAction: params.courseActionByItemId.get(item.id),
+      coachingAction: params.coachingActionByItemId.get(item.id),
+    })),
+    now: params.now,
+  });
+
+  await tx.auditLog.create({
+    data: {
+      actorId: params.actorId,
+      entityType: "Fulfillment",
+      entityId: fulfillment.id,
+      action: "FULFILL_COMPLETED",
+      metadata: {
+        orderId: params.orderId,
+        productSlug: params.product.slug,
+      },
+    },
+  });
+
+  return fulfillment;
+}
+
+export async function findPendingOrderForProduct(userId: string, productSlug: string) {
+  return prisma.order.findFirst({
+    where: {
+      userId,
+      status: "PENDING",
+      lines: { some: { product: { slug: productSlug } } },
+    },
+    select: { id: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/** Class101-style apply — PENDING order without payment (PG 없음). */
+export async function submitProductApplication(params: {
+  userId: string;
+  productSlug: string;
+  idempotencyKey?: string;
+}) {
+  if (params.idempotencyKey) {
+    const existing = await prisma.order.findUnique({
+      where: { idempotencyKey: params.idempotencyKey },
+      include: orderInclude,
+    });
+
+    if (existing) {
+      return existing;
+    }
+  }
+
+  const product = await loadActiveProductBySlug(params.productSlug);
+  if (!product) {
+    throw new Error("PRODUCT_NOT_FOUND");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: params.userId } });
+  if (!user) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  const now = new Date();
+  const checkoutAssessment = await assessProductCheckout(params.userId, product, now);
+
+  if (!checkoutAssessment.canCheckout) {
+    throw new ApiError(
+      checkoutAssessment.blockMessage ?? "Already owned",
+      409,
+      checkoutAssessment.blockCode ?? "ALREADY_OWNED",
+    );
+  }
+
+  const existingPending = await findPendingOrderForProduct(params.userId, product.slug);
+  if (existingPending) {
+    throw new ApiError(
+      "이미 승인 대기 중인 신청이 있습니다.",
+      409,
+      "APPLICATION_PENDING",
+    );
+  }
+
+  const unitPrice = getProductPrice(product);
+
+  const order = await prisma.order.create({
+    data: {
+      userId: params.userId,
+      status: "PENDING",
+      subtotal: unitPrice,
+      total: unitPrice,
+      idempotencyKey: params.idempotencyKey,
+      lines: {
+        create: {
+          productId: product.id,
+          unitPrice,
+          lineTotal: unitPrice,
+        },
+      },
+    },
+    include: orderInclude,
+  });
+
+  await writeAuditLog({
+    actorId: params.userId,
+    entityType: "Order",
+    entityId: order.id,
+    action: "APPLICATION_SUBMITTED",
+    metadata: { productSlug: product.slug },
+  });
+
+  return order;
+}
+
+/** Coach/Admin approves a pending application — grants entitlements. */
+export async function approveProductApplication(params: { orderId: string; actorId: string }) {
+  const order = await prisma.order.findUnique({
+    where: { id: params.orderId },
+    include: {
+      lines: {
+        include: {
+          product: { include: checkoutProductInclude },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new ApiError("Order not found", 404, "ORDER_NOT_FOUND");
+  }
+
+  if (order.status !== "PENDING") {
+    throw new ApiError(`Cannot approve order with status ${order.status}`, 409, "INVALID_STATUS");
+  }
+
+  const orderLine = order.lines[0];
+  const product = orderLine?.product;
+  if (!orderLine || !product) {
+    throw new ApiError("Order line missing", 409, "ORDER_LINE_MISSING");
+  }
+
+  const now = new Date();
+  const checkoutAssessment = await assessProductCheckout(order.userId, product, now);
+
+  if (!checkoutAssessment.canCheckout) {
+    throw new ApiError(
+      checkoutAssessment.blockMessage ?? "Cannot approve this application",
+      409,
+      checkoutAssessment.blockCode ?? "ALREADY_OWNED",
+    );
+  }
+
+  const courseActionByItemId = new Map(
+    checkoutAssessment.courseItems.map((item) => [item.productItemId, item.action]),
+  );
+  const coachingActionByItemId = new Map(
+    checkoutAssessment.coachingItems.map((item) => [item.productItemId, item.action]),
+  );
+
+  const providerRef = `approve-${crypto.randomUUID()}`;
+
+  return prisma.$transaction(async (tx) => {
+    await tx.order.update({
+      where: { id: order.id },
+      data: { status: "PAID", paidAt: now },
+    });
+
+    await tx.payment.create({
+      data: {
+        orderId: order.id,
+        provider: "manual",
+        providerRef,
+        amount: order.total,
+        status: "SUCCEEDED",
+        paidAt: now,
+      },
+    });
+
+    await runOrderFulfillment(tx, {
+      actorId: params.actorId,
+      orderId: order.id,
+      userId: order.userId,
+      orderLineId: orderLine.id,
+      product,
+      courseActionByItemId,
+      coachingActionByItemId,
+      now,
+    });
+
+    await writeAuditLog({
+      actorId: params.actorId,
+      entityType: "Order",
+      entityId: order.id,
+      action: "APPLICATION_APPROVED",
+      metadata: { productSlug: product.slug },
+    });
+
+    return tx.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: orderInclude,
+    });
+  });
+}
+
+export async function rejectProductApplication(params: {
+  orderId: string;
+  actorId: string;
+  reason?: string;
+}) {
+  const order = await prisma.order.findUnique({ where: { id: params.orderId } });
+
+  if (!order) {
+    throw new ApiError("Order not found", 404, "ORDER_NOT_FOUND");
+  }
+
+  if (order.status !== "PENDING") {
+    throw new ApiError(`Cannot reject order with status ${order.status}`, 409, "INVALID_STATUS");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.order.update({
+      where: { id: order.id },
+      data: { status: "CANCELLED" },
+    });
+
+    await writeAuditLog({
+      actorId: params.actorId,
+      entityType: "Order",
+      entityId: order.id,
+      action: "APPLICATION_REJECTED",
+      metadata: { reason: params.reason },
+    });
+  });
+
+  return prisma.order.findUniqueOrThrow({
+    where: { id: order.id },
+    include: orderInclude,
+  });
+}
+
 export async function checkout(params: {
   userId: string;
   productSlug: string;
@@ -298,28 +598,7 @@ export async function checkout(params: {
     }
   }
 
-  const product = await prisma.product.findFirst({
-    where: { slug: params.productSlug, isActive: true },
-    include: {
-      items: {
-        orderBy: { sortOrder: "asc" },
-        include: {
-          course: {
-            select: {
-              id: true,
-              slug: true,
-              title: true,
-              defaultAccessDuration: true,
-              defaultAccessDays: true,
-            },
-          },
-          coachingOffering: {
-            select: { id: true, title: true },
-          },
-        },
-      },
-    },
-  });
+  const product = await loadActiveProductBySlug(params.productSlug);
 
   if (!product) {
     throw new Error("PRODUCT_NOT_FOUND");
@@ -387,43 +666,15 @@ export async function checkout(params: {
       throw new Error("ORDER_LINE_MISSING");
     }
 
-    const fulfillment = await tx.fulfillment.create({
-      data: {
-        orderId: created.id,
-        status: "COMPLETED",
-        fulfilledAt: now,
-      },
-    });
-
-    await fulfillOrderLine(tx, {
+    await runOrderFulfillment(tx, {
+      actorId: params.userId,
+      orderId: created.id,
       userId: params.userId,
-      fulfillmentId: fulfillment.id,
       orderLineId: orderLine.id,
-      items: product.items.map((item) => ({
-        id: item.id,
-        kind: item.kind,
-        courseId: item.courseId,
-        coachingOfferingId: item.coachingOfferingId,
-        accessDuration: item.accessDuration,
-        accessDays: item.accessDays,
-        course: item.course,
-        courseAction: courseActionByItemId.get(item.id),
-        coachingAction: coachingActionByItemId.get(item.id),
-      })),
+      product,
+      courseActionByItemId,
+      coachingActionByItemId,
       now,
-    });
-
-    await tx.auditLog.create({
-      data: {
-        actorId: params.userId,
-        entityType: "Fulfillment",
-        entityId: fulfillment.id,
-        action: "FULFILL_COMPLETED",
-        metadata: {
-          orderId: created.id,
-          productSlug: product.slug,
-        },
-      },
     });
 
     return tx.order.findUniqueOrThrow({

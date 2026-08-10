@@ -1,6 +1,9 @@
 import { ApiError, addDays } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
+import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import { provisionCoachingSessions, syncOfferingSessionTemplates } from "@/lib/coaching-provision";
+import type { Prisma } from "@/generated/prisma/client";
+import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export const coachingOfferingInclude = {
@@ -156,6 +159,7 @@ export async function adminUpdateCoachingSession(params: {
   summary?: string | null;
   scheduledAt?: Date;
   bodyMarkdown?: string | null;
+  bodyMetadata?: Prisma.InputJsonValue | null;
   publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
   progressStatus?: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
 }) {
@@ -175,10 +179,21 @@ export async function adminUpdateCoachingSession(params: {
         ? null
         : params.bodyMarkdown.trim();
 
+  const bodyMetadata =
+    params.bodyMetadata === undefined
+      ? undefined
+      : params.bodyMetadata === null
+        ? PrismaRuntime.JsonNull
+        : params.bodyMetadata;
+
   let publicationStatus = params.publicationStatus;
   if (publicationStatus === "PUBLISHED") {
-    const nextBody = bodyMarkdown ?? session.bodyMarkdown;
-    if (!nextBody?.trim()) {
+    const nextSession = {
+      bodyMarkdown: bodyMarkdown ?? session.bodyMarkdown,
+      bodyMetadata:
+        params.bodyMetadata === undefined ? session.bodyMetadata : params.bodyMetadata,
+    };
+    if (!coachingSessionHasBody(nextSession)) {
       throw new ApiError("bodyMarkdown is required to publish", 400, "VALIDATION_ERROR");
     }
   }
@@ -195,6 +210,7 @@ export async function adminUpdateCoachingSession(params: {
         summary: params.summary === undefined ? undefined : params.summary,
         scheduledAt: params.scheduledAt,
         bodyMarkdown,
+        bodyMetadata,
         publicationStatus,
         publishedAt: publishing ? now : publicationStatus === "EMPTY" ? null : undefined,
         publishedById: publishing ? params.actorId : publicationStatus === "EMPTY" ? null : undefined,

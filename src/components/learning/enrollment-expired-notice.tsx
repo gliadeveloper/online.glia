@@ -46,10 +46,8 @@ export function EnrollmentExpiredNotice({
             평생 수강 복구 (번들)
           </AppButtonLink>
         )}
-        <Link href="/learning" className="shell-focus-ring self-center">
-          <Typography as="span" role="bodySecondary" weight="medium" color="action">
-            내 학습으로
-          </Typography>
+        <Link href="/learning" className="corp-trust-link corp-trust-focus rounded-sm self-center">
+          내 학습으로
         </Link>
       </div>
     </section>

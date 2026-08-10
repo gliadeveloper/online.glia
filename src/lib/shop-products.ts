@@ -1,17 +1,49 @@
 import { prisma } from "@/lib/prisma";
 
+const courseCatalogSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  description: true,
+  thumbnailUrl: true,
+  level: true,
+  defaultAccessDuration: true,
+  defaultAccessDays: true,
+  instructor: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      profile: { select: { headline: true, bio: true } },
+    },
+  },
+  modules: {
+    orderBy: { order: "asc" as const },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      order: true,
+      lessons: {
+        orderBy: { order: "asc" as const },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          duration: true,
+          order: true,
+        },
+      },
+    },
+  },
+} as const;
+
 export const productCatalogInclude = {
   items: {
     orderBy: { sortOrder: "asc" as const },
     include: {
       course: {
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          defaultAccessDuration: true,
-          defaultAccessDays: true,
-        },
+        select: courseCatalogSelect,
       },
       coachingOffering: {
         select: { id: true, title: true, totalSessions: true, validDays: true },

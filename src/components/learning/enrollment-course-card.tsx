@@ -100,16 +100,12 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
         <div className="app-card opacity-90">
           {cardInner}
           <div className="app-card__footer">
-            <Link href={enrollment.extendHref} className="shell-focus-ring">
-              <Typography as="span" role="bodySecondary" weight="medium" color="action">
-                90일 수강 연장
-              </Typography>
+            <Link href={enrollment.extendHref} className="corp-trust-link corp-trust-focus shell-focus-ring">
+              90일 수강 연장
             </Link>
             {enrollment.restoreHref && enrollment.restoreHref !== enrollment.extendHref && (
-              <Link href={enrollment.restoreHref} className="shell-focus-ring">
-                <Typography as="span" role="bodySecondary" weight="medium" color="secondary">
-                  평생 수강 복구
-                </Typography>
+              <Link href={enrollment.restoreHref} className="corp-trust-link corp-trust-focus shell-focus-ring text-[var(--auth-text-muted)]">
+                평생 수강 복구
               </Link>
             )}
           </div>

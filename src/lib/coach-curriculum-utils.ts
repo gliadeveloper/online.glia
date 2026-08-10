@@ -1,9 +1,6 @@
 import { lessonTypeLabels } from "@/lib/lesson-labels";
-import {
-  isLiveKitMetadata,
-  isR2VideoMetadata,
-  parseContentMetadata,
-} from "@/lib/media/content-metadata";
+import { isYoutubeUrl } from "@/lib/media/youtube";
+import { isZoomUrl } from "@/lib/media/zoom";
 
 export const lessonTypes = ["VIDEO", "TEXT", "QUIZ", "ASSIGNMENT", "LIVE"] as const;
 export type LessonTypeValue = (typeof lessonTypes)[number];
@@ -36,11 +33,11 @@ export type CurriculumModule = {
 };
 
 export const lessonTypeHints: Record<LessonTypeValue, string> = {
-  VIDEO: "R2 동영상 업로드",
+  VIDEO: "YouTube 동영상",
   TEXT: "마크다운 본문",
   QUIZ: "객관식 퀴즈",
   ASSIGNMENT: "과제 제출",
-  LIVE: "LiveKit 라이브",
+  LIVE: "Zoom 라이브",
 };
 
 export function curriculumStats(modules: CurriculumModule[]) {
@@ -60,11 +57,10 @@ export function getLessonReadiness(lesson: CurriculumLesson): {
 } {
   switch (lesson.type) {
     case "VIDEO": {
-      const ok = lesson.contents.some((content) => {
-        if (content.url?.trim()) return true;
-        return isR2VideoMetadata(parseContentMetadata(content.metadata as never));
-      });
-      return { ok, label: ok ? "콘텐츠 준비됨" : "동영상 필요", detail: ok ? undefined : "업로드하세요" };
+      const ok = lesson.contents.some(
+        (content) => content.type === "VIDEO" && isYoutubeUrl(content.url ?? ""),
+      );
+      return { ok, label: ok ? "YouTube 등록됨" : "YouTube URL 필요", detail: ok ? undefined : "YouTube URL 등록" };
     }
     case "TEXT": {
       const ok = lesson.contents.some((content) => content.body?.trim());
@@ -84,19 +80,11 @@ export function getLessonReadiness(lesson: CurriculumLesson): {
       return { ok, label: ok ? "과제 설정됨" : "과제 필요", detail: ok ? undefined : "과제 작성" };
     }
     case "LIVE": {
-      const liveContent = lesson.contents.find((content) => {
-        const metadata = parseContentMetadata(content.metadata as never);
-        return isLiveKitMetadata(metadata);
-      });
-      const metadata = liveContent
-        ? parseContentMetadata(liveContent.metadata as never)
-        : null;
-      const hasSchedule =
-        isLiveKitMetadata(metadata) && Boolean(metadata.scheduledAt?.trim());
+      const hasZoom = lesson.contents.some((content) => isZoomUrl(content.url));
       return {
-        ok: hasSchedule,
-        label: hasSchedule ? "라이브 일정 설정됨" : "라이브 일정 필요",
-        detail: hasSchedule ? undefined : "시작 일시 등록",
+        ok: hasZoom,
+        label: hasZoom ? "Zoom 링크 등록됨" : "Zoom 링크 필요",
+        detail: hasZoom ? undefined : "Zoom URL 등록",
       };
     }
     default:

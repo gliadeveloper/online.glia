@@ -15,6 +15,7 @@ export async function POST(request: Request, context: RouteContext) {
       title?: string;
       url?: string;
       body?: string;
+      metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
     };
 
     const userId = await resolveUserId(request, body);
@@ -31,6 +32,7 @@ export async function POST(request: Request, context: RouteContext) {
       title: body.title,
       url: body.url,
       body: body.body,
+      metadata: body.metadata,
     });
 
     return NextResponse.json(content, { status: 201 });

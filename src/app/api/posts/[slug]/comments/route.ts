@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { ApiError, jsonError } from "@/lib/api";
 import { createPostComment } from "@/lib/post-mutations";
 import { mapPostWriteError } from "@/lib/post-write";
+import { assertRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { getSessionUserId } from "@/lib/session";
 
 type RouteContext = {
@@ -16,13 +17,16 @@ export async function POST(request: Request, context: RouteContext) {
       throw new ApiError("Login required", 401, "UNAUTHORIZED");
     }
 
+    assertRateLimit(`post:comment:${userId}`, 20, 60_000);
+
     const { slug } = await context.params;
-    const body = (await request.json()) as { body?: string };
+    const body = (await request.json()) as { body?: string; parentCommentId?: string | null };
 
     const comment = await createPostComment({
       userId,
       postSlug: slug,
       body: body.body ?? "",
+      parentCommentId: body.parentCommentId ?? null,
     });
 
     if (!comment) {
@@ -31,6 +35,10 @@ export async function POST(request: Request, context: RouteContext) {
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {
+    if (error instanceof RateLimitError) {
+      return NextResponse.json({ error: error.message, code: "RATE_LIMITED" }, { status: 429 });
+    }
+
     if (error instanceof ApiError) {
       return jsonError(error);
     }

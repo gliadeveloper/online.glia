@@ -1,4 +1,3 @@
-import { Typography } from "@/components/typography/typography";
 import { formatPostRelativeTime } from "@/lib/post-content";
 import { displayAuthorName, type PostAuthor } from "@/lib/post-display";
 
@@ -11,18 +10,20 @@ type CommunityAuthorRowProps = {
 };
 
 export function CommunityAuthorRow({ user, publishedAt, headline }: CommunityAuthorRowProps) {
-  const meta = [formatPostRelativeTime(publishedAt), headline].filter(Boolean).join(" · ");
+  const relativeTime = formatPostRelativeTime(publishedAt);
 
   return (
     <div className="community-author-row">
-      <CommunityAvatar user={user} />
+      <CommunityAvatar user={user} size="sm" />
+
       <div className="community-author-row__body">
-        <Typography as="p" role="bodyCompact" weight="semibold" color="primary">
-          {displayAuthorName(user)}
-        </Typography>
-        <Typography as="p" role="caption" color="secondary">
-          <time dateTime={publishedAt.toISOString()}>{meta}</time>
-        </Typography>
+        <div className="community-author-row__name-line">
+          <span className="community-author-row__name">{displayAuthorName(user)}</span>
+          {headline && <span className="community-author-row__badge">{headline}</span>}
+          <time className="community-author-row__time" dateTime={publishedAt.toISOString()}>
+            {relativeTime}
+          </time>
+        </div>
       </div>
     </div>
   );

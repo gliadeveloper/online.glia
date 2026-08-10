@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { AppSection, AppSectionHeader, AppStackPage } from "@/components/app";
 import { CoachingCoachProfile } from "@/components/coaching/coaching-coach-profile";
 import { CoachingSessionCard } from "@/components/coaching/coaching-session-card";
+import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
 import { Typography } from "@/components/typography/typography";
 import {
   formatCoachingExpiry,
@@ -36,11 +37,15 @@ export default async function CoachingEntitlementPage({ params }: CoachingEntitl
     <AppStackPage>
       <StackNavTitle title={entitlement.coachingOffering.title} />
 
-      <header className="app-section">
-        <Typography as="h1" role="pageTitle" weight="semibold" color="primary">
-          {entitlement.coachingOffering.title}
-        </Typography>
+      <TabPageHeader
+        eyebrow="Coaching"
+        title="코칭"
+        titleAccent="회차"
+        description={`${entitlement.coachingOffering.title} · ${formatCoachingProgress(entitlement.completedSessions, entitlement.totalSessions)}`}
+        variant="stack"
+      />
 
+      <header className="app-section">
         {coach && <CoachingCoachProfile coach={coach} />}
 
         <dl className="app-section-header__desc flex flex-wrap gap-x-4 gap-y-1">

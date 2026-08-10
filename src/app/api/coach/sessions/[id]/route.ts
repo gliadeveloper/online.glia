@@ -24,6 +24,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const body = (await request.json()) as {
       summary?: string | null;
       bodyMarkdown?: string | null;
+      bodyMetadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
       publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
     };
 
@@ -35,6 +36,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       sessionId: id,
       summary: body.summary,
       bodyMarkdown: body.bodyMarkdown,
+      bodyMetadata: body.bodyMetadata,
       publicationStatus: body.publicationStatus,
     });
 

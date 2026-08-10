@@ -6,6 +6,7 @@ import {
   AppStatusBanner,
   AppTabScreen,
 } from "@/components/app";
+import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
 import { EnrollmentCourseCard } from "@/components/learning/enrollment-course-card";
 import { HeaderAuthAction } from "@/components/shell/header-auth-action";
 import { getUserEnrollments } from "@/lib/learning-enrollments";
@@ -15,13 +16,23 @@ type LearningPageProps = {
   searchParams: Promise<{ purchased?: string }>;
 };
 
+const learningHeader = (
+  <TabPageHeader
+    eyebrow="Learning"
+    title="나의"
+    titleAccent="학습 허브"
+    description="수강 중인 클래스와 진도를 확인하고 이어서 학습하세요."
+    variant="compact"
+  />
+);
+
 export default async function LearningPage({ searchParams }: LearningPageProps) {
   const user = await getCurrentUser();
   const { purchased } = await searchParams;
 
   if (!user) {
     return (
-      <AppTabScreen title="내 학습">
+      <AppTabScreen title="내 학습" header={learningHeader}>
         <AppEmptyState
           message="로그인 후 수강 목록과 진도를 확인할 수 있습니다."
           action={<HeaderAuthAction isLoggedIn={false} />}
@@ -36,7 +47,7 @@ export default async function LearningPage({ searchParams }: LearningPageProps) 
   const expired = enrollments.filter((item) => item.status === "EXPIRED");
 
   return (
-    <AppTabScreen title="내 학습">
+    <AppTabScreen title="내 학습" header={learningHeader}>
       {purchased === "1" && (
         <AppStatusBanner>구매가 완료되었습니다. 첫 레슨부터 학습을 시작해 보세요.</AppStatusBanner>
       )}

@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { TrustAlert, TrustButton } from "@/components/corporate-trust/app-trust-ui";
+
 type Question = {
   id: string;
   prompt: string;
@@ -106,28 +108,24 @@ export function QuizPlayer({
   }
 
   return (
-    <section className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6 shadow-sm">
-      <h2 className="typo-subTypography9 font-semibold text-[var(--color-text-primary)]">{title}</h2>
-      {description && (
-        <p className="mt-2 typo-subTypography11 text-[var(--color-text-secondary)]">{description}</p>
-      )}
-      <p className="mt-2 typo-subTypography12 text-[var(--color-text-secondary)]">
+    <section className="trust-card p-6">
+      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+      {description && <p className="mt-2 text-sm text-slate-600">{description}</p>}
+      <p className="mt-2 text-xs text-slate-500">
         합격 점수 {passingScore}% · {questions.length}문항
       </p>
 
       {result ? (
         <div
           role="status"
-          className={`mt-6 rounded-[var(--radius-md)] px-5 py-4 ${
-            result.isPassed
-              ? "bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
-              : "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+          className={`mt-6 rounded-xl px-5 py-4 ${
+            result.isPassed ? "trust-alert trust-alert--success" : "trust-alert trust-alert--info"
           }`}
         >
           <p className="font-semibold">
             {result.isPassed ? "합격!" : "아직 합격 점수에 미달입니다"}
           </p>
-          <p className="mt-1 typo-subTypography11">
+          <p className="mt-1 text-sm opacity-90">
             점수 {Math.round(result.score)}%
             {result.correctCount > 0
               ? ` · ${result.correctCount}/${result.totalQuestions} 정답`
@@ -137,7 +135,7 @@ export function QuizPlayer({
             <button
               type="button"
               onClick={() => setResult(null)}
-              className="shell-focus-ring mt-3 typo-subTypography11 font-medium text-[var(--color-action-primary)] underline"
+              className="trust-link corp-trust-focus mt-3 text-sm font-semibold underline"
             >
               다시 응시하기
             </button>
@@ -146,19 +144,13 @@ export function QuizPlayer({
       ) : (
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
           {questions.map((question, index) => (
-            <fieldset
-              key={question.id}
-              className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4"
-            >
-              <legend className="px-1 typo-subTypography11 font-medium text-[var(--color-text-primary)]">
+            <fieldset key={question.id} className="trust-quiz-fieldset">
+              <legend className="trust-quiz-legend">
                 {index + 1}. {question.prompt}
               </legend>
               <div className="mt-3 space-y-2">
                 {question.options.map((option) => (
-                  <label
-                    key={option.id}
-                    className="flex min-h-11 cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-3 py-2.5 typo-subTypography11 text-[var(--color-text-primary)] has-[:checked]:border-[var(--color-action-primary)] has-[:checked]:ring-1 has-[:checked]:ring-[var(--color-action-primary)]"
-                  >
+                  <label key={option.id} className="trust-quiz-option">
                     <input
                       type="radio"
                       name={question.id}
@@ -175,18 +167,10 @@ export function QuizPlayer({
               </div>
             </fieldset>
           ))}
-          {error && (
-            <p role="alert" className="rounded-[var(--radius-md)] bg-red-50 px-3 py-2 typo-subTypography11 text-red-800">
-              {error}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={busy}
-            className="shell-focus-ring min-h-11 rounded-[var(--radius-md)] bg-[var(--color-action-primary)] px-5 py-2.5 typo-subTypography11 font-medium text-white hover:bg-[var(--color-action-primary-hover)] disabled:opacity-60"
-          >
+          {error && <TrustAlert tone="error">{error}</TrustAlert>}
+          <TrustButton type="submit" variant="primary" disabled={busy}>
             {busy ? "채점 중..." : "제출하기"}
-          </button>
+          </TrustButton>
         </form>
       )}
     </section>

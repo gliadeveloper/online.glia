@@ -12,6 +12,7 @@ export type PostCommentItem = {
   createdAt: Date;
   editedAt: Date | null;
   user: PostAuthor;
+  replies?: PostCommentItem[];
 };
 
 export type PostSummary = {

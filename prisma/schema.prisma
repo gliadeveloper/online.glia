@@ -116,6 +116,24 @@ enum PostCommentStatus {
   DELETED
 }
 
+enum PostReportTargetType {
+  POST
+  COMMENT
+}
+
+enum PostReportReason {
+  SPAM
+  ABUSE
+  INAPPROPRIATE
+  OTHER
+}
+
+enum PostReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
 enum ProductKind {
   COURSE_ONLY
   COACHING_ONLY
@@ -259,10 +277,12 @@ model User {
   role            UserRole   @default(USER)
   status          UserStatus @default(ACTIVE)
   lastLoginAt     DateTime?
+  onboardingCompletedAt DateTime?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
   profile              Profile?
+  consent              UserConsent?
   identities           Identity[]
   authSessions         AuthSession[]
   organizationMembers  OrganizationMember[]
@@ -280,6 +300,8 @@ model User {
   postComments         PostComment[]
   postLikes            PostLike[]
   postCommentLikes     PostCommentLike[]
+  postReportsFiled     PostReport[]        @relation("PostReportReporter")
+  postReportsReviewed  PostReport[]        @relation("PostReportReviewer")
   lessonBookmarks      LessonBookmark[]
   lessonNotes          LessonNote[]
   orders               Order[]
@@ -303,6 +325,44 @@ model User {
   @@index([status])
   @@index([lastLoginAt])
   @@map("users")
+}
+
+model UserConsent {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  termsAcceptedAt      DateTime
+  privacyAcceptedAt    DateTime
+  age14ConfirmedAt     DateTime
+  marketingAcceptedAt  DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_consents")
+}
+
+model SignupDraft {
+  id                  String    @id @default(cuid())
+  email               String
+  passwordHash        String
+  verifyCodeHash      String?
+  verifyExpiresAt     DateTime?
+  emailVerifiedAt     DateTime?
+  termsAcceptedAt     DateTime?
+  marketingConsent    Boolean?
+  marketingAcceptedAt DateTime?
+  nickname            String?
+  avatarPresetId      String?
+  avatarUrl           String?
+  ipAddress           String?
+  expiresAt           DateTime
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("signup_drafts")
 }
 
 /// External identity from an OAuth/OIDC provider (Kakao today; extensible).
@@ -853,6 +913,7 @@ model Post {
   childPosts Post[]        @relation("PostHierarchy")
   comments   PostComment[]
   likes      PostLike[]
+  views      PostView[]
 
   @@index([status, publishedAt])
   @@index([parentPostId, createdAt])
@@ -914,6 +975,41 @@ model PostCommentLike {
   @@unique([userId, commentId])
   @@index([commentId, createdAt])
   @@map("post_comment_likes")
+}
+
+model PostView {
+  id        String   @id @default(cuid())
+  postId    String
+  viewerKey String
+  viewedAt  DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, viewerKey])
+  @@index([postId, viewedAt])
+  @@map("post_views")
+}
+
+model PostReport {
+  id           String               @id @default(cuid())
+  reporterId   String
+  targetType   PostReportTargetType
+  targetId     String
+  reason       PostReportReason
+  detail       String?
+  status       PostReportStatus     @default(PENDING)
+  reviewedAt   DateTime?
+  reviewedById String?
+  resolution   String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  reporter   User  @relation("PostReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("PostReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([status, createdAt])
+  @@map("post_reports")
 }
 
 // ─── Certificate & Notification ────────────────────────────────────────────────
@@ -1189,6 +1285,7 @@ model CoachingSession {
 
   scheduledAt  DateTime
   bodyMarkdown String?
+  bodyMetadata Json?
 
   publicationStatus CoachingSessionPublicationStatus @default(EMPTY)
   publishedAt       DateTime?

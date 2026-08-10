@@ -1,6 +1,4 @@
-import Link from "next/link";
-
-import { Typography } from "@/components/typography/typography";
+import { TrustButtonLink } from "@/components/corporate-trust/app-trust-ui";
 
 type CheckInFutureEmptyProps = {
   title: string;
@@ -34,28 +32,17 @@ export function CheckInFutureEmpty({
           </svg>
         </div>
 
-        <Typography
-          as="h1"
-          id="check-in-future-heading"
-          role="pageTitle"
-          weight="semibold"
-          color="primary"
-          className="check-in-state-page__title"
-        >
+        <h1 id="check-in-future-heading" className="check-in-state-page__title">
           {title}
-        </Typography>
+        </h1>
 
-        <Typography as="p" role="bodySecondary" color="secondary" className="check-in-state-page__description">
-          {description}
-        </Typography>
+        <p className="check-in-state-page__description">{description}</p>
       </div>
 
       <div className="check-in-state-page__footer">
-        <Link href={actionHref} className="check-in-state-page__action shell-focus-ring">
-          <Typography as="span" role="bodySecondary" weight="semibold">
-            {actionLabel}
-          </Typography>
-        </Link>
+        <TrustButtonLink href={actionHref} className="check-in-state-page__action">
+          {actionLabel}
+        </TrustButtonLink>
       </div>
     </section>
   );

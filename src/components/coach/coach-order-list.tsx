@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
-import { formatDateTime, formatKrw } from "@/lib/admin";
+import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import type { CoachOrderRow } from "@/lib/coach-orders";
 import { productKindLabels } from "@/lib/customer-labels";
 

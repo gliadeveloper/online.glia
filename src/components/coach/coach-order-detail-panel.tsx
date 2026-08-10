@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
-import { formatDateTime, formatKrw } from "@/lib/admin";
+import { OrderApplicationActions } from "@/components/orders/order-application-actions";
+import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import { productKindLabels } from "@/lib/customer-labels";
 import type { CoachOrderDetail } from "@/lib/coach-orders";
 
@@ -102,6 +103,12 @@ export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDeta
           </ul>
         </section>
       )}
+
+      <OrderApplicationActions
+        orderId={order.id}
+        status={order.status}
+        apiBase="/api/coach/orders"
+      />
     </div>
   );
 }

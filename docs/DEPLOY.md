@@ -23,7 +23,7 @@ gh repo create gliadeveloper/online.glia --public --source=. --remote=origin --p
 | `SESSION_SECRET` | 32자 이상 랜덤 문자열 (프로덕션 필수) |
 | `DATABASE_URL` | Prisma Postgres 연결 시 **자동 주입** (아래 3단계) |
 
-선택: `KAKAO_*`, LiveKit, R2 등은 기능 사용 시 추가.
+선택: `KAKAO_*`, `R2_*`(BlockNote 이미지 등) — [.env.example](../.env.example) 참고.
 
 ## 3. Prisma Postgres (무료) 연결
 
@@ -39,7 +39,7 @@ gh repo create gliadeveloper/online.glia --public --source=. --remote=origin --p
 
 ## 4. 첫 배포 후 DB 스키마
 
-빌드 시 `prisma migrate deploy` 가 `prisma/migrations/20260730180000_init_postgres` 를 적용합니다.
+빌드 시 `prisma migrate deploy` 가 `prisma/migrations/` 의 pending migration 을 적용합니다.
 
 로컬에서 시드 (선택):
 
@@ -74,18 +74,35 @@ mv online.glia.test online.glia
 
 ## 7. 카카오 / OAuth redirect
 
-프로덕션 도메인 배포 후 Kakao Developers 에 redirect URI 추가:
+프로덕션 도메인: **https://online.glia.kr**
+
+[Kakao Developers](https://developers.kakao.com) → 앱 → **Redirect URI** 등록:
 
 ```
-https://<your-vercel-domain>/api/auth/kakao/callback
+https://online.glia.kr/api/auth/kakao/callback
 ```
 
-`KAKAO_REDIRECT_URI` 환경 변수도 동일 URL로 설정.
+Vercel 환경 변수 (Production / Preview):
+
+| 변수 | 값 |
+|------|-----|
+| `KAKAO_REST_API_KEY` | 카카오 REST API 키 |
+| `KAKAO_CLIENT_SECRET` | (선택) Client Secret 사용 시 |
+| `KAKAO_REDIRECT_URI` | `https://online.glia.kr/api/auth/kakao/callback` |
+
+## 8. 런칭 전 체크리스트
+
+- [ ] `npm run build` 성공 (로컬 또는 CI)
+- [ ] Vercel `SESSION_SECRET`, `DATABASE_URL` 설정
+- [ ] 카카오 Redirect URI: `https://online.glia.kr/api/auth/kakao/callback`
+- [ ] 코스 publish: VIDEO(YouTube), LIVE(Zoom), TEXT(BlockNote) 콘텐츠 등록
+- [ ] TEXT 이미지 사용 시 `R2_*` env 설정
 
 ## 트러블슈팅
 
 | 증상 | 조치 |
 |------|------|
 | `DATABASE_URL is required` | Vercel Storage에서 Prisma Postgres Connect |
+| `P1017` / `Server has closed the connection` | DB 연결 끊김 — `npm run dev` 재시작, `.env`의 `DATABASE_URL` 확인, `vercel env pull`로 최신 URL 갱신. Prisma Postgres 무료 티어는 idle 후 sleep → 첫 요청이 느릴 수 있음 |
 | migrate deploy 실패 | Vercel 빌드 로그 확인, DB가 postgres인지 확인 |
 | design-tokens 오류 | `src/app/design-tokens/` 폴더 포함 여부 확인 |

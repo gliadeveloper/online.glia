@@ -1,17 +1,66 @@
 import Link from "next/link";
 
-import { CheckInHistoryList } from "@/components/checkin/check-in-history-list";
 import { CheckInDayStrip } from "@/components/checkin/check-in-day-strip";
-import { CheckInReportTasks } from "@/components/checkin/check-in-report-tasks";
+import { CheckInHistoryList } from "@/components/checkin/check-in-history-list";
+import { CheckInHubStripTitle } from "@/components/checkin/check-in-hub-strip-title";
+import { CheckInSharePendingBanner } from "@/components/checkin/check-in-share-pending-banner";
+import { CheckInStatusPill } from "@/components/checkin/check-in-status-pill";
 import { Typography } from "@/components/typography/typography";
-import { formatCheckInDayOfMonth } from "@/lib/checkin-dates";
 import type { CheckInHubData } from "@/lib/checkin-hub";
+import type { listPendingShareGrantsForUser } from "@/lib/checkin-share/grants";
+
+type PendingGrant = Awaited<ReturnType<typeof listPendingShareGrantsForUser>>[number];
 
 type CheckInHubPanelProps = {
   data: CheckInHubData;
+  pendingShareGrants?: PendingGrant[];
 };
 
-export function CheckInHubPanel({ data }: CheckInHubPanelProps) {
+function ChevronIcon() {
+  return (
+    <span className="check-in-hub-row__chevron" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
+
+function CheckInWeeklyTaskRow({ task }: { task: NonNullable<CheckInHubData["weeklyTask"]> }) {
+  const isLocked = !task.done && !task.writable;
+
+  if (isLocked) {
+    return (
+      <div className="check-in-hub-row check-in-hub-row--locked" aria-disabled="true">
+        <span className="check-in-hub-row__body">
+          <span className="check-in-hub-row__title">{task.label}</span>
+          <span className="check-in-hub-row__subtitle">이번 주</span>
+        </span>
+        <span className="check-in-hub-row__lock-hint">{task.lockedHint}</span>
+      </div>
+    );
+  }
+
+  return (
+    <Link href={task.href} className="check-in-hub-row shell-focus-ring">
+      <span className="check-in-hub-row__body">
+        <span className="check-in-hub-row__title">{task.label}</span>
+        <span className="check-in-hub-row__subtitle">이번 주</span>
+      </span>
+      <CheckInStatusPill
+        done={task.done}
+        pendingLabel="작성 필요"
+        doneLabel="완료"
+      />
+      <ChevronIcon />
+      <span className="sr-only">
+        {task.label} — {task.done ? "완료된 기록 보기" : "작성하기"}
+      </span>
+    </Link>
+  );
+}
+
+export function CheckInHubPanel({ data, pendingShareGrants = [] }: CheckInHubPanelProps) {
   if (!data.dailyForm) {
     return (
       <p className="check-in-hub__missing">
@@ -26,59 +75,49 @@ export function CheckInHubPanel({ data }: CheckInHubPanelProps) {
     id: item.id,
     href: item.href,
     title: item.title,
+    kind: item.kind,
     subtitle: item.subtitle,
   }));
 
-  const streakBadge = data.todayDailyDone && data.streak > 0 ? data.streak : formatCheckInDayOfMonth(data.today);
-
   return (
     <div className="check-in-hub__panel">
-      <CheckInDayStrip days={data.dayStrip} labelId="check-in-day-strip-heading" />
+      <CheckInSharePendingBanner grants={pendingShareGrants} />
 
-      <CheckInReportTasks
-        daily={{
-          ...data.dailyTask,
-          label: "데일리 체크 리스트 참여하기",
-          badge: streakBadge,
-        }}
-        weekly={
-          data.weeklyTask
-            ? {
-                ...data.weeklyTask,
-                label: "주간 체크 리스트 참여하기",
-                badge: streakBadge,
-              }
-            : null
+      <CheckInDayStrip
+        days={data.dayStrip}
+        title={
+          <CheckInHubStripTitle todayDailyDone={data.todayDailyDone} streak={data.streak} />
         }
       />
 
-      <section
-        aria-labelledby="check-in-written-list-heading"
-        className="check-in-section check-in-written-list"
-      >
-        <div className="check-in-section__header">
-          <Typography
-            as="h2"
-            id="check-in-written-list-heading"
-            role="sectionTitle"
-            weight="semibold"
-            color="primary"
-            className="check-in-section__title"
-          >
+      {data.weeklyTask ? (
+        <section aria-labelledby="check-in-weekly-heading" className="check-in-hub-section check-in-hub-weekly">
+          <div className="check-in-hub-section__head check-in-hub-weekly__head">
+            <h2 id="check-in-weekly-heading" className="check-in-hub-section__title">
+              이번 주 주간 체크
+            </h2>
+          </div>
+          <CheckInWeeklyTaskRow task={data.weeklyTask} />
+        </section>
+      ) : null}
+
+      <section aria-labelledby="check-in-written-list-heading" className="check-in-hub-section check-in-written-list">
+        <div className="check-in-hub-section__head">
+          <h2 id="check-in-written-list-heading" className="check-in-hub-section__title">
             작성한 목록
-          </Typography>
-          <Link href="/checkin/history" className="check-in-written-list__more shell-focus-ring">
-            <Typography as="span" role="bodySecondary" weight="medium" color="secondary">
-              더보기
-            </Typography>
+          </h2>
+          <Link href="/checkin/history" className="check-in-written-list__more corp-trust-focus shell-focus-ring">
+            더보기
           </Link>
         </div>
 
-        <CheckInHistoryList
-          labelledBy="check-in-written-list-heading"
-          items={historyItems}
-          emptyMessage="아직 작성한 기록이 없습니다. 오늘 첫 체크를 시작해 보세요."
-        />
+        <div className="check-in-written-list__surface">
+          <CheckInHistoryList
+            labelledBy="check-in-written-list-heading"
+            items={historyItems}
+            emptyMessage="아직 작성한 기록이 없습니다. 오늘 첫 체크를 시작해 보세요."
+          />
+        </div>
       </section>
     </div>
   );

@@ -3,16 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { TrustAlert, TrustButton } from "@/components/corporate-trust/app-trust-ui";
+
 type CompleteLessonButtonProps = {
   lessonId: string;
   courseSlug: string;
   label?: string;
+  compact?: boolean;
 };
 
 export function CompleteLessonButton({
   lessonId,
   courseSlug,
   label = "학습 완료",
+  compact = false,
 }: CompleteLessonButtonProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -46,20 +50,31 @@ export function CompleteLessonButton({
   }
 
   return (
-    <div className="space-y-2">
-      <button
+    <div className={compact ? "lesson-player-complete-wrap" : "space-y-2"}>
+      <TrustButton
         type="button"
+        variant="primary"
         onClick={handleComplete}
         disabled={busy || done}
-        className="shell-focus-ring min-h-11 rounded-[var(--radius-md)] bg-[var(--color-action-primary)] px-5 py-2.5 typo-subTypography11 font-medium text-white hover:bg-[var(--color-action-primary-hover)] disabled:opacity-60"
+        className={
+          compact
+            ? [
+                "lesson-player-complete-btn",
+                done ? "lesson-player-complete-btn--done" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")
+            : undefined
+        }
       >
         {done ? "완료됨" : busy ? "저장 중..." : label}
-      </button>
-      {error && (
-        <p role="alert" className="rounded-[var(--radius-md)] bg-red-50 px-3 py-2 typo-subTypography11 text-red-800">
+      </TrustButton>
+      {error && !compact ? <TrustAlert tone="error">{error}</TrustAlert> : null}
+      {error && compact ? (
+        <p className="lesson-player-complete-error" role="alert">
           {error}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

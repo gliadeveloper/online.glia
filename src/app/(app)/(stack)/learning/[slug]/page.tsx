@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { AppSection, AppSectionHeader, AppStackPage } from "@/components/app";
+import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
 import { CourseDetailHeader } from "@/components/learning/course-detail-header";
 import { CourseModuleList } from "@/components/learning/course-module-list";
 import { EnrollmentExpiredNotice } from "@/components/learning/enrollment-expired-notice";
@@ -55,6 +56,14 @@ export default async function LearningCoursePage({ params }: LearningCoursePageP
   return (
     <AppStackPage>
       <StackNavTitle title={course.title} />
+
+      <TabPageHeader
+        eyebrow="Learning"
+        title="커리큘럼"
+        titleAccent="학습"
+        description={course.description ?? `${course.title} 강의를 이어서 진행하세요.`}
+        variant="stack"
+      />
 
       <CourseDetailHeader
         course={course}

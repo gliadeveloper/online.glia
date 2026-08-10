@@ -32,7 +32,7 @@ export function CoachingSessionCard({
   const isPublished = publicationStatus === "PUBLISHED";
 
   const content = (
-    <article className="app-panel app-panel--padded transition hover:border-[var(--color-border-strong,var(--color-border))]">
+    <article className="app-panel app-panel--padded transition">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <Typography as="p" role="caption" weight="medium" color="action">

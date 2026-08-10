@@ -1,11 +1,35 @@
 import { redirect } from "next/navigation";
 
+import { AppStackPage } from "@/components/app";
+import { CheckInHubFooterCta } from "@/components/checkin/check-in-hub-footer-cta";
 import { CheckInHubPanel } from "@/components/checkin/check-in-hub-panel";
-import { CheckInSharePendingBanner } from "@/components/checkin/check-in-share-pending-banner";
-import { Typography } from "@/components/typography/typography";
 import { listPendingShareGrantsForUser } from "@/lib/checkin-share/grants";
 import { getCheckInHubData } from "@/lib/checkin-hub";
+import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
+
+function resolveHubFooterCta(data: Awaited<ReturnType<typeof getCheckInHubData>>) {
+  const showDaily = Boolean(data.dailyForm && !data.todayDailyDone);
+  const showWeekly = Boolean(data.weeklyTask?.writable);
+
+  if (showDaily) {
+    return {
+      show: true,
+      href: data.dailyTask.href,
+      label: "오늘 체크 남기기",
+    };
+  }
+
+  if (showWeekly && data.weeklyTask) {
+    return {
+      show: true,
+      href: data.weeklyTask.href,
+      label: "이번 주 주간 체크",
+    };
+  }
+
+  return { show: false, href: "", label: "" };
+}
 
 export default async function CheckInHubPage() {
   const user = await getCurrentUser();
@@ -16,41 +40,28 @@ export default async function CheckInHubPage() {
 
   const data = await getCheckInHubData(user.id);
   const pendingShareGrants = await listPendingShareGrantsForUser(user.id);
-
-  const headlineRole =
-    data.streakHeadline.kind === "continuing"
-      ? "display"
-      : data.streakHeadline.kind === "start"
-        ? "pageTitle"
-        : "pageTitle";
-
-  const headlineWeight = data.streakHeadline.kind === "continuing" ? "bold" : "semibold";
+  const footerCta = resolveHubFooterCta(data);
 
   return (
-    <div className="check-in-hub-page">
-      <header className="check-in-streak-header">
-        <Typography
-          as="h1"
-          role={headlineRole}
-          weight={headlineWeight}
-          color="primary"
-          className="check-in-streak-header__title"
-        >
-          {data.streakTitle}
-        </Typography>
-        <Typography
-          as="p"
-          role="bodySecondary"
-          color="secondary"
-          className="check-in-streak-header__subtitle"
-        >
-          이번 주도 짧게 돌아보고 주간 체크를 남겨보세요
-        </Typography>
-      </header>
+    <AppStackPage className="check-in-hub-page">
+      <StackNavTitle title="체크인" />
 
-      <CheckInSharePendingBanner grants={pendingShareGrants} />
+      <article
+        className={`check-in-hub-card${footerCta.show ? " check-in-hub-card--with-footer" : ""}`}
+      >
+        <div className="check-in-hub-card__blobs" aria-hidden="true">
+          <div className="check-in-hub-card__blob check-in-hub-card__blob--indigo" />
+          <div className="check-in-hub-card__blob check-in-hub-card__blob--violet" />
+        </div>
 
-      <CheckInHubPanel data={data} />
-    </div>
+        <div className="check-in-hub-card__content">
+          <CheckInHubPanel data={data} pendingShareGrants={pendingShareGrants} />
+
+          {footerCta.show ? (
+            <CheckInHubFooterCta href={footerCta.href} label={footerCta.label} />
+          ) : null}
+        </div>
+      </article>
+    </AppStackPage>
   );
 }

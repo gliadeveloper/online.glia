@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { shareGrantStatusLabel } from "@/lib/checkin-share/grants";
-import { formatDateTime, formatKrw } from "@/lib/admin";
+import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import type { getCoachCustomerDetail } from "@/lib/coach-customers";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
 

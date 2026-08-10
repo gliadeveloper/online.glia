@@ -11,9 +11,10 @@ import {
   formatWeekRangeLabel,
   isFutureDailyDate,
   isFutureWeeklyPeriod,
-  isSundayDateKey,
+  isWeeklyCheckInWritableDay,
 } from "@/lib/checkin-dates";
 import { resolveCheckInHref } from "@/lib/checkin-routes";
+import { getCalendarWeekRecord } from "@/lib/checkin-hub-ui";
 import {
   calculateDailyStreak,
   resolveStreakHeadline,
@@ -39,7 +40,7 @@ export async function getCheckInHubData(userId: string) {
   const timezone = dailyForm?.timezone ?? weeklyForm?.timezone ?? "Asia/Seoul";
   const today = getCheckInDate(timezone);
   const currentWeekKey = getWeekPeriodKey(timezone);
-  const showWeeklyTask = isSundayDateKey(today, timezone);
+  const isWeeklyWritableToday = isWeeklyCheckInWritableDay(today, timezone);
 
   const [dailyHistory, weeklyHistory] = await Promise.all([
     dailyForm
@@ -78,11 +79,17 @@ export async function getCheckInHubData(userId: string) {
     limit: CHECKIN_HUB_RECENT_LIMIT,
   });
 
+  const weekRecord = getCalendarWeekRecord({
+    today,
+    timezone,
+    recordedDates: dailyRecorded,
+  });
+
   return {
     timezone,
     today,
     currentWeekKey,
-    showWeeklyTask,
+    isWeeklyWritableToday,
     dailyForm,
     weeklyForm,
     todayDailyDone,
@@ -91,17 +98,20 @@ export async function getCheckInHubData(userId: string) {
     streakHeadline,
     streakTitle: streakHeadlineText(streakHeadline),
     dayStrip,
+    weekRecord,
     recentHistory,
     dailyTask: {
       label: "데일리 체크",
       done: todayDailyDone,
       href: resolveCheckInHref("daily", today, todayDailyDone),
     },
-    weeklyTask: showWeeklyTask
+    weeklyTask: weeklyForm
       ? {
           label: "주간 체크",
           done: currentWeekDone,
           href: resolveCheckInHref("weekly", currentWeekKey, currentWeekDone),
+          writable: isWeeklyWritableToday && !currentWeekDone,
+          lockedHint: !currentWeekDone && !isWeeklyWritableToday ? "일요일에 작성할 수 있어요" : null,
         }
       : null,
   };

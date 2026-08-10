@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { TrustAlert } from "@/components/corporate-trust/app-trust-ui";
 import { Typography } from "@/components/typography/typography";
+import { withCheckInReportSavedQuery } from "@/lib/checkin-routes";
 import { StackNavTrailingLabel } from "@/lib/stack-nav-context";
 
 type FormOption = {
@@ -97,7 +99,7 @@ function CheckInQuestionField({
           rows={question.type === "LONG_TEXT" ? 5 : 3}
           placeholder="입력하세요"
           aria-required={question.isRequired}
-          className="check-in-form__textarea shell-focus-ring"
+          className="check-in-form__textarea corp-trust-input corp-trust-focus shell-focus-ring"
         />
       ) : (
         <div
@@ -280,7 +282,7 @@ export function CheckInForm({
         return;
       }
 
-      router.push(reportHref);
+      router.push(withCheckInReportSavedQuery(reportHref));
       router.refresh();
     } catch {
       setError("네트워크 오류가 발생했습니다.");
@@ -344,11 +346,7 @@ export function CheckInForm({
           />
 
           {error && (
-            <div role="alert" className="app-feedback app-feedback--error">
-              <Typography as="p" role="bodySecondary">
-                {error}
-              </Typography>
-            </div>
+            <TrustAlert tone="error">{error}</TrustAlert>
           )}
         </div>
 

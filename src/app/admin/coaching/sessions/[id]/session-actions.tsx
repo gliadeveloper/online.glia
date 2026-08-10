@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+import {
+  CoachingSessionBlockEditor,
+  type CoachingSessionBlockEditorHandle,
+} from "@/components/coaching/coaching-session-block-editor";
+import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 
 type SessionActionsProps = {
   sessionId: string;
@@ -9,6 +15,7 @@ type SessionActionsProps = {
   summary: string | null;
   scheduledAt: string;
   bodyMarkdown: string | null;
+  bodyMetadata: unknown;
   publicationStatus: string;
   progressStatus: string;
 };
@@ -19,20 +26,31 @@ export function SessionActions({
   summary: initialSummary,
   scheduledAt: initialScheduledAt,
   bodyMarkdown: initialBody,
+  bodyMetadata: initialBodyMetadata,
   publicationStatus: initialPublicationStatus,
   progressStatus: initialProgressStatus,
 }: SessionActionsProps) {
   const router = useRouter();
+  const editorRef = useRef<CoachingSessionBlockEditorHandle>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState(initialTitle);
   const [summary, setSummary] = useState(initialSummary ?? "");
-  const [scheduledAt, setScheduledAt] = useState(
-    initialScheduledAt.slice(0, 16),
-  );
-  const [bodyMarkdown, setBodyMarkdown] = useState(initialBody ?? "");
+  const [scheduledAt, setScheduledAt] = useState(initialScheduledAt.slice(0, 16));
   const [publicationStatus, setPublicationStatus] = useState(initialPublicationStatus);
   const [progressStatus, setProgressStatus] = useState(initialProgressStatus);
+
+  async function exportBody() {
+    if (!editorRef.current) {
+      return { bodyMarkdown: initialBody, bodyMetadata: initialBodyMetadata };
+    }
+
+    const { body, blocks } = await editorRef.current.exportForSave();
+    return {
+      bodyMarkdown: body || null,
+      bodyMetadata: buildContentMetadataWithBlockNote(initialBodyMetadata, blocks),
+    };
+  }
 
   async function save(patch: Record<string, unknown>) {
     setLoading(true);
@@ -57,6 +75,20 @@ export function SessionActions({
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSave(extra: Record<string, unknown> = {}) {
+    const body = await exportBody();
+    await save({
+      title,
+      summary: summary || null,
+      scheduledAt: new Date(scheduledAt).toISOString(),
+      bodyMarkdown: body.bodyMarkdown,
+      bodyMetadata: body.bodyMetadata,
+      publicationStatus,
+      progressStatus,
+      ...extra,
+    });
   }
 
   return (
@@ -93,13 +125,14 @@ export function SessionActions({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-zinc-700">본문 (Markdown)</label>
-        <textarea
-          value={bodyMarkdown}
-          onChange={(event) => setBodyMarkdown(event.target.value)}
-          rows={12}
-          className="w-full rounded-xl border border-zinc-200 px-3 py-2 font-mono text-sm"
-          placeholder="## 이번 회차&#10;&#10;코칭 내용을 Markdown으로 작성하세요."
+        <label className="text-sm font-medium text-zinc-700">본문</label>
+        <CoachingSessionBlockEditor
+          ref={editorRef}
+          sessionId={sessionId}
+          body={initialBody}
+          bodyMetadata={initialBodyMetadata}
+          apiRole="admin"
+          disabled={loading}
         />
       </div>
 
@@ -134,33 +167,15 @@ export function SessionActions({
         <button
           type="button"
           disabled={loading}
-          onClick={() =>
-            save({
-              title,
-              summary: summary || null,
-              scheduledAt: new Date(scheduledAt).toISOString(),
-              bodyMarkdown: bodyMarkdown || null,
-              publicationStatus,
-              progressStatus,
-            })
-          }
+          onClick={() => handleSave()}
           className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
           {loading ? "저장 중..." : "저장"}
         </button>
         <button
           type="button"
-          disabled={loading || !bodyMarkdown.trim()}
-          onClick={() =>
-            save({
-              title,
-              summary: summary || null,
-              scheduledAt: new Date(scheduledAt).toISOString(),
-              bodyMarkdown,
-              publicationStatus: "PUBLISHED",
-              progressStatus,
-            })
-          }
+          disabled={loading}
+          onClick={() => handleSave({ publicationStatus: "PUBLISHED" })}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
           발행하기

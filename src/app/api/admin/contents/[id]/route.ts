@@ -15,6 +15,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       url?: string;
       body?: string;
       type?: ContentType;
+      metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
     };
 
     const userId = await resolveUserId(request, body);
@@ -27,6 +28,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       url: body.url,
       body: body.body,
       type: body.type,
+      metadata: body.metadata,
     });
 
     return NextResponse.json(content);

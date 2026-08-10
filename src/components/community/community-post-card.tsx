@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Typography } from "@/components/typography/typography";
 import type { PostListItem } from "@/lib/posts";
 
 import { CommunityAuthorRow } from "./community-author-row";
@@ -15,42 +14,28 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
 
   return (
     <article className="community-post-card">
-      <Link href={`/community/${post.slug}`} className="community-post-card__link shell-focus-ring">
+      <div className="community-post-card__inner">
         <CommunityAuthorRow
           user={post.user}
           publishedAt={publishedAt}
           headline={post.user.profile?.headline}
         />
 
-        <Typography
-          as="h2"
-          role="sectionTitle"
-          weight="semibold"
-          color="primary"
-          className="community-post-card__title"
-        >
-          {post.title}
-        </Typography>
+        <Link href={`/community/${post.slug}`} className="community-post-card__body shell-focus-ring">
+          <h2 className="community-post-card__title">{post.title}</h2>
 
-        {post.excerpt && (
-          <Typography
-            as="p"
-            role="bodySecondary"
-            color="secondary"
-            className="community-post-card__excerpt"
-          >
-            {post.excerpt}
-          </Typography>
-        )}
+          {post.excerpt && <p className="community-post-card__excerpt">{post.excerpt}</p>}
 
-        <span className="sr-only">{post.title} — 게시글 보기</span>
-      </Link>
+          <span className="sr-only">{post.title} — 게시글 보기</span>
+        </Link>
 
-      <CommunityPostActions
-        postSlug={post.slug}
-        likeCount={post.likeCount}
-        commentCount={post.commentCount}
-      />
+        <CommunityPostActions
+          postSlug={post.slug}
+          likeCount={post.likeCount}
+          commentCount={post.commentCount}
+          viewCount={post.viewCount}
+        />
+      </div>
     </article>
   );
 }

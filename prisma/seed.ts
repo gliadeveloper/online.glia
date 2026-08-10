@@ -1,5 +1,6 @@
 import { provisionCoachingSessions, ensureCoachingSessionsProvisioned } from "../src/lib/coaching-provision";
 import { computeEnrollmentAccessGrant, resolveCourseAccessPolicyFromProductItem } from "../src/lib/enrollment-access";
+import type { Prisma } from "../src/generated/prisma/client";
 import { prisma } from "../src/lib/prisma";
 import { seedCommunityPosts } from "./seed-community";
 
@@ -493,7 +494,7 @@ async function main() {
       if (item.kind === "COACHING_ACCESS" && item.coachingOfferingId) {
         const offering = bundleCoachingOffering;
 
-        const entitlement = await prisma.$transaction(async (tx) => {
+        const entitlement = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
           const created = await tx.coachingEntitlement.create({
             data: {
               userId: student.id,
@@ -853,7 +854,8 @@ async function seedPublishedCoachingDemo(params: {
   }
 
   const hasStudentMessage = session.conversation.messages.some(
-    (message) => message.authorRole === "STUDENT",
+    (message: (typeof session.conversation.messages)[number]) =>
+      message.authorRole === "STUDENT",
   );
 
   if (!hasStudentMessage) {

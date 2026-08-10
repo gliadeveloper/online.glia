@@ -12,7 +12,7 @@
 |------|----------------|
 | customer UI / 바텀탭 화면 추가 | [§4 Customer App](#4-customer-app-app) → [screens/README.md](./screens/README.md) |
 | 특정 URL 구현·수정 | [docs/screens/](./screens/) 해당 md |
-| 색·타이포·컴포넌트 토큰 | [§4.2 App Tone v1](#42-app-tone-v1) → [design-system.md](./design-system.md) |
+| 색·타이포·컴포넌트 토큰 | [§4.2 Corporate Trust](#42-corporate-trust) → [visual-direction.md](./visual-direction.md) |
 | Shop / 수강권 / 만료 / 연장 | [§5 Commerce & LMS Access](#5-commerce--lms-access) |
 | 코치 포털 기능 추가 | [§7 Coach Portal](#7-coach-portal) |
 | 라이브·녹화·다시보기 | [§8 Live Lessons](#8-live-lessons) |
@@ -26,11 +26,11 @@
 
 | 구역 | 경로 | 대상 | UI 톤 |
 |------|------|------|--------|
-| **Customer `(app)`** | `src/app/(app)/` | 로그인 회원 | **App Tone v1** (neutral chrome) |
+| **Customer `(app)`** | `src/app/(app)/` | 로그인 회원 | **Corporate Trust** (indigo chrome) |
 | **Coach Portal** | `/coach/*` | `COACH` 역할 | 별도 dark sidebar shell |
 | **Admin** | `/admin/*` | `ADMIN` 역할 | Admin shell (violet accent) |
 | **Login** | `/login` | 비로그인 | 독립 레이아웃 |
-| **Legacy `(customer)`** | `src/app/(customer)/` | 레거시 | 신규 customer UI **금지** — `(app)`만 사용 |
+| **Legacy `(customer)`** | `src/app/(customer)/` | dashboard 등 잔존 | 신규 customer UI **금지** — `(app)`만 사용. `/lms/*` 페이지 **제거됨** → `/learning` |
 
 ### 1.1 Customer `(app)` IA
 
@@ -100,21 +100,21 @@
 ### 4.1 적용 범위
 
 - ✅ `src/app/(app)/`, shell·home·learning·community·shop·checkin·coaching 관련 components
-- ❌ `admin`, `(customer)`, `login`, `coach` — App Tone v1 **미적용** (별도 요청 시만)
+- ❌ `admin`, `(customer)`, `login`, `coach` — Corporate Trust **미적용** (별도 요청 시만)
 
-### 4.2 App Tone v1
+### 4.2 Corporate Trust
 
 | 축 | 규칙 |
 |----|------|
-| Neutral chrome | 탭·헤더 active에 primary blue **금지** — semibold + outline→filled icon |
-| Action blue | CTA·텍스트 링크·`:focus-visible` ring만 |
-| Border-first | shadow `sm` 수준, `--color-border` 중심 |
+| Accent | indigo gradient — active nav, CTA, links (`--auth-primary`) |
+| Surfaces | `--auth-bg` / `--auth-surface` / card shadow |
+| Page headers | `TabPageHeader` on tab + stack L3 |
 | Motion | 150–360ms, `prefers-reduced-motion` 필수 |
 | Typography | `<Typography role="…">` / typo 토큰 — Tailwind `text-sm`/`text-lg` **금지** |
 
-**한 줄 요청 (에이전트):** 「App Tone v1」 / 「design-system 따라」 / 「바텀탭 톤」
+**한 줄 요청 (에이전트):** 「Corporate Trust」 / 「corp-trust」 / 「design-system 따라」
 
-→ [visual-direction.md](./visual-direction.md) · [design-system.md](./design-system.md) · [colors.md](./colors.md) · [typography.md](./typography.md)
+→ [visual-direction.md](./visual-direction.md) · `src/components/corporate-trust/`
 
 ### 4.3 Navigation & Chrome
 
@@ -226,37 +226,32 @@ Coach: `/coach/coaching`, `/coach/sessions/[id]`
 
 | 레슨 타입 | 정책 |
 |-----------|------|
-| `VIDEO` | R2 업로드 / markdown TEXT |
-| `LIVE` | LiveKit room · `scheduledAt` 필수 |
+| `VIDEO` | YouTube URL (iframe) |
+| `TEXT` | BlockNote 본문 |
+| `LIVE` | Zoom URL (`LINK` 콘텐츠) |
 | 발행 | publish checklist 통과 후 `PUBLISHED` |
 
 ---
 
 ## 8. Live Lessons
 
-### 8.1 세션 상태
+### 8.1 운영 플로우
 
-| `sessionStatus` | 고객 UI | 코치 UI |
-|-----------------|---------|---------|
-| `SCHEDULED` | D-day 카운트다운, **입장 불가** | 일정 변경 · **라이브 시작** |
-| `LIVE` | 입장 가능 | 스튜디오 · **종료·다시보기 생성** |
-| `ENDED` | 「종료됨」 (VOD 미변환 시) | **다시보기로 변환** (녹화 있을 때) — **재시작 버튼 없음** |
+1. **라이브 전:** 코치가 LIVE 레슨에 Zoom URL 등록
+2. **라이브 중:** 수강생 `/learning/...` → Zoom 입장 링크
+3. **라이브 후:** LIVE 레슨 삭제 → **VIDEO 레슨 신규 생성** → YouTube URL 등록 (다시보기)
 
-### 8.2 다시보기 변환
+### 8.2 고객 UI
 
-1. 코치가 **LIVE** 중 「종료 · 다시보기 생성」
-2. LiveKit egress stop → R2 MP4
-3. 성공 시: `Lesson.type` **LIVE → VIDEO**, content → R2 replay (`source: live_recording`)
-4. 실패/미설정: `ENDED` 유지 → 허브 「다시보기 대기」+ **수동 변환** 재시도
+- Zoom URL 있음 → 「Zoom 입장하기」
+- Zoom URL 없음 → 「Zoom 링크 미등록」 안내
 
-**필수 env:** LiveKit + R2 (`R2_*` 또는 `LIVEKIT_EGRESS_S3_*`) — [.env.example](../.env.example)
+### 8.3 코치 UI
 
-**코드:** `src/lib/coach-live.ts` · `src/lib/live-session.ts` · `src/lib/media/livekit-egress.ts`
+- `/coach/lessons/[id]` — Zoom URL 입력
+- `/coach/live` — LIVE 레슨 목록 · Zoom 등록 상태
 
-### 8.3 고객 입장
-
-- Live token: **`sessionStatus === LIVE`** 일 때만 발급
-- 코치 미시작: 카운트다운만 표시
+**코드:** `src/lib/media/zoom.ts` · `src/lib/coach-live-lessons.ts` · `lesson-live-panel.tsx`
 
 ---
 
@@ -288,7 +283,7 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 |------|------|
 | Next.js | **Training data와 다른 breaking API** — `node_modules/next/dist/docs/` 참고 ([AGENTS.md](../AGENTS.md)) |
 | DB | Prisma + SQLite (dev) |
-| 미디어 | R2 (VOD) · LiveKit (live) |
+| 미디어 | YouTube (VOD) · Zoom (live) · R2 (BlockNote 이미지 등) |
 | 커밋 | 사용자 요청 시에만 |
 | Customer UI 작업 | App Tone v1 문서 세트 준수 |
 
@@ -331,7 +326,7 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 | Enrollment access | `src/lib/enrollment-access.ts` |
 | Shop state | `src/lib/shop-purchase-state.ts` |
 | Coach commerce scope | `src/lib/coach-commerce.ts` |
-| Live session | `src/lib/coach-live.ts` |
+| Live lessons (Zoom) | `src/lib/coach-live-lessons.ts` · `src/lib/media/zoom.ts` |
 | Coach auth | `src/lib/coach.ts` |
 
 ---

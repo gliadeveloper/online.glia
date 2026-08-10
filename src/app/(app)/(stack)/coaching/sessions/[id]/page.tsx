@@ -4,8 +4,9 @@ import { AppSection, AppSectionHeader, AppStackPage } from "@/components/app";
 import { CoachingCoachProfile } from "@/components/coaching/coaching-coach-profile";
 import { CoachingMarkdown } from "@/components/coaching/coaching-markdown";
 import { CoachingSessionQnaPanel } from "@/components/coaching/coaching-session-qna-panel";
-import { Typography } from "@/components/typography/typography";
+import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
 import { getCoachingSessionForUser } from "@/lib/coaching";
+import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import { StackNavBack, StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
@@ -22,7 +23,7 @@ export default async function CoachingSessionPage({ params }: CoachingSessionPag
   const { id } = await params;
   const session = await getCoachingSessionForUser(id, user.id);
 
-  if (session.publicationStatus !== "PUBLISHED" || !session.bodyMarkdown) {
+  if (session.publicationStatus !== "PUBLISHED" || !coachingSessionHasBody(session)) {
     notFound();
   }
 
@@ -34,24 +35,20 @@ export default async function CoachingSessionPage({ params }: CoachingSessionPag
         label={session.entitlement.coachingOffering.title}
       />
 
+      <TabPageHeader
+        eyebrow={`${session.sessionNo}회차`}
+        title={session.title}
+        description={session.summary ?? "코칭 회차 콘텐츠와 Q&A를 확인하세요."}
+        variant="stack"
+      />
+
       <header className="app-section">
-        <Typography as="p" role="caption" weight="medium" color="action">
-          {session.sessionNo}회차
-        </Typography>
-        <Typography as="h1" role="pageTitle" weight="semibold" color="primary">
-          {session.title}
-        </Typography>
         <CoachingCoachProfile coach={session.coach} />
-        {session.summary && (
-          <Typography as="p" role="bodySecondary" color="secondary" className="app-section-header__desc">
-            {session.summary}
-          </Typography>
-        )}
       </header>
 
       <AppSection labelledBy="coaching-content-heading">
         <AppSectionHeader title="내용" titleId="coaching-content-heading" />
-        <CoachingMarkdown content={session.bodyMarkdown} />
+        <CoachingMarkdown body={session.bodyMarkdown} bodyMetadata={session.bodyMetadata} />
       </AppSection>
 
       <AppSection labelledBy="coaching-qna-heading">

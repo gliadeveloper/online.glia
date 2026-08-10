@@ -4,31 +4,39 @@ import { Typography } from "@/components/typography/typography";
 
 type AppTabScreenProps = {
   title: string;
+  header?: React.ReactNode;
   children: React.ReactNode;
 };
 
 /** Tab root pages — full-bleed surface (community / learning tab pattern). */
-export function AppTabScreen({ title, children }: AppTabScreenProps) {
+export function AppTabScreen({ title, header, children }: AppTabScreenProps) {
   return (
     <div className="app-tab-screen">
       <h1 className="sr-only">{title}</h1>
-      <div className="app-tab-screen__surface">{children}</div>
+      {header}
+      <div className="app-tab-screen__surface">
+        <div className="app-tab-screen__body">{children}</div>
+      </div>
     </div>
   );
 }
 
 type AppStackPageProps = {
   children: React.ReactNode;
+  className?: string;
 };
 
 /** Stack drill-down pages — consistent spacing + full-bleed on mobile. */
-export function AppStackPage({ children }: AppStackPageProps) {
-  return <div className="app-stack-page">{children}</div>;
+export function AppStackPage({ children, className }: AppStackPageProps) {
+  return (
+    <div className={["app-stack-page", className].filter(Boolean).join(" ")}>
+      {children}
+    </div>
+  );
 }
 
 type AppSectionProps = {
   children: React.ReactNode;
-  /** Pass when section has a visible heading */
   labelledBy?: string;
   className?: string;
 };
@@ -44,7 +52,6 @@ export function AppSection({ children, labelledBy, className }: AppSectionProps)
 type AppPanelProps = {
   children: React.ReactNode;
   className?: string;
-  /** Remove inner padding — for list panels with rows */
   flush?: boolean;
 };
 
@@ -125,19 +132,15 @@ export function AppButtonLink({
   return (
     <Link
       href={href}
-      className={["app-btn", variant === "primary" ? "app-btn--primary" : "app-btn--secondary", "shell-focus-ring", className]
+      className={[
+        "corp-trust-focus shell-focus-ring trust-btn",
+        variant === "primary" ? "corp-trust-btn-primary" : "corp-trust-btn-secondary",
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
     >
-      <Typography
-        as="span"
-        role="bodySecondary"
-        weight="medium"
-        color={variant === "primary" ? "inherit" : "primary"}
-        className={variant === "primary" ? "app-btn__label" : undefined}
-      >
-        {children}
-      </Typography>
+      {children}
     </Link>
   );
 }
@@ -149,10 +152,8 @@ type AppStackBackLinkProps = {
 
 export function AppStackBackLink({ href, children }: AppStackBackLinkProps) {
   return (
-    <Link href={href} className="app-stack-back shell-focus-ring">
-      <Typography as="span" role="bodySecondary" weight="medium" color="action">
-        {children}
-      </Typography>
+    <Link href={href} className="app-stack-back corp-trust-link corp-trust-focus shell-focus-ring">
+      {children}
     </Link>
   );
 }

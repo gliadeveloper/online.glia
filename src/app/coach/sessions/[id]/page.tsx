@@ -120,6 +120,7 @@ export default async function CoachSessionDetailPage({ params }: Props) {
             sessionId={session.id}
             summary={session.summary}
             bodyMarkdown={session.bodyMarkdown}
+            bodyMetadata={session.bodyMetadata}
             publicationStatus={session.publicationStatus}
             hasSharedReport={Boolean(report)}
           />

@@ -1,27 +1,30 @@
 ---
-description: (app) UI visual direction — App Tone v1 (neutral chrome, subtle motion)
-globs: src/app/(app)/**/*,src/components/shell/**/*,src/components/home/**/*,src/components/community/**/*,src/components/learning/**/*,src/components/mypage/**/*,src/components/checkin/**/*,src/components/orders/**/*,src/components/shop/**/*,src/components/coaching/**/*,src/components/typography/**/*
+description: (app) UI visual direction — Corporate Trust (indigo chrome, Plus Jakarta)
+globs: src/app/(app)/**/*,src/components/shell/**/*,src/components/home/**/*,src/components/community/**/*,src/components/learning/**/*,src/components/mypage/**/*,src/components/checkin/**/*,src/components/orders/**/*,src/components/shop/**/*,src/components/coaching/**/*,src/components/corporate-trust/**/*
 alwaysApply: false
 ---
 
-# App Tone v1 — `(app)` Visual Direction
+# Corporate Trust — `(app)` Visual Direction
 
 Before implementing or restyling `(app)` UI, read:
 
-1. [docs/visual-direction.md](../../docs/visual-direction.md) — **App Tone v1** (short)
-2. [docs/design-system.md](../../docs/design-system.md) — tokens & patterns
-3. [docs/typography.md](../../docs/typography.md) — typo tokens & WebView scale
+1. `src/components/corporate-trust/tokens.css` — shared `--auth-*` tokens
+2. `src/components/corporate-trust/app-trust-tokens.css` — `.corp-trust` overrides
+3. `src/components/corporate-trust/app-trust-ui.tsx` — TrustButton, TrustInput, etc.
 
 ## Must follow
 
-- **Neutral chrome:** Tab/header **selection** uses `text-primary` / `text-secondary` + `font-semibold` + outline→filled icons — **not** `--color-action-primary`.
-- **Action blue only for:** primary CTA buttons, text links, `:focus-visible` ring.
-- **Borders:** `--color-border-subtle` for chrome dividers; `--color-border` for cards/inputs.
-- **Typography:** `typo-*` classes or `<Typography role="…">` — no Tailwind `text-sm` / `text-lg` in `(app)`.
-- **Motion:** subtle (≈150–360ms), tap scale / crossfade; respect `prefers-reduced-motion`.
-- **Reference implementation:** `PrimaryNavBottom`, `NavTabItem`, `nav-icons.tsx`.
+- **Scope root:** `(app)/layout.tsx` wraps routes in `CorpTrustScope` (`.corp-trust`).
+- **Primary accent:** indigo gradient (`--auth-primary` / `--auth-secondary`) for active nav, CTAs, links.
+- **Page headers:** use `TabPageHeader` on tab/stack L3 pages.
+- **Buttons/links:** prefer `TrustButton`, `TrustButtonLink`, `corp-trust-btn-*`, `corp-trust-link`.
+- **Layout primitives:** keep `AppStackPage`, `AppTabScreen`, `app-panel`, `app-card` class names — styling comes from corp-trust CSS overrides.
+- **Typography:** `typo-*` classes or `<Typography role="…">` — action color uses `.typography-action` inside `.corp-trust`.
+- **Motion:** subtle (≈150–360ms); respect `prefers-reduced-motion`.
+- **Reference:** `primary-nav-trust.css`, `shell-chrome-trust.css`, `tab-page-header.tsx`.
 
 ## Scope
 
 - Apply to `(app)` routes and their components only.
-- Do not extend App Tone v1 to `admin`, `(customer)`, or `login` unless explicitly asked.
+- Do not extend Corporate Trust to `admin` or `(customer)` unless explicitly asked.
+- Auth (`(auth)/`) and Shop stack use their own nested trust scopes.

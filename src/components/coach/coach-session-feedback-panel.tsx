@@ -1,12 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+import {
+  CoachingSessionBlockEditor,
+  type CoachingSessionBlockEditorHandle,
+} from "@/components/coaching/coaching-session-block-editor";
+import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 
 type CoachSessionFeedbackPanelProps = {
   sessionId: string;
   summary: string | null;
   bodyMarkdown: string | null;
+  bodyMetadata: unknown;
   publicationStatus: string;
   hasSharedReport: boolean;
 };
@@ -15,12 +22,13 @@ export function CoachSessionFeedbackPanel({
   sessionId,
   summary: initialSummary,
   bodyMarkdown: initialBody,
+  bodyMetadata: initialBodyMetadata,
   publicationStatus: initialStatus,
   hasSharedReport,
 }: CoachSessionFeedbackPanelProps) {
   const router = useRouter();
+  const editorRef = useRef<CoachingSessionBlockEditorHandle>(null);
   const [summary, setSummary] = useState(initialSummary ?? "");
-  const [bodyMarkdown, setBodyMarkdown] = useState(initialBody ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,12 +37,19 @@ export function CoachSessionFeedbackPanel({
     setError(null);
 
     try {
+      const exported = editorRef.current
+        ? await editorRef.current.exportForSave()
+        : { body: initialBody ?? "", blocks: [] };
+      const bodyMarkdown = exported.body.trim() || null;
+      const bodyMetadata = buildContentMetadataWithBlockNote(initialBodyMetadata, exported.blocks);
+
       const response = await fetch(`/api/coach/sessions/${sessionId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           summary: summary.trim() || null,
-          bodyMarkdown: bodyMarkdown.trim() || null,
+          bodyMarkdown,
+          bodyMetadata,
           publicationStatus,
         }),
       });
@@ -72,13 +87,14 @@ export function CoachSessionFeedbackPanel({
       </div>
 
       <div className="space-y-1">
-        <label className="text-sm font-medium text-zinc-700">피드백 본문 (Markdown)</label>
-        <textarea
-          value={bodyMarkdown}
-          onChange={(event) => setBodyMarkdown(event.target.value)}
-          rows={14}
-          className="w-full rounded-xl border border-zinc-200 px-3 py-2 font-mono text-sm"
-          placeholder="## 이번 회차 피드백&#10;&#10;공유해 주신 체크인을 바탕으로..."
+        <label className="text-sm font-medium text-zinc-700">피드백 본문</label>
+        <CoachingSessionBlockEditor
+          ref={editorRef}
+          sessionId={sessionId}
+          body={initialBody}
+          bodyMetadata={initialBodyMetadata}
+          apiRole="coach"
+          disabled={loading}
         />
       </div>
 
@@ -93,7 +109,7 @@ export function CoachSessionFeedbackPanel({
         </button>
         <button
           type="button"
-          disabled={loading || !bodyMarkdown.trim()}
+          disabled={loading}
           onClick={() => save("PUBLISHED")}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >

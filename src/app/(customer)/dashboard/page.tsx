@@ -38,7 +38,7 @@ export default async function DashboardPage() {
       accent: "violet" as const,
     },
     {
-      href: "/lms",
+      href: "/learning",
       title: "내 학습",
       description: "수강 중인 강의와 진도",
       stat: `${enrollmentCount}개 수강`,
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="수강 중" value={enrollmentCount} href="/lms" accent="violet" />
+        <StatCard label="수강 중" value={enrollmentCount} href="/learning" accent="violet" />
         <StatCard label="코칭권" value={entitlementCount} href="/coaching" accent="emerald" />
         <StatCard
           label="데일리 체크인"
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
               {Math.round(continueLearning.progressPercent)}%
             </span>
             <Link
-              href={`/lms/${continueLearning.courseSlug}/lessons/${continueLearning.lesson.id}`}
+              href={`/learning/${continueLearning.courseSlug}/lessons/${continueLearning.lesson.id}`}
               className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white"
             >
               이어서 학습

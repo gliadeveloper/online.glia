@@ -2,10 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AppFootnote, AppPanel, AppStackPage } from "@/components/app";
+import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
 import { ProfileEditForm } from "@/components/mypage/profile-edit-form";
-import { Typography } from "@/components/typography/typography";
-import { getMyProfileForEdit } from "@/lib/profile";
 import { StackNavTitle } from "@/lib/stack-nav-context";
+import { getMyProfileForEdit } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/session";
 
 export default async function MyPageEditPage() {
@@ -23,14 +23,13 @@ export default async function MyPageEditPage() {
     <AppStackPage>
       <StackNavTitle title="프로필 수정" />
 
-      <header className="app-section">
-        <Typography as="h1" role="pageTitle" weight="semibold" color="primary" className="sr-only lg:not-sr-only">
-          프로필 수정
-        </Typography>
-        <Typography as="p" role="bodySecondary" color="secondary" className="sr-only lg:not-sr-only">
-          이름과 프로필 정보를 변경할 수 있습니다.
-        </Typography>
-      </header>
+      <TabPageHeader
+        eyebrow="Profile"
+        title="프로필"
+        titleAccent="수정"
+        description="이름과 소개 정보를 업데이트하세요."
+        variant="stack"
+      />
 
       <AppPanel>
         <ProfileEditForm
@@ -45,10 +44,8 @@ export default async function MyPageEditPage() {
 
       <AppFootnote>
         이메일 변경은 지원하지 않습니다.{" "}
-        <Link href="/mypage" className="shell-focus-ring">
-          <Typography as="span" role="bodySecondary" weight="medium" color="action">
-            마이페이지로 돌아가기
-          </Typography>
+        <Link href="/mypage" className="corp-trust-link corp-trust-focus rounded-sm">
+          마이페이지로 돌아가기
         </Link>
       </AppFootnote>
     </AppStackPage>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { TrustButton, TrustTextarea } from "@/components/corporate-trust/app-trust-ui";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { Typography } from "@/components/typography/typography";
 import type { CoachProfile } from "@/lib/coaching-display";
@@ -137,7 +138,7 @@ export function CoachingSessionQnaPanel({
         <label htmlFor={`coaching-qna-${sessionId}`} className="sr-only">
           질문
         </label>
-        <textarea
+        <TrustTextarea
           id={`coaching-qna-${sessionId}`}
           value={body}
           onChange={(event) => setBody(event.target.value)}
@@ -145,22 +146,15 @@ export function CoachingSessionQnaPanel({
           rows={3}
           maxLength={2000}
           disabled={loading}
-          className="community-comment-form__textarea shell-focus-ring"
         />
 
         <div className="community-comment-form__footer">
           <Typography as="p" role="caption" color="secondary">
             {body.length.toLocaleString("ko-KR")} / 2,000
           </Typography>
-          <button
-            type="submit"
-            disabled={loading || !body.trim()}
-            className="community-comment-form__submit shell-focus-ring"
-          >
-            <Typography as="span" role="bodySecondary" weight="medium">
-              {loading ? "전송 중…" : "질문 등록"}
-            </Typography>
-          </button>
+          <TrustButton type="submit" variant="primary" disabled={loading || !body.trim()}>
+            {loading ? "전송 중…" : "질문 등록"}
+          </TrustButton>
         </div>
 
         {error && (

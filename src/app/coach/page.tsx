@@ -73,7 +73,7 @@ export default async function CoachDashboardPage() {
           href="/coach/live"
           className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-800"
         >
-          라이브 허브
+          라이브 일정
         </Link>
         <Link
           href="/coach/courses/new"

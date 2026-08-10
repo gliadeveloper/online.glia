@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
+import "@/components/shell/primary-nav-trust.css";
+import "@/components/shell/shell-chrome-trust.css";
+
 import { BackNav } from "@/components/shell/back-nav";
 import { MobileGlobalHeader } from "@/components/shell/mobile-global-header";
 import { PrimaryNavBottom } from "@/components/shell/primary-nav-bottom";
@@ -51,14 +54,16 @@ export function AdaptiveShell({ mode, isLoggedIn, children }: AdaptiveShellProps
     main.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [pathname]);
 
-  const mainPadding = homeHero
-    ? "px-0 pt-0 pb-[var(--home-stack-sm)] lg:px-4 lg:py-6"
-    : "px-4 py-6";
+  const mainClassName = [
+    "app-shell__main",
+    "mx-auto w-full max-w-5xl flex-1",
+    homeHero ? "app-shell__main--home" : "app-shell__main--trust",
+  ].join(" ");
 
   const showMobileGlobalHeader = policy.mobileGlobalHeader && !homeHero;
 
   return (
-    <div className="app-shell flex min-h-screen flex-col bg-[var(--color-surface-muted)] text-[var(--color-text-primary)]">
+    <div className="app-shell flex min-h-screen flex-col text-[var(--color-text-primary)]">
       <SkipLinks
         showPrimaryNav={skip.showPrimaryNav}
         showContextNav={skip.showContextNav}
@@ -86,7 +91,7 @@ export function AdaptiveShell({ mode, isLoggedIn, children }: AdaptiveShellProps
         ref={mainRef}
         id="main-content"
         tabIndex={-1}
-        className={`app-shell__main mx-auto w-full max-w-5xl flex-1 ${mainPadding}`}
+        className={mainClassName}
       >
         {children}
       </main>

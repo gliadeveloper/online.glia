@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { attachSessionCookie } from "@/lib/auth-session";
+import { AUTH_ERROR_MESSAGES } from "@/lib/auth-errors";
 import { ApiError, jsonError } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
+import { verifyPassword } from "@/lib/signup/crypto";
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +17,7 @@ export async function POST(request: Request) {
     const password = body.password?.trim();
 
     if (!email || !password) {
-      throw new ApiError("email and password are required", 400, "VALIDATION_ERROR");
+      throw new ApiError(AUTH_ERROR_MESSAGES.VALIDATION_ERROR, 400, "VALIDATION_ERROR");
     }
 
     const user = await prisma.user.findUnique({
@@ -27,11 +29,21 @@ export async function POST(request: Request) {
         role: true,
         password: true,
         status: true,
+        onboardingCompletedAt: true,
       },
     });
 
-    if (!user || user.status !== "ACTIVE" || !user.password || user.password !== password) {
-      throw new ApiError("Invalid email or password", 401, "INVALID_CREDENTIALS");
+    if (
+      !user ||
+      user.status !== "ACTIVE" ||
+      !user.password ||
+      !(await verifyPassword(user.password, password))
+    ) {
+      throw new ApiError(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS, 401, "INVALID_CREDENTIALS");
+    }
+
+    if (!user.onboardingCompletedAt) {
+      throw new ApiError("온보딩을 먼저 완료해 주세요.", 409, "ONBOARDING_INCOMPLETE");
     }
 
     const response = NextResponse.json({

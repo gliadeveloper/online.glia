@@ -2,10 +2,16 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { hasSessionTokenFormat, SESSION_COOKIE } from "@/lib/session-cookie";
 
-const protectedPrefixes = ["/dashboard", "/shop", "/lms", "/learning", "/coaching", "/checkin", "/orders", "/admin", "/coach", "/mypage"];
+const protectedPrefixes = ["/dashboard", "/shop", "/learning", "/coaching", "/checkin", "/orders", "/admin", "/coach", "/mypage"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/lms" || pathname.startsWith("/lms/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/lms/, "/learning");
+    return NextResponse.redirect(url);
+  }
 
   if (!protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) {
     return NextResponse.next();

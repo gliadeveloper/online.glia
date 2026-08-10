@@ -41,7 +41,15 @@ function useHomeHeroCopy({
     : "/checkin";
   const ctaHref = isLoggedIn ? dailyPath : "/login?next=%2Fcheckin";
 
-  return { greeting, prompt, ctaLabel, ctaHref, completed: !!completed && isLoggedIn };
+  return {
+    greeting,
+    prompt,
+    ctaLabel,
+    ctaHref,
+    completed: !!completed && isLoggedIn,
+    showNameAccent: !!(isLoggedIn && displayName),
+    displayName: displayName ?? null,
+  };
 }
 
 function HomeHeroContent({
@@ -51,7 +59,7 @@ function HomeHeroContent({
   checkInDateKey,
   completed,
 }: HomeHeroProps) {
-  const { greeting, prompt, ctaLabel, ctaHref, completed: isCompleted } = useHomeHeroCopy({
+  const { greeting, prompt, ctaLabel, ctaHref, completed: isCompleted, showNameAccent, displayName: name } = useHomeHeroCopy({
     isLoggedIn,
     displayName,
     checkInDateKey,
@@ -68,7 +76,13 @@ function HomeHeroContent({
           weight="semibold"
           className="home-hero__greeting"
         >
-          {greeting}
+          {showNameAccent && name ? (
+            <>
+              안녕하세요, <span className="corp-trust-gradient-text">{name}</span>님
+            </>
+          ) : (
+            greeting
+          )}
         </Typography>
 
         <div className="home-hero__copy">
@@ -110,7 +124,7 @@ export function HomeBrandHero(props: HomeHeroProps) {
  * Desktop home hero — contained band below unified header.
  */
 export function HomeHeroDesktop(props: HomeHeroProps) {
-  const { greeting, prompt, ctaLabel, ctaHref, completed: isCompleted } = useHomeHeroCopy(props);
+  const { greeting, prompt, ctaLabel, ctaHref, completed: isCompleted, showNameAccent, displayName: name } = useHomeHeroCopy(props);
 
   return (
     <section
@@ -127,7 +141,13 @@ export function HomeHeroDesktop(props: HomeHeroProps) {
               weight="semibold"
               className="home-hero-desktop__greeting"
             >
-              {greeting}
+              {showNameAccent && name ? (
+                <>
+                  안녕하세요, <span className="corp-trust-gradient-text">{name}</span>님
+                </>
+              ) : (
+                greeting
+              )}
             </Typography>
 
             <div className="home-hero-desktop__copy">

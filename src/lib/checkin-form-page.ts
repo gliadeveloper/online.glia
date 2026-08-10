@@ -1,4 +1,4 @@
-import { formDetailInclude, getCheckInDate, getWeekPeriodKey, resolvePeriodKey } from "@/lib/forms";
+import { formDetailInclude, getCheckInDate, getWeekPeriodKey } from "@/lib/forms";
 import { prisma } from "@/lib/prisma";
 
 import {
@@ -6,6 +6,7 @@ import {
   isFutureDailyDate,
   isFutureWeeklyPeriod,
   isValidCheckInDateKey,
+  parseCheckInDateKey,
 } from "@/lib/checkin-dates";
 
 export {
@@ -31,7 +32,10 @@ export async function getCheckInFormContext(
   const today = getCheckInDate(timezone);
   const selectedDate =
     dateParam && isValidCheckInDateKey(dateParam) ? dateParam : today;
-  const periodKey = resolvePeriodKey(form, new Date(`${selectedDate}T12:00:00`));
+  const periodKey =
+    form.schedule === "WEEKLY"
+      ? getWeekPeriodKey(form.timezone, parseCheckInDateKey(selectedDate))
+      : selectedDate;
   const currentWeekKey = getWeekPeriodKey(timezone);
 
   const submission = await prisma.formSubmission.findUnique({

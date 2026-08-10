@@ -1,10 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { MarkdownComposer } from "@/components/community/markdown-composer";
-import { Typography } from "@/components/typography/typography";
 
 type CreatePostFormProps = {
   parentPost?: {
@@ -23,6 +23,17 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    if (title.trim().length < 2) {
+      setError("제목을 2자 이상 입력해 주세요.");
+      return;
+    }
+
+    if (bodyMarkdown.trim().length < 8) {
+      setError("본문을 8자 이상 입력해 주세요.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -53,20 +64,18 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="community-write-form">
       {parentPost && (
-        <div className="app-feedback app-feedback--info" role="status">
-          <Typography as="p" role="bodySecondary" weight="medium">
-            부모 글에 연결됩니다
-          </Typography>
-          <Typography as="p" role="bodySecondary" color="secondary" className="mt-1">
+        <div className="community-write-form__parent">
+          <span className="community-write-form__parent-label">부모 글</span>
+          <Link href={`/community/${parentPost.slug}`} className="community-write-form__parent-link">
             {parentPost.title}
-          </Typography>
+          </Link>
         </div>
       )}
 
-      <div className="space-y-2">
-        <label htmlFor="post-title" className="typo-subTypography11 font-semibold text-[var(--color-text-primary)]">
+      <div className="community-write-form__field">
+        <label htmlFor="post-title" className="community-write-form__label">
           제목
         </label>
         <input
@@ -77,7 +86,7 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
           placeholder={parentPost ? "하위 글 제목" : "무엇을 공유하고 싶으신가요?"}
           maxLength={120}
           disabled={submitting}
-          className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 typo-subTypography10 text-[var(--color-text-primary)] placeholder:text-[var(--color-text-disabled)] shell-focus-ring disabled:opacity-60"
+          className="community-write-form__title-input corp-trust-focus shell-focus-ring"
         />
       </div>
 
@@ -87,37 +96,31 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
         value={bodyMarkdown}
         onChange={setBodyMarkdown}
         placeholder={"## 소제목\n\n내용을 Markdown으로 작성해 보세요."}
-        minRows={14}
+        minRows={16}
         disabled={submitting}
       />
 
       {error && (
-        <div role="alert" className="app-feedback app-feedback--error">
-          <Typography as="p" role="bodySecondary">
-            {error}
-          </Typography>
-        </div>
+        <p role="alert" className="community-write-form__error">
+          {error}
+        </p>
       )}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="community-write-form__actions">
         <button
           type="submit"
           disabled={submitting}
-          className="app-btn app-btn--primary shell-focus-ring"
+          className="community-write-form__submit shell-focus-ring"
         >
-          <Typography as="span" role="bodySecondary" weight="medium">
-            {submitting ? "게시 중…" : parentPost ? "하위 글 게시" : "게시하기"}
-          </Typography>
+          {submitting ? "게시 중…" : parentPost ? "하위 글 게시" : "게시하기"}
         </button>
         <button
           type="button"
           disabled={submitting}
           onClick={() => router.back()}
-          className="app-btn app-btn--secondary shell-focus-ring"
+          className="community-write-form__cancel shell-focus-ring"
         >
-          <Typography as="span" role="bodySecondary" weight="medium">
-            취소
-          </Typography>
+          취소
         </button>
       </div>
     </form>

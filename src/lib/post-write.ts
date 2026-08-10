@@ -80,6 +80,27 @@ export function mapPostWriteError(code: string): string {
       return "내용이 너무 깁니다.";
     case "PARENT_POST_NOT_FOUND":
       return "부모 글을 찾을 수 없습니다.";
+    case "PARENT_NOT_ROOT":
+      return "하위 글에는 또 다른 하위 글을 작성할 수 없습니다.";
+    case "PARENT_COMMENT_NOT_FOUND":
+      return "답글 대상 댓글을 찾을 수 없습니다.";
+    case "INVALID_REPORT_REASON":
+      return "신고 사유를 선택해 주세요.";
+    case "INVALID_REPORT_DETAIL":
+      return "신고 상세 형식이 올바르지 않습니다.";
+    case "REPORT_DETAIL_TOO_LONG":
+      return "신고 상세는 500자 이내로 입력해 주세요.";
+    case "REPORT_ALREADY_EXISTS":
+      return "이미 신고한 콘텐츠입니다.";
+    case "REPORT_NOT_FOUND":
+      return "신고 내역을 찾을 수 없습니다.";
+    case "REPORT_ALREADY_RESOLVED":
+      return "이미 처리된 신고입니다.";
+    case "POST_NOT_FOUND":
+    case "COMMENT_NOT_FOUND":
+      return "게시글 또는 댓글을 찾을 수 없습니다.";
+    case "FORBIDDEN":
+      return "권한이 없습니다.";
     case "UNAUTHORIZED":
       return "로그인이 필요합니다.";
     default:

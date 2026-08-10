@@ -1,0 +1,35 @@
+/* Read-only BlockNote in lesson player — no chrome, player typography */
+
+.lesson-block-note-view {
+  margin: 0;
+}
+
+.lesson-block-note-view .bn-mantine {
+  min-height: 0;
+}
+
+.lesson-block-note-view .bn-container {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.lesson-block-note-view .bn-editor {
+  padding: 0;
+}
+
+.lesson-block-note-view .bn-block-group {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.lesson-block-note-view .bn-inline-content {
+  color: inherit;
+}
+
+.lesson-block-note-view .bn-inline-content a {
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

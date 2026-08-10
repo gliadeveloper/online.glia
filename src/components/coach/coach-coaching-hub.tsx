@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import type { CheckInShareGrantStatus } from "@/generated/prisma/client";
-import { shareGrantStatusLabel } from "@/lib/checkin-share/grants";
-import { formatDateTime } from "@/lib/admin";
+import { shareGrantStatusLabel } from "@/lib/checkin-share/labels";
+import { formatDateTime } from "@/lib/admin-format";
 
 type SessionRow = {
   id: string;

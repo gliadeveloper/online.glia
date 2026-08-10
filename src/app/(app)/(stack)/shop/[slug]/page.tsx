@@ -1,9 +1,16 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { AppStackBackLink, AppStackPage } from "@/components/app";
 import { ProductDetailPanel } from "@/components/shop/product-detail-panel";
+import { ShopStackPage } from "@/components/shop/shop-stack-page";
+import {
+  canUserReviewProduct,
+  getProductCourseIds,
+  getProductReviews,
+  getProductReviewSummary,
+  getViewerReviewForCourses,
+} from "@/lib/course-reviews";
 import { getProductBySlug } from "@/lib/shop-products";
-import { getProductShopState } from "@/lib/shop-purchase-state";
+import { getProductShopState, defaultPurchaseShopState } from "@/lib/shop-purchase-state";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
@@ -15,24 +22,41 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const user = await getCurrentUser();
   const { slug } = await params;
 
-  if (!user) {
-    redirect(`/login?next=/shop/${slug}`);
-  }
-
   const product = await getProductBySlug(slug);
   if (!product) {
     notFound();
   }
 
-  const { shopState } = await getProductShopState(user.id, product);
+  const courseIds = getProductCourseIds(product.items);
+  const guestShopState = {
+    ...defaultPurchaseShopState,
+    buttonLabel: "신청하기",
+    checkoutLabel: "신청하기",
+  };
+
+  const [reviewSummary, reviews, viewerReview, canReview, shopStateResult] = await Promise.all([
+    getProductReviewSummary(courseIds),
+    getProductReviews(courseIds, 8),
+    user ? getViewerReviewForCourses(user.id, courseIds) : Promise.resolve(null),
+    user ? canUserReviewProduct(user.id, courseIds) : Promise.resolve(false),
+    user ? getProductShopState(user.id, product) : Promise.resolve({ shopState: guestShopState }),
+  ]);
+
+  const { shopState } = shopStateResult;
 
   return (
-    <AppStackPage>
+    <ShopStackPage className="shop-pdp-page">
       <StackNavTitle title={product.title} />
 
-      <AppStackBackLink href="/shop">← 상품 목록</AppStackBackLink>
-
-      <ProductDetailPanel product={product} shopState={shopState} isLoggedIn={!!user} />
-    </AppStackPage>
+      <ProductDetailPanel
+        product={product}
+        shopState={shopState}
+        isLoggedIn={!!user}
+        reviewSummary={reviewSummary}
+        reviews={reviews}
+        canReview={canReview}
+        hasExistingReview={!!viewerReview}
+      />
+    </ShopStackPage>
   );
 }

@@ -3,6 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import {
+  TrustAlert,
+  TrustButton,
+  TrustField,
+  TrustTextarea,
+} from "@/components/corporate-trust/app-trust-ui";
 import { submissionStatusLabels } from "@/lib/customer-labels";
 import type { SubmissionStatus } from "@/generated/prisma/client";
 
@@ -65,61 +71,46 @@ export function AssignmentForm({
   }
 
   return (
-    <section className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6 shadow-sm">
-      <h2 className="typo-subTypography9 font-semibold text-[var(--color-text-primary)]">{title}</h2>
-      {description && (
-        <p className="mt-2 typo-subTypography11 text-[var(--color-text-secondary)]">{description}</p>
-      )}
-      <p className="mt-2 typo-subTypography12 text-[var(--color-text-secondary)]">
+    <section className="trust-card p-6">
+      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+      {description && <p className="mt-2 text-sm text-slate-600">{description}</p>}
+      <p className="mt-2 text-xs text-slate-500">
         만점 {maxScore}점
         {dueDate ? ` · 마감 ${new Date(dueDate).toLocaleDateString("ko-KR")}` : ""}
       </p>
 
       {existing && (
-        <div className="mt-4 rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] px-4 py-3 typo-subTypography11">
-          <p className="font-medium text-[var(--color-text-primary)]">
-            {submissionStatusLabels[existing.status]}
-          </p>
+        <div className="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-sm">
+          <p className="font-semibold text-slate-900">{submissionStatusLabels[existing.status]}</p>
           {existing.score != null && (
-            <p className="mt-1 text-[var(--color-text-secondary)]">점수 {existing.score}점</p>
+            <p className="mt-1 text-slate-600">점수 {existing.score}점</p>
           )}
-          {existing.feedback && (
-            <p className="mt-2 text-[var(--color-text-secondary)]">피드백: {existing.feedback}</p>
-          )}
+          {existing.feedback && <p className="mt-2 text-slate-600">피드백: {existing.feedback}</p>}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <label className="block space-y-2 typo-subTypography11">
-          <span className="font-medium text-[var(--color-text-primary)]">제출 내용</span>
-          <textarea
+        <TrustField label="제출 내용">
+          <TrustTextarea
             value={content}
             onChange={(event) => setContent(event.target.value)}
             rows={8}
             required
             disabled={submitted && existing?.status === "GRADED"}
-            className="w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-[var(--color-text-primary)] placeholder:text-[var(--color-text-disabled)] shell-focus-ring"
             placeholder="과제 내용, GitHub 링크, 구현 설명 등을 작성하세요."
           />
-        </label>
-        {error && (
-          <p role="alert" className="rounded-[var(--radius-md)] bg-red-50 px-3 py-2 typo-subTypography11 text-red-800">
-            {error}
-          </p>
-        )}
+        </TrustField>
+
+        {error && <TrustAlert tone="error">{error}</TrustAlert>}
+
         {(!submitted || existing?.status === "RETURNED") && (
-          <button
-            type="submit"
-            disabled={busy}
-            className="shell-focus-ring min-h-11 rounded-[var(--radius-md)] bg-[var(--color-action-primary)] px-5 py-2.5 typo-subTypography11 font-medium text-white hover:bg-[var(--color-action-primary-hover)] disabled:opacity-60"
-          >
+          <TrustButton type="submit" variant="primary" disabled={busy}>
             {busy ? "제출 중..." : submitted ? "다시 제출" : "과제 제출"}
-          </button>
+          </TrustButton>
         )}
+
         {submitted && existing?.status !== "RETURNED" && (
-          <p role="status" className="typo-subTypography11 text-emerald-800">
-            제출이 완료되었습니다.
-          </p>
+          <TrustAlert tone="success">제출이 완료되었습니다.</TrustAlert>
         )}
       </form>
     </section>

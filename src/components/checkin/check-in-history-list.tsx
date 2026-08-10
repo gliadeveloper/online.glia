@@ -1,11 +1,10 @@
 import Link from "next/link";
 
-import { Typography } from "@/components/typography/typography";
-
 export type CheckInHistoryItem = {
   id: string;
   href: string;
   title: string;
+  kind?: "daily" | "weekly";
   subtitle?: string;
   done?: boolean;
 };
@@ -18,6 +17,12 @@ type CheckInHistoryListProps = {
   variant?: "hub" | "page";
 };
 
+function kindLabel(kind?: "daily" | "weekly") {
+  if (kind === "weekly") return "주간";
+  if (kind === "daily") return "데일리";
+  return null;
+}
+
 export function CheckInHistoryList({
   items,
   emptyMessage,
@@ -26,60 +31,55 @@ export function CheckInHistoryList({
 }: CheckInHistoryListProps) {
   if (items.length === 0) {
     return (
-      <p className="check-in-history__empty">
-        <Typography as="span" role="bodySecondary" color="secondary">
-          {emptyMessage}
-        </Typography>
+      <p
+        className={`check-in-history__empty${variant === "hub" ? " check-in-history__empty--hub" : ""}`}
+      >
+        {emptyMessage}
       </p>
     );
   }
 
+  const isHub = variant === "hub";
+
   return (
     <ul
-      className={`check-in-history__list${variant === "page" ? " check-in-history__list--page" : ""}`}
+      className={`check-in-history__list${isHub ? " check-in-history__list--hub-surface" : " check-in-history__list--page"}`}
       aria-labelledby={labelledBy}
     >
-      {items.map((item) => (
-        <li key={item.id}>
-          <Link href={item.href} className="check-in-history__row shell-focus-ring">
-            <span className="check-in-history__body">
-              <Typography
-                as="span"
-                role="bodyCompact"
-                weight="semibold"
-                color="primary"
-                className="check-in-history__title block truncate"
-              >
-                {item.title}
-              </Typography>
-              {item.subtitle && (
-                <Typography
-                  as="span"
-                  role="caption"
-                  weight="regular"
-                  color="secondary"
-                  className="check-in-history__meta block truncate"
+      {items.map((item) => {
+        const label = kindLabel(item.kind);
+        const secondary = isHub ? (item.subtitle ?? label) : null;
+
+        return (
+          <li key={item.id}>
+            <Link
+              href={item.href}
+              className={`check-in-history__row shell-focus-ring${isHub ? " check-in-history__row--hub" : ""}`}
+            >
+              {!isHub && label ? (
+                <span
+                  className={`check-in-history__kind check-in-history__kind--${item.kind}`}
+                  aria-hidden="true"
                 >
-                  {item.subtitle}
-                </Typography>
-              )}
-            </span>
-            <span className="check-in-history__chevron size-4 shrink-0" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </span>
-            <span className="sr-only">{item.title} — 기록 보기</span>
-          </Link>
-        </li>
-      ))}
+                  {label}
+                </span>
+              ) : null}
+              <span className="check-in-history__body">
+                <span className="check-in-history__title">{item.title}</span>
+                {secondary ? (
+                  <span className="check-in-history__subtitle">{secondary}</span>
+                ) : null}
+              </span>
+              <span className="check-in-history__chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span className="sr-only">{item.title} — 기록 보기</span>
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }

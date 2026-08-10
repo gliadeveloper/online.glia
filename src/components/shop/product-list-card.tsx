@@ -1,8 +1,12 @@
 import Link from "next/link";
 
-import { StatusPill, type StatusPillTone } from "@/components/ui/status-pill";
-import { Typography } from "@/components/typography/typography";
-import { formatKrw, productKindLabels } from "@/lib/customer-labels";
+import {
+  ShopKindBadge,
+  ShopPrice,
+  ShopStatusBadge,
+  type ShopStatusTone,
+} from "@/components/shop/shop-trust-ui";
+import { formatKrw } from "@/lib/customer-labels";
 import { getProductPrice } from "@/lib/fulfillment";
 import type { CatalogProduct } from "@/lib/shop-products";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
@@ -20,7 +24,7 @@ function productSummary(product: CatalogProduct) {
     .join(" · ");
 }
 
-function listBadge(shopState: ProductShopState): { label: string; tone: StatusPillTone } | null {
+function listBadge(shopState: ProductShopState): { label: string; tone: ShopStatusTone } | null {
   switch (shopState.kind) {
     case "owned":
       return { label: "수강 중", tone: "complete" };
@@ -32,6 +36,8 @@ function listBadge(shopState: ProductShopState): { label: string; tone: StatusPi
       return { label: "업그레이드", tone: "info" };
     case "partial":
       return { label: "추가 구매", tone: "info" };
+    case "pending":
+      return { label: "승인 대기", tone: "pending" };
     default:
       return null;
   }
@@ -45,45 +51,33 @@ export function ProductListCard({ product, shopState }: ProductListCardProps) {
   return (
     <Link
       href={`/shop/${product.slug}`}
-      className="app-card app-card--interactive shell-focus-ring group flex h-full flex-col p-4"
+      className="shop-trust-product-card corp-trust-focus group"
     >
       <div className="flex flex-1 items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <Typography as="p" role="caption" weight="medium" color="action">
-            {productKindLabels[product.kind]}
-          </Typography>
-          <Typography as="h3" role="sectionTitle" weight="semibold" color="primary" className="app-section-header__desc">
-            {product.title}
-          </Typography>
-          {product.description && (
-            <Typography as="p" role="bodySecondary" color="secondary" className="line-clamp-2 app-section-header__desc">
-              {product.description}
-            </Typography>
-          )}
-          {summary && (
-            <Typography as="p" role="caption" color="secondary" className="app-section-header__desc">
-              {summary}
-            </Typography>
-          )}
+        <div className="min-w-0 flex-1 space-y-3">
+          <ShopKindBadge kind={product.kind} />
 
-          <div className="app-section-header__desc flex flex-wrap items-center gap-2">
-            {shopState.kind === "purchase" && (
-              <Typography as="p" role="bodyCompact" weight="semibold" color="primary">
-                {formatKrw(price)}
-              </Typography>
-            )}
-            {badge && (
-              <StatusPill tone={badge.tone} showCompleteIcon={badge.tone === "complete"}>
-                {badge.label}
-              </StatusPill>
-            )}
+          <div>
+            <h3 className="text-base font-semibold leading-snug text-slate-900 sm:text-lg">
+              {product.title}
+            </h3>
+            {product.description ? (
+              <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-500">
+                {product.description}
+              </p>
+            ) : null}
+            {summary ? (
+              <p className="mt-2 text-xs font-medium text-slate-400">{summary}</p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {shopState.kind === "purchase" ? <ShopPrice amount={formatKrw(price)} /> : null}
+            {badge ? <ShopStatusBadge tone={badge.tone}>{badge.label}</ShopStatusBadge> : null}
           </div>
         </div>
 
-        <span
-          aria-hidden="true"
-          className="home-feed-row__chevron mt-1 transition group-hover:bg-[var(--color-home-row-chevron-hover-bg)] group-hover:text-[var(--color-home-row-chevron-hover-text)]"
-        >
+        <span className="shop-trust-chevron mt-1" aria-hidden="true">
           <svg
             width={18}
             height={18}

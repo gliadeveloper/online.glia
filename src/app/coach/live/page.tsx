@@ -1,25 +1,22 @@
-import { CoachLiveHub } from "@/components/coach/coach-live-hub";
-import { listCoachLiveReplays, listCoachLiveSessions } from "@/lib/coach-live";
+import { CoachLiveScheduleList } from "@/components/coach/coach-live-schedule-list";
+import { listCoachLiveLessons } from "@/lib/coach-live-lessons";
 import { requireCoach } from "@/lib/coach";
 
 export default async function CoachLivePage() {
   const user = await requireCoach();
-  const [sessions, replays] = await Promise.all([
-    listCoachLiveSessions(user.id),
-    listCoachLiveReplays(user.id),
-  ]);
+  const lessons = await listCoachLiveLessons(user.id);
 
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Coach Live</p>
-        <h1 className="mt-1 text-2xl font-semibold text-zinc-900">라이브 수업</h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          라이브 진행 후 「종료 · 다시보기 생성」으로 VOD 변환합니다. 변환 완료 레슨은 아래에 표시됩니다.
+        <p className="text-sm font-medium text-emerald-600">Coach Portal</p>
+        <h1 className="text-3xl font-semibold tracking-tight">라이브</h1>
+        <p className="mt-1 text-zinc-600">
+          LIVE 레슨에 등록된 Zoom 링크를 확인하고 편집할 수 있습니다.
         </p>
       </div>
 
-      <CoachLiveHub initialSessions={sessions} initialReplays={replays} />
+      <CoachLiveScheduleList lessons={lessons} />
     </div>
   );
 }

@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { AppStackPage } from "@/components/app";
+import { CheckInFlowShell } from "@/components/checkin/check-in-flow-shell";
 import { CheckInHistoryList } from "@/components/checkin/check-in-history-list";
-import { Typography } from "@/components/typography/typography";
 import { getCheckInHistoryPage } from "@/lib/checkin-hub";
-import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
 type CheckInHistoryPageProps = {
@@ -33,25 +31,23 @@ export default async function CheckInHistoryPage({ searchParams }: CheckInHistor
     id: item.id,
     href: item.href,
     title: item.title,
+    kind: item.kind,
     subtitle: item.subtitle,
     done: true,
   }));
 
   return (
-    <AppStackPage>
-      <StackNavTitle title="작성한 목록" />
-
+    <CheckInFlowShell
+      navTitle="작성한 목록"
+      eyebrow="History"
+      title="작성한"
+      titleAccent="기록"
+      description="지금까지 작성한 데일리·주간 체크인을 모아봅니다."
+    >
       <section aria-labelledby="check-in-history-page-heading">
-        <Typography
-          as="h1"
-          id="check-in-history-page-heading"
-          role="pageTitle"
-          weight="semibold"
-          color="primary"
-          className="sr-only"
-        >
+        <h1 id="check-in-history-page-heading" className="sr-only">
           작성한 목록
-        </Typography>
+        </h1>
 
         <CheckInHistoryList
           labelledBy="check-in-history-page-heading"
@@ -67,41 +63,33 @@ export default async function CheckInHistoryPage({ searchParams }: CheckInHistor
                 href={`/checkin/history?page=${page - 1}`}
                 className="check-in-history-pagination__btn shell-focus-ring"
               >
-                <Typography as="span" role="bodySecondary" weight="medium" color="primary">
-                  이전
-                </Typography>
+                이전
               </Link>
             ) : (
               <span className="check-in-history-pagination__btn check-in-history-pagination__btn--disabled">
-                <Typography as="span" role="bodySecondary" weight="medium" color="disabled">
-                  이전
-                </Typography>
+                이전
               </span>
             )}
 
-            <Typography as="span" role="caption" color="secondary">
+            <span>
               {page} / {totalPages}
-            </Typography>
+            </span>
 
             {page < totalPages ? (
               <Link
                 href={`/checkin/history?page=${page + 1}`}
                 className="check-in-history-pagination__btn shell-focus-ring"
               >
-                <Typography as="span" role="bodySecondary" weight="medium" color="primary">
-                  다음
-                </Typography>
+                다음
               </Link>
             ) : (
               <span className="check-in-history-pagination__btn check-in-history-pagination__btn--disabled">
-                <Typography as="span" role="bodySecondary" weight="medium" color="disabled">
-                  다음
-                </Typography>
+                다음
               </span>
             )}
           </nav>
         )}
       </section>
-    </AppStackPage>
+    </CheckInFlowShell>
   );
 }

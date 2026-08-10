@@ -25,7 +25,7 @@ function HeroUtilityButton({
     <Link
       href={href}
       aria-label={label}
-      className="home-hero__utility shell-focus-ring flex size-10 items-center justify-center rounded-full text-[var(--color-hero-text)] transition"
+      className="home-hero__utility shell-focus-ring flex size-10 items-center justify-center rounded-full text-white transition"
     >
       {children}
     </Link>
@@ -40,9 +40,12 @@ function MobileGlobalHeaderOnHero({ isLoggedIn }: { isLoggedIn: boolean }) {
       className="home-hero__global lg:hidden"
     >
       <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="home-hero__wordmark shell-focus-ring">
-          <Typography as="span" role="contextTitle" weight="semibold">
-            온라인 학습
+        <Link href="/" className="home-hero__wordmark-trust shell-focus-ring">
+          <span className="home-hero__wordmark-trust__logo" aria-hidden="true">
+            G
+          </span>
+          <Typography as="span" role="contextTitle" weight="semibold" className="home-hero__wordmark-trust__label">
+            온라인 <span className="brand-mark-trust__accent">학습</span>
           </Typography>
         </Link>
         <div className="flex items-center gap-0.5">
@@ -72,7 +75,7 @@ function MobileGlobalHeaderSeparated({ isLoggedIn }: { isLoggedIn: boolean }) {
     <header
       data-slot="mobile-global-header"
       data-variant="separated"
-      className="border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)]/95 backdrop-blur-sm lg:hidden"
+      className="mobile-global-header-trust lg:hidden"
     >
       <div className="mx-auto flex h-[var(--header-height)] max-w-5xl items-center justify-between gap-4 px-4">
         <BrandMark />

@@ -1,74 +1,69 @@
 /**
- * Home `/` color tokens — derived from primitive palette.
- * Docs: docs/colors.md · design-system.md §1.2
+ * Home `/` color tokens — Corporate Trust (indigo) palette.
  */
 :root {
-  /* Hero — teal brand gradient */
-  --color-hero-brand: var(--color-teal-brand);
-  --color-hero-from: var(--color-teal-brand);
-  --color-hero-to: color-mix(in srgb, var(--color-teal-brand) 42%, var(--color-surface));
-  --color-hero-text: var(--color-surface);
-  --color-hero-text-muted: color-mix(in srgb, var(--color-surface) 76%, transparent);
-  --color-hero-cta: var(--color-surface);
-  --color-hero-cta-text: var(--color-teal-700);
-  --color-hero-utility-hover: color-mix(in srgb, var(--color-surface) 12%, transparent);
-  --color-hero-shadow: var(--color-grey-opacity-100);
-  --color-hero-gradient-mid: color-mix(in srgb, var(--color-teal-brand) 68%, var(--color-surface));
-  --color-hero-cta-shadow: 0 2px 8px var(--color-grey-opacity-200), 0 1px 2px var(--color-grey-opacity-100);
+  /* Hero — indigo brand gradient */
+  --color-hero-brand: #4f46e5;
+  --color-hero-from: #4f46e5;
+  --color-hero-to: #6d28d9;
+  --color-hero-text: #ffffff;
+  --color-hero-text-muted: rgba(255, 255, 255, 0.78);
+  --color-hero-cta: #ffffff;
+  --color-hero-cta-text: #4338ca;
+  --color-hero-utility-hover: rgba(255, 255, 255, 0.18);
+  --color-hero-shadow: rgba(79, 70, 229, 0.2);
+  --color-hero-gradient-mid: #6366f1;
+  --color-hero-cta-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
 
   /* Feed stack */
-  --color-home-canvas: var(--color-grey-100);
+  --color-home-canvas: #f8fafc;
   --home-feed-overlap: calc(var(--radius-hero-bottom) * -0.65);
-  --color-home-panel-bg: var(--color-surface);
-  --color-home-panel-border: var(--color-grey-opacity-100);
-  --color-home-panel-shadow:
-    0 1px 2px var(--color-grey-opacity-100),
-    0 4px 16px var(--color-grey-opacity-50);
-  --color-home-row-hover: var(--color-grey-50);
-  --color-home-row-active: var(--color-grey-100);
-  --color-home-row-leading-bg: var(--color-grey-100);
-  --color-home-row-leading-border: var(--color-grey-200);
-  --color-home-row-leading-accent-bg: var(--color-teal-50);
-  --color-home-row-leading-accent-text: var(--color-teal-700);
-  --color-home-row-chevron-bg: var(--color-grey-100);
-  --color-home-row-chevron-text: var(--color-grey-500);
-  --color-home-row-chevron-hover-bg: var(--color-grey-200);
-  --color-home-row-chevron-hover-text: var(--color-grey-700);
-  --color-home-more-hover: var(--color-grey-100);
-  --color-home-hero-cta-completed-bg: color-mix(in srgb, var(--color-surface) 88%, transparent);
-  --color-home-hero-cta-completed-text: var(--color-surface);
+  --color-home-panel-bg: #ffffff;
+  --color-home-panel-border: #f1f5f9;
+  --color-home-panel-shadow: 0 4px 20px -2px rgba(79, 70, 229, 0.1);
+  --color-home-row-hover: #f8fafc;
+  --color-home-row-active: #f1f5f9;
+  --color-home-row-leading-bg: #f1f5f9;
+  --color-home-row-leading-border: #e2e8f0;
+  --color-home-row-leading-accent-bg: #eef2ff;
+  --color-home-row-leading-accent-text: #4338ca;
+  --color-home-row-chevron-bg: #f1f5f9;
+  --color-home-row-chevron-text: #64748b;
+  --color-home-row-chevron-hover-bg: #e2e8f0;
+  --color-home-row-chevron-hover-text: #334155;
+  --color-home-more-hover: #f1f5f9;
+  --color-home-hero-cta-completed-bg: rgba(255, 255, 255, 0.14);
+  --color-home-hero-cta-completed-text: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-hero-from: var(--color-teal-700);
-    --color-hero-to: color-mix(in srgb, var(--color-teal-800) 55%, var(--color-grey-900));
-    --color-hero-text: var(--color-grey-50);
-    --color-hero-text-muted: color-mix(in srgb, var(--color-grey-50) 72%, transparent);
-    --color-hero-cta: var(--color-grey-50);
-    --color-hero-cta-text: var(--color-teal-800);
-    --color-hero-utility-hover: color-mix(in srgb, var(--color-grey-50) 10%, transparent);
-    --color-hero-gradient-mid: color-mix(in srgb, var(--color-teal-700) 72%, var(--color-grey-900));
-    --color-hero-cta-shadow: 0 2px 8px var(--color-grey-opacity-300), 0 1px 2px var(--color-grey-opacity-200);
-    --color-home-hero-cta-completed-bg: color-mix(in srgb, var(--color-grey-50) 12%, transparent);
-    --color-home-hero-cta-completed-text: var(--color-grey-50);
-    --color-home-row-leading-accent-bg: color-mix(in srgb, var(--color-teal-800) 40%, var(--color-grey-800));
-    --color-home-row-leading-accent-text: var(--color-teal-100);
+    --color-hero-from: #4338ca;
+    --color-hero-to: #312e81;
+    --color-hero-text: #f8fafc;
+    --color-hero-text-muted: rgba(248, 250, 252, 0.72);
+    --color-hero-cta: #f8fafc;
+    --color-hero-cta-text: #312e81;
+    --color-hero-utility-hover: rgba(248, 250, 252, 0.1);
+    --color-hero-gradient-mid: #4f46e5;
+    --color-hero-cta-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    --color-home-hero-cta-completed-bg: rgba(248, 250, 252, 0.12);
+    --color-home-hero-cta-completed-text: #f8fafc;
+    --color-home-row-leading-accent-bg: rgba(79, 70, 229, 0.25);
+    --color-home-row-leading-accent-text: #c7d2fe;
 
-    --color-home-canvas: var(--color-grey-900);
-    --color-home-panel-bg: var(--color-grey-800);
-    --color-home-panel-border: var(--color-grey-opacity-200);
-    --color-home-panel-shadow:
-      0 1px 2px var(--color-grey-opacity-200),
-      0 4px 16px var(--color-grey-opacity-100);
-    --color-home-row-hover: var(--color-grey-800);
-    --color-home-row-active: var(--color-grey-700);
-    --color-home-row-leading-bg: var(--color-grey-700);
-    --color-home-row-leading-border: var(--color-grey-600);
-    --color-home-row-chevron-bg: var(--color-grey-700);
-    --color-home-row-chevron-text: var(--color-grey-400);
-    --color-home-row-chevron-hover-bg: var(--color-grey-600);
-    --color-home-row-chevron-hover-text: var(--color-grey-200);
-    --color-home-more-hover: var(--color-grey-700);
+    --color-home-canvas: #0f172a;
+    --color-home-panel-bg: #1e293b;
+    --color-home-panel-border: #334155;
+    --color-home-panel-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+    --color-home-row-hover: #1e293b;
+    --color-home-row-active: #334155;
+    --color-home-row-leading-bg: #334155;
+    --color-home-row-leading-border: #475569;
+    --color-home-row-chevron-bg: #334155;
+    --color-home-row-chevron-text: #94a3b8;
+    --color-home-row-chevron-hover-bg: #475569;
+    --color-home-row-chevron-hover-text: #e2e8f0;
+    --color-home-more-hover: #334155;
   }
 }

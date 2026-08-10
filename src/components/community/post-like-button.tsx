@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { Typography } from "@/components/typography/typography";
-
 type PostLikeButtonProps = {
   postSlug: string;
   initialCount: number;
@@ -63,16 +61,12 @@ export function PostLikeButton({
           className="community-post-actions__stat community-post-actions__stat--button shell-focus-ring"
         >
           <HeartIcon filled={liked} />
-          <Typography as="span" role="caption" color="secondary">
-            {count.toLocaleString("ko-KR")}
-          </Typography>
+          <span className="text-xs text-slate-600">{count.toLocaleString("ko-KR")}</span>
           <span className="sr-only">{liked ? "좋아요 취소" : "좋아요"}</span>
         </button>
         {error && (
-          <p role="alert" className="community-post-actions__error">
-            <Typography as="span" role="caption" color="secondary">
-              {error}
-            </Typography>
+          <p role="alert" className="community-post-actions__error text-xs text-red-600">
+            {error}
           </p>
         )}
       </div>
@@ -86,14 +80,14 @@ export function PostLikeButton({
         onClick={toggleLike}
         disabled={pending}
         aria-pressed={liked}
-        className="shell-focus-ring inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-2 typo-subTypography11 font-medium text-[var(--color-text-primary)] transition hover:border-[var(--color-border-strong)] disabled:opacity-60"
+        className={`trust-like-btn shell-focus-ring inline-flex min-h-11 items-center gap-2${liked ? " trust-like-btn--active" : ""}`}
       >
         <HeartIcon filled={liked} />
         <span>{liked ? "좋아요 취소" : "좋아요"}</span>
-        <span className="text-[var(--color-text-secondary)]">{count.toLocaleString("ko-KR")}</span>
+        <span className="opacity-70">{count.toLocaleString("ko-KR")}</span>
       </button>
       {error && (
-        <p role="alert" className="typo-subTypography12 text-red-600 dark:text-red-400">
+        <p role="alert" className="text-xs text-red-600">
           {error}
         </p>
       )}
@@ -105,7 +99,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
   return (
     <svg
       aria-hidden="true"
-      className={`community-post-actions__icon${filled ? " community-post-actions__icon--active" : ""}`}
+      className={`community-post-actions__icon size-[1.125rem]${filled ? " community-post-actions__icon--active" : ""}`}
       viewBox="0 0 24 24"
       fill={filled ? "currentColor" : "none"}
       stroke="currentColor"

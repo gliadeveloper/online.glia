@@ -60,7 +60,7 @@ export async function GET(request: Request) {
   try {
     const token = await exchangeKakaoCode(code);
     const kakaoUser = await fetchKakaoUser(token.access_token);
-    const user = await upsertUserFromKakao({
+    const { user, isNewUser } = await upsertUserFromKakao({
       kakaoUser,
       accessToken: token.access_token,
       refreshToken: token.refresh_token,
@@ -68,7 +68,9 @@ export async function GET(request: Request) {
       scopes: token.scope,
     });
 
-    const redirectPath = resolvePostLoginPath(verifiedState.next, user.role);
+    const redirectPath = isNewUser || !user.onboardingCompletedAt
+      ? `/signup/terms${verifiedState.next ? `?next=${encodeURIComponent(verifiedState.next)}` : ""}`
+      : resolvePostLoginPath(verifiedState.next, user.role);
     const origin = new URL(request.url).origin;
     const response = NextResponse.redirect(`${origin}${redirectPath}`);
 

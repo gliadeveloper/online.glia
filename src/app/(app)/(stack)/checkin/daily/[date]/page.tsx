@@ -1,8 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 
+import { CheckInFlowShell } from "@/components/checkin/check-in-flow-shell";
 import { CheckInForm } from "@/components/checkin/check-in-form";
 import { CheckInFutureEmpty } from "@/components/checkin/check-in-future-empty";
-import { Typography } from "@/components/typography/typography";
 import {
   formatCheckInPageDate,
   getCheckInFormContext,
@@ -41,41 +41,64 @@ export default async function DailyCheckFormPage({
 
   if (!context) {
     return (
-      <p>
-        <Typography as="span" role="bodySecondary" color="secondary">
-          데일리 체크인 폼이 아직 준비되지 않았습니다.
-        </Typography>
-      </p>
+      <CheckInFlowShell
+        navTitle="데일리 체크"
+        eyebrow="Daily Check-in"
+        title="데일리"
+        titleAccent="체크"
+        description="데일리 체크인 폼이 아직 준비되지 않았습니다."
+      >
+        <p className="check-in-hub__missing">데일리 체크인 폼이 아직 준비되지 않았습니다.</p>
+      </CheckInFlowShell>
     );
   }
 
-  const { form, today, selectedDate, periodKey, submission, isFuture } = context;
+  const { form, today, selectedDate, periodKey, submission, isFuture, isCurrentPeriod } =
+    context;
+
+  const periodTitle = isCurrentPeriod ? "오늘" : formatCheckInPageDate(selectedDate);
+  const shellProps = {
+    navTitle: "데일리 체크",
+    eyebrow: "Daily Check-in",
+    title: periodTitle,
+    titleAccent: "체크",
+    description: "짧게 돌아보고 오늘의 체크를 남겨보세요.",
+  };
 
   if (isFuture) {
     return (
-      <CheckInFutureEmpty
-        title="아직 기록할 수 없는 날짜입니다"
-        description={`${formatCheckInPageDate(selectedDate)} 체크는 해당 날짜가 되면 열립니다.`}
-        actionHref={`/checkin/daily/${today}`}
-        actionLabel="오늘 기록하러 가기"
-      />
+      <CheckInFlowShell
+        {...shellProps}
+        contentClassName="check-in-flow__content check-in-flow__content--state"
+      >
+        <CheckInFutureEmpty
+          title="아직 기록할 수 없는 날짜입니다"
+          description={`${formatCheckInPageDate(selectedDate)} 체크는 해당 날짜가 되면 열립니다.`}
+          actionHref={`/checkin/daily/${today}`}
+          actionLabel="오늘 기록하러 가기"
+        />
+      </CheckInFlowShell>
     );
   }
 
   if (submission && !isRedo) {
-    redirect(checkInReportPath("daily", periodKey));
+    redirect(checkInReportPath("daily", selectedDate));
   }
 
   return (
-    <div className="check-in-form-page check-in-form-page--step">
+    <CheckInFlowShell
+      {...shellProps}
+      hideHeader
+      contentClassName="check-in-flow__content check-in-flow__content--form"
+    >
       <CheckInForm
         key={`${form.slug}-${periodKey}-${isRedo ? "redo" : "new"}`}
         formSlug={form.slug}
         questions={form.questions}
         periodDate={selectedDate}
-        reportHref={checkInReportPath("daily", periodKey)}
+        reportHref={checkInReportPath("daily", selectedDate)}
         submitLabel={isRedo ? "다시 저장" : "체크인 저장"}
       />
-    </div>
+    </CheckInFlowShell>
   );
 }

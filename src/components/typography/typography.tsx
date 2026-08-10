@@ -12,7 +12,7 @@ const COLOR_CLASS: Record<Exclude<TypographyColor, "inherit">, string> = {
   primary: "text-[var(--color-text-primary)]",
   secondary: "text-[var(--color-text-secondary)]",
   disabled: "text-[var(--color-text-disabled)]",
-  action: "text-[var(--color-action-primary)]",
+  action: "typography-action",
 };
 
 const WEIGHT_CLASS: Record<TypographyWeight, string> = {

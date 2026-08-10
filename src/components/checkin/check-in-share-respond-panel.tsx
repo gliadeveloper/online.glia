@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { AppButtonLink } from "@/components/app";
+import { TrustButton, TrustButtonLink } from "@/components/corporate-trust/app-trust-ui";
 import { CheckInShareReportView } from "@/components/checkin/check-in-share-report-view";
 import { Typography } from "@/components/typography/typography";
 import type { CheckInShareGrantPreview } from "@/lib/checkin-share/types";
@@ -53,9 +53,9 @@ export function CheckInShareRespondPanel({ preview }: CheckInShareRespondPanelPr
         <Typography as="p" role="bodySecondary" color="secondary">
           코치가 피드백을 준비하면 코칭 탭에서 확인할 수 있습니다.
         </Typography>
-        <AppButtonLink href="/coaching" variant="secondary">
+        <TrustButtonLink href="/coaching" variant="secondary">
           코칭으로 이동
-        </AppButtonLink>
+        </TrustButtonLink>
       </div>
     );
   }
@@ -66,9 +66,9 @@ export function CheckInShareRespondPanel({ preview }: CheckInShareRespondPanelPr
         <Typography as="p" role="body" weight="semibold" color="primary">
           공유 요청을 거절했습니다.
         </Typography>
-        <AppButtonLink href="/checkin" variant="secondary">
+        <TrustButtonLink href="/checkin" variant="secondary">
           체크인으로 돌아가기
-        </AppButtonLink>
+        </TrustButtonLink>
       </div>
     );
   }
@@ -106,26 +106,22 @@ export function CheckInShareRespondPanel({ preview }: CheckInShareRespondPanelPr
       )}
 
       <div className="check-in-share-respond__actions">
-        <button
+        <TrustButton
           type="button"
+          variant="primary"
           disabled={loading !== null || !preview.canAccept}
           onClick={() => respond("ACCEPT")}
-          className="check-in-share-respond__btn check-in-share-respond__btn--accept shell-focus-ring"
         >
-          <Typography as="span" role="bodySecondary" weight="semibold" className="app-btn__label">
-            {loading === "accept" ? "처리 중..." : "수락하고 공유하기"}
-          </Typography>
-        </button>
-        <button
+          {loading === "accept" ? "처리 중..." : "수락하고 공유하기"}
+        </TrustButton>
+        <TrustButton
           type="button"
+          variant="secondary"
           disabled={loading !== null}
           onClick={() => respond("DECLINE")}
-          className="check-in-share-respond__btn check-in-share-respond__btn--decline shell-focus-ring"
         >
-          <Typography as="span" role="bodySecondary" weight="medium" color="secondary">
-            {loading === "decline" ? "처리 중..." : "거절"}
-          </Typography>
-        </button>
+          {loading === "decline" ? "처리 중..." : "거절"}
+        </TrustButton>
       </div>
 
       {error && (

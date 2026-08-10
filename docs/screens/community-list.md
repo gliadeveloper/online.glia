@@ -62,7 +62,7 @@
 ## 구현 참고
 
 - `src/app/(app)/(tabs)/community/page.tsx`
-- `src/components/community/post-list-card.tsx`
+- `src/components/community/community-post-card.tsx`
 - `src/components/community/community-write-fab.tsx`
 
 ## 미결 / v2

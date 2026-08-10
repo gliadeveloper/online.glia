@@ -1,8 +1,5 @@
-import {
-  isLiveKitMetadata,
-  isR2VideoMetadata,
-  parseContentMetadata,
-} from "@/lib/media/content-metadata";
+import { isYoutubeUrl } from "@/lib/media/youtube";
+import { isZoomUrl } from "@/lib/media/zoom";
 
 type CurriculumCourse = Awaited<
   ReturnType<typeof import("@/lib/curriculum-admin").getCourseCurriculum>
@@ -23,12 +20,10 @@ export type PublishChecklist = {
 function lessonContentReady(lesson: CurriculumCourse["modules"][number]["lessons"][number]) {
   switch (lesson.type) {
     case "VIDEO": {
-      const hasVideo = lesson.contents.some((content) => {
-        if (content.url?.trim()) return true;
-        const metadata = parseContentMetadata(content.metadata);
-        return isR2VideoMetadata(metadata);
-      });
-      return { ok: hasVideo, detail: hasVideo ? undefined : "동영상 업로드 필요" };
+      const hasYoutube = lesson.contents.some(
+        (content) => content.type === "VIDEO" && isYoutubeUrl(content.url ?? ""),
+      );
+      return { ok: hasYoutube, detail: hasYoutube ? undefined : "YouTube URL 필요" };
     }
     case "TEXT": {
       const hasBody = lesson.contents.some((content) => content.body?.trim());
@@ -46,11 +41,11 @@ function lessonContentReady(lesson: CurriculumCourse["modules"][number]["lessons
       return { ok, detail: ok ? undefined : "과제 설정 필요" };
     }
     case "LIVE": {
-      const hasSchedule = lesson.contents.some((content) => {
-        const metadata = parseContentMetadata(content.metadata);
-        return isLiveKitMetadata(metadata) && Boolean(metadata.scheduledAt?.trim());
-      });
-      return { ok: hasSchedule, detail: hasSchedule ? undefined : "라이브 시작 일시 필요" };
+      const hasZoom = lesson.contents.some((content) => isZoomUrl(content.url));
+      return {
+        ok: hasZoom,
+        detail: hasZoom ? undefined : "Zoom URL 필요",
+      };
     }
     default:
       return { ok: false, detail: "지원하지 않는 레슨 타입" };

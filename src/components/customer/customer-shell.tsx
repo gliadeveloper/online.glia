@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 const links = [
   { href: "/dashboard", label: "홈", exact: true },
   { href: "/shop", label: "상품" },
-  { href: "/lms", label: "학습" },
+  { href: "/learning", label: "학습" },
   { href: "/coaching", label: "코칭" },
   { href: "/checkin", label: "체크인" },
   { href: "/orders", label: "주문" },

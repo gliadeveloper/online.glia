@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import type { Prisma } from "@/generated/prisma/client";
+
 import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
 import { adminUpdateCoachingSession } from "@/lib/coaching-admin";
 
@@ -41,6 +43,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       summary?: string | null;
       scheduledAt?: string;
       bodyMarkdown?: string | null;
+      bodyMetadata?: Prisma.InputJsonValue | null;
       publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
       progressStatus?: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
     };
@@ -55,6 +58,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       summary: body.summary,
       scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : undefined,
       bodyMarkdown: body.bodyMarkdown,
+      bodyMetadata: body.bodyMetadata,
       publicationStatus: body.publicationStatus,
       progressStatus: body.progressStatus,
     });

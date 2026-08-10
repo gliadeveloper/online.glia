@@ -74,6 +74,7 @@ export default async function AdminCoachingSessionDetailPage({ params }: Props) 
         summary={session.summary}
         scheduledAt={session.scheduledAt.toISOString()}
         bodyMarkdown={session.bodyMarkdown}
+        bodyMetadata={session.bodyMetadata}
         publicationStatus={session.publicationStatus}
         progressStatus={session.progressStatus}
       />

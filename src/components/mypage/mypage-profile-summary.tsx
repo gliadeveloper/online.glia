@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { TrustButtonLink } from "@/components/corporate-trust/app-trust-ui";
 import { Typography } from "@/components/typography/typography";
 import type { MyPageData } from "@/lib/mypage";
 
@@ -21,18 +20,13 @@ export function MyPageProfileSummary({ data }: MyPageProfileSummaryProps) {
         <Typography as="h2" id="mypage-profile-heading" role="sectionTitle" weight="semibold" color="primary">
           프로필
         </Typography>
-        <Link href="/mypage/edit" className="app-btn app-btn--secondary shell-focus-ring">
-          <Typography as="span" role="bodySecondary" weight="medium" color="primary">
-            수정
-          </Typography>
-        </Link>
+        <TrustButtonLink href="/mypage/edit" variant="secondary" className="!min-h-10 !px-4 !py-2 text-sm">
+          수정
+        </TrustButtonLink>
       </div>
 
       <div className="flex items-start gap-4">
-        <div
-          className="community-avatar community-avatar--md text-xl font-semibold text-[var(--color-action-primary)]"
-          aria-hidden="true"
-        >
+        <div className="community-avatar community-avatar--md text-xl" aria-hidden="true">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />

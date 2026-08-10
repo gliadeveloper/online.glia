@@ -1,0 +1,186 @@
+/* Shared lesson markdown typography — customer view + instructor preview */
+
+.lesson-markdown-prose.post-markdown,
+.lesson-md-editor .wmde-markdown {
+  color: #334155;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+.lesson-markdown-prose.post-markdown > * + *,
+.lesson-md-editor .wmde-markdown > * + * {
+  margin-top: 1rem;
+}
+
+.lesson-markdown-prose.post-markdown h1,
+.lesson-markdown-prose.post-markdown h2,
+.lesson-markdown-prose.post-markdown h3,
+.lesson-markdown-prose.post-markdown h4,
+.lesson-markdown-prose.post-markdown h5,
+.lesson-markdown-prose.post-markdown h6,
+.lesson-md-editor .wmde-markdown h1,
+.lesson-md-editor .wmde-markdown h2,
+.lesson-md-editor .wmde-markdown h3,
+.lesson-md-editor .wmde-markdown h4,
+.lesson-md-editor .wmde-markdown h5,
+.lesson-md-editor .wmde-markdown h6 {
+  color: #0f172a;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.lesson-markdown-prose.post-markdown h1,
+.lesson-md-editor .wmde-markdown h1 {
+  margin: 0 0 1rem;
+  font-size: 1.875rem;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.lesson-markdown-prose.post-markdown h2,
+.lesson-md-editor .wmde-markdown h2 {
+  margin: 1.5rem 0 1rem;
+  font-size: 1.5rem;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.lesson-markdown-prose.post-markdown h3,
+.lesson-md-editor .wmde-markdown h3 {
+  margin: 1.25rem 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.lesson-markdown-prose.post-markdown h4,
+.lesson-md-editor .wmde-markdown h4 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.lesson-markdown-prose.post-markdown h5,
+.lesson-md-editor .wmde-markdown h5 {
+  margin: 0.875rem 0 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.lesson-markdown-prose.post-markdown h6,
+.lesson-md-editor .wmde-markdown h6 {
+  margin: 0.875rem 0 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.lesson-markdown-prose.post-markdown p,
+.lesson-md-editor .wmde-markdown p {
+  margin: 0 0 0.75rem;
+  color: #334155;
+}
+
+.lesson-markdown-prose.post-markdown p:last-child,
+.lesson-md-editor .wmde-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.lesson-markdown-prose.post-markdown ul,
+.lesson-markdown-prose.post-markdown ol,
+.lesson-md-editor .wmde-markdown ul,
+.lesson-md-editor .wmde-markdown ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+  color: #334155;
+}
+
+.lesson-markdown-prose.post-markdown ul,
+.lesson-md-editor .wmde-markdown ul {
+  list-style: disc;
+}
+
+.lesson-markdown-prose.post-markdown ol,
+.lesson-md-editor .wmde-markdown ol {
+  list-style: decimal;
+}
+
+.lesson-markdown-prose.post-markdown li + li,
+.lesson-md-editor .wmde-markdown li + li {
+  margin-top: 0.375rem;
+}
+
+.lesson-markdown-prose.post-markdown blockquote,
+.lesson-md-editor .wmde-markdown blockquote {
+  margin: 0 0 0.75rem;
+  padding: 0 0 0 1rem;
+  border-left: 3px solid #cbd5e1;
+  color: #64748b;
+}
+
+.lesson-markdown-prose.post-markdown hr,
+.lesson-md-editor .wmde-markdown hr {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.lesson-markdown-prose.post-markdown a,
+.lesson-markdown-prose.post-markdown .post-markdown__link,
+.lesson-md-editor .wmde-markdown a {
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.lesson-markdown-prose.post-markdown pre,
+.lesson-md-editor .wmde-markdown pre {
+  margin: 0 0 0.75rem;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 1rem;
+  font-size: 0.8125rem;
+}
+
+.lesson-markdown-prose.post-markdown :not(pre) > code,
+.lesson-md-editor .wmde-markdown :not(pre) > code {
+  border-radius: 0.25rem;
+  background: #eef2ff;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.875em;
+  color: #4338ca;
+}
+
+.lesson-markdown-prose.post-markdown table,
+.lesson-md-editor .wmde-markdown table {
+  width: 100%;
+  margin: 0 0 0.75rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.lesson-markdown-prose.post-markdown th,
+.lesson-markdown-prose.post-markdown td,
+.lesson-md-editor .wmde-markdown th,
+.lesson-md-editor .wmde-markdown td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.lesson-markdown-prose.post-markdown th,
+.lesson-md-editor .wmde-markdown th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.lesson-markdown-prose.post-markdown img,
+.lesson-md-editor .wmde-markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.lesson-player-materials__markdown.post-markdown {
+  font-size: 0.875rem;
+}

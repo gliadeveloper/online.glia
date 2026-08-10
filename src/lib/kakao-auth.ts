@@ -152,7 +152,9 @@ type UpsertKakaoUserInput = {
   scopes?: string;
 };
 
-export async function upsertUserFromKakao(input: UpsertKakaoUserInput): Promise<User> {
+export async function upsertUserFromKakao(
+  input: UpsertKakaoUserInput,
+): Promise<{ user: User; isNewUser: boolean }> {
   const providerAccountId = String(input.kakaoUser.id);
   const profile = getKakaoProfile(input.kakaoUser);
   const emailInfo = normalizeEmail(profile.email, providerAccountId);
@@ -172,7 +174,7 @@ export async function upsertUserFromKakao(input: UpsertKakaoUserInput): Promise<
   });
 
   if (existingIdentity) {
-    return prisma.$transaction(async (tx) => {
+    const user = await prisma.$transaction(async (tx) => {
       await tx.identity.update({
         where: { id: existingIdentity.id },
         data: {
@@ -217,6 +219,7 @@ export async function upsertUserFromKakao(input: UpsertKakaoUserInput): Promise<
 
       return user;
     });
+    return { user, isNewUser: false };
   }
 
   const linkedUser = profile.email
@@ -224,7 +227,7 @@ export async function upsertUserFromKakao(input: UpsertKakaoUserInput): Promise<
     : null;
 
   if (linkedUser) {
-    return prisma.$transaction(async (tx) => {
+    const user = await prisma.$transaction(async (tx) => {
       await tx.identity.create({
         data: {
           userId: linkedUser.id,
@@ -259,23 +262,20 @@ export async function upsertUserFromKakao(input: UpsertKakaoUserInput): Promise<
 
       return user;
     });
+    return { user, isNewUser: false };
   }
 
-  return prisma.$transaction(async (tx) => {
-    const user = await tx.user.create({
+  const user = await prisma.$transaction(async (tx) => {
+    return tx.user.create({
       data: {
         email: emailInfo.email,
         emailKind: emailInfo.emailKind,
         emailVerifiedAt: emailInfo.emailKind === "VERIFIED" ? new Date() : null,
-        name: profile.nickname,
+        name: null,
         role: "USER",
         status: "ACTIVE",
+        onboardingCompletedAt: null,
         lastLoginAt: new Date(),
-        profile: {
-          create: {
-            avatarUrl: profile.avatarUrl,
-          },
-        },
         identities: {
           create: {
             provider: "KAKAO",
@@ -292,7 +292,7 @@ export async function upsertUserFromKakao(input: UpsertKakaoUserInput): Promise<
         },
       },
     });
-
-    return user;
   });
+
+  return { user, isNewUser: true };
 }

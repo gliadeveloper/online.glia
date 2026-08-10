@@ -18,9 +18,9 @@ export function PrimaryNavInline({ className = "" }: PrimaryNavInlineProps) {
       id="primary-nav"
       aria-label="주요 메뉴"
       data-slot="primary-nav-inline"
-      className={className}
+      className={`primary-nav-trust ${className}`}
     >
-      <ul className="flex items-center gap-1">
+      <ul className="primary-nav-inline__list">
         {primaryNavItems.map((item) => {
           const { href, label, Icon } = item;
           const exact = "exact" in item ? item.exact : undefined;
@@ -32,15 +32,7 @@ export function PrimaryNavInline({ className = "" }: PrimaryNavInlineProps) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 data-active={active ? "true" : "false"}
-                className={`shell-focus-ring inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] px-4 py-2 transition-colors ${typoRoleClass("bodySecondary")} ${
-                  active
-                    ? "font-semibold text-[var(--color-text-primary)]"
-                    : "font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]"
-                }`}
-                style={{
-                  transitionDuration: "var(--motion-duration-normal)",
-                  transitionTimingFunction: "var(--motion-ease-standard)",
-                }}
+                className={`primary-nav-inline__link shell-focus-ring ${typoRoleClass("bodySecondary")}`}
               >
                 <Icon filled={active} className="size-5 shrink-0" />
                 <span>{label}</span>

@@ -17,9 +17,9 @@
 
 | type | UI |
 |------|-----|
-| **VIDEO** | R2 플레이어 + 완료 버튼 |
-| **LIVE** | SCHEDULED: 카운트다운 / LIVE: LiveKit room / ENDED: 종료 안내 (VOD 변환 후 → VIDEO) |
-| **TEXT** | Markdown 본문 |
+| **VIDEO** | YouTube iframe + 완료 버튼 |
+| **LIVE** | Zoom 입장 링크 (URL 등록 시) |
+| **TEXT** | BlockNote 본문 |
 | **QUIZ** | Quiz player |
 | **ASSIGNMENT** | 제출 폼 |
 
@@ -32,8 +32,14 @@
 | 조건 | UI |
 |------|-----|
 | enrollment 없음 / 만료 | gate — 만료 안내 or 404 |
-| LIVE + coach 미시작 | 카운트다운, 입장 불가 |
-| LIVE + 진행 중 | 입장 버튼 → room |
+| LIVE + Zoom 미등록 | 「Zoom 링크 미등록」 안내 |
+| LIVE + Zoom URL | 「Zoom 입장하기」 외부 링크 |
+
+---
+
+## LIVE 다시보기 (운영)
+
+라이브 종료 후 다시보기는 **LIVE 레슨 삭제 → VIDEO 레슨 신규 생성 → YouTube URL 등록**으로 처리합니다.
 
 ---
 
@@ -42,7 +48,6 @@
 | 액션 | 대상 |
 |------|------|
 | 완료 | progress API → 코스 상세 refresh |
-| LIVE token | `/api/learning/lessons/[id]/live-token` (LIVE only) |
 
 ---
 

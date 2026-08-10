@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Typography } from "@/components/typography/typography";
 import {
   formatCheckInDayOfMonth,
   formatCheckInShortDate,
@@ -17,7 +16,7 @@ export type CheckInDayStripItem = {
 
 type CheckInDayStripProps = {
   days: CheckInDayStripItem[];
-  labelId: string;
+  title: React.ReactNode;
 };
 
 function CheckIcon({ className }: { className?: string }) {
@@ -79,37 +78,17 @@ function DayStripCell({ day }: { day: CheckInDayStripItem }) {
   const ariaLabel = `${formatCheckInShortDate(day.dateKey)} ${weekday}${day.isRecorded ? ", 기록 완료" : ", 미기록"}${day.isToday ? ", 오늘" : ""}${day.isFuture ? ", 예정" : ""}`;
 
   const circle = day.isRecorded ? (
-    <CheckIcon className="check-in-strip__check size-5 shrink-0" />
+    <CheckIcon className="check-in-strip__check" />
   ) : (
-    <Typography
-      as="span"
-      role="bodyCompact"
-      weight="semibold"
-      color="primary"
-      className="check-in-strip__cell-date"
-    >
-      {dayOfMonth}
-    </Typography>
+    <span className="check-in-strip__cell-date">{dayOfMonth}</span>
   );
 
   const column = (
     <div className={columnClassName(day)}>
-      <Typography
-        as="span"
-        role="caption"
-        weight="medium"
-        color="secondary"
-        className="check-in-strip__weekday"
-      >
-        {weekday}
-      </Typography>
+      <span className="check-in-strip__weekday">{weekday}</span>
 
       {day.isFuture || !day.href ? (
-        <div
-          aria-label={ariaLabel}
-          aria-disabled="true"
-          className={cellClassName(day)}
-        >
+        <div aria-label={ariaLabel} aria-disabled="true" className={cellClassName(day)}>
           {circle}
         </div>
       ) : (
@@ -128,17 +107,19 @@ function DayStripCell({ day }: { day: CheckInDayStripItem }) {
   return <div role="listitem">{column}</div>;
 }
 
-export function CheckInDayStrip({ days, labelId }: CheckInDayStripProps) {
+export function CheckInDayStrip({ days, title }: CheckInDayStripProps) {
   return (
-    <section aria-labelledby={labelId} className="check-in-strip">
-      <Typography as="h2" id={labelId} className="sr-only">
-        7일 체크 캘린더
-      </Typography>
+    <section aria-labelledby="check-in-strip-heading" className="check-in-hub-section check-in-strip">
+      <h2 id="check-in-strip-heading" className="check-in-hub-status__title check-in-strip__heading">
+        {title}
+      </h2>
 
-      <div className="check-in-strip__scroll" role="list">
-        {days.map((day) => (
-          <DayStripCell key={day.dateKey} day={day} />
-        ))}
+      <div className="check-in-strip__panel">
+        <div className="check-in-strip__scroll" role="list">
+          {days.map((day) => (
+            <DayStripCell key={day.dateKey} day={day} />
+          ))}
+        </div>
       </div>
     </section>
   );

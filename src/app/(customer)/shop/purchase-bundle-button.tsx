@@ -41,7 +41,7 @@ export function PurchaseBundleButton({
         return;
       }
 
-      router.push("/lms?purchased=1");
+      router.push("/learning?purchased=1");
       router.refresh();
     } catch {
       setError("네트워크 오류가 발생했습니다.");

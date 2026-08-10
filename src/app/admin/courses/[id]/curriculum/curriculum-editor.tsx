@@ -75,7 +75,7 @@ export function CurriculumEditor({ courseId, modules: initialModules }: Curricul
   }
 
   async function addContent(lessonId: string) {
-    const url = prompt("콘텐츠 URL (VOD)");
+    const url = prompt("YouTube URL (watch 또는 youtu.be)");
     if (!url?.trim()) return;
     await apiCall(`/api/admin/lessons/${lessonId}/contents`, "POST", {
       type: "VIDEO",

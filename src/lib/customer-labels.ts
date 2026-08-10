@@ -44,11 +44,11 @@ export const coachingSessionProgressLabels: Record<CoachingSessionProgressStatus
 };
 
 export const orderStatusLabels: Record<OrderStatus, string> = {
-  PENDING: "결제 대기",
-  PAID: "결제 완료",
+  PENDING: "승인 대기",
+  PAID: "승인 완료",
   PARTIALLY_REFUNDED: "부분 환불",
   REFUNDED: "환불됨",
-  CANCELLED: "취소됨",
+  CANCELLED: "거절됨",
 };
 
 export const productKindLabels: Record<ProductKind, string> = {

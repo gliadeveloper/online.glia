@@ -183,11 +183,7 @@ export function LessonAssessmentPanel({
   }
 
   if (lessonType !== "QUIZ" && lessonType !== "ASSIGNMENT") {
-    return (
-      <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center text-sm text-zinc-500">
-        이 레슨은 VIDEO/TEXT 타입입니다. 커리큘럼 편집기에서 콘텐츠를 관리하세요.
-      </div>
-    );
+    return null;
   }
 
   return (

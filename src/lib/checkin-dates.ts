@@ -139,6 +139,11 @@ export function isSundayDateKey(dateKey: string, timezone = "Asia/Seoul") {
   return getWeekdayEnShort(dateKey, timezone) === "Sun";
 }
 
+/** Weekly check-in forms open for new submissions on Sundays only. */
+export function isWeeklyCheckInWritableDay(dateKey: string, timezone = "Asia/Seoul") {
+  return isSundayDateKey(dateKey, timezone);
+}
+
 export function checkInHubHref() {
   return "/checkin";
 }

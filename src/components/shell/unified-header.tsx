@@ -11,9 +11,9 @@ export function UnifiedHeader({ isLoggedIn }: UnifiedHeaderProps) {
   return (
     <header
       data-slot="unified-header"
-      className="border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)]/95 backdrop-blur-sm"
+      className="unified-header-trust"
     >
-      <div className="mx-auto flex h-[var(--header-height)] max-w-5xl items-center gap-4 px-4">
+      <div className="mx-auto flex h-[var(--header-height)] w-full max-w-5xl items-center gap-4 px-4 lg:px-6">
         <BrandMark />
         <PrimaryNavInline className="min-w-0 flex-1" />
         <HeaderAuthAction isLoggedIn={isLoggedIn} />

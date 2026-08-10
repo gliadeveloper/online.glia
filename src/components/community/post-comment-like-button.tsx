@@ -54,12 +54,15 @@ export function PostCommentLikeButton({
       onClick={toggleLike}
       disabled={pending}
       aria-pressed={liked}
-      className="shell-focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-[var(--radius-md)] px-2 py-1 typo-subTypography12 font-medium text-[var(--color-text-secondary)] transition hover:bg-[var(--color-surface-muted)] disabled:opacity-60"
+      className={`trust-comment-like shell-focus-ring inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold transition disabled:opacity-60${
+        liked ? " trust-comment-like--active" : ""
+      }`}
     >
       <svg
         aria-hidden="true"
-        className={`size-3.5 ${liked ? "fill-[var(--color-action-primary)] text-[var(--color-action-primary)]" : "fill-none"}`}
+        className="size-3.5"
         viewBox="0 0 24 24"
+        fill={liked ? "currentColor" : "none"}
         stroke="currentColor"
         strokeWidth={2}
       >

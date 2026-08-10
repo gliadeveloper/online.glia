@@ -1,13 +1,15 @@
+import { LessonContentView } from "@/components/learning/lesson/lesson-content-view";
+
 type CoachingMarkdownProps = {
-  content: string;
+  body: string | null;
+  bodyMetadata?: unknown;
+  className?: string;
 };
 
-export function CoachingMarkdown({ content }: CoachingMarkdownProps) {
+export function CoachingMarkdown({ body, bodyMetadata, className }: CoachingMarkdownProps) {
   return (
-    <article className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-6 shadow-sm">
-      <div className="prose prose-sm max-w-none text-[var(--color-text-primary)] prose-headings:text-[var(--color-text-primary)] prose-p:text-[var(--color-text-secondary)] prose-strong:text-[var(--color-text-primary)] prose-li:text-[var(--color-text-secondary)]">
-        <pre className="whitespace-pre-wrap font-sans typo-subTypography11 leading-relaxed">{content}</pre>
-      </div>
+    <article className="trust-card p-6">
+      <LessonContentView body={body} metadata={bodyMetadata} className={className} />
     </article>
   );
 }

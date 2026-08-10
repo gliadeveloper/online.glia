@@ -1,6 +1,9 @@
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { sessionInclude } from "@/lib/coaching-admin";
+import { coachingSessionHasBody } from "@/lib/coaching-session-content";
+import type { Prisma } from "@/generated/prisma/client";
+import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export const coachSessionListInclude = {
@@ -61,6 +64,7 @@ export async function coachUpdateSession(params: {
   sessionId: string;
   summary?: string | null;
   bodyMarkdown?: string | null;
+  bodyMetadata?: Prisma.InputJsonValue | null;
   publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
 }) {
   const session = await prisma.coachingSession.findUnique({
@@ -82,10 +86,21 @@ export async function coachUpdateSession(params: {
         ? null
         : params.bodyMarkdown.trim();
 
+  const bodyMetadata =
+    params.bodyMetadata === undefined
+      ? undefined
+      : params.bodyMetadata === null
+        ? PrismaRuntime.JsonNull
+        : params.bodyMetadata;
+
   let publicationStatus = params.publicationStatus;
   if (publicationStatus === "PUBLISHED") {
-    const nextBody = bodyMarkdown ?? session.bodyMarkdown;
-    if (!nextBody?.trim()) {
+    const nextSession = {
+      bodyMarkdown: bodyMarkdown ?? session.bodyMarkdown,
+      bodyMetadata:
+        params.bodyMetadata === undefined ? session.bodyMetadata : params.bodyMetadata,
+    };
+    if (!coachingSessionHasBody(nextSession)) {
       throw new ApiError("피드백 본문을 작성한 뒤 발행해 주세요.", 400, "VALIDATION_ERROR");
     }
   }
@@ -99,6 +114,7 @@ export async function coachUpdateSession(params: {
     data: {
       summary: params.summary === undefined ? undefined : params.summary,
       bodyMarkdown,
+      bodyMetadata,
       publicationStatus,
       publishedAt: publishing ? now : publicationStatus === "EMPTY" ? null : undefined,
       publishedById: publishing ? params.coachId : publicationStatus === "EMPTY" ? null : undefined,

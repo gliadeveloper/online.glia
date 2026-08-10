@@ -57,6 +57,7 @@ type ProductShopStateBase = {
 
 export type ProductShopState =
   | { kind: "purchase"; checkoutLabel: string; buttonLabel: string; preview: PurchasePreviewLine[] }
+  | { kind: "pending"; orderId: string; message: string; detail: string }
   | ({ kind: "owned"; learnHref: string } & Pick<ProductShopStateBase, "message" | "detail">)
   | ({ kind: "extend" } & ProductShopStateBase)
   | ({ kind: "restore" } & ProductShopStateBase)
@@ -65,8 +66,8 @@ export type ProductShopState =
 
 export const defaultPurchaseShopState: ProductShopState = {
   kind: "purchase",
-  checkoutLabel: "구매하기",
-  buttonLabel: "구매하기",
+  checkoutLabel: "신청하기",
+  buttonLabel: "신청하기",
   preview: [],
 };
 
@@ -384,16 +385,31 @@ export function deriveProductShopState(
 
   return {
     kind: "purchase",
-    checkoutLabel: `구매하기 · ${priceLabel}`,
-    buttonLabel: "구매하기",
+    checkoutLabel: `신청하기 · ${priceLabel}`,
+    buttonLabel: "신청하기",
     preview,
   };
 }
 
 export async function getProductShopState(userId: string, product: ProductForAssessment) {
   const now = new Date();
+  const { findPendingOrderForProduct } = await import("@/lib/fulfillment");
+  const pendingOrder = await findPendingOrderForProduct(userId, product.slug);
   const assessment = await assessProductCheckout(userId, product, now);
   const shopState = deriveProductShopState(product, assessment, now);
+
+  if (pendingOrder && shopState.kind !== "owned") {
+    return {
+      assessment,
+      shopState: {
+        kind: "pending" as const,
+        orderId: pendingOrder.id,
+        message: "승인 대기 중",
+        detail: "코치 확인 후 수강 권한이 부여됩니다. 주문 내역에서 진행 상태를 확인할 수 있어요.",
+      },
+    };
+  }
+
   return { assessment, shopState };
 }
 

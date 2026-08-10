@@ -23,7 +23,7 @@ export function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={loading}
-      className="shell-focus-ring min-h-11 w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] px-4 py-3 typo-subTypography11 font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] disabled:opacity-60"
+      className="corp-trust-btn-secondary corp-trust-focus shell-focus-ring disabled:opacity-60"
     >
       {loading ? "로그아웃 중..." : "로그아웃"}
     </button>
