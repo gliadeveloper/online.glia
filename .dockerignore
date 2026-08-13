@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+deploy/env.production.example
+*.md
+.dev.db
+/prisma/dev.db
+coverage
+.DS_Store

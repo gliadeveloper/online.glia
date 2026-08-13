@@ -13,7 +13,10 @@ npm run dev
 
 ## 배포
 
-**Vercel + Prisma Postgres (무료 tier):** [docs/DEPLOY.md](./docs/DEPLOY.md)
+| 환경 | 문서 |
+|------|------|
+| **Vercel + Prisma Postgres** | [docs/DEPLOY.md](./docs/DEPLOY.md) |
+| **iwinv VPS (Docker + PostgreSQL)** | [docs/DEPLOY-VPS.md](./docs/DEPLOY-VPS.md) |
 
 ## 주요 스크립트
 
