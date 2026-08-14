@@ -13,6 +13,8 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# next build imports Prisma modules; runtime URL comes from compose env_file
+ENV DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public"
 RUN npm run build:docker
 
 # One-shot: docker compose run --rm migrate
