@@ -10,8 +10,10 @@ import { assertRateLimit, getClientIp, RateLimitError } from "@/lib/signup/rate-
 import {
   createSignupDraft,
   findExistingAccountSummary,
+  markSignupDraftEmailVerified,
   sendSignupVerificationEmail,
 } from "@/lib/signup/service";
+import { isSignupEmailVerificationEnabled } from "@/lib/signup/constants";
 import { maskDisplayName, maskEmail, validatePassword } from "@/lib/signup/validation";
 
 export async function POST(request: Request) {
@@ -65,7 +67,16 @@ export async function POST(request: Request) {
 
     await sendSignupVerificationEmail(email, code);
 
-    const response = NextResponse.json({ duplicate: false, ok: true });
+    const skipEmailVerification = !isSignupEmailVerificationEnabled();
+    if (skipEmailVerification) {
+      await markSignupDraftEmailVerified(draft.id);
+    }
+
+    const response = NextResponse.json({
+      duplicate: false,
+      ok: true,
+      skipEmailVerification,
+    });
     response.cookies.set(
       SIGNUP_DRAFT_COOKIE,
       draft.id,

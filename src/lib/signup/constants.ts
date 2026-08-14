@@ -42,3 +42,8 @@ export function getSignupStepPath(step: "terms" | "marketing" | "profile") {
 export function needsOnboarding(onboardingCompletedAt: Date | null | undefined) {
   return !onboardingCompletedAt;
 }
+
+/** Set SIGNUP_EMAIL_VERIFICATION_ENABLED=true when transactional email is ready. */
+export function isSignupEmailVerificationEnabled() {
+  return process.env.SIGNUP_EMAIL_VERIFICATION_ENABLED === "true";
+}

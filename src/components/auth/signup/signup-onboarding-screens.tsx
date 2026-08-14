@@ -50,13 +50,19 @@ function DuplicateContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...pending, forceDraft: true }),
       });
-      const data = (await response.json()) as { error?: string; code?: string };
+      const data = (await response.json()) as {
+        skipEmailVerification?: boolean;
+        error?: string;
+        code?: string;
+      };
       if (!response.ok) {
         setError(getAuthErrorMessage(data.code, data.error));
         return;
       }
       router.push(
-        `/signup/verify?email=${encodeURIComponent(pending.email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
+        data.skipEmailVerification
+          ? `/signup/terms${buildNextQuery(next)}`
+          : `/signup/verify?email=${encodeURIComponent(pending.email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
       );
     } catch {
       setError("네트워크 오류가 발생했습니다.");

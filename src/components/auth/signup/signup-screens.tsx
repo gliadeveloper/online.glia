@@ -71,6 +71,7 @@ export function SignupEmailScreen() {
       const data = (await response.json()) as {
         duplicate?: boolean;
         account?: { email: string; maskedName: string; createdAt: string };
+        skipEmailVerification?: boolean;
         error?: string;
         code?: string;
       };
@@ -81,6 +82,7 @@ export function SignupEmailScreen() {
       }
 
       const nextQuery = next ? `&next=${encodeURIComponent(next)}` : "";
+      const nextPath = next ? `?next=${encodeURIComponent(next)}` : "";
 
       if (data.duplicate && data.account) {
         sessionStorage.setItem(
@@ -99,7 +101,11 @@ export function SignupEmailScreen() {
         return;
       }
 
-      router.push(`/signup/verify?email=${encodeURIComponent(email)}${nextQuery}`);
+      router.push(
+        data.skipEmailVerification
+          ? `/signup/terms${nextPath}`
+          : `/signup/verify?email=${encodeURIComponent(email)}${nextQuery}`,
+      );
     } catch {
       setError("네트워크 오류가 발생했습니다.");
     } finally {

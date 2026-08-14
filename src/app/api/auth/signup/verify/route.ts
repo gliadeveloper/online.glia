@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { ApiError, jsonError } from "@/lib/api";
-import { SIGNUP_DRAFT_COOKIE } from "@/lib/signup/constants";
+import { SIGNUP_DRAFT_COOKIE, isSignupEmailVerificationEnabled } from "@/lib/signup/constants";
 import { verifyVerificationCode } from "@/lib/signup/crypto";
 import { assertRateLimit, getClientIp, RateLimitError } from "@/lib/signup/rate-limit";
 import { getSignupDraftById } from "@/lib/signup/service";
@@ -28,6 +28,20 @@ export async function POST(request: Request) {
     const draft = await getSignupDraftById(draftId);
     if (!draft) {
       throw new ApiError("회원가입 세션이 만료되었습니다. 처음부터 다시 시도해 주세요.", 401, "DRAFT_EXPIRED");
+    }
+
+    if (!isSignupEmailVerificationEnabled()) {
+      if (!draft.emailVerifiedAt) {
+        await prisma.signupDraft.update({
+          where: { id: draft.id },
+          data: {
+            emailVerifiedAt: new Date(),
+            verifyCodeHash: null,
+            verifyExpiresAt: null,
+          },
+        });
+      }
+      return NextResponse.json({ ok: true });
     }
 
     if (!draft.verifyExpiresAt || draft.verifyExpiresAt.getTime() <= Date.now()) {

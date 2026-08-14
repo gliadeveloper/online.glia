@@ -7,6 +7,7 @@ import {
 import {
   SIGNUP_DRAFT_TTL_SECONDS,
   getAvatarPresetUrl,
+  isSignupEmailVerificationEnabled,
 } from "@/lib/signup/constants";
 
 export async function findExistingAccountSummary(email: string) {
@@ -64,10 +65,25 @@ export async function getSignupDraftById(id: string) {
 }
 
 export async function sendSignupVerificationEmail(email: string, code: string) {
+  if (!isSignupEmailVerificationEnabled()) {
+    return;
+  }
+
   if (process.env.NODE_ENV === "development") {
     console.info(`[signup] verification code for ${email}: ${code}`);
   }
   // Production: integrate email provider (Resend, SES, etc.)
+}
+
+export async function markSignupDraftEmailVerified(draftId: string) {
+  await prisma.signupDraft.update({
+    where: { id: draftId },
+    data: {
+      emailVerifiedAt: new Date(),
+      verifyCodeHash: null,
+      verifyExpiresAt: null,
+    },
+  });
 }
 
 export async function completeEmailSignup(draftId: string) {
