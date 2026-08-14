@@ -6,7 +6,8 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci
+# postinstall runs prisma generate — schema not copied yet at this stage
+RUN npm ci --ignore-scripts
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
