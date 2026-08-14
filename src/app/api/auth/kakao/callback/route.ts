@@ -15,9 +15,10 @@ import {
   OAUTH_STATE_COOKIE,
   verifyOAuthState,
 } from "@/lib/oauth-state";
+import { getRequestOrigin } from "@/lib/request-origin";
 
 function loginErrorRedirect(request: Request, message: string) {
-  const url = new URL("/login", request.url);
+  const url = new URL("/login", getRequestOrigin(request));
   url.searchParams.set("error", message);
   return NextResponse.redirect(url);
 }
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
     const redirectPath = isNewUser || !user.onboardingCompletedAt
       ? `/signup/terms${verifiedState.next ? `?next=${encodeURIComponent(verifiedState.next)}` : ""}`
       : resolvePostLoginPath(verifiedState.next, user.role);
-    const origin = new URL(request.url).origin;
+    const origin = getRequestOrigin(request);
     const response = NextResponse.redirect(`${origin}${redirectPath}`);
 
     await attachSessionCookie(response, user.id, request);
