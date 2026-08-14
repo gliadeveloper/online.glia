@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { CHECKIN_FORM_SLUGS } from "@/lib/checkin-form-templates";
+
 type QuestionDraft = {
   prompt: string;
   type: "SINGLE_CHOICE" | "SHORT_TEXT" | "YES_NO";
@@ -41,6 +43,21 @@ export function CreateFormPanel() {
 
   function removeQuestion(index: number) {
     setQuestions((current) => current.filter((_, i) => i !== index));
+  }
+
+  function handlePurposeChange(nextPurpose: string) {
+    setPurpose(nextPurpose);
+
+    if (nextPurpose === "DAILY_CHECKIN") {
+      setSlug(CHECKIN_FORM_SLUGS.daily);
+      setSchedule("DAILY");
+      return;
+    }
+
+    if (nextPurpose === "WEEKLY_CHECKIN") {
+      setSlug(CHECKIN_FORM_SLUGS.weekly);
+      setSchedule("WEEKLY");
+    }
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -131,7 +148,7 @@ export function CreateFormPanel() {
             <span className="font-medium text-zinc-700">목적</span>
             <select
               value={purpose}
-              onChange={(event) => setPurpose(event.target.value)}
+              onChange={(event) => handlePurposeChange(event.target.value)}
               className="w-full rounded-xl border border-zinc-200 px-4 py-3 outline-none ring-violet-300 focus:ring-2"
             >
               <option value="SURVEY">설문</option>
@@ -162,6 +179,16 @@ export function CreateFormPanel() {
           />
           생성 즉시 발행
         </label>
+        {(purpose === "DAILY_CHECKIN" || purpose === "WEEKLY_CHECKIN") && (
+          <p className="mt-3 text-sm text-amber-700">
+            체크인 폼은 slug가 <code className="rounded bg-amber-100 px-1">{slug}</code> 이고
+            발행(PUBLISHED) 상태여야 고객 화면에 표시됩니다.{" "}
+            <a href="/admin/checkins/forms" className="font-medium underline">
+              체크인 폼 등록
+            </a>
+            에서 기본 템플릿을 한 번에 등록할 수도 있습니다.
+          </p>
+        )}
       </section>
 
       <section className="space-y-4">

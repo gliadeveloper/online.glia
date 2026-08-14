@@ -22,6 +22,7 @@ const navSections = [
     items: [
       { href: "/admin/forms", label: "폼" },
       { href: "/admin/checkins", label: "체크인" },
+      { href: "/admin/checkins/forms", label: "체크인 폼" },
       { href: "/admin/community/reports", label: "커뮤니티 신고" },
       { href: "/admin/enrollments", label: "수강" },
       { href: "/admin/coaching/entitlements", label: "코칭권" },

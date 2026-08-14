@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, purposeLabels, requireAdmin } from "@/lib/admin";
+import { getCheckInFormsSetupStatus } from "@/lib/checkin-admin-setup";
 import { prisma } from "@/lib/prisma";
 
 type AdminCheckinsPageProps = {
@@ -11,6 +12,8 @@ type AdminCheckinsPageProps = {
 export default async function AdminCheckinsPage({ searchParams }: AdminCheckinsPageProps) {
   await requireAdmin();
   const { purpose } = await searchParams;
+  const formSetup = await getCheckInFormsSetupStatus();
+  const missingForms = formSetup.filter((item) => !item.isReady);
 
   const purposeFilter =
     purpose === "DAILY_CHECKIN" || purpose === "WEEKLY_CHECKIN"
@@ -45,11 +48,34 @@ export default async function AdminCheckinsPage({ searchParams }: AdminCheckinsP
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium text-violet-600">Check-ins</p>
-        <h1 className="text-3xl font-semibold tracking-tight">체크인 기록</h1>
-        <p className="mt-1 text-zinc-600">고객 제출 내역을 날짜·유형별로 확인합니다.</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-violet-600">Check-ins</p>
+          <h1 className="text-3xl font-semibold tracking-tight">체크인 기록</h1>
+          <p className="mt-1 text-zinc-600">고객 제출 내역을 날짜·유형별로 확인합니다.</p>
+        </div>
+        <Link
+          href="/admin/checkins/forms"
+          className="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm"
+        >
+          체크인 폼 등록
+        </Link>
       </div>
+
+      {missingForms.length > 0 && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
+          <p className="font-medium">
+            {missingForms.map((item) => item.title).join(", ")} 폼이 아직 준비되지 않았습니다.
+          </p>
+          <p className="mt-1">
+            고객 화면에서 체크인하려면 발행된 폼이 필요합니다.{" "}
+            <Link href="/admin/checkins/forms" className="font-medium text-amber-950 underline">
+              체크인 폼 등록
+            </Link>
+            에서 기본 템플릿을 등록하세요.
+          </p>
+        </div>
+      )}
 
       <div className="flex gap-2">
         {tabs.map((tab) => (
