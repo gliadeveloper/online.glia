@@ -1,3 +1,4 @@
+import { normalizeCatalogSlug } from "@/lib/catalog-slug";
 import { prisma } from "@/lib/prisma";
 
 const courseCatalogSelect = {
@@ -69,7 +70,7 @@ export async function getActiveProducts(limit?: number) {
 
 export async function getProductBySlug(slug: string) {
   return prisma.product.findFirst({
-    where: { slug, isActive: true },
+    where: { slug: normalizeCatalogSlug(slug), isActive: true },
     include: productCatalogInclude,
   });
 }

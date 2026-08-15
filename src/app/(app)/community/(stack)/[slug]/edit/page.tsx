@@ -5,6 +5,8 @@ import { getEditablePostBySlug } from "@/lib/posts";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
+export const dynamic = "force-dynamic";
+
 type CommunityEditPostPageProps = {
   params: Promise<{ slug: string }>;
 };

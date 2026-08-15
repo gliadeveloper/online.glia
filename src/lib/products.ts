@@ -2,6 +2,7 @@ import type { Product, ProductItemKind, ProductKind } from "@/generated/prisma/c
 
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
+import { sanitizeCatalogSlugInput } from "@/lib/catalog-slug";
 import { prisma } from "@/lib/prisma";
 
 export const productInclude = {
@@ -54,7 +55,7 @@ export async function createProduct(params: {
 
   const product = await prisma.product.create({
     data: {
-      slug: params.slug.trim(),
+      slug: sanitizeCatalogSlugInput(params.slug),
       title: params.title.trim(),
       description: params.description?.trim(),
       kind: params.kind,

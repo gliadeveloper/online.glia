@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { ApiError, jsonError } from "@/lib/api";
 import { recordPostViewIfNew } from "@/lib/post-views";
+import { normalizePostSlugParam } from "@/lib/post-write";
 import { prisma } from "@/lib/prisma";
 import { assertRateLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 import { getSessionUserId } from "@/lib/session";
@@ -15,7 +16,8 @@ const VIEWER_COOKIE = "glia_post_viewer";
 
 export async function POST(request: Request, context: RouteContext) {
   try {
-    const { slug } = await context.params;
+    const { slug: rawSlug } = await context.params;
+    const slug = normalizePostSlugParam(rawSlug);
     const ip = getClientIp(request);
     assertRateLimit(`post:view:${ip}`, 120, 60_000);
 

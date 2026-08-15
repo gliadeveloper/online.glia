@@ -1,18 +1,18 @@
-const SLUG_MAX_BASE = 48;
+export function buildPostSlug(_title: string): string {
+  // ASCII-only slugs avoid unicode path decoding issues in some server/proxy stacks.
+  return `post-${Date.now().toString(36)}`;
+}
 
-export function buildPostSlug(title: string): string {
-  const normalized = title
-    .trim()
-    .toLowerCase()
-    .normalize("NFKC")
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, SLUG_MAX_BASE);
+export function normalizePostSlugParam(value: string): string {
+  let slug = value;
 
-  const base = normalized || "post";
-  const suffix = Date.now().toString(36);
+  try {
+    slug = decodeURIComponent(slug);
+  } catch {
+    // keep raw value when not URI-encoded
+  }
 
-  return `${base}-${suffix}`;
+  return slug.normalize("NFKC").trim();
 }
 
 export function validatePostTitle(title: unknown): string {

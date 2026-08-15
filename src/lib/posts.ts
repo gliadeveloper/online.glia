@@ -1,4 +1,5 @@
 import { getWeekPeriodKey } from "@/lib/forms";
+import { normalizePostSlugParam } from "@/lib/post-write";
 import { prisma } from "@/lib/prisma";
 
 const authorSelect = {
@@ -120,8 +121,20 @@ export async function getPopularPostsThisWeek(limit = 6) {
 }
 
 export async function getPublishedPostBySlug(slug: string, viewerUserId?: string) {
-  const post = await prisma.post.findFirst({
-    where: { slug, ...publishedPostWhere },
+  const normalizedSlug = normalizePostSlugParam(slug);
+
+  // Match the API route lookup first (simple query), then load relations by id.
+  const match = await prisma.post.findFirst({
+    where: { slug: normalizedSlug, ...publishedPostWhere },
+    select: { id: true },
+  });
+
+  if (!match) {
+    return null;
+  }
+
+  const post = await prisma.post.findUnique({
+    where: { id: match.id },
     include: {
       user: { select: authorSelect },
       parentPost: {
@@ -206,7 +219,7 @@ export type PostDetail = NonNullable<Awaited<ReturnType<typeof getPublishedPostB
 
 export async function getPublishedPostSummaryBySlug(slug: string) {
   return prisma.post.findFirst({
-    where: { slug, ...publishedPostWhere },
+    where: { slug: normalizePostSlugParam(slug), ...publishedPostWhere },
     select: { id: true, slug: true, title: true },
   });
 }
@@ -214,7 +227,7 @@ export async function getPublishedPostSummaryBySlug(slug: string) {
 /** Parent for a new child post — root posts only (no nested children). */
 export async function getChildPostParentBySlug(slug: string) {
   return prisma.post.findFirst({
-    where: { slug, ...publishedPostWhere, parentPostId: null },
+    where: { slug: normalizePostSlugParam(slug), ...publishedPostWhere, parentPostId: null },
     select: { id: true, slug: true, title: true },
   });
 }
@@ -222,7 +235,7 @@ export async function getChildPostParentBySlug(slug: string) {
 /** Edit page — author-owned published post only. */
 export async function getEditablePostBySlug(slug: string, userId: string) {
   return prisma.post.findFirst({
-    where: { slug, ...publishedPostWhere, userId },
+    where: { slug: normalizePostSlugParam(slug), ...publishedPostWhere, userId },
     select: {
       id: true,
       slug: true,
