@@ -2,10 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CoachOrderDetailPanel } from "@/components/coach/coach-order-detail-panel";
+import { ApiError } from "@/lib/api";
 import { requireCoach } from "@/lib/coach";
 import { getCoachOrder } from "@/lib/coach-orders";
 
 type PageProps = { params: Promise<{ id: string }> };
+
+export const dynamic = "force-dynamic";
 
 export default async function CoachOrderDetailPage({ params }: PageProps) {
   const user = await requireCoach();
@@ -14,8 +17,11 @@ export default async function CoachOrderDetailPage({ params }: PageProps) {
   let detail;
   try {
     detail = await getCoachOrder(user.id, id);
-  } catch {
-    notFound();
+  } catch (error) {
+    if (error instanceof ApiError && error.code === "ORDER_NOT_FOUND") {
+      notFound();
+    }
+    throw error;
   }
 
   return (

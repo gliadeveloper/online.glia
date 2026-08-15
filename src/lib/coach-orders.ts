@@ -45,7 +45,7 @@ const coachOrderDetailInclude = {
   },
   fulfillments: {
     orderBy: { createdAt: "desc" as const },
-    select: { id: true, status: true, completedAt: true },
+    select: { id: true, status: true, fulfilledAt: true },
   },
 } as const;
 
@@ -62,7 +62,7 @@ async function assertCoachOrderAccess(coachId: string, orderId: string) {
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: coachOrderDetailInclude,
+    include: coachOrderInclude,
   });
 
   if (!order) {
@@ -74,7 +74,7 @@ async function assertCoachOrderAccess(coachId: string, orderId: string) {
     throw new ApiError("Order access denied", 403, "FORBIDDEN");
   }
 
-  return { order, coachProductIds: productIds };
+  return { orderId: order.id, coachProductIds: productIds };
 }
 
 export async function listCoachOrders(coachId: string) {
@@ -92,7 +92,13 @@ export async function listCoachOrders(coachId: string) {
 }
 
 export async function getCoachOrder(coachId: string, orderId: string) {
-  const { order, coachProductIds } = await assertCoachOrderAccess(coachId, orderId);
+  const { orderId: id, coachProductIds } = await assertCoachOrderAccess(coachId, orderId);
+
+  const order = await prisma.order.findUniqueOrThrow({
+    where: { id },
+    include: coachOrderDetailInclude,
+  });
+
   return { order, coachProductIds };
 }
 
