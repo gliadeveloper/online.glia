@@ -9,7 +9,7 @@ import type { ProgressStatus } from "@/generated/prisma/client";
 type LessonPlayerTab = "curriculum" | "materials";
 
 type LessonPlayerShellProps = {
-  slug: string;
+  courseId: string;
   lessonId: string;
   courseTitle: string;
   moduleTitle: string;
@@ -24,7 +24,7 @@ type LessonPlayerShellProps = {
 };
 
 export function LessonPlayerShell({
-  slug,
+  courseId,
   lessonId,
   courseTitle,
   moduleTitle,
@@ -96,7 +96,7 @@ export function LessonPlayerShell({
             <div className="lesson-player__mobile-panel" role="tabpanel">
               {mobileTab === "curriculum" ? (
                 <LessonCurriculumSidebar
-                  slug={slug}
+                  courseId={courseId}
                   activeLessonId={lessonId}
                   modules={modules}
                   progressMap={progressMap}
@@ -148,7 +148,7 @@ export function LessonPlayerShell({
             <div className="lesson-player-sidebar__body">
               {sidebarTab === "curriculum" ? (
                 <LessonCurriculumSidebar
-                  slug={slug}
+                  courseId={courseId}
                   activeLessonId={lessonId}
                   modules={modules}
                   progressMap={progressMap}

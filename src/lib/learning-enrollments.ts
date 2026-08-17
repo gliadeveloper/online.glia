@@ -1,8 +1,8 @@
 import { materializeEnrollmentExpiry } from "@/lib/enrollment-access";
 import { prisma } from "@/lib/prisma";
 import {
-  findExtensionProductSlug,
-  findLifetimeRestoreProductSlug,
+  findExtensionProductId,
+  findLifetimeRestoreProductId,
 } from "@/lib/shop-purchase-state";
 
 export async function getUserEnrollments(userId: string) {
@@ -16,7 +16,6 @@ export async function getUserEnrollments(userId: string) {
       course: {
         select: {
           id: true,
-          slug: true,
           title: true,
           description: true,
           thumbnailUrl: true,
@@ -45,14 +44,14 @@ export async function getUserEnrollments(userId: string) {
         return { extendHref: "/shop", restoreHref: null as string | null };
       }
 
-      const [extensionSlug, restoreSlug] = await Promise.all([
-        findExtensionProductSlug(enrollment.courseId),
-        findLifetimeRestoreProductSlug(enrollment.courseId),
+      const [extensionProductId, restoreProductId] = await Promise.all([
+        findExtensionProductId(enrollment.courseId),
+        findLifetimeRestoreProductId(enrollment.courseId),
       ]);
 
       return {
-        extendHref: extensionSlug ? `/shop/${extensionSlug}` : "/shop",
-        restoreHref: restoreSlug ? `/shop/${restoreSlug}` : null,
+        extendHref: extensionProductId ? `/shop/${extensionProductId}` : "/shop",
+        restoreHref: restoreProductId ? `/shop/${restoreProductId}` : null,
       };
     }),
   );

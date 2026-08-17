@@ -28,7 +28,6 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
       title?: string;
-      slug?: string;
       description?: string;
       level?: CourseLevel;
       thumbnailUrl?: string;
@@ -44,7 +43,6 @@ export async function POST(request: Request) {
     const course = await createCoachCourse({
       coachId: userId,
       title: body.title,
-      slug: body.slug,
       description: body.description,
       level: body.level,
       thumbnailUrl: body.thumbnailUrl,

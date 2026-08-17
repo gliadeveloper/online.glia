@@ -111,7 +111,7 @@ export async function getHomeNotifications(userId: string): Promise<HomeNotifica
             select: { conversation: { select: { session: { select: { id: true, title: true } } } } },
           },
           liveSession: {
-            select: { lesson: { select: { id: true, title: true, module: { select: { course: { select: { slug: true } } } } } } },
+            select: { lesson: { select: { id: true, title: true, module: { select: { course: { select: { id: true } } } } } } },
           },
         },
       },
@@ -121,7 +121,7 @@ export async function getHomeNotifications(userId: string): Promise<HomeNotifica
   return deliveries.map(({ id, event }) => {
     if (event.type === "LIVE_STARTED" && event.liveSession) {
       const lesson = event.liveSession.lesson;
-      return { id, kind: "live" as const, label: "지금 라이브 진행 중", title: lesson.title, href: `/learning/${lesson.module.course.slug}/lessons/${lesson.id}`, occurredAt: event.occurredAt };
+      return { id, kind: "live" as const, label: "지금 라이브 진행 중", title: lesson.title, href: `/learning/${lesson.module.course.id}/lessons/${lesson.id}`, occurredAt: event.occurredAt };
     }
     const session = event.coachingSession ?? event.coachingMessage?.conversation.session;
     if (!session) throw new Error("Notification event source is missing");

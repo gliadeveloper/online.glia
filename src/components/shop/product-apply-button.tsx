@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 type ProductApplyButtonProps = {
-  productSlug: string;
+  productId: string;
   label?: string;
   isLoggedIn: boolean;
   compact?: boolean;
@@ -16,7 +16,7 @@ type ProductApplyButtonProps = {
 };
 
 export function ProductApplyButton({
-  productSlug,
+  productId,
   label = "신청하기",
   isLoggedIn,
   compact = false,
@@ -46,7 +46,7 @@ export function ProductApplyButton({
     }
 
     if (!isLoggedIn) {
-      router.push(`/login?next=${encodeURIComponent(`/shop/${productSlug}`)}`);
+      router.push(`/login?next=${encodeURIComponent(`/shop/${productId}`)}`);
       return;
     }
 
@@ -58,8 +58,8 @@ export function ProductApplyButton({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productSlug,
-          idempotencyKey: `apply-${productSlug}-${Date.now()}`,
+          productId,
+          idempotencyKey: `apply-${productId}-${Date.now()}`,
         }),
       });
 

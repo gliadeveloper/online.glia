@@ -7,19 +7,19 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
       userId?: string;
-      productSlug?: string;
+      productId?: string;
       idempotencyKey?: string;
     };
 
     const userId = await resolveUserId(request, body);
 
-    if (!body.productSlug?.trim()) {
-      throw new ApiError("productSlug is required", 400, "PRODUCT_SLUG_REQUIRED");
+    if (!body.productId?.trim()) {
+      throw new ApiError("productId is required", 400, "PRODUCT_ID_REQUIRED");
     }
 
     const order = await checkout({
       userId,
-      productSlug: body.productSlug.trim(),
+      productId: body.productId.trim(),
       idempotencyKey: body.idempotencyKey?.trim(),
     });
 

@@ -56,7 +56,7 @@ export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDeta
                 <div>
                   <p className="font-medium">{line.product.title}</p>
                   <p className="text-sm text-zinc-500">
-                    {productKindLabels[line.product.kind]} · /shop/{line.product.slug}
+                    {productKindLabels[line.product.kind]} · /shop/{line.product.id}
                   </p>
                 </div>
                 <p className="font-semibold">{formatKrw(line.lineTotal)}</p>

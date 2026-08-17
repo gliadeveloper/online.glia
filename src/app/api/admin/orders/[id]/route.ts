@@ -13,7 +13,7 @@ const orderInclude = {
         include: {
           items: {
             include: {
-              course: { select: { id: true, title: true, slug: true } },
+              course: { select: { id: true, title: true } },
               coachingOffering: { select: { id: true, title: true, slug: true } },
             },
           },

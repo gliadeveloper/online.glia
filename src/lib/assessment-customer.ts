@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function submitQuizAttempt(params: {
   userId: string;
-  courseSlug: string;
+  courseId: string;
   quizId: string;
   answers: Array<{ questionId: string; optionId: string }>;
 }) {
@@ -12,7 +12,7 @@ export async function submitQuizAttempt(params: {
     where: { id: params.quizId },
     include: {
       lesson: {
-        include: { module: { select: { course: { select: { slug: true } } } } },
+        include: { module: { select: { course: { select: { id: true } } } } },
       },
       questions: {
         include: { options: true },
@@ -24,7 +24,7 @@ export async function submitQuizAttempt(params: {
     throw new ApiError("Quiz not found", 404, "QUIZ_NOT_FOUND");
   }
 
-  if (quiz.lesson.module.course.slug !== params.courseSlug) {
+  if (quiz.lesson.module.course.id !== params.courseId) {
     throw new ApiError("Forbidden", 403, "FORBIDDEN");
   }
 
@@ -69,14 +69,14 @@ export async function submitQuizAttempt(params: {
   if (isPassed) {
     await updateLessonProgress({
       userId: params.userId,
-      courseSlug: params.courseSlug,
+      courseId: params.courseId,
       lessonId: quiz.lessonId,
       status: "COMPLETED",
     });
   } else {
     await updateLessonProgress({
       userId: params.userId,
-      courseSlug: params.courseSlug,
+      courseId: params.courseId,
       lessonId: quiz.lessonId,
       status: "IN_PROGRESS",
     });
@@ -97,7 +97,7 @@ export async function submitQuizAttempt(params: {
 
 export async function submitAssignment(params: {
   userId: string;
-  courseSlug: string;
+  courseId: string;
   assignmentId: string;
   content: string;
 }) {
@@ -105,7 +105,7 @@ export async function submitAssignment(params: {
     where: { id: params.assignmentId },
     include: {
       lesson: {
-        include: { module: { select: { course: { select: { slug: true } } } } },
+        include: { module: { select: { course: { select: { id: true } } } } },
       },
     },
   });
@@ -114,7 +114,7 @@ export async function submitAssignment(params: {
     throw new ApiError("Assignment not found", 404, "ASSIGNMENT_NOT_FOUND");
   }
 
-  if (assignment.lesson.module.course.slug !== params.courseSlug) {
+  if (assignment.lesson.module.course.id !== params.courseId) {
     throw new ApiError("Forbidden", 403, "FORBIDDEN");
   }
 
@@ -148,7 +148,7 @@ export async function submitAssignment(params: {
 
   await updateLessonProgress({
     userId: params.userId,
-    courseSlug: params.courseSlug,
+      courseId: params.courseId,
     lessonId: assignment.lessonId,
     status: "COMPLETED",
   });

@@ -62,12 +62,6 @@ export function buildCoursePublishChecklist(course: CurriculumCourse): PublishCh
   });
 
   items.push({
-    id: "slug",
-    label: "URL 슬러그",
-    ok: Boolean(course.slug.trim()),
-  });
-
-  items.push({
     id: "modules",
     label: "모듈 1개 이상",
     ok: course.modules.length > 0,

@@ -22,7 +22,6 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
-      slug?: string;
       title?: string;
       description?: string;
       kind?: ProductKind;
@@ -40,8 +39,8 @@ export async function POST(request: Request) {
     const userId = await resolveUserId(request);
     await assertCoach(userId);
 
-    if (!body.slug?.trim() || !body.title?.trim() || !body.kind || body.listPrice == null) {
-      throw new ApiError("slug, title, kind, listPrice are required", 400, "VALIDATION_ERROR");
+    if (!body.title?.trim() || !body.kind || body.listPrice == null) {
+      throw new ApiError("title, kind, listPrice are required", 400, "VALIDATION_ERROR");
     }
 
     if (!body.items?.length) {
@@ -50,7 +49,6 @@ export async function POST(request: Request) {
 
     const product = await createCoachProduct({
       coachId: userId,
-      slug: body.slug,
       title: body.title,
       description: body.description,
       kind: body.kind,

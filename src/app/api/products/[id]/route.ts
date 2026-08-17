@@ -5,20 +5,20 @@ import { getProductPrice } from "@/lib/fulfillment";
 import { prisma } from "@/lib/prisma";
 
 type RouteContext = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 };
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { slug } = await context.params;
+    const { id } = await context.params;
 
     const product = await prisma.product.findFirst({
-      where: { slug, isActive: true },
+      where: { id, isActive: true },
       include: {
         items: {
           orderBy: { sortOrder: "asc" },
           include: {
-            course: { select: { id: true, slug: true, title: true, description: true } },
+            course: { select: { id: true, title: true, description: true } },
             coachingOffering: {
               select: {
                 id: true,

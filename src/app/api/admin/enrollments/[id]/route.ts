@@ -19,7 +19,7 @@ export async function GET(request: Request, context: RouteContext) {
       where: { id },
       include: {
         user: { select: { id: true, name: true, email: true } },
-        course: { select: { id: true, title: true, slug: true } },
+        course: { select: { id: true, title: true } },
         progress: {
           include: {
             lesson: { select: { id: true, title: true, order: true } },

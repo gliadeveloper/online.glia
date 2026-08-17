@@ -13,7 +13,7 @@ export async function GET() {
         items: {
           orderBy: { sortOrder: "asc" },
           include: {
-            course: { select: { id: true, slug: true, title: true } },
+            course: { select: { id: true, title: true } },
             coachingOffering: {
               select: {
                 id: true,

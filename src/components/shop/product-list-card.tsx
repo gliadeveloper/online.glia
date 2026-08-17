@@ -50,7 +50,7 @@ export function ProductListCard({ product, shopState }: ProductListCardProps) {
 
   return (
     <Link
-      href={`/shop/${product.slug}`}
+      href={`/shop/${product.id}`}
       className="shop-trust-product-card corp-trust-focus group"
     >
       <div className="flex flex-1 items-start justify-between gap-3">

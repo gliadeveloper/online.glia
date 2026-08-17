@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export async function getPurchasedProductSlugs(userId: string) {
+export async function getPurchasedProductIds(userId: string) {
   const lines = await prisma.orderLine.findMany({
     where: {
       order: {
@@ -9,9 +9,9 @@ export async function getPurchasedProductSlugs(userId: string) {
       },
     },
     select: {
-      product: { select: { slug: true } },
+      product: { select: { id: true } },
     },
   });
 
-  return new Set(lines.map((line) => line.product.slug));
+  return new Set(lines.map((line) => line.product.id));
 }

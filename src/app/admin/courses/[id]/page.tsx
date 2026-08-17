@@ -41,7 +41,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{course.title}</h1>
-          <p className="font-mono text-sm text-zinc-500">{course.slug}</p>
+          <p className="font-mono text-sm text-zinc-500">{course.id}</p>
         </div>
         <CourseActions courseId={course.id} status={course.status} />
         <CourseEditPanel

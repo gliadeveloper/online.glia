@@ -14,7 +14,7 @@ export default async function AdminEnrollmentsPage() {
       take: 100,
       include: {
         user: { select: { id: true, name: true, email: true } },
-        course: { select: { id: true, title: true, slug: true } },
+        course: { select: { id: true, title: true } },
       },
     }),
     prisma.user.findMany({

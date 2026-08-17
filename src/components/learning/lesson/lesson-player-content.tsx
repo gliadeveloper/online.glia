@@ -130,17 +130,17 @@ export function LessonMaterialsPanel({ contents, lessonTitle }: LessonMaterialsP
 }
 
 type LessonNavFooterProps = {
-  slug: string;
+  courseId: string;
   prevLesson: { id: string; title: string } | null;
   nextLesson: { id: string; title: string } | null;
 };
 
-export function LessonNavFooter({ slug, prevLesson, nextLesson }: LessonNavFooterProps) {
+export function LessonNavFooter({ courseId, prevLesson, nextLesson }: LessonNavFooterProps) {
   return (
     <nav aria-label="레슨 이동" className="lesson-player-nav">
       {prevLesson ? (
         <Link
-          href={`/learning/${slug}/lessons/${prevLesson.id}`}
+          href={`/learning/${courseId}/lessons/${prevLesson.id}`}
           className="lesson-player-nav__link lesson-player-nav__link--muted shell-focus-ring"
         >
           ← {prevLesson.title}
@@ -148,13 +148,13 @@ export function LessonNavFooter({ slug, prevLesson, nextLesson }: LessonNavFoote
       ) : null}
       {nextLesson ? (
         <Link
-          href={`/learning/${slug}/lessons/${nextLesson.id}`}
+          href={`/learning/${courseId}/lessons/${nextLesson.id}`}
           className="lesson-player-nav__link shell-focus-ring"
         >
           다음: {nextLesson.title} →
         </Link>
       ) : (
-        <Link href={`/learning/${slug}`} className="lesson-player-nav__link shell-focus-ring">
+        <Link href={`/learning/${courseId}`} className="lesson-player-nav__link shell-focus-ring">
           커리큘럼으로 돌아가기
         </Link>
       )}

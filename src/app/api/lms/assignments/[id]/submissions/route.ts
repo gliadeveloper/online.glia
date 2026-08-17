@@ -10,19 +10,19 @@ export async function POST(request: Request, context: RouteContext) {
     const { id: assignmentId } = await context.params;
     const body = (await request.json()) as {
       userId?: string;
-      courseSlug?: string;
+      courseId?: string;
       content?: string;
     };
 
     const userId = await resolveUserId(request, body);
 
-    if (!body.courseSlug?.trim()) {
-      return NextResponse.json({ error: "courseSlug is required" }, { status: 400 });
+    if (!body.courseId?.trim()) {
+      return NextResponse.json({ error: "courseId is required" }, { status: 400 });
     }
 
     const submission = await submitAssignment({
       userId,
-      courseSlug: body.courseSlug,
+      courseId: body.courseId,
       assignmentId,
       content: body.content ?? "",
     });

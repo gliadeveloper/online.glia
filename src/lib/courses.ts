@@ -28,7 +28,6 @@ export const courseInclude = {
 export async function createCourse(params: {
   actorId: string;
   title: string;
-  slug: string;
   description?: string;
   instructorId: string;
   organizationId?: string;
@@ -39,7 +38,6 @@ export async function createCourse(params: {
   const course = await prisma.course.create({
     data: {
       title: params.title.trim(),
-      slug: params.slug.trim(),
       description: params.description?.trim(),
       instructorId: params.instructorId,
       organizationId: params.organizationId,
@@ -56,7 +54,7 @@ export async function createCourse(params: {
     entityType: "Course",
     entityId: course.id,
     action: "COURSE_CREATED",
-    metadata: { slug: course.slug },
+    metadata: { courseId: course.id },
   });
 
   return course;
@@ -86,7 +84,7 @@ export async function updateCourseStatus(params: {
     entityType: "Course",
     entityId: course.id,
     action: params.action === "publish" ? "COURSE_PUBLISHED" : "COURSE_ARCHIVED",
-    metadata: { slug: course.slug },
+    metadata: { courseId: course.id },
   });
 
   return course;
@@ -118,7 +116,7 @@ export async function updateCourse(params: {
     entityType: "Course",
     entityId: course.id,
     action: "COURSE_UPDATED",
-    metadata: { slug: course.slug },
+    metadata: { courseId: course.id },
   });
 
   return course;

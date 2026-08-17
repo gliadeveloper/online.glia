@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       take: Number(url.searchParams.get("limit") ?? 100),
       include: {
         user: { select: { id: true, name: true, email: true } },
-        course: { select: { id: true, title: true, slug: true, status: true } },
+        course: { select: { id: true, title: true, status: true } },
       },
     });
 

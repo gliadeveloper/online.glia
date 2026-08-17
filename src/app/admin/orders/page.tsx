@@ -14,7 +14,7 @@ export default async function AdminOrdersPage() {
       user: { select: { id: true, name: true, email: true } },
       lines: {
         include: {
-          product: { select: { title: true, slug: true } },
+          product: { select: { title: true } },
         },
       },
       payments: {

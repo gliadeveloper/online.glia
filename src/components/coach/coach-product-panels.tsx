@@ -9,7 +9,6 @@ import type { ProductKind } from "@/generated/prisma/client";
 
 type ProductRow = {
   id: string;
-  slug: string;
   title: string;
   kind: ProductKind;
   listPrice: number;
@@ -60,7 +59,7 @@ export function CoachProductList({ products }: { products: ProductRow[] }) {
                 )}
               </div>
               <p className="mt-1 text-sm text-zinc-500">
-                /shop/{product.slug} · 주문 {product._count.orderLines}건
+                /shop/{product.id} · 주문 {product._count.orderLines}건
               </p>
               <p className="mt-1 text-xs text-zinc-400">
                 {product.items
@@ -87,7 +86,6 @@ type CoachCreateProductFormProps = {
 export function CoachCreateProductForm({ courses, offerings }: CoachCreateProductFormProps) {
   const router = useRouter();
   const [kind, setKind] = useState<ProductKind>("COURSE_ONLY");
-  const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [listPrice, setListPrice] = useState("99000");
@@ -117,7 +115,6 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          slug,
           title,
           description: description || undefined,
           kind,
@@ -160,16 +157,10 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
         </select>
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-2 text-sm">
-          <span className="font-medium">Slug</span>
-          <input value={slug} onChange={(e) => setSlug(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-        </label>
-        <label className="block space-y-2 text-sm">
-          <span className="font-medium">제목</span>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-        </label>
-      </div>
+      <label className="block space-y-2 text-sm">
+        <span className="font-medium">제목</span>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
+      </label>
 
       <label className="block space-y-2 text-sm">
         <span className="font-medium">설명</span>
@@ -218,7 +209,6 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
 
 type CoachProductEditPanelProps = {
   productId: string;
-  slug: string;
   kind: ProductKind;
   title: string;
   description: string | null;
@@ -307,7 +297,7 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
     <div className="space-y-4">
       <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-sm">
         <p className="font-medium text-zinc-800">{productKindLabels[props.kind]}</p>
-        <p className="mt-1 text-zinc-500">/shop/{props.slug}</p>
+        <p className="mt-1 break-all text-zinc-500">/shop/{props.productId}</p>
       </div>
 
       <form onSubmit={saveAll} className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">

@@ -17,7 +17,7 @@ export async function updateEnrollment(params: {
     },
     include: {
       user: { select: { id: true, name: true, email: true } },
-      course: { select: { id: true, title: true, slug: true } },
+      course: { select: { id: true, title: true } },
     },
   });
 

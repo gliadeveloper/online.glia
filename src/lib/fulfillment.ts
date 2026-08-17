@@ -24,7 +24,7 @@ const orderInclude = {
         include: {
           items: {
             include: {
-              course: { select: { id: true, slug: true, title: true } },
+              course: { select: { id: true, title: true } },
               coachingOffering: {
                 select: {
                   id: true,
@@ -289,7 +289,6 @@ const checkoutProductInclude = {
       course: {
         select: {
           id: true,
-          slug: true,
           title: true,
           defaultAccessDuration: true,
           defaultAccessDays: true,
@@ -304,9 +303,9 @@ const checkoutProductInclude = {
 
 type CheckoutProduct = Prisma.ProductGetPayload<{ include: typeof checkoutProductInclude }>;
 
-async function loadActiveProductBySlug(productSlug: string): Promise<CheckoutProduct | null> {
+async function loadActiveProductById(productId: string): Promise<CheckoutProduct | null> {
   return prisma.product.findFirst({
-    where: { slug: productSlug, isActive: true },
+    where: { id: productId, isActive: true },
     include: checkoutProductInclude,
   });
 }
@@ -358,7 +357,7 @@ async function runOrderFulfillment(
       action: "FULFILL_COMPLETED",
       metadata: {
         orderId: params.orderId,
-        productSlug: params.product.slug,
+        productId: params.product.id,
       },
     },
   });
@@ -366,12 +365,12 @@ async function runOrderFulfillment(
   return fulfillment;
 }
 
-export async function findPendingOrderForProduct(userId: string, productSlug: string) {
+export async function findPendingOrderForProduct(userId: string, productId: string) {
   return prisma.order.findFirst({
     where: {
       userId,
       status: "PENDING",
-      lines: { some: { product: { slug: productSlug } } },
+      lines: { some: { productId } },
     },
     select: { id: true, createdAt: true },
     orderBy: { createdAt: "desc" },
@@ -381,7 +380,7 @@ export async function findPendingOrderForProduct(userId: string, productSlug: st
 /** Class101-style apply — PENDING order without payment (PG 없음). */
 export async function submitProductApplication(params: {
   userId: string;
-  productSlug: string;
+  productId: string;
   idempotencyKey?: string;
 }) {
   if (params.idempotencyKey) {
@@ -395,7 +394,7 @@ export async function submitProductApplication(params: {
     }
   }
 
-  const product = await loadActiveProductBySlug(params.productSlug);
+  const product = await loadActiveProductById(params.productId);
   if (!product) {
     throw new Error("PRODUCT_NOT_FOUND");
   }
@@ -416,7 +415,7 @@ export async function submitProductApplication(params: {
     );
   }
 
-  const existingPending = await findPendingOrderForProduct(params.userId, product.slug);
+  const existingPending = await findPendingOrderForProduct(params.userId, product.id);
   if (existingPending) {
     throw new ApiError(
       "이미 승인 대기 중인 신청이 있습니다.",
@@ -450,7 +449,7 @@ export async function submitProductApplication(params: {
     entityType: "Order",
     entityId: order.id,
     action: "APPLICATION_SUBMITTED",
-    metadata: { productSlug: product.slug },
+    metadata: { productId: product.id },
   });
 
   return order;
@@ -536,7 +535,7 @@ export async function approveProductApplication(params: { orderId: string; actor
       entityType: "Order",
       entityId: order.id,
       action: "APPLICATION_APPROVED",
-      metadata: { productSlug: product.slug },
+      metadata: { productId: product.id },
     });
 
     return tx.order.findUniqueOrThrow({
@@ -584,7 +583,7 @@ export async function rejectProductApplication(params: {
 
 export async function checkout(params: {
   userId: string;
-  productSlug: string;
+  productId: string;
   idempotencyKey?: string;
 }) {
   if (params.idempotencyKey) {
@@ -598,7 +597,7 @@ export async function checkout(params: {
     }
   }
 
-  const product = await loadActiveProductBySlug(params.productSlug);
+  const product = await loadActiveProductById(params.productId);
 
   if (!product) {
     throw new Error("PRODUCT_NOT_FOUND");
@@ -866,7 +865,7 @@ export async function adminGrantCourseAccess(params: {
         data: accessData,
         include: {
           user: { select: { id: true, name: true, email: true } },
-          course: { select: { id: true, title: true, slug: true } },
+          course: { select: { id: true, title: true } },
         },
       })
     : await prisma.enrollment.create({
@@ -877,7 +876,7 @@ export async function adminGrantCourseAccess(params: {
         },
         include: {
           user: { select: { id: true, name: true, email: true } },
-          course: { select: { id: true, title: true, slug: true } },
+          course: { select: { id: true, title: true } },
         },
       });
 

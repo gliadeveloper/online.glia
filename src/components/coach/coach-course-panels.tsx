@@ -14,7 +14,6 @@ type CoachCreateCourseFormProps = {
 export function CoachCreateCourseForm({ onCreated }: CoachCreateCourseFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState<CourseLevel>("ALL_LEVELS");
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +30,6 @@ export function CoachCreateCourseForm({ onCreated }: CoachCreateCourseFormProps)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
-          slug: slug || undefined,
           description: description || undefined,
           level,
         }),
@@ -70,16 +68,6 @@ export function CoachCreateCourseForm({ onCreated }: CoachCreateCourseFormProps)
           required
           className="w-full rounded-xl border border-zinc-200 px-4 py-3 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
           placeholder="예: 30일 습관 코칭 기초"
-        />
-      </label>
-
-      <label className="block space-y-2 text-sm">
-        <span className="font-medium text-zinc-700">URL 슬러그 (선택)</span>
-        <input
-          value={slug}
-          onChange={(event) => setSlug(event.target.value)}
-          className="w-full rounded-xl border border-zinc-200 px-4 py-3 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-          placeholder="비워두면 제목에서 자동 생성"
         />
       </label>
 
@@ -130,7 +118,6 @@ export function CoachCreateCourseForm({ onCreated }: CoachCreateCourseFormProps)
 type CourseRow = {
   id: string;
   title: string;
-  slug: string;
   status: keyof typeof courseStatusLabels;
   moduleCount: number;
   lessonCount: number;

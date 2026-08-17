@@ -9,20 +9,20 @@ import {
   getProductReviewSummary,
   getViewerReviewForCourses,
 } from "@/lib/course-reviews";
-import { getProductBySlug } from "@/lib/shop-products";
+import { getProductById } from "@/lib/shop-products";
 import { getProductShopState, defaultPurchaseShopState } from "@/lib/shop-purchase-state";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
 type ProductDetailPageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 };
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const user = await getCurrentUser();
-  const { slug } = await params;
+  const { id } = await params;
 
-  const product = await getProductBySlug(slug);
+  const product = await getProductById(id);
   if (!product) {
     notFound();
   }

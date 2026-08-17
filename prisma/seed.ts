@@ -4,6 +4,12 @@ import type { Prisma } from "../src/generated/prisma/client";
 import { prisma } from "../src/lib/prisma";
 import { seedCommunityPosts } from "./seed-community";
 
+const seedProductIds = {
+  courseOnly: "7afcec96-2e61-4c53-8951-7729b4ecf601",
+  coachingOnly: "f2cfd9ba-17ae-4b36-a721-e0722442ae32",
+  bundle: "a4f97e45-061d-455d-b4df-2a622d58c121",
+} as const;
+
 function addDays(date: Date, days: number) {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
@@ -291,10 +297,10 @@ async function main() {
   });
 
   const courseOnlyProduct = await prisma.product.upsert({
-    where: { slug: "nextjs-vod-only" },
+    where: { id: seedProductIds.courseOnly },
     update: {},
     create: {
-      slug: "nextjs-vod-only",
+      id: seedProductIds.courseOnly,
       title: "Next.js Fundamentals (VOD)",
       description: "동영상 강의만 포함",
       kind: "COURSE_ONLY",
@@ -317,10 +323,10 @@ async function main() {
   });
 
   const coachingOnlyProduct = await prisma.product.upsert({
-    where: { slug: "coaching-3sessions" },
+    where: { id: seedProductIds.coachingOnly },
     update: {},
     create: {
-      slug: "coaching-3sessions",
+      id: seedProductIds.coachingOnly,
       title: "1:1 코칭 3회권",
       description: "코스 없이 코칭만 구매",
       kind: "COACHING_ONLY",
@@ -341,10 +347,10 @@ async function main() {
   });
 
   const bundleProduct = await prisma.product.upsert({
-    where: { slug: "nextjs-vod-coaching-bundle" },
+    where: { id: seedProductIds.bundle },
     update: {},
     create: {
-      slug: "nextjs-vod-coaching-bundle",
+      id: seedProductIds.bundle,
       title: "Next.js VOD + 코칭 2회 패키지",
       description: "강의와 1:1 코칭 2회가 포함된 번들",
       kind: "BUNDLE",
@@ -585,7 +591,7 @@ async function main() {
         action: "FULFILL_COMPLETED",
         metadata: {
           orderId: order.id,
-          productSlug: bundleProduct.slug,
+          productPublicId: bundleProduct.publicId,
         },
       },
     });
@@ -642,7 +648,7 @@ async function main() {
   });
 
   console.log("High-end LMS seed completed.");
-  console.log(`Products: ${courseOnlyProduct.slug}, ${coachingOnlyProduct.slug}, ${bundleProduct.slug}`);
+  console.log(`Products: ${courseOnlyProduct.publicId}, ${coachingOnlyProduct.publicId}, ${bundleProduct.publicId}`);
   console.log("");
   console.log("── Access QA accounts (password: demo-password) ──");
   console.log("  demo@localhost            번들 평생 · 수료 · 코칭 (메인 데모)");

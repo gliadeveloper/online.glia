@@ -43,7 +43,7 @@ export default async function ShopPage() {
               <li key={product.id}>
                 <ProductListCard
                   product={product}
-                  shopState={shopStates.get(product.slug) ?? defaultPurchaseShopState}
+                  shopState={shopStates.get(product.id) ?? defaultPurchaseShopState}
                 />
               </li>
             ))}

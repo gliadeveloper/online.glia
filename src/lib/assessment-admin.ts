@@ -8,7 +8,7 @@ export const lessonDetailInclude = {
       id: true,
       title: true,
       courseId: true,
-      course: { select: { id: true, title: true, slug: true } },
+      course: { select: { id: true, title: true } },
     },
   },
   contents: { orderBy: { order: "asc" as const } },

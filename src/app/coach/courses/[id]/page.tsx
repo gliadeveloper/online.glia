@@ -33,7 +33,6 @@ export default async function CoachCourseDetailPage({ params }: Props) {
       <CoachCourseWorkspace
         courseId={course.id}
         title={course.title}
-        slug={course.slug}
         description={course.description}
         level={course.level}
         status={course.status}

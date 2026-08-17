@@ -13,7 +13,7 @@ export { buildCoursePublishChecklist };
 export async function assertCoachOwnsCourse(coachId: string, courseId: string) {
   const course = await prisma.course.findUnique({
     where: { id: courseId },
-    select: { id: true, instructorId: true, title: true, slug: true, status: true },
+    select: { id: true, instructorId: true, title: true, status: true },
   });
 
   if (!course) {
@@ -35,7 +35,7 @@ export async function assertCoachOwnsLesson(coachId: string, lessonId: string) {
       module: {
         select: {
           courseId: true,
-          course: { select: { instructorId: true, slug: true, title: true } },
+          course: { select: { instructorId: true, title: true } },
         },
       },
     },
@@ -103,30 +103,6 @@ export async function assertCoachOwnsContent(coachId: string, contentId: string)
   return content;
 }
 
-function slugifyTitle(title: string) {
-  return title
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 64);
-}
-
-async function ensureUniqueSlug(base: string) {
-  let slug = base || "course";
-  let suffix = 0;
-
-  while (true) {
-    const candidate = suffix === 0 ? slug : `${slug}-${suffix}`;
-    const existing = await prisma.course.findUnique({ where: { slug: candidate } });
-    if (!existing) {
-      return candidate;
-    }
-    suffix += 1;
-  }
-}
-
 export async function listCoachCourses(coachId: string) {
   return prisma.course.findMany({
     where: { instructorId: coachId },
@@ -138,18 +114,13 @@ export async function listCoachCourses(coachId: string) {
 export async function createCoachCourse(params: {
   coachId: string;
   title: string;
-  slug?: string;
   description?: string;
   level?: CourseLevel;
   thumbnailUrl?: string;
 }) {
-  const baseSlug = params.slug?.trim() || slugifyTitle(params.title);
-  const slug = await ensureUniqueSlug(baseSlug);
-
   const course = await prisma.course.create({
     data: {
       title: params.title.trim(),
-      slug,
       description: params.description?.trim(),
       instructorId: params.coachId,
       level: params.level ?? "ALL_LEVELS",
@@ -164,7 +135,7 @@ export async function createCoachCourse(params: {
     entityType: "Course",
     entityId: course.id,
     action: "COURSE_CREATED",
-    metadata: { slug: course.slug, source: "coach_portal" },
+    metadata: { courseId: course.id, source: "coach_portal" },
   });
 
   return course;
@@ -225,7 +196,6 @@ export async function archiveCoachCourse(params: { coachId: string; courseId: st
 export type CoachCourseSummary = {
   id: string;
   title: string;
-  slug: string;
   status: CourseStatus;
   moduleCount: number;
   lessonCount: number;
@@ -238,7 +208,6 @@ export async function summarizeCoachCourses(coachId: string): Promise<CoachCours
     select: {
       id: true,
       title: true,
-      slug: true,
       status: true,
       updatedAt: true,
       modules: {
@@ -253,7 +222,6 @@ export async function summarizeCoachCourses(coachId: string): Promise<CoachCours
   return courses.map((course) => ({
     id: course.id,
     title: course.title,
-    slug: course.slug,
     status: course.status,
     updatedAt: course.updatedAt,
     moduleCount: course.modules.length,

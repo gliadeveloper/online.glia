@@ -47,7 +47,7 @@ const coachProductListInclude = {
     orderBy: { sortOrder: "asc" as const },
     include: {
       course: {
-        select: { id: true, slug: true, title: true, status: true, instructorId: true },
+        select: { id: true, title: true, status: true, instructorId: true },
       },
       coachingOffering: {
         select: {
@@ -73,7 +73,7 @@ export async function assertCoachOwnsProduct(coachId: string, productId: string)
       items: {
         orderBy: { sortOrder: "asc" },
         include: {
-          course: { select: { id: true, instructorId: true, title: true, slug: true, status: true } },
+          course: { select: { id: true, instructorId: true, title: true, status: true } },
           coachingOffering: {
             select: {
               id: true,
@@ -130,7 +130,6 @@ export async function listCoachProducts(coachId: string) {
 
 export async function createCoachProduct(params: {
   coachId: string;
-  slug: string;
   title: string;
   description?: string;
   kind: ProductKind;
@@ -143,7 +142,6 @@ export async function createCoachProduct(params: {
 
   return createProduct({
     actorId: params.coachId,
-    slug: params.slug,
     title: params.title,
     description: params.description,
     kind: params.kind,
@@ -195,7 +193,7 @@ export async function getCoachProductCatalog(coachId: string) {
   const [courses, offerings] = await Promise.all([
     prisma.course.findMany({
       where: { instructorId: coachId },
-      select: { id: true, title: true, slug: true, status: true },
+      select: { id: true, title: true, status: true },
       orderBy: { title: "asc" },
     }),
     prisma.coachingOffering.findMany({

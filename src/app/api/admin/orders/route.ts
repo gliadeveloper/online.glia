@@ -21,7 +21,7 @@ export async function GET(request: Request) {
         user: { select: { id: true, name: true, email: true } },
         lines: {
           include: {
-            product: { select: { id: true, title: true, slug: true } },
+            product: { select: { id: true, title: true } },
           },
         },
         payments: {

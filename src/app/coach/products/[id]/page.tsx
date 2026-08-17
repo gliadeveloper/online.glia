@@ -32,7 +32,6 @@ export default async function CoachProductDetailPage({ params }: PageProps) {
 
       <CoachProductEditPanel
         productId={product.id}
-        slug={product.slug}
         kind={product.kind}
         title={product.title}
         description={product.description}

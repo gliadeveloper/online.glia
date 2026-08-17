@@ -51,7 +51,7 @@ export default async function AdminProductsPage() {
                   >
                     {product.title}
                   </Link>
-                  <p className="font-mono text-xs text-zinc-500">{product.slug}</p>
+                  <p className="font-mono text-xs text-zinc-500">/shop/{product.id}</p>
                 </td>
                 <td className="px-5 py-4">
                   <StatusBadge value={product.kind} label={productKindLabels[product.kind]} />

@@ -134,7 +134,7 @@ export function ProductDetailPanel({
             ) : null}
 
             <ProductReviewSection
-              productSlug={product.slug}
+              productId={product.id}
               averageRating={reviewSummary.averageRating}
               reviewCount={reviewSummary.reviewCount}
               reviews={reviews}

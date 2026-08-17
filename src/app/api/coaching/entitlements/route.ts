@@ -22,7 +22,7 @@ export async function GET(request: Request) {
             totalSessions: true,
           },
         },
-        course: { select: { id: true, slug: true, title: true } },
+        course: { select: { id: true, title: true } },
         enrollment: { select: { id: true, status: true } },
         sessions: {
           orderBy: { sessionNo: "asc" },

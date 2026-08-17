@@ -7,12 +7,12 @@ import { lessonTypeLabels } from "@/lib/lesson-labels";
 import type { ProgressStatus } from "@/generated/prisma/client";
 
 type CourseModuleListProps = {
-  slug: string;
+  courseId: string;
   modules: EnrolledCourseDetail["course"]["modules"];
   progressMap: Map<string, ProgressStatus>;
 };
 
-export function CourseModuleList({ slug, modules, progressMap }: CourseModuleListProps) {
+export function CourseModuleList({ courseId, modules, progressMap }: CourseModuleListProps) {
   return (
     <div className="app-section">
       {modules.map((module) => (
@@ -49,7 +49,7 @@ export function CourseModuleList({ slug, modules, progressMap }: CourseModuleLis
               return (
                 <li key={lesson.id}>
                   <Link
-                    href={`/learning/${slug}/lessons/${lesson.id}`}
+                    href={`/learning/${courseId}/lessons/${lesson.id}`}
                     className="app-list-row shell-focus-ring"
                   >
                     <div className="app-list-row__inner">

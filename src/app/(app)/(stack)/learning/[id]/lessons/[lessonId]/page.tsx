@@ -21,13 +21,13 @@ import "@/components/learning/lesson-player.css";
 import { ApiError } from "@/lib/api";
 import { getEnrolledCourseDetail } from "@/lib/learning-course-detail";
 import { getLessonPlayerContext } from "@/lib/learning";
-import { getCourseShopStateBySlug } from "@/lib/shop-purchase-state";
+import { getCourseShopStateById } from "@/lib/shop-purchase-state";
 import { markLiveNotificationsRead } from "@/lib/home-notifications";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
 type LearningLessonPageProps = {
-  params: Promise<{ slug: string; lessonId: string }>;
+  params: Promise<{ id: string; lessonId: string }>;
 };
 
 type LessonContext = Awaited<ReturnType<typeof getLessonPlayerContext>>;
@@ -47,7 +47,7 @@ function resolveLessonPlayer(lesson: Lesson) {
 
 function resolveLessonBody(
   lesson: Lesson,
-  slug: string,
+  courseId: string,
   quizAttempt: LessonContext["quizAttempt"],
   assignmentSubmission: LessonContext["assignmentSubmission"],
 ) {
@@ -65,7 +65,7 @@ function resolveLessonBody(
       {lesson.type === "QUIZ" && lesson.quiz ? (
         <QuizPlayer
           quizId={lesson.quiz.id}
-          courseSlug={slug}
+          courseId={courseId}
           title={lesson.quiz.title}
           description={lesson.quiz.description}
           passingScore={lesson.quiz.passingScore}
@@ -85,7 +85,7 @@ function resolveLessonBody(
       {lesson.type === "ASSIGNMENT" && lesson.assignment ? (
         <AssignmentForm
           assignmentId={lesson.assignment.id}
-          courseSlug={slug}
+          courseId={courseId}
           title={lesson.assignment.title}
           description={lesson.assignment.description}
           maxScore={lesson.assignment.maxScore}
@@ -122,10 +122,10 @@ function hasLessonBodyContent(lesson: Lesson) {
 
 export default async function LearningLessonPage({ params }: LearningLessonPageProps) {
   const user = await getCurrentUser();
-  const { slug, lessonId } = await params;
+  const { id: courseId, lessonId } = await params;
 
   if (!user) {
-    redirect(`/login?next=/learning/${slug}/lessons/${lessonId}`);
+    redirect(`/login?next=/learning/${courseId}/lessons/${lessonId}`);
   }
 
   let context;
@@ -133,14 +133,14 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
 
   try {
     [context, courseDetail] = await Promise.all([
-      getLessonPlayerContext({ userId: user.id, courseSlug: slug, lessonId }),
-      getEnrolledCourseDetail(user.id, slug),
+      getLessonPlayerContext({ userId: user.id, courseId, lessonId }),
+      getEnrolledCourseDetail(user.id, courseId),
     ]);
   } catch (error) {
     if (error instanceof ApiError && error.code === "ENROLLMENT_EXPIRED") {
-      const detail = await getEnrolledCourseDetail(user.id, slug);
+      const detail = await getEnrolledCourseDetail(user.id, courseId);
       if (detail?.accessState === "expired") {
-        const courseShopState = await getCourseShopStateBySlug(user.id, slug);
+        const courseShopState = await getCourseShopStateById(user.id, courseId);
 
         return (
           <AppStackPage>
@@ -174,7 +174,7 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
   const status = progress?.status ?? "NOT_STARTED";
 
   const player = resolveLessonPlayer(lesson);
-  const bodyContent = resolveLessonBody(lesson, slug, quizAttempt, assignmentSubmission);
+  const bodyContent = resolveLessonBody(lesson, courseId, quizAttempt, assignmentSubmission);
   const showBody = hasLessonBodyContent(lesson);
 
   const showCompleteButton =
@@ -182,20 +182,20 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
     (lesson.type === "VIDEO" || lesson.type === "TEXT" || lesson.type === "LIVE");
 
   const actions = showCompleteButton ? (
-    <CompleteLessonButton lessonId={lesson.id} courseSlug={slug} compact />
+    <CompleteLessonButton lessonId={lesson.id} courseId={courseId} compact />
   ) : null;
 
   const mobileNav = (
-    <LessonNavFooter slug={slug} prevLesson={prevLesson} nextLesson={nextLesson} />
+    <LessonNavFooter courseId={courseId} prevLesson={prevLesson} nextLesson={nextLesson} />
   );
 
   return (
     <AppStackPage className="lesson-player-page">
       <StackNavTitle title={lesson.title} />
-      <LessonStartedMarker lessonId={lesson.id} courseSlug={slug} status={status} />
+      <LessonStartedMarker lessonId={lesson.id} courseId={courseId} status={status} />
 
       <LessonPlayerShell
-        slug={slug}
+        courseId={courseId}
         lessonId={lesson.id}
         courseTitle={lesson.module.course.title}
         moduleTitle={lesson.module.title}

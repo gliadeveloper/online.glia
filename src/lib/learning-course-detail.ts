@@ -3,8 +3,8 @@ import type { ProgressStatus } from "@/generated/prisma/client";
 import { getEnrollmentAccessState } from "@/lib/learning";
 import { prisma } from "@/lib/prisma";
 
-export async function getEnrolledCourseDetail(userId: string, slug: string) {
-  const accessState = await getEnrollmentAccessState(userId, slug);
+export async function getEnrolledCourseDetail(userId: string, courseId: string) {
+  const accessState = await getEnrollmentAccessState(userId, courseId);
   if (accessState.kind === "none") {
     return null;
   }

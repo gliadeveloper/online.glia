@@ -6,7 +6,7 @@ const coachOrderInclude = {
   user: { select: { id: true, name: true, email: true } },
   lines: {
     include: {
-      product: { select: { id: true, title: true, slug: true, kind: true } },
+      product: { select: { id: true, title: true, kind: true } },
     },
   },
   payments: {
@@ -20,7 +20,7 @@ const coachOrderDetailInclude = {
   lines: {
     include: {
       product: {
-        select: { id: true, title: true, slug: true, kind: true },
+        select: { id: true, title: true, kind: true },
       },
       entitlementGrants: {
         include: {

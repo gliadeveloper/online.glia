@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 export const coachingOfferingInclude = {
   coach: { select: { id: true, name: true, email: true } },
-  course: { select: { id: true, slug: true, title: true } },
+  course: { select: { id: true, title: true } },
   sessionTemplates: { orderBy: { sessionNo: "asc" as const } },
   _count: {
     select: {

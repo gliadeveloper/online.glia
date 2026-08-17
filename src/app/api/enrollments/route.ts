@@ -17,7 +17,6 @@ export async function GET(request: Request) {
         course: {
           select: {
             id: true,
-            slug: true,
             title: true,
             thumbnailUrl: true,
           },

@@ -75,7 +75,7 @@ export function ProductDetailSidebar({
             </ShopButtonLink>
           ) : (
             <ProductApplyButton
-              productSlug={product.slug}
+              productId={product.id}
               isLoggedIn={isLoggedIn}
               disabled={shopState.kind === "pending"}
               pendingOrderId={shopState.kind === "pending" ? shopState.orderId : undefined}

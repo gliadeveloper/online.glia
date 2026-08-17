@@ -48,12 +48,12 @@ export async function FeaturedProductsSection({ userId, limit = 3 }: FeaturedPro
       <HomeFeedPanelHeader title="추천 상품" titleId={headingId} moreHref="/shop" />
       <HomeFeedPanelList>
         {products.map((product) => {
-          const shopState = shopStates.get(product.slug) ?? defaultPurchaseShopState;
+          const shopState = shopStates.get(product.id) ?? defaultPurchaseShopState;
 
           return (
             <HomeFeedRow
               key={product.id}
-              href={`/shop/${product.slug}`}
+              href={`/shop/${product.id}`}
               title={product.title}
               subtitle={productSubtitle(product, shopState)}
               leading={

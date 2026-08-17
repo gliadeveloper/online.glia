@@ -109,7 +109,7 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
             </AppButtonLink>
           )}
           {order.status === "PENDING" && product && (
-            <AppButtonLink href={`/shop/${product.slug}`} variant="secondary">
+            <AppButtonLink href={`/shop/${product.id}`} variant="secondary">
               상품으로 돌아가기
             </AppButtonLink>
           )}

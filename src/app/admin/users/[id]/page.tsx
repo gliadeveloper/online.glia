@@ -20,7 +20,7 @@ export default async function AdminUserDetailPage({ params }: Props) {
       role: true,
       createdAt: true,
       enrollments: {
-        include: { course: { select: { id: true, title: true, slug: true } } },
+        include: { course: { select: { id: true, title: true } } },
         orderBy: { enrolledAt: "desc" },
       },
       orders: {

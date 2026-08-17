@@ -7,14 +7,14 @@ import { TrustAlert, TrustButton } from "@/components/corporate-trust/app-trust-
 
 type CompleteLessonButtonProps = {
   lessonId: string;
-  courseSlug: string;
+  courseId: string;
   label?: string;
   compact?: boolean;
 };
 
 export function CompleteLessonButton({
   lessonId,
-  courseSlug,
+  courseId,
   label = "학습 완료",
   compact = false,
 }: CompleteLessonButtonProps) {
@@ -31,7 +31,7 @@ export function CompleteLessonButton({
       const response = await fetch(`/api/lms/lessons/${lessonId}/progress`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseSlug, status: "COMPLETED" }),
+        body: JSON.stringify({ courseId, status: "COMPLETED" }),
       });
 
       const data = (await response.json()) as { error?: string };

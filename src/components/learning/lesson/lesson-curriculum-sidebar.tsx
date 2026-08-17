@@ -8,7 +8,7 @@ import { lessonTypeLabels } from "@/lib/lesson-labels";
 import type { ProgressStatus } from "@/generated/prisma/client";
 
 type LessonCurriculumSidebarProps = {
-  slug: string;
+  courseId: string;
   activeLessonId: string;
   modules: EnrolledCourseDetail["course"]["modules"];
   progressMap: Map<string, ProgressStatus>;
@@ -54,7 +54,7 @@ function StatusIcon({ status, active }: { status: ProgressStatus; active: boolea
 }
 
 export function LessonCurriculumSidebar({
-  slug,
+  courseId,
   activeLessonId,
   modules,
   progressMap,
@@ -84,7 +84,7 @@ export function LessonCurriculumSidebar({
                 <li key={lesson.id}>
                   <Link
                     ref={active ? activeRef : undefined}
-                    href={`/learning/${slug}/lessons/${lesson.id}`}
+                    href={`/learning/${courseId}/lessons/${lesson.id}`}
                     className={[
                       "lesson-curriculum-item shell-focus-ring",
                       active ? "lesson-curriculum-item--active" : "",

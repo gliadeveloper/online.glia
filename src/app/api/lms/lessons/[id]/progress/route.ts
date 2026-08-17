@@ -11,14 +11,14 @@ export async function POST(request: Request, context: RouteContext) {
     const { id: lessonId } = await context.params;
     const body = (await request.json()) as {
       userId?: string;
-      courseSlug?: string;
+      courseId?: string;
       status?: ProgressStatus;
     };
 
     const userId = await resolveUserId(request, body);
 
-    if (!body.courseSlug?.trim()) {
-      return NextResponse.json({ error: "courseSlug is required" }, { status: 400 });
+    if (!body.courseId?.trim()) {
+      return NextResponse.json({ error: "courseId is required" }, { status: 400 });
     }
 
     if (!body.status) {
@@ -27,7 +27,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const result = await updateLessonProgress({
       userId,
-      courseSlug: body.courseSlug,
+      courseId: body.courseId,
       lessonId,
       status: body.status,
     });

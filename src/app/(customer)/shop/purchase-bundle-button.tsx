@@ -4,14 +4,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type PurchaseBundleButtonProps = {
-  productSlug: string;
+  productId: string;
   priceLabel: string;
   disabled?: boolean;
   label?: string;
 };
 
 export function PurchaseBundleButton({
-  productSlug,
+  productId,
   priceLabel,
   disabled = false,
   label = "구매하기",
@@ -29,8 +29,8 @@ export function PurchaseBundleButton({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productSlug,
-          idempotencyKey: `checkout-${productSlug}-${Date.now()}`,
+          productId,
+          idempotencyKey: `checkout-${productId}-${Date.now()}`,
         }),
       });
 

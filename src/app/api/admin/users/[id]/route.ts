@@ -23,7 +23,7 @@ export async function GET(request: Request, context: RouteContext) {
         role: true,
         createdAt: true,
         enrollments: {
-          include: { course: { select: { id: true, title: true, slug: true } } },
+          include: { course: { select: { id: true, title: true } } },
           orderBy: { enrolledAt: "desc" },
         },
         orders: {

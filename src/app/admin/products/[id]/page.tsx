@@ -45,7 +45,7 @@ export default async function AdminProductDetailPage({ params }: Props) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{product.title}</h1>
-          <p className="font-mono text-sm text-zinc-500">{product.slug}</p>
+          <p className="font-mono text-sm text-zinc-500">/shop/{product.id}</p>
         </div>
         <ProductActions productId={product.id} isActive={product.isActive} />
         <ProductEditPanel

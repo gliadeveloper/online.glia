@@ -111,7 +111,7 @@ export default async function DashboardPage() {
               {Math.round(continueLearning.progressPercent)}%
             </span>
             <Link
-              href={`/learning/${continueLearning.courseSlug}/lessons/${continueLearning.lesson.id}`}
+              href={`/learning/${continueLearning.courseId}/lessons/${continueLearning.lesson.id}`}
               className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white"
             >
               이어서 학습

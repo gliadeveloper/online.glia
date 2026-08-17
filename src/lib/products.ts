@@ -2,14 +2,13 @@ import type { Product, ProductItemKind, ProductKind } from "@/generated/prisma/c
 
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
-import { sanitizeCatalogSlugInput } from "@/lib/catalog-slug";
 import { prisma } from "@/lib/prisma";
 
 export const productInclude = {
   items: {
     orderBy: { sortOrder: "asc" as const },
     include: {
-      course: { select: { id: true, slug: true, title: true, status: true } },
+      course: { select: { id: true, title: true, status: true } },
       coachingOffering: {
         select: {
           id: true,
@@ -40,7 +39,6 @@ type ProductItemInput = {
 
 export async function createProduct(params: {
   actorId: string;
-  slug: string;
   title: string;
   description?: string;
   kind: ProductKind;
@@ -55,7 +53,6 @@ export async function createProduct(params: {
 
   const product = await prisma.product.create({
     data: {
-      slug: sanitizeCatalogSlugInput(params.slug),
       title: params.title.trim(),
       description: params.description?.trim(),
       kind: params.kind,
@@ -82,7 +79,7 @@ export async function createProduct(params: {
     entityType: "Product",
     entityId: product.id,
     action: "PRODUCT_CREATED",
-    metadata: { slug: product.slug, kind: product.kind },
+    metadata: { productId: product.id, kind: product.kind },
   });
 
   return product;
@@ -121,7 +118,7 @@ export async function updateProduct(params: {
     entityType: "Product",
     entityId: product.id,
     action: params.isActive === false ? "PRODUCT_DEACTIVATED" : "PRODUCT_UPDATED",
-    metadata: { slug: product.slug },
+    metadata: { productId: product.id },
   });
 
   return product;
@@ -165,7 +162,7 @@ export async function updateProductItems(params: {
     entityType: "Product",
     entityId: product.id,
     action: "PRODUCT_ITEMS_UPDATED",
-    metadata: { slug: product.slug, itemCount: params.items.length },
+    metadata: { productId: product.id, itemCount: params.items.length },
   });
 
   return product;

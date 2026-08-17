@@ -9,12 +9,12 @@ import {
   validateReviewComment,
   validateReviewRating,
 } from "@/lib/course-reviews";
-import { getProductBySlug } from "@/lib/shop-products";
+import { getProductById } from "@/lib/shop-products";
 import { assertRateLimit, RateLimitError } from "@/lib/rate-limit";
 import { getSessionUserId } from "@/lib/session";
 
 type RouteContext = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 };
 
 function mapReviewError(code: string) {
@@ -35,8 +35,8 @@ function mapReviewError(code: string) {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { slug } = await context.params;
-    const product = await getProductBySlug(slug);
+    const { id } = await context.params;
+    const product = await getProductById(id);
 
     if (!product) {
       throw new ApiError("Product not found", 404, "PRODUCT_NOT_FOUND");
@@ -63,8 +63,8 @@ export async function POST(request: Request, context: RouteContext) {
 
     assertRateLimit(`product:review:${userId}`, 5, 60_000);
 
-    const { slug } = await context.params;
-    const product = await getProductBySlug(slug);
+    const { id } = await context.params;
+    const product = await getProductById(id);
 
     if (!product) {
       throw new ApiError("Product not found", 404, "PRODUCT_NOT_FOUND");

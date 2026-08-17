@@ -51,7 +51,7 @@ export default async function AdminCoursesPage() {
                   >
                     {course.title}
                   </Link>
-                  <p className="font-mono text-xs text-zinc-500">{course.slug}</p>
+                  <p className="font-mono text-xs text-zinc-500">{course.id}</p>
                 </td>
                 <td className="px-5 py-4 text-zinc-600">
                   {course.instructor.name ?? course.instructor.email}

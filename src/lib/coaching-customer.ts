@@ -13,7 +13,7 @@ const entitlementListInclude = {
       coach: { select: coachProfileSelect },
     },
   },
-  course: { select: { title: true, slug: true } },
+  course: { select: { id: true, title: true } },
   sessions: {
     orderBy: { sessionNo: "asc" as const },
     take: 1,
@@ -33,7 +33,7 @@ const entitlementDetailInclude = {
       coach: { select: coachProfileSelect },
     },
   },
-  course: { select: { title: true, slug: true } },
+  course: { select: { id: true, title: true } },
   sessions: {
     orderBy: { sessionNo: "asc" as const },
     include: {

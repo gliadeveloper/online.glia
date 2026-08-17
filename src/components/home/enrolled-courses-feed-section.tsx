@@ -42,7 +42,7 @@ export async function EnrolledCoursesFeedSection({
           return (
             <HomeFeedRow
               key={enrollment.id}
-              href={`/learning/${enrollment.course.slug}`}
+              href={`/learning/${enrollment.course.id}`}
               title={enrollment.course.title}
               subtitle={`${completedLessons}/${totalLessons} · ${progressPercent}%`}
               leading={

@@ -29,7 +29,6 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       userId?: string;
       title?: string;
-      slug?: string;
       description?: string;
       instructorId?: string;
       organizationId?: string;
@@ -40,14 +39,13 @@ export async function POST(request: Request) {
     const userId = await resolveUserId(request, body);
     await assertAdmin(userId);
 
-    if (!body.title?.trim() || !body.slug?.trim() || !body.instructorId) {
-      throw new ApiError("title, slug, instructorId are required", 400, "VALIDATION_ERROR");
+    if (!body.title?.trim() || !body.instructorId) {
+      throw new ApiError("title, instructorId are required", 400, "VALIDATION_ERROR");
     }
 
     const course = await createCourse({
       actorId: userId,
       title: body.title,
-      slug: body.slug,
       description: body.description,
       instructorId: body.instructorId,
       organizationId: body.organizationId,

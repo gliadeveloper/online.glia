@@ -46,7 +46,7 @@ export function ProductDetailStickyBar({
           </p>
         </div>
         <ProductApplyButton
-          productSlug={product.slug}
+          productId={product.id}
           isLoggedIn={isLoggedIn}
           compact
           className="shop-pdp-sticky-bar__cta"

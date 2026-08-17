@@ -9,7 +9,7 @@ export type CoachCustomerRow = {
   enrollments: Array<{
     id: string;
     courseTitle: string;
-    courseSlug: string;
+    courseId: string;
     status: string;
     progressPercent: number;
     enrolledAt: string;
@@ -31,7 +31,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
       where: { course: { instructorId: coachId } },
       include: {
         user: { select: { id: true, name: true, email: true } },
-        course: { select: { title: true, slug: true } },
+        course: { select: { id: true, title: true } },
       },
       orderBy: { enrolledAt: "desc" },
     }),
@@ -60,7 +60,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
     existing.enrollments.push({
       id: enrollment.id,
       courseTitle: enrollment.course.title,
-      courseSlug: enrollment.course.slug,
+      courseId: enrollment.course.id,
       status: enrollment.status,
       progressPercent: enrollment.progressPercent,
       enrolledAt: enrollment.enrolledAt.toISOString(),
@@ -144,7 +144,7 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
     prisma.enrollment.findMany({
       where: { userId: customerUserId, course: { instructorId: coachId } },
       include: {
-        course: { select: { id: true, title: true, slug: true, status: true } },
+        course: { select: { id: true, title: true, status: true } },
       },
       orderBy: { enrolledAt: "desc" },
     }),
@@ -174,7 +174,7 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
           include: {
             lines: {
               where: { productId: { in: productIds } },
-              include: { product: { select: { title: true, slug: true, kind: true } } },
+              include: { product: { select: { title: true, kind: true } } },
             },
           },
         })

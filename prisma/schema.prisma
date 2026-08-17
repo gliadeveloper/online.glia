@@ -483,9 +483,9 @@ model Tag {
 // ─── Course Content ────────────────────────────────────────────────────────────
 
 model Course {
-  id                    String             @id @default(cuid())
+  /// UUID primary key. This is the only identifier used by learning URLs and APIs.
+  id                    String             @id @default(uuid())
   title                 String
-  slug                  String             @unique
   description           String?
   thumbnailUrl          String?
   instructorId          String
@@ -1098,8 +1098,8 @@ model CoachingOfferingSessionTemplate {
 }
 
 model Product {
-  id             String      @id @default(cuid())
-  slug           String      @unique
+  /// UUID primary key. This is the only product identifier used by URLs and APIs.
+  id             String      @id @default(uuid())
   title          String
   description    String?
   kind           ProductKind

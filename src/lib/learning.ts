@@ -17,7 +17,6 @@ export const lessonPlayerInclude = {
       course: {
         select: {
           id: true,
-          slug: true,
           title: true,
           thumbnailUrl: true,
         },
@@ -55,19 +54,19 @@ const enrollmentInclude = {
   progress: true,
 } as const;
 
-async function findEnrollmentRecord(userId: string, courseSlug: string) {
+async function findEnrollmentRecord(userId: string, courseId: string) {
   return prisma.enrollment.findFirst({
     where: {
       userId,
-      course: { slug: courseSlug },
+      courseId,
       status: { in: ["ACTIVE", "COMPLETED", "EXPIRED"] },
     },
     include: enrollmentInclude,
   });
 }
 
-export async function getEnrollmentAccessState(userId: string, courseSlug: string) {
-  const enrollment = await findEnrollmentRecord(userId, courseSlug);
+export async function getEnrollmentAccessState(userId: string, courseId: string) {
+  const enrollment = await findEnrollmentRecord(userId, courseId);
   if (!enrollment) {
     return { kind: "none" as const };
   }
@@ -86,8 +85,8 @@ export async function getEnrollmentAccessState(userId: string, courseSlug: strin
   return { kind: "blocked" as const, enrollment: { ...enrollment, ...materialized } };
 }
 
-export async function getEnrollmentForCourse(userId: string, courseSlug: string) {
-  const state = await getEnrollmentAccessState(userId, courseSlug);
+export async function getEnrollmentForCourse(userId: string, courseId: string) {
+  const state = await getEnrollmentAccessState(userId, courseId);
   if (state.kind !== "active") {
     return null;
   }
@@ -97,10 +96,10 @@ export async function getEnrollmentForCourse(userId: string, courseSlug: string)
 
 export async function getLessonPlayerContext(params: {
   userId: string;
-  courseSlug: string;
+  courseId: string;
   lessonId: string;
 }) {
-  const state = await getEnrollmentAccessState(params.userId, params.courseSlug);
+  const state = await getEnrollmentAccessState(params.userId, params.courseId);
   if (state.kind === "none") {
     throw new ApiError("Enrollment not found", 404, "ENROLLMENT_NOT_FOUND");
   }
@@ -216,13 +215,13 @@ async function recalculateEnrollmentProgress(enrollmentId: string) {
 
 export async function updateLessonProgress(params: {
   userId: string;
-  courseSlug: string;
+  courseId: string;
   lessonId: string;
   status: ProgressStatus;
 }) {
-  const enrollment = await getEnrollmentForCourse(params.userId, params.courseSlug);
+  const enrollment = await getEnrollmentForCourse(params.userId, params.courseId);
   if (!enrollment) {
-    const state = await getEnrollmentAccessState(params.userId, params.courseSlug);
+    const state = await getEnrollmentAccessState(params.userId, params.courseId);
     if (state.kind === "expired") {
       throw new ApiError("Enrollment access expired", 403, "ENROLLMENT_EXPIRED");
     }
@@ -265,7 +264,7 @@ export async function getContinueLearning(userId: string) {
     where: { userId, status: { in: ["ACTIVE", "COMPLETED"] } },
     orderBy: { lastAccessedAt: "desc" },
     include: {
-      course: { select: { slug: true, title: true, thumbnailUrl: true } },
+      course: { select: { title: true, thumbnailUrl: true } },
       progress: { where: { status: { in: ["IN_PROGRESS", "COMPLETED"] } } },
     },
   });
@@ -299,7 +298,7 @@ export async function getContinueLearning(userId: string) {
     }
 
     return {
-      courseSlug: enrollment.course.slug,
+      courseId: enrollment.courseId,
       courseTitle: enrollment.course.title,
       thumbnailUrl: enrollment.course.thumbnailUrl,
       progressPercent: enrollment.progressPercent,

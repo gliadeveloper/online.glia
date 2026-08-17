@@ -4,20 +4,20 @@ import { useEffect } from "react";
 
 type LessonStartedMarkerProps = {
   lessonId: string;
-  courseSlug: string;
+  courseId: string;
   status: string;
 };
 
-export function LessonStartedMarker({ lessonId, courseSlug, status }: LessonStartedMarkerProps) {
+export function LessonStartedMarker({ lessonId, courseId, status }: LessonStartedMarkerProps) {
   useEffect(() => {
     if (status !== "NOT_STARTED") return;
 
     void fetch(`/api/lms/lessons/${lessonId}/progress`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ courseSlug, status: "IN_PROGRESS" }),
+      body: JSON.stringify({ courseId, status: "IN_PROGRESS" }),
     });
-  }, [lessonId, courseSlug, status]);
+  }, [lessonId, courseId, status]);
 
   return null;
 }

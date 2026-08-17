@@ -15,7 +15,7 @@ type ProductReview = {
 };
 
 type ProductReviewSectionProps = {
-  productSlug: string;
+  productId: string;
   averageRating: number;
   reviewCount: number;
   reviews: ProductReview[];
@@ -47,7 +47,7 @@ function formatRelativeTime(date: Date) {
 }
 
 export function ProductReviewSection({
-  productSlug,
+  productId,
   averageRating,
   reviewCount,
   reviews,
@@ -65,13 +65,13 @@ export function ProductReviewSection({
     event.preventDefault();
 
     if (!isLoggedIn) {
-      router.push(`/login?next=${encodeURIComponent(`/shop/${productSlug}`)}`);
+      router.push(`/login?next=${encodeURIComponent(`/shop/${productId}`)}`);
       return;
     }
 
     startTransition(async () => {
       setError(null);
-      const response = await fetch(`/api/products/${productSlug}/reviews`, {
+      const response = await fetch(`/api/products/${productId}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating, comment }),

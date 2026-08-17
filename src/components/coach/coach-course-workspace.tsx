@@ -12,7 +12,6 @@ import type { CourseLevel, CourseStatus } from "@/generated/prisma/client";
 type CoachCourseWorkspaceProps = {
   courseId: string;
   title: string;
-  slug: string;
   description: string | null;
   level: CourseLevel;
   status: CourseStatus;
@@ -37,7 +36,7 @@ export function CoachCourseWorkspace(props: CoachCourseWorkspaceProps) {
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">내 코스</p>
           <h1 className="mt-1 text-2xl font-semibold text-zinc-900">{props.title}</h1>
           <p className="mt-1 text-sm text-zinc-500">
-            /learning/{props.slug} · {courseStatusLabels[props.status]}
+            /learning/{props.courseId} · {courseStatusLabels[props.status]}
           </p>
         </div>
 
@@ -65,7 +64,6 @@ export function CoachCourseWorkspace(props: CoachCourseWorkspaceProps) {
         <CoachCourseDetailPanel
           courseId={props.courseId}
           title={props.title}
-          slug={props.slug}
           description={props.description}
           level={props.level}
           status={props.status}

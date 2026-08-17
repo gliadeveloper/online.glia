@@ -8,7 +8,7 @@ export async function getUserOrders(userId: string) {
     include: {
       lines: {
         include: {
-          product: { select: { title: true, kind: true, slug: true } },
+          product: { select: { title: true, kind: true } },
         },
       },
     },

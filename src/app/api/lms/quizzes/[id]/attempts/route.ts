@@ -10,14 +10,14 @@ export async function POST(request: Request, context: RouteContext) {
     const { id: quizId } = await context.params;
     const body = (await request.json()) as {
       userId?: string;
-      courseSlug?: string;
+      courseId?: string;
       answers?: Array<{ questionId: string; optionId: string }>;
     };
 
     const userId = await resolveUserId(request, body);
 
-    if (!body.courseSlug?.trim()) {
-      return NextResponse.json({ error: "courseSlug is required" }, { status: 400 });
+    if (!body.courseId?.trim()) {
+      return NextResponse.json({ error: "courseId is required" }, { status: 400 });
     }
 
     if (!body.answers?.length) {
@@ -26,7 +26,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const result = await submitQuizAttempt({
       userId,
-      courseSlug: body.courseSlug,
+      courseId: body.courseId,
       quizId,
       answers: body.answers,
     });

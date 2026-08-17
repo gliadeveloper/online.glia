@@ -22,7 +22,6 @@ export type PurchasePreviewLine = {
 export type ProductCourseItemAssessment = {
   productItemId: string;
   courseId: string;
-  courseSlug: string;
   courseTitle: string;
   action: CourseGrantAction;
   accessDuration: AccessDurationKind;
@@ -38,7 +37,7 @@ export type ProductCoachingItemAssessment = {
 };
 
 export type ProductCheckoutAssessment = {
-  productSlug: string;
+  productId: string;
   canCheckout: boolean;
   blockCode?: "ALREADY_OWNED";
   blockMessage?: string;
@@ -72,7 +71,7 @@ export const defaultPurchaseShopState: ProductShopState = {
 };
 
 type ProductForAssessment = {
-  slug: string;
+  id: string;
   kind: "COURSE_ONLY" | "COACHING_ONLY" | "BUNDLE";
   listPrice: number;
   salePrice: number | null;
@@ -85,7 +84,6 @@ type ProductForAssessment = {
     coachingOfferingId: string | null;
     course: {
       id: string;
-      slug: string;
       title: string;
       defaultAccessDuration: AccessDurationKind;
       defaultAccessDays: number | null;
@@ -209,7 +207,7 @@ async function loadUserEntitlementContext(userId: string, now: Date) {
         progressPercent: true,
         completedAt: true,
         expiredAt: true,
-        course: { select: { slug: true, title: true } },
+        course: { select: { title: true } },
       },
     }),
     prisma.coachingEntitlement.findMany({
@@ -256,7 +254,6 @@ export async function assessProductCheckout(
       courseItems.push({
         productItemId: item.id,
         courseId: item.courseId,
-        courseSlug: item.course.slug,
         courseTitle: item.course.title,
         action: evaluateCourseGrantAction({ enrollment, policy, now }),
         accessDuration: policy.accessDuration,
@@ -282,7 +279,7 @@ export async function assessProductCheckout(
 
   if (grantableActions.length === 0) {
     return {
-      productSlug: product.slug,
+      productId: product.id,
       canCheckout: false,
       blockCode: "ALREADY_OWNED",
       blockMessage: "이미 보유 중인 수강권과 동일하거나 더 유리한 권한을 가지고 있습니다.",
@@ -292,7 +289,7 @@ export async function assessProductCheckout(
   }
 
   return {
-    productSlug: product.slug,
+    productId: product.id,
     canCheckout: true,
     courseItems,
     coachingItems,
@@ -308,7 +305,7 @@ export function deriveProductShopState(
   const priceLabel = `${price.toLocaleString("ko-KR")}원`;
   const preview = buildPurchasePreview(assessment, product, now);
   const primaryCourse = assessment.courseItems[0];
-  const learnHref = primaryCourse ? `/learning/${primaryCourse.courseSlug}` : "/learning";
+  const learnHref = primaryCourse ? `/learning/${primaryCourse.courseId}` : "/learning";
 
   if (!assessment.canCheckout && assessment.blockCode === "ALREADY_OWNED") {
     return {
@@ -394,7 +391,7 @@ export function deriveProductShopState(
 export async function getProductShopState(userId: string, product: ProductForAssessment) {
   const now = new Date();
   const { findPendingOrderForProduct } = await import("@/lib/fulfillment");
-  const pendingOrder = await findPendingOrderForProduct(userId, product.slug);
+  const pendingOrder = await findPendingOrderForProduct(userId, product.id);
   const assessment = await assessProductCheckout(userId, product, now);
   const shopState = deriveProductShopState(product, assessment, now);
 
@@ -417,14 +414,14 @@ export async function getCatalogProductShopStates(userId: string, products: Cata
   const entries = await Promise.all(
     products.map(async (product) => {
       const { shopState } = await getProductShopState(userId, product);
-      return [product.slug, shopState] as const;
+      return [product.id, shopState] as const;
     }),
   );
 
   return new Map(entries);
 }
 
-export async function findExtensionProductSlug(courseId: string) {
+export async function findExtensionProductId(courseId: string) {
   const items = await prisma.productItem.findMany({
     where: {
       kind: "COURSE_ACCESS",
@@ -433,7 +430,7 @@ export async function findExtensionProductSlug(courseId: string) {
       product: { isActive: true },
     },
     include: {
-      product: { select: { slug: true, kind: true } },
+      product: { select: { id: true, kind: true } },
     },
     orderBy: [{ product: { kind: "asc" } }, { product: { title: "asc" } }],
   });
@@ -441,13 +438,13 @@ export async function findExtensionProductSlug(courseId: string) {
   const preferred =
     items.find((item) => item.product.kind === "COURSE_ONLY") ?? items[0];
 
-  return preferred?.product.slug ?? null;
+  return preferred?.product.id ?? null;
 }
 
-/** @deprecated Use findExtensionProductSlug */
-export const findPrimaryRenewalProductSlug = findExtensionProductSlug;
+/** @deprecated Use findExtensionProductId */
+export const findPrimaryRenewalProductId = findExtensionProductId;
 
-export async function findLifetimeRestoreProductSlug(courseId: string) {
+export async function findLifetimeRestoreProductId(courseId: string) {
   const items = await prisma.productItem.findMany({
     where: {
       kind: "COURSE_ACCESS",
@@ -456,29 +453,29 @@ export async function findLifetimeRestoreProductSlug(courseId: string) {
       product: { isActive: true },
     },
     include: {
-      product: { select: { slug: true, kind: true } },
+      product: { select: { id: true, kind: true } },
     },
   });
 
   const bundle = items.find((item) => item.product.kind === "BUNDLE");
   const courseOnly = items.find((item) => item.product.kind === "COURSE_ONLY");
 
-  return bundle?.product.slug ?? courseOnly?.product.slug ?? items[0]?.product.slug ?? null;
+  return bundle?.product.id ?? courseOnly?.product.id ?? items[0]?.product.id ?? null;
 }
 
-export async function getCourseShopStateBySlug(userId: string, courseSlug: string) {
+export async function getCourseShopStateById(userId: string, courseId: string) {
   const course = await prisma.course.findUnique({
-    where: { slug: courseSlug },
-    select: { id: true, slug: true, title: true },
+    where: { id: courseId },
+    select: { id: true, title: true },
   });
 
   if (!course) {
     return null;
   }
 
-  const [extensionProductSlug, restoreProductSlug] = await Promise.all([
-    findExtensionProductSlug(course.id),
-    findLifetimeRestoreProductSlug(course.id),
+  const [extensionProductId, restoreProductId] = await Promise.all([
+    findExtensionProductId(course.id),
+    findLifetimeRestoreProductId(course.id),
   ]);
 
   const enrollment = await prisma.enrollment.findUnique({
@@ -502,7 +499,7 @@ export async function getCourseShopStateBySlug(userId: string, courseSlug: strin
   });
 
   if (!enrollment) {
-    return { kind: "none" as const, extensionProductSlug, restoreProductSlug };
+    return { kind: "none" as const, extensionProductId, restoreProductId };
   }
 
   const materialized = await materializeEnrollmentExpiry(enrollment);
@@ -510,21 +507,21 @@ export async function getCourseShopStateBySlug(userId: string, courseSlug: strin
   if (canAccessEnrollment(materialized)) {
     return {
       kind: "active" as const,
-      extensionProductSlug,
-      restoreProductSlug,
-      learnHref: `/learning/${course.slug}`,
+      extensionProductId,
+      restoreProductId,
+      learnHref: `/learning/${course.id}`,
     };
   }
 
   if (materialized.status === "EXPIRED") {
     return {
       kind: "expired" as const,
-      extensionProductSlug,
-      restoreProductSlug,
-      extendHref: extensionProductSlug ? `/shop/${extensionProductSlug}` : "/shop",
-      restoreHref: restoreProductSlug ? `/shop/${restoreProductSlug}` : "/shop",
+      extensionProductId,
+      restoreProductId,
+      extendHref: extensionProductId ? `/shop/${extensionProductId}` : "/shop",
+      restoreHref: restoreProductId ? `/shop/${restoreProductId}` : "/shop",
     };
   }
 
-  return { kind: "blocked" as const, extensionProductSlug, restoreProductSlug };
+  return { kind: "blocked" as const, extensionProductId, restoreProductId };
 }

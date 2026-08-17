@@ -117,7 +117,7 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
   return (
     <li>
       <Link
-        href={`/learning/${enrollment.course.slug}`}
+        href={`/learning/${enrollment.course.id}`}
         className="app-card app-card--interactive shell-focus-ring"
       >
         {cardInner}

@@ -14,7 +14,7 @@ type Question = {
 
 type QuizPlayerProps = {
   quizId: string;
-  courseSlug: string;
+  courseId: string;
   title: string;
   description: string | null;
   passingScore: number;
@@ -28,7 +28,7 @@ type QuizPlayerProps = {
 
 export function QuizPlayer({
   quizId,
-  courseSlug,
+  courseId,
   title,
   description,
   passingScore,
@@ -77,7 +77,7 @@ export function QuizPlayer({
       const response = await fetch(`/api/lms/quizzes/${quizId}/attempts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseSlug, answers: payload }),
+        body: JSON.stringify({ courseId, answers: payload }),
       });
 
       const data = (await response.json()) as {

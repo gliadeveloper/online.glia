@@ -14,7 +14,7 @@ import type { SubmissionStatus } from "@/generated/prisma/client";
 
 type AssignmentFormProps = {
   assignmentId: string;
-  courseSlug: string;
+  courseId: string;
   title: string;
   description: string | null;
   maxScore: number;
@@ -30,7 +30,7 @@ type AssignmentFormProps = {
 
 export function AssignmentForm({
   assignmentId,
-  courseSlug,
+  courseId,
   title,
   description,
   maxScore,
@@ -52,7 +52,7 @@ export function AssignmentForm({
       const response = await fetch(`/api/lms/assignments/${assignmentId}/submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseSlug, content }),
+        body: JSON.stringify({ courseId, content }),
       });
 
       const data = (await response.json()) as { error?: string };

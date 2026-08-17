@@ -6,29 +6,29 @@ import { CourseDetailHeader } from "@/components/learning/course-detail-header";
 import { CourseModuleList } from "@/components/learning/course-module-list";
 import { EnrollmentExpiredNotice } from "@/components/learning/enrollment-expired-notice";
 import { getEnrolledCourseDetail } from "@/lib/learning-course-detail";
-import { getCourseShopStateBySlug } from "@/lib/shop-purchase-state";
+import { getCourseShopStateById } from "@/lib/shop-purchase-state";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
 type LearningCoursePageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 };
 
 export default async function LearningCoursePage({ params }: LearningCoursePageProps) {
   const user = await getCurrentUser();
-  const { slug } = await params;
+  const { id } = await params;
 
   if (!user) {
-    redirect(`/login?next=/learning/${slug}`);
+    redirect(`/login?next=/learning/${id}`);
   }
 
-  const detail = await getEnrolledCourseDetail(user.id, slug);
+  const detail = await getEnrolledCourseDetail(user.id, id);
   if (!detail) {
     notFound();
   }
 
   if (detail.accessState === "expired") {
-    const courseShopState = await getCourseShopStateBySlug(user.id, slug);
+    const courseShopState = await getCourseShopStateById(user.id, id);
 
     return (
       <AppStackPage>
@@ -75,7 +75,7 @@ export default async function LearningCoursePage({ params }: LearningCoursePageP
 
       <AppSection labelledBy="curriculum-heading">
         <AppSectionHeader title="커리큘럼" titleId="curriculum-heading" />
-        <CourseModuleList slug={slug} modules={course.modules} progressMap={progressMap} />
+        <CourseModuleList courseId={id} modules={course.modules} progressMap={progressMap} />
       </AppSection>
     </AppStackPage>
   );

@@ -6,7 +6,6 @@ export type CoachLiveLessonItem = {
   lessonTitle: string;
   courseId: string;
   courseTitle: string;
-  courseSlug: string;
   zoomUrl: string | null;
   liveStatus: "SCHEDULED" | "LIVE" | "ENDED" | "CANCELLED" | null;
   editHref: string;
@@ -23,7 +22,7 @@ export async function listCoachLiveLessons(coachId: string): Promise<CoachLiveLe
       liveSession: { select: { status: true } },
       module: {
         include: {
-          course: { select: { id: true, title: true, slug: true } },
+          course: { select: { id: true, title: true } },
         },
       },
     },
@@ -35,7 +34,6 @@ export async function listCoachLiveLessons(coachId: string): Promise<CoachLiveLe
     lessonTitle: lesson.title,
     courseId: lesson.module.course.id,
     courseTitle: lesson.module.course.title,
-    courseSlug: lesson.module.course.slug,
     zoomUrl: getLessonZoomUrl(lesson.contents),
     liveStatus: lesson.liveSession?.status ?? null,
     editHref: `/coach/lessons/${lesson.id}`,
