@@ -6,6 +6,7 @@ import type {
 import { ApiError } from "@/lib/api";
 import { coachProfileSelect } from "@/lib/coaching-display";
 import { prisma } from "@/lib/prisma";
+import { createCoachingCommentNotification } from "@/lib/home-notifications";
 
 export type CoachingSessionDisplayState = "UPCOMING" | "PREPARING" | "PUBLISHED";
 
@@ -206,6 +207,14 @@ export async function sendCoachingMessage(params: {
       where: { id: session.conversation!.id },
       data: { lastMessageAt: message.createdAt },
     });
+
+    if (authorRole === "COACH") {
+      await createCoachingCommentNotification(tx, {
+        messageId: message.id,
+        userId: session.userId,
+        occurredAt: message.createdAt,
+      });
+    }
 
     return message;
   });

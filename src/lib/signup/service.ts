@@ -88,7 +88,7 @@ export async function markSignupDraftEmailVerified(draftId: string) {
 
 export async function completeEmailSignup(draftId: string) {
   const draft = await getSignupDraftById(draftId);
-  if (!draft?.emailVerifiedAt || !draft.termsAcceptedAt || !draft.nickname) {
+  if (!draft?.emailVerifiedAt || !draft.termsAcceptedAt || !draft.userId || !draft.nickname) {
     throw new Error("SIGNUP_INCOMPLETE");
   }
   if (!draft.avatarPresetId && !draft.avatarUrl) {
@@ -109,6 +109,7 @@ export async function completeEmailSignup(draftId: string) {
 
     const created = await tx.user.create({
       data: {
+        userId: draft.userId,
         email: draft.email,
         emailKind: "VERIFIED",
         emailVerifiedAt: draft.emailVerifiedAt,
@@ -142,7 +143,8 @@ export async function completeEmailSignup(draftId: string) {
 }
 
 export async function completeKakaoOnboarding(input: {
-  userId: string;
+  accountId: string;
+  publicUserId: string;
   nickname: string;
   avatarPresetId?: string | null;
   avatarUrl?: string | null;
@@ -160,8 +162,9 @@ export async function completeKakaoOnboarding(input: {
 
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.update({
-      where: { id: input.userId },
+      where: { id: input.accountId },
       data: {
+        userId: input.publicUserId,
         name: input.nickname,
         onboardingCompletedAt: now,
         lastLoginAt: now,

@@ -420,6 +420,78 @@
   color: var(--auth-text-muted);
 }
 
+.check-in-hub-access {
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.72), rgba(255, 255, 255, 0));
+}
+
+.check-in-hub-access__link {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--auth-border-subtle);
+  border-radius: 0.75rem;
+  background: var(--auth-surface);
+  color: var(--auth-primary);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.check-in-access-page {
+  max-width: 42rem;
+}
+
+.check-in-access-page__intro {
+  margin: 0 0 1.5rem;
+}
+
+.check-in-access-page__intro p {
+  margin: 0 0 0.5rem;
+  color: var(--auth-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.check-in-access-page__intro h1 {
+  margin: 0;
+  color: var(--auth-text);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+
+.check-in-access { display: grid; gap: 1rem; }
+.check-in-access__notice { padding: 1rem 1.125rem; border: 1px solid rgba(79, 70, 229, 0.18); border-radius: 0.75rem; background: #eef2ff; color: #3730a3; font-size: 0.875rem; line-height: 1.6; }
+.check-in-access__notice p { margin: 0; }
+.check-in-access__search { display: grid; gap: 0.5rem; }
+.check-in-access__search > label, .check-in-access__section h2 { color: var(--auth-text); font-size: 1rem; font-weight: 700; }
+.check-in-access__search > div { display: flex; gap: 0.5rem; }
+.check-in-access__search input { min-width: 0; flex: 1; }
+.check-in-access__search button { flex: 0 0 auto; min-width: 4.75rem; }
+.check-in-access__section { display: grid; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--auth-border-subtle); }
+.check-in-access__section h2 { margin: 0; }
+.check-in-access__section-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.check-in-access__section-head > span { color: var(--auth-text-muted); font-size: 0.8125rem; }
+.check-in-access__list { display: grid; gap: 0.625rem; margin: 0; padding: 0; list-style: none; }
+.check-in-access__list li { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.875rem; border: 1px solid var(--auth-border-subtle); border-radius: 0.75rem; background: var(--auth-surface); }
+.check-in-access__identity { display: flex; min-width: 0; align-items: center; gap: 0.75rem; }
+.check-in-access__identity > span:last-child { display: grid; min-width: 0; gap: 0.125rem; }
+.check-in-access__identity strong { overflow: hidden; color: var(--auth-text); font-size: 0.9375rem; text-overflow: ellipsis; white-space: nowrap; }
+.check-in-access__identity small, .check-in-access__identity em { overflow: hidden; color: var(--auth-text-muted); font-size: 0.75rem; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.check-in-access__avatar { width: 2.5rem; height: 2.5rem; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
+.check-in-access__avatar--fallback { display: grid; place-items: center; background: #e0e7ff; color: #4338ca; font-size: 0.875rem; font-weight: 800; }
+.check-in-access__list button { min-height: 2.75rem; white-space: nowrap; }
+.check-in-access__empty { margin: 0; padding: 1.25rem; border-radius: 0.75rem; background: var(--auth-surface-muted); color: var(--auth-text-muted); font-size: 0.875rem; text-align: center; }
+.check-in-access__dialog-backdrop { position: fixed; z-index: 50; inset: 0; display: grid; place-items: end center; padding: 1rem; background: rgba(15, 23, 42, 0.44); }
+.check-in-access__dialog { width: min(100%, 34rem); padding: 1.5rem; border-radius: 1rem; background: var(--auth-surface); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24); }
+.check-in-access__dialog h2 { margin: 0; color: var(--auth-text); font-size: 1.125rem; line-height: 1.4; }
+.check-in-access__dialog p { margin: 0.75rem 0 1.5rem; color: var(--auth-text-muted); font-size: 0.875rem; line-height: 1.65; }
+.check-in-access__dialog > div { display: flex; justify-content: flex-end; gap: 0.5rem; }
+@media (min-width: 768px) { .check-in-access__dialog-backdrop { place-items: center; } }
+
 .check-in-written-list__more {
   flex-shrink: 0;
   min-height: 2.75rem;

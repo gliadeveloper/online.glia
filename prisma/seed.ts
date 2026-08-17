@@ -20,8 +20,9 @@ function verifiedEmailUserFields() {
 async function main() {
   const admin = await prisma.user.upsert({
     where: { email: "admin@localhost" },
-    update: verifiedEmailUserFields(),
+    update: { ...verifiedEmailUserFields(), userId: "admin" },
     create: {
+      userId: "admin",
       email: "admin@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
@@ -38,8 +39,9 @@ async function main() {
 
   const coach = await prisma.user.upsert({
     where: { email: "coach@localhost" },
-    update: verifiedEmailUserFields(),
+    update: { ...verifiedEmailUserFields(), userId: "coach_kim" },
     create: {
+      userId: "coach_kim",
       email: "coach@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
@@ -56,8 +58,9 @@ async function main() {
 
   const student = await prisma.user.upsert({
     where: { email: "demo@localhost" },
-    update: verifiedEmailUserFields(),
+    update: { ...verifiedEmailUserFields(), userId: "demo_user" },
     create: {
+      userId: "demo_user",
       email: "demo@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
@@ -73,8 +76,9 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "customer@localhost" },
-    update: verifiedEmailUserFields(),
+    update: { ...verifiedEmailUserFields(), userId: "new_customer" },
     create: {
+      userId: "new_customer",
       email: "customer@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
@@ -682,10 +686,12 @@ async function seedAccessQaPersonas(params: {
   }
 
   async function ensureQaUser(email: string, name: string) {
+    const userId = email.replace(/@.*$/, "").replace(/[^a-z0-9_]/gi, "_").toLowerCase();
     return prisma.user.upsert({
       where: { email },
-      update: verifiedEmailUserFields(),
+      update: { ...verifiedEmailUserFields(), userId },
       create: {
+        userId,
         email,
         ...verifiedEmailUserFields(),
         password: qaPassword,

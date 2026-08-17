@@ -192,7 +192,7 @@
 | Entitlement | `CoachingOffering.validDays` · `totalSessions` 스냅샷 |
 | Session | offering 템플릿 기준 회차 생성 |
 | Publication | 코치 피드백 `DRAFT` → `PUBLISHED` |
-| Check-in 공유 | 회원 요청 → 코치 승인/거절 → 리포트 생성 (`CheckInShareGrant`) |
+| Check-in 접근 | 회원이 코치 사용자 ID를 검색해 전체 체크인 기록 접근을 허용·차단 (`CoachCheckInAccess`) |
 
 Customer: `/coaching`, `/coaching/sessions/[id]`  
 Coach: `/coach/coaching`, `/coach/sessions/[id]`
@@ -273,7 +273,7 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 | 영역 | 정책 |
 |------|------|
 | **Community** | Markdown 게시글 · 댓글 · 좋아요 · `(app)` Tab `/community` |
-| **Check-in** | Daily / Weekly · Stack `/checkin/*` · 코칭 세션 연계 공유 (`CheckInShareGrant`) |
+| **Check-in** | Daily / Weekly · Stack `/checkin/*` · 사용자 관리형 코치 접근 권한 (`CoachCheckInAccess`) |
 
 ---
 

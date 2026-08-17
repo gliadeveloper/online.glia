@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { shareGrantStatusLabel } from "@/lib/checkin-share/grants";
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import type { getCoachCustomerDetail } from "@/lib/coach-customers";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
@@ -8,7 +7,7 @@ import { OrderStatusPill } from "@/components/orders/order-status-pill";
 type CoachCustomerDetail = Awaited<ReturnType<typeof getCoachCustomerDetail>>;
 
 export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDetail }) {
-  const { user, enrollments, entitlements, sessions, shareGrants, orders } = detail;
+  const { user, enrollments, entitlements, sessions, orders } = detail;
 
   return (
     <div className="space-y-6">
@@ -80,41 +79,6 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
                   {session.entitlement.coachingOffering.title} · {formatDateTime(session.scheduledAt)} ·{" "}
                   {session.progressStatus}
                 </p>
-                {session.checkInShareGrant && (
-                  <p className="mt-1 text-xs text-zinc-400">
-                    체크인 공유 {shareGrantStatusLabel(session.checkInShareGrant.status)}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <div className="border-b border-zinc-100 px-5 py-4">
-          <h2 className="font-semibold">체크인 공유</h2>
-        </div>
-        {shareGrants.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-zinc-500">공유 요청/리포트가 없습니다.</p>
-        ) : (
-          <ul className="divide-y divide-zinc-100">
-            {shareGrants.map((grant) => (
-              <li key={grant.id} className="px-5 py-4 text-sm">
-                <p className="font-medium">
-                  {grant.session.sessionNo}회차 · {grant.session.title}
-                </p>
-                <p className="mt-1 text-zinc-500">
-                  {shareGrantStatusLabel(grant.status)} · {formatDateTime(grant.requestedAt)}
-                </p>
-                {grant.report && (
-                  <Link
-                    href={`/coach/share-reports/${grant.report.id}`}
-                    className="mt-1 inline-block text-emerald-700 hover:underline"
-                  >
-                    리포트 · {grant.report.scopeLabel}
-                  </Link>
-                )}
               </li>
             ))}
           </ul>

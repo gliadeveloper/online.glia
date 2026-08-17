@@ -9,7 +9,7 @@ import { SignupStepCard, SignupSuspenseFallback } from "@/components/auth/signup
 import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { AVATAR_PRESETS } from "@/lib/signup/constants";
-import { validateNickname } from "@/lib/signup/validation";
+import { validateNickname, validateUserId } from "@/lib/signup/validation";
 
 function buildNextQuery(next: string | null) {
   return next ? `?next=${encodeURIComponent(next)}` : "";
@@ -358,13 +358,15 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
   const marketingConsent = searchParams.get("marketing") === "1";
+  const [userId, setUserId] = useState("");
   const [nickname, setNickname] = useState("");
   const [avatarPresetId, setAvatarPresetId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const nicknameValid = validateNickname(nickname).ok;
-  const canSubmit = nicknameValid && Boolean(avatarPresetId);
+  const userIdValid = validateUserId(userId.trim().toLowerCase()).ok;
+  const canSubmit = userIdValid && nicknameValid && Boolean(avatarPresetId);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -378,6 +380,7 @@ function ProfileContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          userId: userId.trim().toLowerCase(),
           nickname: nickname.trim(),
           avatarPresetId,
           marketingConsent,
@@ -412,6 +415,26 @@ function ProfileContent() {
       description="크리에이터를 비롯한 다른 사람들과 소통할 나만의 프로필이에요."
     >
       <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="space-y-2">
+          <label htmlFor="profile-user-id" className="text-sm font-semibold text-slate-700">
+            사용자 ID
+          </label>
+          <input
+            id="profile-user-id"
+            value={userId}
+            onChange={(event) => setUserId(event.target.value.toLowerCase())}
+            className="auth-trust-input"
+            placeholder="예: coach_kim"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            required
+          />
+          <p className="text-sm text-slate-500">
+            코치를 검색하고 다른 사용자가 나를 찾을 때 사용하는 ID예요. 영문 소문자, 숫자, 밑줄로 3~20자까지 입력할 수 있어요.
+          </p>
+        </div>
+
         <div className="space-y-2">
           <label htmlFor="profile-nickname" className="text-sm font-semibold text-slate-700">
             닉네임

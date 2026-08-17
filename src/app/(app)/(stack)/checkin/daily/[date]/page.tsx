@@ -96,6 +96,11 @@ export default async function DailyCheckFormPage({
         formSlug={form.slug}
         questions={form.questions}
         periodDate={selectedDate}
+        initialAnswers={submission?.answers.map((answer) => ({
+          questionId: answer.questionId,
+          optionId: answer.optionId,
+          textValue: answer.textValue,
+        }))}
         reportHref={checkInReportPath("daily", selectedDate)}
         submitLabel={isRedo ? "다시 저장" : "체크인 저장"}
       />

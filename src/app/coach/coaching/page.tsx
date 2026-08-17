@@ -42,7 +42,6 @@ export default async function CoachCoachingPage() {
           scheduledAt: session.scheduledAt.toISOString(),
           user: session.user,
           entitlement: session.entitlement,
-          checkInShareGrant: session.checkInShareGrant,
         }))}
         entitlements={entitlements.map((entitlement) => ({
           id: entitlement.id,

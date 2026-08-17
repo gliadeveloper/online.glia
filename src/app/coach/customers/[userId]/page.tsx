@@ -25,7 +25,7 @@ export default async function CoachCustomerDetailPage({ params }: PageProps) {
           ← 고객 목록
         </Link>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">고객 상세</h1>
-        <p className="mt-1 text-zinc-600">수강·코칭·체크인 공유·주문을 한 화면에서 확인합니다.</p>
+        <p className="mt-1 text-zinc-600">수강·코칭·주문을 한 화면에서 확인합니다.</p>
       </div>
 
       <CoachCustomerDetailPanel detail={detail} />

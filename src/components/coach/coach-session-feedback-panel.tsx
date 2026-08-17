@@ -15,7 +15,6 @@ type CoachSessionFeedbackPanelProps = {
   bodyMarkdown: string | null;
   bodyMetadata: unknown;
   publicationStatus: string;
-  hasSharedReport: boolean;
 };
 
 export function CoachSessionFeedbackPanel({
@@ -24,7 +23,6 @@ export function CoachSessionFeedbackPanel({
   bodyMarkdown: initialBody,
   bodyMetadata: initialBodyMetadata,
   publicationStatus: initialStatus,
-  hasSharedReport,
 }: CoachSessionFeedbackPanelProps) {
   const router = useRouter();
   const editorRef = useRef<CoachingSessionBlockEditorHandle>(null);
@@ -70,13 +68,6 @@ export function CoachSessionFeedbackPanel({
 
   return (
     <div className="space-y-4">
-      {!hasSharedReport && (
-        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          회원이 체크인 공유를 수락하면 기록을 확인할 수 있습니다. 피드백은 공유 전에도 임시 저장할 수
-          있습니다.
-        </p>
-      )}
-
       <div className="space-y-1">
         <label className="text-sm font-medium text-zinc-700">요약 (선택)</label>
         <input

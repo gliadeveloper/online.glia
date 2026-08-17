@@ -37,8 +37,8 @@ export function resolveStackNav(pathname: string): StackNavContext {
     return { backHref: "/checkin", backLabel: "체크인", title: "작성한 목록" };
   }
 
-  if (pathname.startsWith("/checkin/share/")) {
-    return { backHref: "/checkin", backLabel: "체크인", title: "체크인 공유" };
+  if (pathname === "/checkin/sharing") {
+    return { backHref: "/checkin", backLabel: "체크인", title: "코치 접근 관리" };
   }
 
   if (pathname === "/checkin") {

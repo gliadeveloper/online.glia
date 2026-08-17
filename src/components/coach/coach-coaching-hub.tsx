@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
-import type { CheckInShareGrantStatus } from "@/generated/prisma/client";
-import { shareGrantStatusLabel } from "@/lib/checkin-share/labels";
 import { formatDateTime } from "@/lib/admin-format";
 
 type SessionRow = {
@@ -15,7 +13,6 @@ type SessionRow = {
   scheduledAt: string;
   user: { name: string | null; email: string };
   entitlement: { coachingOffering: { title: string } };
-  checkInShareGrant: { status: CheckInShareGrantStatus } | null;
 };
 
 type EntitlementRow = {
@@ -112,16 +109,9 @@ export function CoachCoachingHub(props: CoachCoachingHubProps) {
                       {session.entitlement.coachingOffering.title}
                     </p>
                   </div>
-                  <div className="text-right text-sm">
-                    {session.checkInShareGrant ? (
-                      <span className="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
-                        공유 {shareGrantStatusLabel(session.checkInShareGrant.status)}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-400">공유 미요청</span>
-                    )}
-                    <p className="mt-2 text-zinc-500">{formatDateTime(new Date(session.scheduledAt))}</p>
-                  </div>
+                  <p className="text-right text-sm text-zinc-500">
+                    {formatDateTime(new Date(session.scheduledAt))}
+                  </p>
                 </div>
               </Link>
             ))

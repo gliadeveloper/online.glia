@@ -5,6 +5,7 @@ import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import type { Prisma } from "@/generated/prisma/client";
 import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { createCoachingPublishedNotification } from "@/lib/home-notifications";
 
 export const coachSessionListInclude = {
   user: { select: { id: true, name: true, email: true } },
@@ -12,20 +13,6 @@ export const coachSessionListInclude = {
     select: {
       coachingOffering: { select: { title: true } },
     },
-  },
-  checkInShareGrant: {
-    select: {
-      id: true,
-      status: true,
-      scopeType: true,
-      weekPeriodKey: true,
-      startDate: true,
-      endDate: true,
-      requestedAt: true,
-    },
-  },
-  checkInShareReport: {
-    select: { id: true, scopeLabel: true, generatedAt: true },
   },
 } as const;
 
@@ -43,8 +30,6 @@ export async function getCoachSessionDetail(sessionId: string, coachId: string) 
     include: {
       ...sessionInclude,
       user: { select: { id: true, name: true, email: true } },
-      checkInShareGrant: true,
-      checkInShareReport: true,
     },
   });
 
@@ -93,7 +78,7 @@ export async function coachUpdateSession(params: {
         ? PrismaRuntime.JsonNull
         : params.bodyMetadata;
 
-  let publicationStatus = params.publicationStatus;
+  const publicationStatus = params.publicationStatus;
   if (publicationStatus === "PUBLISHED") {
     const nextSession = {
       bodyMarkdown: bodyMarkdown ?? session.bodyMarkdown,
@@ -109,17 +94,23 @@ export async function coachUpdateSession(params: {
   const publishing =
     publicationStatus === "PUBLISHED" && session.publicationStatus !== "PUBLISHED";
 
-  const updated = await prisma.coachingSession.update({
-    where: { id: session.id },
-    data: {
-      summary: params.summary === undefined ? undefined : params.summary,
-      bodyMarkdown,
-      bodyMetadata,
-      publicationStatus,
-      publishedAt: publishing ? now : publicationStatus === "EMPTY" ? null : undefined,
-      publishedById: publishing ? params.coachId : publicationStatus === "EMPTY" ? null : undefined,
-    },
-    include: sessionInclude,
+  const updated = await prisma.$transaction(async (tx) => {
+    const next = await tx.coachingSession.update({
+      where: { id: session.id },
+      data: {
+        summary: params.summary === undefined ? undefined : params.summary,
+        bodyMarkdown,
+        bodyMetadata,
+        publicationStatus,
+        publishedAt: publishing ? now : publicationStatus === "EMPTY" ? null : undefined,
+        publishedById: publishing ? params.coachId : publicationStatus === "EMPTY" ? null : undefined,
+      },
+      include: sessionInclude,
+    });
+    if (publishing) {
+      await createCoachingPublishedNotification(tx, { sessionId: session.id, userId: session.userId, occurredAt: now });
+    }
+    return next;
   });
 
   await writeAuditLog({

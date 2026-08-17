@@ -113,6 +113,11 @@ export default async function WeeklyCheckFormPage({
         formSlug={form.slug}
         questions={form.questions}
         periodDate={date}
+        initialAnswers={submission?.answers.map((answer) => ({
+          questionId: answer.questionId,
+          optionId: answer.optionId,
+          textValue: answer.textValue,
+        }))}
         reportHref={checkInReportPath("weekly", periodKey)}
         submitLabel={isRedo ? "다시 저장" : "주간 체크 저장"}
       />

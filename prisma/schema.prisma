@@ -88,13 +88,16 @@ enum SubmissionStatus {
 }
 
 enum NotificationType {
-  SYSTEM
-  COURSE
-  ASSIGNMENT
-  QUIZ
-  DISCUSSION
-  CERTIFICATE
-  COACHING
+  COACHING_SESSION_PUBLISHED
+  COACHING_COMMENT
+  LIVE_STARTED
+}
+
+enum LiveSessionStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
 }
 
 enum DiscussionType {
@@ -197,19 +200,6 @@ enum CoachingMessageAuthorRole {
   COACH
 }
 
-enum CheckInShareScopeType {
-  WEEK
-  RANGE
-}
-
-enum CheckInShareGrantStatus {
-  PENDING
-  GRANTED
-  DECLINED
-  CANCELLED
-  EXPIRED
-}
-
 enum RefundStatus {
   PENDING
   COMPLETED
@@ -268,59 +258,60 @@ enum IdentityStatus {
 // ─── User & Organization ─────────────────────────────────────────────────────
 
 model User {
-  id              String     @id @default(cuid())
-  email           String     @unique
-  emailKind       EmailKind  @default(UNVERIFIED)
-  emailVerifiedAt DateTime?
-  password        String?
-  name            String?
-  role            UserRole   @default(USER)
-  status          UserStatus @default(ACTIVE)
-  lastLoginAt     DateTime?
+  id                    String     @id @default(cuid())
+  /// Public, user-chosen identifier. Distinct from the internal CUID `id`.
+  userId                String?    @unique
+  email                 String     @unique
+  emailKind             EmailKind  @default(UNVERIFIED)
+  emailVerifiedAt       DateTime?
+  password              String?
+  name                  String?
+  role                  UserRole   @default(USER)
+  status                UserStatus @default(ACTIVE)
+  lastLoginAt           DateTime?
   onboardingCompletedAt DateTime?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
 
-  profile              Profile?
-  consent              UserConsent?
-  identities           Identity[]
-  authSessions         AuthSession[]
-  organizationMembers  OrganizationMember[]
-  instructedCourses    Course[]             @relation("CourseInstructor")
-  enrollments          Enrollment[]
-  quizAttempts         QuizAttempt[]
-  submissions          Submission[]
-  gradedSubmissions    Submission[]         @relation("SubmissionGrader")
-  reviews              Review[]
-  certificates         Certificate[]
-  notifications        Notification[]
-  discussions          Discussion[]
-  discussionReplies    DiscussionReply[]
-  posts                Post[]
-  postComments         PostComment[]
-  postLikes            PostLike[]
-  postCommentLikes     PostCommentLike[]
-  postReportsFiled     PostReport[]        @relation("PostReportReporter")
-  postReportsReviewed  PostReport[]        @relation("PostReportReviewer")
-  lessonBookmarks      LessonBookmark[]
-  lessonNotes          LessonNote[]
-  orders               Order[]
-  coachedOfferings     CoachingOffering[]   @relation("CoachingOfferingCoach")
-  coachingEntitlements CoachingEntitlement[]
-  coachingSessionsAsCoach       CoachingSession[]             @relation("CoachingSessionCoach")
-  coachingSessionsAsStudent     CoachingSession[]             @relation("CoachingSessionStudent")
-  coachingSessionsPublished     CoachingSession[]             @relation("CoachingSessionPublisher")
+  profile                        Profile?
+  consent                        UserConsent?
+  identities                     Identity[]
+  authSessions                   AuthSession[]
+  organizationMembers            OrganizationMember[]
+  instructedCourses              Course[]                      @relation("CourseInstructor")
+  enrollments                    Enrollment[]
+  quizAttempts                   QuizAttempt[]
+  submissions                    Submission[]
+  gradedSubmissions              Submission[]                  @relation("SubmissionGrader")
+  reviews                        Review[]
+  certificates                   Certificate[]
+  notificationDeliveries         NotificationDelivery[]
+  liveSessionsAsCoach            LiveSession[]                 @relation("LiveSessionCoach")
+  discussions                    Discussion[]
+  discussionReplies              DiscussionReply[]
+  posts                          Post[]
+  postComments                   PostComment[]
+  postLikes                      PostLike[]
+  postCommentLikes               PostCommentLike[]
+  postReportsFiled               PostReport[]                  @relation("PostReportReporter")
+  postReportsReviewed            PostReport[]                  @relation("PostReportReviewer")
+  lessonBookmarks                LessonBookmark[]
+  lessonNotes                    LessonNote[]
+  orders                         Order[]
+  coachedOfferings               CoachingOffering[]            @relation("CoachingOfferingCoach")
+  coachingEntitlements           CoachingEntitlement[]
+  coachingSessionsAsCoach        CoachingSession[]             @relation("CoachingSessionCoach")
+  coachingSessionsAsStudent      CoachingSession[]             @relation("CoachingSessionStudent")
+  coachingSessionsPublished      CoachingSession[]             @relation("CoachingSessionPublisher")
   coachingConversationsAsStudent CoachingSessionConversation[] @relation("CoachingConversationStudent")
   coachingConversationsAsCoach   CoachingSessionConversation[] @relation("CoachingConversationCoach")
   coachingSessionMessages        CoachingSessionMessage[]
   coachingSessionProgress        CoachingSessionProgress[]
-  checkInShareGrantsAsCoach      CheckInShareGrant[]           @relation("CheckInShareGrantCoach")
-  checkInShareGrantsAsStudent    CheckInShareGrant[]           @relation("CheckInShareGrantStudent")
-  checkInShareReportsAsCoach     CheckInShareReport[]          @relation("CheckInShareReportCoach")
-  checkInShareReportsAsStudent   CheckInShareReport[]          @relation("CheckInShareReportStudent")
-  auditLogs            AuditLog[]
-  createdForms         Form[]             @relation("FormCreator")
-  formSubmissions      FormSubmission[]
+  checkInAccessGrantedToCoaches  CoachCheckInAccess[]          @relation("CoachCheckInAccessUser")
+  checkInAccessGrantedByUsers    CoachCheckInAccess[]          @relation("CoachCheckInAccessCoach")
+  auditLogs                      AuditLog[]
+  createdForms                   Form[]                        @relation("FormCreator")
+  formSubmissions                FormSubmission[]
 
   @@index([status])
   @@index([lastLoginAt])
@@ -328,14 +319,14 @@ model User {
 }
 
 model UserConsent {
-  id                   String    @id @default(cuid())
-  userId               String    @unique
-  termsAcceptedAt      DateTime
-  privacyAcceptedAt    DateTime
-  age14ConfirmedAt     DateTime
-  marketingAcceptedAt  DateTime?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  termsAcceptedAt     DateTime
+  privacyAcceptedAt   DateTime
+  age14ConfirmedAt    DateTime
+  marketingAcceptedAt DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -352,6 +343,7 @@ model SignupDraft {
   termsAcceptedAt     DateTime?
   marketingConsent    Boolean?
   marketingAcceptedAt DateTime?
+  userId              String?
   nickname            String?
   avatarPresetId      String?
   avatarUrl           String?
@@ -439,10 +431,10 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members OrganizationMember[]
-  courses Course[]
+  members  OrganizationMember[]
+  courses  Course[]
   products Product[]
-  forms   Form[]
+  forms    Form[]
 
   @@map("organizations")
 }
@@ -491,41 +483,41 @@ model Tag {
 // ─── Course Content ────────────────────────────────────────────────────────────
 
 model Course {
-  id           String       @id @default(cuid())
-  title        String
-  slug         String       @unique
-  description  String?
-  thumbnailUrl String?
-  instructorId String
-  organizationId String?
-  status       CourseStatus @default(DRAFT)
-  level        CourseLevel  @default(ALL_LEVELS)
+  id                    String             @id @default(cuid())
+  title                 String
+  slug                  String             @unique
+  description           String?
+  thumbnailUrl          String?
+  instructorId          String
+  organizationId        String?
+  status                CourseStatus       @default(DRAFT)
+  level                 CourseLevel        @default(ALL_LEVELS)
   /// @deprecated Use Product.listPrice for sales. Kept for legacy display.
-  price        Float        @default(0)
-  currency     String       @default("KRW")
-  isFeatured   Boolean      @default(false)
+  price                 Float              @default(0)
+  currency              String             @default("KRW")
+  isFeatured            Boolean            @default(false)
   /// Fallback when granting enrollment without a ProductItem (admin grant).
   defaultAccessDuration AccessDurationKind @default(LIFETIME)
   defaultAccessDays     Int?
-  publishedAt  DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  publishedAt           DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 
-  instructor   User               @relation("CourseInstructor", fields: [instructorId], references: [id], onDelete: Restrict)
-  organization Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  modules      Module[]
-  enrollments  Enrollment[]
-  categories   CourseCategory[]
-  tags         CourseTag[]
-  prerequisites CoursePrerequisite[] @relation("CoursePrerequisites")
-  requiredBy   CoursePrerequisite[] @relation("PrerequisiteCourses")
-  reviews      Review[]
-  certificates Certificate[]
-  discussions  Discussion[]
-  productItems ProductItem[]
-  coachingOfferings CoachingOffering[]
+  instructor           User                  @relation("CourseInstructor", fields: [instructorId], references: [id], onDelete: Restrict)
+  organization         Organization?         @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  modules              Module[]
+  enrollments          Enrollment[]
+  categories           CourseCategory[]
+  tags                 CourseTag[]
+  prerequisites        CoursePrerequisite[]  @relation("CoursePrerequisites")
+  requiredBy           CoursePrerequisite[]  @relation("PrerequisiteCourses")
+  reviews              Review[]
+  certificates         Certificate[]
+  discussions          Discussion[]
+  productItems         ProductItem[]
+  coachingOfferings    CoachingOffering[]
   coachingEntitlements CoachingEntitlement[]
-  forms            Form[]
+  forms                Form[]
 
   @@index([instructorId])
   @@index([status])
@@ -567,11 +559,11 @@ model CourseTag {
 }
 
 model Module {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   courseId    String
   title       String
   description String?
-  order       Int     @default(0)
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -594,14 +586,15 @@ model Lesson {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  module          Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  contents        Content[]
-  progress        LessonProgress[]
-  quiz            Quiz?
-  assignment      Assignment?
-  bookmarks       LessonBookmark[]
-  notes           LessonNote[]
-  discussions     Discussion[]
+  module      Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  contents    Content[]
+  progress    LessonProgress[]
+  quiz        Quiz?
+  assignment  Assignment?
+  bookmarks   LessonBookmark[]
+  notes       LessonNote[]
+  discussions Discussion[]
+  liveSession LiveSession?
 
   @@index([moduleId, order])
   @@map("lessons")
@@ -626,14 +619,14 @@ model Content {
 // ─── Enrollment & Progress ─────────────────────────────────────────────────────
 
 model Enrollment {
-  id              String           @id @default(cuid())
+  id              String             @id @default(cuid())
   userId          String
   courseId        String
-  status          EnrollmentStatus @default(ACTIVE)
-  progressPercent Float            @default(0)
-  enrolledAt      DateTime         @default(now())
+  status          EnrollmentStatus   @default(ACTIVE)
+  progressPercent Float              @default(0)
+  enrolledAt      DateTime           @default(now())
   /// Start of the current access window (may refresh on renewal).
-  validFrom       DateTime         @default(now())
+  validFrom       DateTime           @default(now())
   /// End of access; null = lifetime unlimited replay.
   validUntil      DateTime?
   /// Snapshot of catalog policy at grant/renewal time.
@@ -643,13 +636,13 @@ model Enrollment {
   /// Set when status transitions to EXPIRED.
   expiredAt       DateTime?
   lastAccessedAt  DateTime?
-  updatedAt       DateTime         @updatedAt
+  updatedAt       DateTime           @updatedAt
 
-  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course       Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  progress     LessonProgress[]
-  certificate  Certificate?
-  entitlementGrants EntitlementGrant[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course               Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress             LessonProgress[]
+  certificate          Certificate?
+  entitlementGrants    EntitlementGrant[]
   coachingEntitlements CoachingEntitlement[]
 
   @@unique([userId, courseId])
@@ -724,13 +717,13 @@ model Quiz {
 }
 
 model Question {
-  id           String       @id @default(cuid())
-  quizId       String
-  type         QuestionType @default(SINGLE_CHOICE)
-  prompt       String
-  explanation  String?
-  points       Float        @default(1)
-  order        Int          @default(0)
+  id          String       @id @default(cuid())
+  quizId      String
+  type        QuestionType @default(SINGLE_CHOICE)
+  prompt      String
+  explanation String?
+  points      Float        @default(1)
+  order       Int          @default(0)
 
   quiz    Quiz             @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options QuestionOption[]
@@ -771,7 +764,7 @@ model QuizAttempt {
 }
 
 model QuizAnswer {
-  id         String @id @default(cuid())
+  id         String  @id @default(cuid())
   attemptId  String
   questionId String
   answerText String?
@@ -883,30 +876,30 @@ model DiscussionReply {
 
 /// Community article. Body is Markdown (react-markdown). Comments & likes are separate entities.
 model Post {
-  id           String     @id @default(cuid())
-  userId       String
-  slug         String     @unique
-  title        String
+  id             String     @id @default(cuid())
+  userId         String
+  slug           String     @unique
+  title          String
   /// Markdown source of truth for react-markdown rendering.
-  bodyMarkdown String
+  bodyMarkdown   String
   /// Plain-text preview for list cards / search (derived on write).
-  excerpt      String?
+  excerpt        String?
   /// When set, this post is a child article linked to the parent post.
-  parentPostId String?
+  parentPostId   String?
   /// Top-level thread id for grouping (root posts: null; children: root id).
-  rootPostId   String?
-  status       PostStatus @default(DRAFT)
+  rootPostId     String?
+  status         PostStatus @default(DRAFT)
   /// Denormalized — keep in sync when PostLike rows change.
-  likeCount    Int        @default(0)
+  likeCount      Int        @default(0)
   /// Denormalized — keep in sync when PostComment rows change.
-  commentCount Int        @default(0)
+  commentCount   Int        @default(0)
   /// Denormalized — direct child posts only (keep in sync on child Post writes).
-  childPostCount Int      @default(0)
-  viewCount    Int        @default(0)
-  publishedAt  DateTime?
-  editedAt     DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  childPostCount Int        @default(0)
+  viewCount      Int        @default(0)
+  publishedAt    DateTime?
+  editedAt       DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   parentPost Post?         @relation("PostHierarchy", fields: [parentPostId], references: [id], onDelete: SetNull)
@@ -1015,12 +1008,12 @@ model PostReport {
 // ─── Certificate & Notification ────────────────────────────────────────────────
 
 model Certificate {
-  id             String   @id @default(cuid())
-  enrollmentId   String   @unique
-  userId         String
-  courseId       String
-  certificateNo  String   @unique
-  issuedAt       DateTime @default(now())
+  id            String   @id @default(cuid())
+  enrollmentId  String   @unique
+  userId        String
+  courseId      String
+  certificateNo String   @unique
+  issuedAt      DateTime @default(now())
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1029,20 +1022,38 @@ model Certificate {
   @@map("certificates")
 }
 
-model Notification {
-  id        String           @id @default(cuid())
+model NotificationEvent {
+  id         String           @id @default(cuid())
+  type       NotificationType
+  occurredAt DateTime         @default(now())
+  createdAt  DateTime         @default(now())
+
+  coachingSessionId String? @unique
+  coachingMessageId String? @unique
+  liveSessionId     String? @unique
+
+  coachingSession CoachingSession?        @relation("NotificationCoachingSession", fields: [coachingSessionId], references: [id], onDelete: Cascade)
+  coachingMessage CoachingSessionMessage? @relation("NotificationCoachingMessage", fields: [coachingMessageId], references: [id], onDelete: Cascade)
+  liveSession     LiveSession?            @relation("NotificationLiveSession", fields: [liveSessionId], references: [id], onDelete: Cascade)
+  deliveries      NotificationDelivery[]
+
+  @@index([type, occurredAt])
+  @@map("notification_events")
+}
+
+model NotificationDelivery {
+  id        String    @id @default(cuid())
+  eventId   String
   userId    String
-  type      NotificationType @default(SYSTEM)
-  title     String
-  body      String
-  link      String?
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event NotificationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, isRead])
-  @@map("notifications")
+  @@unique([eventId, userId])
+  @@index([userId, readAt, createdAt])
+  @@map("notification_deliveries")
 }
 
 // ─── Catalog: Coaching Offering & Product ──────────────────────────────────────
@@ -1060,8 +1071,8 @@ model CoachingOffering {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  coach            User?                            @relation("CoachingOfferingCoach", fields: [coachId], references: [id], onDelete: SetNull)
-  course           Course?                          @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  coach            User?                             @relation("CoachingOfferingCoach", fields: [coachId], references: [id], onDelete: SetNull)
+  course           Course?                           @relation(fields: [courseId], references: [id], onDelete: SetNull)
   sessionTemplates CoachingOfferingSessionTemplate[]
   productItems     ProductItem[]
   entitlements     CoachingEntitlement[]
@@ -1072,13 +1083,13 @@ model CoachingOffering {
 }
 
 model CoachingOfferingSessionTemplate {
-  id                  String @id @default(cuid())
+  id                  String  @id @default(cuid())
   offeringId          String
   sessionNo           Int
   title               String
   summary             String?
-  scheduledOffsetDays Int    @default(0)
-  sortOrder           Int    @default(0)
+  scheduledOffsetDays Int     @default(0)
+  sortOrder           Int     @default(0)
 
   offering CoachingOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
 
@@ -1110,7 +1121,7 @@ model Product {
 }
 
 model ProductItem {
-  id                 String          @id @default(cuid())
+  id                 String             @id @default(cuid())
   productId          String
   kind               ProductItemKind
   courseId           String?
@@ -1118,12 +1129,12 @@ model ProductItem {
   /// COURSE_ACCESS only. COACHING_ACCESS uses CoachingOffering.validDays.
   accessDuration     AccessDurationKind @default(LIFETIME)
   accessDays         Int?
-  quantity           Int             @default(1)
-  sortOrder          Int             @default(0)
+  quantity           Int                @default(1)
+  sortOrder          Int                @default(0)
 
-  product          Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
-  course           Course?           @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  coachingOffering CoachingOffering? @relation(fields: [coachingOfferingId], references: [id], onDelete: SetNull)
+  product           Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  course            Course?            @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  coachingOffering  CoachingOffering?  @relation(fields: [coachingOfferingId], references: [id], onDelete: SetNull)
   entitlementGrants EntitlementGrant[]
 
   @@index([productId, sortOrder])
@@ -1265,8 +1276,6 @@ model CoachingEntitlement {
   enrollment       Enrollment?        @relation(fields: [enrollmentId], references: [id], onDelete: SetNull)
   grants           EntitlementGrant[]
   sessions         CoachingSession[]
-  checkInShareGrants CheckInShareGrant[]
-  checkInShareReports CheckInShareReport[]
 
   @@index([userId, status])
   @@index([coachingOfferingId])
@@ -1297,14 +1306,13 @@ model CoachingSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  entitlement  CoachingEntitlement           @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
-  coach        User                          @relation("CoachingSessionCoach", fields: [coachId], references: [id], onDelete: Restrict)
-  user         User                          @relation("CoachingSessionStudent", fields: [userId], references: [id], onDelete: Cascade)
-  publishedBy  User?                         @relation("CoachingSessionPublisher", fields: [publishedById], references: [id], onDelete: SetNull)
+  entitlement  CoachingEntitlement          @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
+  coach        User                         @relation("CoachingSessionCoach", fields: [coachId], references: [id], onDelete: Restrict)
+  user         User                         @relation("CoachingSessionStudent", fields: [userId], references: [id], onDelete: Cascade)
+  publishedBy  User?                        @relation("CoachingSessionPublisher", fields: [publishedById], references: [id], onDelete: SetNull)
   conversation CoachingSessionConversation?
   progress     CoachingSessionProgress?
-  checkInShareGrant  CheckInShareGrant?
-  checkInShareReport CheckInShareReport?
+  notification NotificationEvent?           @relation("NotificationCoachingSession")
 
   @@unique([entitlementId, sessionNo])
   @@index([userId, sessionNo])
@@ -1359,76 +1367,52 @@ model CoachingSessionMessage {
 
   conversation CoachingSessionConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   author       User                        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  notification NotificationEvent?          @relation("NotificationCoachingMessage")
 
   @@index([conversationId, createdAt])
   @@map("coaching_session_messages")
 }
 
-// ─── Check-in share (coach request → member accept → immutable report) ─────────
+/// An actual live occurrence; Lesson(type=LIVE) remains the curriculum definition.
+model LiveSession {
+  id        String            @id @default(cuid())
+  lessonId  String            @unique
+  coachId   String
+  status    LiveSessionStatus @default(SCHEDULED)
+  startedAt DateTime?
+  endedAt   DateTime?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
-model CheckInShareGrant {
-  id            String                  @id @default(cuid())
-  entitlementId String
-  sessionId     String                  @unique
-  coachId       String
-  userId        String
+  lesson       Lesson             @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  coach        User               @relation("LiveSessionCoach", fields: [coachId], references: [id], onDelete: Restrict)
+  notification NotificationEvent? @relation("NotificationLiveSession")
 
-  scopeType     CheckInShareScopeType
-  weekPeriodKey String?
-  startDate     String?
-  endDate       String?
-
-  coachMessage  String?
-  status        CheckInShareGrantStatus @default(PENDING)
-
-  requestedAt   DateTime                @default(now())
-  respondedAt   DateTime?
-
-  entitlement CoachingEntitlement @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
-  session     CoachingSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  coach       User                @relation("CheckInShareGrantCoach", fields: [coachId], references: [id], onDelete: Restrict)
-  user        User                @relation("CheckInShareGrantStudent", fields: [userId], references: [id], onDelete: Cascade)
-  report      CheckInShareReport?
-
-  @@index([userId, status])
   @@index([coachId, status])
-  @@index([entitlementId])
-  @@map("check_in_share_grants")
+  @@index([status, startedAt])
+  @@map("live_sessions")
 }
 
-model CheckInShareReport {
-  id                    String                @id @default(cuid())
-  grantId               String                @unique
-  entitlementId         String
-  sessionId             String                @unique
-  userId                String
-  coachId               String
+// ─── Check-in access (user-managed, ongoing coach access) ─────────────────────
 
-  scopeType             CheckInShareScopeType
-  weekPeriodKey         String?
-  startDate             String?
-  endDate               String?
+/// A user grants one coach access to all past and future daily/weekly check-ins.
+/// Every read must require `revokedAt IS NULL`, so a block applies immediately.
+model CoachCheckInAccess {
+  id        String    @id @default(cuid())
+  userId    String
+  coachId   String
+  grantedAt DateTime  @default(now())
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  scopeLabel            String
-  generatedAt           DateTime              @default(now())
+  user  User @relation("CoachCheckInAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  coach User @relation("CoachCheckInAccessCoach", fields: [coachId], references: [id], onDelete: Restrict)
 
-  dailyRecorded         Int
-  dailyInScope          Int
-  weeklyIncluded        Boolean
-  weeklyCount           Int                   @default(0)
-
-  contentJson           Json
-  snapshotSubmissionIds Json
-
-  grant       CheckInShareGrant       @relation(fields: [grantId], references: [id], onDelete: Cascade)
-  entitlement CoachingEntitlement     @relation(fields: [entitlementId], references: [id], onDelete: Cascade)
-  session     CoachingSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  coach       User                    @relation("CheckInShareReportCoach", fields: [coachId], references: [id], onDelete: Restrict)
-  user        User                    @relation("CheckInShareReportStudent", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([coachId])
-  @@index([userId])
-  @@map("check_in_share_reports")
+  @@unique([userId, coachId])
+  @@index([userId, revokedAt])
+  @@index([coachId, revokedAt])
+  @@map("coach_check_in_accesses")
 }
 
 // ─── Ops: Audit & Idempotency ──────────────────────────────────────────────────

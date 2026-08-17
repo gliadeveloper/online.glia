@@ -3,17 +3,11 @@ import Link from "next/link";
 import { CheckInDayStrip } from "@/components/checkin/check-in-day-strip";
 import { CheckInHistoryList } from "@/components/checkin/check-in-history-list";
 import { CheckInHubStripTitle } from "@/components/checkin/check-in-hub-strip-title";
-import { CheckInSharePendingBanner } from "@/components/checkin/check-in-share-pending-banner";
 import { CheckInStatusPill } from "@/components/checkin/check-in-status-pill";
 import { Typography } from "@/components/typography/typography";
 import type { CheckInHubData } from "@/lib/checkin-hub";
-import type { listPendingShareGrantsForUser } from "@/lib/checkin-share/grants";
-
-type PendingGrant = Awaited<ReturnType<typeof listPendingShareGrantsForUser>>[number];
-
 type CheckInHubPanelProps = {
   data: CheckInHubData;
-  pendingShareGrants?: PendingGrant[];
 };
 
 function ChevronIcon() {
@@ -60,7 +54,7 @@ function CheckInWeeklyTaskRow({ task }: { task: NonNullable<CheckInHubData["week
   );
 }
 
-export function CheckInHubPanel({ data, pendingShareGrants = [] }: CheckInHubPanelProps) {
+export function CheckInHubPanel({ data }: CheckInHubPanelProps) {
   if (!data.dailyForm) {
     return (
       <p className="check-in-hub__missing">
@@ -81,8 +75,6 @@ export function CheckInHubPanel({ data, pendingShareGrants = [] }: CheckInHubPan
 
   return (
     <div className="check-in-hub__panel">
-      <CheckInSharePendingBanner grants={pendingShareGrants} />
-
       <CheckInDayStrip
         days={data.dayStrip}
         title={
@@ -100,6 +92,18 @@ export function CheckInHubPanel({ data, pendingShareGrants = [] }: CheckInHubPan
           <CheckInWeeklyTaskRow task={data.weeklyTask} />
         </section>
       ) : null}
+
+      <section aria-labelledby="check-in-coach-access-heading" className="check-in-hub-section check-in-hub-access">
+        <div className="check-in-hub-section__head">
+          <div>
+            <h2 id="check-in-coach-access-heading" className="check-in-hub-section__title">코치 공유</h2>
+            <p className="check-in-hub-section__meta">내 기록을 볼 코치를 직접 관리할 수 있어요.</p>
+          </div>
+        </div>
+        <Link href="/checkin/sharing" className="check-in-hub-access__link corp-trust-focus shell-focus-ring">
+          코치 접근 권한 관리 <ChevronIcon />
+        </Link>
+      </section>
 
       <section aria-labelledby="check-in-written-list-heading" className="check-in-hub-section check-in-written-list">
         <div className="check-in-hub-section__head">

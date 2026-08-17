@@ -22,6 +22,7 @@ import { ApiError } from "@/lib/api";
 import { getEnrolledCourseDetail } from "@/lib/learning-course-detail";
 import { getLessonPlayerContext } from "@/lib/learning";
 import { getCourseShopStateBySlug } from "@/lib/shop-purchase-state";
+import { markLiveNotificationsRead } from "@/lib/home-notifications";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
@@ -167,6 +168,9 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
   }
 
   const { lesson, progress, prevLesson, nextLesson, quizAttempt, assignmentSubmission } = context;
+  if (lesson.type === "LIVE") {
+    await markLiveNotificationsRead(user.id, lesson.id);
+  }
   const status = progress?.status ?? "NOT_STARTED";
 
   const player = resolveLessonPlayer(lesson);

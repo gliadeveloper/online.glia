@@ -6,6 +6,7 @@ import { CoachingMarkdown } from "@/components/coaching/coaching-markdown";
 import { CoachingSessionQnaPanel } from "@/components/coaching/coaching-session-qna-panel";
 import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
 import { getCoachingSessionForUser } from "@/lib/coaching";
+import { markCoachingNotificationsRead } from "@/lib/home-notifications";
 import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import { StackNavBack, StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
@@ -26,6 +27,8 @@ export default async function CoachingSessionPage({ params }: CoachingSessionPag
   if (session.publicationStatus !== "PUBLISHED" || !coachingSessionHasBody(session)) {
     notFound();
   }
+
+  await markCoachingNotificationsRead(user.id, session.id);
 
   return (
     <AppStackPage>

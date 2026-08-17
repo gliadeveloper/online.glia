@@ -39,7 +39,7 @@
 | 오늘 작성 | `/checkin/daily/[date]` |
 | 주간 | `/checkin/weekly/[date]` |
 | 리포트 | `/checkin/daily/[date]/report` |
-| 코칭 공유 | `/checkin/share/[id]` |
+| 코치 접근 관리 | `/checkin/sharing` |
 
 ---
 
@@ -52,4 +52,4 @@
 
 ## 코칭 연동
 
-- 코칭 세션에서 체크인 **공유 요청** → 코치 승인 → 리포트 ([policies.md](../policies.md) §6)
+- 사용자가 코치 사용자 ID를 검색해 체크인 기록의 전체 접근 권한을 허용·차단한다.

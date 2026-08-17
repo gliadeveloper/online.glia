@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { AppStackPage } from "@/components/app";
 import { CheckInHubFooterCta } from "@/components/checkin/check-in-hub-footer-cta";
 import { CheckInHubPanel } from "@/components/checkin/check-in-hub-panel";
-import { listPendingShareGrantsForUser } from "@/lib/checkin-share/grants";
 import { getCheckInHubData } from "@/lib/checkin-hub";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
@@ -39,7 +38,6 @@ export default async function CheckInHubPage() {
   }
 
   const data = await getCheckInHubData(user.id);
-  const pendingShareGrants = await listPendingShareGrantsForUser(user.id);
   const footerCta = resolveHubFooterCta(data);
 
   return (
@@ -55,7 +53,7 @@ export default async function CheckInHubPage() {
         </div>
 
         <div className="check-in-hub-card__content">
-          <CheckInHubPanel data={data} pendingShareGrants={pendingShareGrants} />
+          <CheckInHubPanel data={data} />
 
           {footerCta.show ? (
             <CheckInHubFooterCta href={footerCta.href} label={footerCta.label} />

@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { shareGrantStatusLabel } from "@/lib/checkin-share/grants";
 import { listCoachSessions } from "@/lib/coaching-coach";
 import { requireCoach } from "@/lib/coach";
 import { getCoachDashboardStats } from "@/lib/coach-customers";
@@ -98,8 +97,6 @@ export default async function CoachDashboardPage() {
         ) : (
           <div className="space-y-3">
             {recentSessions.map((session) => {
-              const grant = session.checkInShareGrant;
-
               return (
                 <Link
                   key={session.id}
@@ -116,16 +113,7 @@ export default async function CoachDashboardPage() {
                         {session.entitlement.coachingOffering.title}
                       </p>
                     </div>
-                    <div className="text-right text-sm">
-                      {grant ? (
-                        <span className="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
-                          공유 {shareGrantStatusLabel(grant.status)}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-zinc-400">공유 미요청</span>
-                      )}
-                      <p className="mt-2 text-zinc-500">{formatDateTime(session.scheduledAt)}</p>
-                    </div>
+                    <p className="text-right text-sm text-zinc-500">{formatDateTime(session.scheduledAt)}</p>
                   </div>
                 </Link>
               );

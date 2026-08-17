@@ -140,7 +140,7 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
     )
     .map((product) => product.id);
 
-  const [enrollments, entitlements, sessions, shareGrants, orders] = await Promise.all([
+  const [enrollments, entitlements, sessions, orders] = await Promise.all([
     prisma.enrollment.findMany({
       where: { userId: customerUserId, course: { instructorId: coachId } },
       include: {
@@ -162,20 +162,6 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
         entitlement: {
           select: { coachingOffering: { select: { title: true } } },
         },
-        checkInShareGrant: {
-          select: { id: true, status: true, scopeType: true, requestedAt: true },
-        },
-        checkInShareReport: {
-          select: { id: true, scopeLabel: true, generatedAt: true },
-        },
-      },
-    }),
-    prisma.checkInShareGrant.findMany({
-      where: { userId: customerUserId, coachId },
-      orderBy: { requestedAt: "desc" },
-      include: {
-        session: { select: { id: true, sessionNo: true, title: true } },
-        report: { select: { id: true, scopeLabel: true, generatedAt: true } },
       },
     }),
     productIds.length
@@ -204,7 +190,6 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
     enrollments,
     entitlements,
     sessions,
-    shareGrants,
     orders,
   };
 }

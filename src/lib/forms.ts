@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api";
 import {
   isFutureDailyDate,
   isFutureWeeklyPeriod,
+  isWeeklyCheckInWritableDay,
 } from "@/lib/checkin-dates";
 import { prisma } from "@/lib/prisma";
 
@@ -311,6 +312,15 @@ export async function upsertFormSubmission(params: {
         },
       },
     });
+
+    if (
+      form.schedule === "WEEKLY" &&
+      !existing &&
+      (!isWeeklyCheckInWritableDay(getCheckInDate(form.timezone), form.timezone) ||
+        periodKey !== getWeekPeriodKey(form.timezone))
+    ) {
+      throw new ApiError("주간 체크인은 매주 일요일에만 새로 작성할 수 있습니다.", 409, "WEEKLY_NOT_WRITABLE");
+    }
 
     const submission = existing
       ? await tx.formSubmission.update({

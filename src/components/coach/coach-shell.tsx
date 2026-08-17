@@ -8,6 +8,7 @@ const navItems = [
   { href: "/coach/products", label: "상품", exact: false },
   { href: "/coach/orders", label: "주문", exact: false },
   { href: "/coach/customers", label: "고객", exact: false },
+  { href: "/coach/checkins", label: "체크인", exact: false },
   { href: "/coach/courses", label: "코스", exact: false },
   { href: "/coach/live", label: "라이브", exact: false },
   { href: "/coach/coaching", label: "코칭", exact: false },

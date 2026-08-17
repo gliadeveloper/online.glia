@@ -8,6 +8,7 @@ export type CoachLiveLessonItem = {
   courseTitle: string;
   courseSlug: string;
   zoomUrl: string | null;
+  liveStatus: "SCHEDULED" | "LIVE" | "ENDED" | "CANCELLED" | null;
   editHref: string;
 };
 
@@ -19,6 +20,7 @@ export async function listCoachLiveLessons(coachId: string): Promise<CoachLiveLe
     },
     include: {
       contents: { orderBy: { order: "asc" } },
+      liveSession: { select: { status: true } },
       module: {
         include: {
           course: { select: { id: true, title: true, slug: true } },
@@ -35,6 +37,7 @@ export async function listCoachLiveLessons(coachId: string): Promise<CoachLiveLe
     courseTitle: lesson.module.course.title,
     courseSlug: lesson.module.course.slug,
     zoomUrl: getLessonZoomUrl(lesson.contents),
+    liveStatus: lesson.liveSession?.status ?? null,
     editHref: `/coach/lessons/${lesson.id}`,
   }));
 }

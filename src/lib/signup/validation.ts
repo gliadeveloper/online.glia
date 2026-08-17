@@ -27,6 +27,27 @@ export type NicknameValidationResult =
   | { ok: true }
   | { ok: false; message: string };
 
+export type UserIdValidationResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
+/** Public account identifier used when users search for a coach. */
+export function validateUserId(userId: string): UserIdValidationResult {
+  const trimmed = userId.trim();
+  if (!trimmed) {
+    return { ok: false, message: "사용자 ID를 입력해 주세요." };
+  }
+
+  if (!/^[a-z][a-z0-9_]{2,19}$/.test(trimmed)) {
+    return {
+      ok: false,
+      message: "사용자 ID는 영문 소문자로 시작하는 3~20자의 영문 소문자, 숫자, 밑줄만 사용할 수 있어요.",
+    };
+  }
+
+  return { ok: true };
+}
+
 export function validateNickname(nickname: string): NicknameValidationResult {
   const trimmed = nickname.trim();
   if (!trimmed) {

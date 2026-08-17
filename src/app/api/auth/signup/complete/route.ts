@@ -14,7 +14,7 @@ import {
   completeKakaoOnboarding,
   getSignupDraftById,
 } from "@/lib/signup/service";
-import { validateNickname } from "@/lib/signup/validation";
+import { validateNickname, validateUserId } from "@/lib/signup/validation";
 import { getCurrentUser } from "@/lib/session";
 
 async function getDraftId() {
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     assertRateLimit(`signup:profile:${ip}`, 20);
 
     const body = (await request.json()) as {
+      userId?: string;
       nickname?: string;
       avatarPresetId?: string;
       marketingConsent?: boolean;
@@ -36,6 +37,12 @@ export async function POST(request: Request) {
     const nicknameResult = validateNickname(body.nickname ?? "");
     if (!nicknameResult.ok) {
       throw new ApiError(nicknameResult.message, 400, "VALIDATION_ERROR");
+    }
+
+    const publicUserId = body.userId?.trim().toLowerCase() ?? "";
+    const userIdResult = validateUserId(publicUserId);
+    if (!userIdResult.ok) {
+      throw new ApiError(userIdResult.message, 400, "VALIDATION_ERROR");
     }
 
     if (!body.avatarPresetId) {
@@ -53,7 +60,8 @@ export async function POST(request: Request) {
 
       if (!onboardingState?.onboardingCompletedAt) {
         await completeKakaoOnboarding({
-          userId: sessionUser.id,
+          accountId: sessionUser.id,
+          publicUserId,
           nickname: body.nickname!.trim(),
           avatarPresetId: body.avatarPresetId,
           marketingConsent: Boolean(body.marketingConsent),
@@ -75,6 +83,7 @@ export async function POST(request: Request) {
     await prisma.signupDraft.update({
       where: { id: draft.id },
       data: {
+        userId: publicUserId,
         nickname: body.nickname!.trim(),
         avatarPresetId: body.avatarPresetId,
         marketingConsent: Boolean(body.marketingConsent),
@@ -96,6 +105,14 @@ export async function POST(request: Request) {
       return jsonError(
         new ApiError("이미 가입된 이메일입니다. 로그인해 주세요.", 409, "EMAIL_ALREADY_REGISTERED"),
       );
+    }
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: string }).code === "P2002"
+    ) {
+      return jsonError(new ApiError("이미 사용 중인 사용자 ID입니다.", 409, "USER_ID_TAKEN"));
     }
     return jsonError(error);
   }
