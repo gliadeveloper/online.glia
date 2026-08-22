@@ -7,9 +7,5 @@ type CoachingMarkdownProps = {
 };
 
 export function CoachingMarkdown({ body, bodyMetadata, className }: CoachingMarkdownProps) {
-  return (
-    <article className="trust-card p-6">
-      <LessonContentView body={body} metadata={bodyMetadata} className={className} />
-    </article>
-  );
+  return <LessonContentView body={body} metadata={bodyMetadata} className={className} />;
 }

@@ -1,0 +1,89 @@
+/**
+ * GLIA design tokens — Recovery Wellness.
+ * Use via `var(--glia-*)`. Home `/` is the first consumer.
+ */
+:root {
+  --glia-blue: #1e839e;
+  --glia-blue-dark: #17677d;
+  --glia-blue-light: #e8f5f7;
+  --glia-mint: #ccf7d5;
+  --glia-mint-soft: #bff2cb;
+  --glia-soft-blue: #adcded;
+
+  --glia-bg: #f7fafa;
+  --glia-surface: #ffffff;
+  --glia-surface-secondary: #f1f7f7;
+  --glia-text: #183238;
+  --glia-text-secondary: #668087;
+  --glia-border: #dce9ea;
+
+  --glia-success: #2fa36b;
+  --glia-warning: #f4b860;
+  --glia-error: #e56b6f;
+  --glia-info: #5bafc4;
+
+  --glia-live: #c2413a;
+  --glia-live-bg: #fdecec;
+  --glia-coaching: #317044;
+  --glia-coaching-bg: #ecf7ee;
+
+  --glia-gradient-primary: linear-gradient(135deg, #1e839e 0%, #17677d 100%);
+  --glia-gradient-wellness: linear-gradient(135deg, #ccf7d5 0%, #bff2cb 45%, #adcded 100%);
+  --glia-gradient-surface: linear-gradient(180deg, #ffffff 0%, #f1f7f7 100%);
+
+  --glia-radius-sm: 8px;
+  --glia-radius-md: 12px;
+  --glia-radius-lg: 16px;
+  --glia-radius-xl: 20px;
+  --glia-radius-pill: 999px;
+
+  --glia-shadow-card: 0 8px 30px rgba(30, 131, 158, 0.08);
+  --glia-shadow-card-hover: 0 14px 40px rgba(30, 131, 158, 0.14);
+  --glia-shadow-button: 0 8px 20px rgba(30, 131, 158, 0.28);
+  --glia-shadow-float: 0 20px 60px rgba(24, 50, 56, 0.1);
+
+  --glia-focus-ring: rgba(30, 131, 158, 0.18);
+  --glia-glass: rgba(255, 255, 255, 0.72);
+  --glia-glass-border: rgba(255, 255, 255, 0.6);
+
+  --glia-page-max: 64rem; /* shell · 홈/커뮤니티/내학습/코칭 공통 컬럼 (max-w-5xl) */
+  --glia-shell-pad: 1.5rem; /* desktop main + header */
+  --glia-gutter: 1.25rem;
+  --glia-gutter-lg: 1.75rem;
+  --glia-motion: 200ms ease-out;
+  --glia-motion-long: 500ms ease-out;
+  --glia-font: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo",
+    "Noto Sans KR", sans-serif;
+}
+
+/*
+ * Shared tab canvas. Discovery hubs share one column so switching
+ * 홈 / 커뮤니티 / 내학습 / 코칭 does not change page width.
+ */
+@media (min-width: 1024px) {
+  .app-trust-root .glia-home,
+  .app-trust-root .glia-community,
+  .app-trust-root .glia-learning,
+  .app-trust-root .glia-coaching,
+  .app-trust-root .glia-sessions {
+    margin: 0 auto;
+    width: 100%;
+    max-width: var(--glia-page-max);
+  }
+
+  .app-trust-root .glia-home__hero,
+  .app-trust-root .glia-community__hero,
+  .app-trust-root .glia-learning__hero,
+  .app-trust-root .glia-coaching__hero,
+  .app-trust-root .glia-sessions__hero {
+    padding-inline: var(--glia-gutter-lg);
+  }
+
+  .app-trust-root .glia-home__feed,
+  .app-trust-root .glia-community__layout,
+  .app-trust-root .glia-learning__body,
+  .app-trust-root .glia-coaching__body,
+  .app-trust-root .glia-sessions__body {
+    padding-inline: 0;
+  }
+}

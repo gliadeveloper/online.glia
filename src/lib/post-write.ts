@@ -79,9 +79,9 @@ export function mapPostWriteError(code: string): string {
     case "BODY_TOO_LONG":
       return "내용이 너무 깁니다.";
     case "PARENT_POST_NOT_FOUND":
-      return "부모 글을 찾을 수 없습니다.";
+      return "원본 글을 찾을 수 없습니다.";
     case "PARENT_NOT_ROOT":
-      return "하위 글에는 또 다른 하위 글을 작성할 수 없습니다.";
+      return "인증 글에는 또 다른 인증 글을 작성할 수 없습니다.";
     case "PARENT_COMMENT_NOT_FOUND":
       return "답글 대상 댓글을 찾을 수 없습니다.";
     case "INVALID_REPORT_REASON":

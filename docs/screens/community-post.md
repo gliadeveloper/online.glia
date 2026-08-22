@@ -1,13 +1,13 @@
 # /community/[slug] — POST 상세
 
 > **상태:** review  
-> **마지막 갱신:** 2026-07-30
+> **마지막 갱신:** 2026-08-20
 
 ---
 
 ## 0. 한 줄 요약
 
-커뮤니티 글을 읽고, 챌린지 하위글(인증)을 남기며, 댓글로 대화한다.
+커뮤니티 글을 읽고, 챌린지 인증 글을 남기며, 댓글로 대화한다.
 
 ---
 
@@ -20,14 +20,14 @@
 | **Chrome** | Mobile: ← + 제목 / Desktop: unified header |
 | **진입** | `/community` 카드, 알림(v2) |
 | **정책 SSOT** | [policies.md](../policies.md) §10 |
-| **용어** | 기획 「챌린지 인증글」= **하위 글 (childPost)** |
+| **용어** | UI 「인증 글」 = 데이터 `childPost` · UI 「원본 글」 = `parentPost` |
 
 ---
 
 ## 2. 사용자 목표
 
 - 본문 전체 읽기
-- (부모글) 인증 하위글 작성·열람
+- (원본 글) 인증 글 작성·열람
 - 댓글·답글·좋아요
 
 ---
@@ -51,7 +51,7 @@
 | 6 | 좋아요 | 토글 + count | ✅ |
 | 7 | 댓글 수 | → `#post-comments` | ✅ |
 | 8 | 조회수 | 진입 increment | ✅ |
-| 9 | 부모 글 링크 | child post일 때만 | ✅ |
+| 9 | 원본 글 링크 | child post일 때만 | ✅ |
 
 **인터랙션**
 
@@ -61,19 +61,19 @@
 
 ---
 
-### Block: 하위 글 (챌린지 인증)
+### Block: 인증 글 (챌린지 인증)
 
 | | |
 |-|-|
-| **역할** | parent 아래 child post 목록 + 작성 |
+| **역할** | parent 아래 child post 가로 스크롤 + 작성 |
 | **노출** | parent post only |
 
 | # | UI 요소 | 데이터·규칙 | v1 |
 |---|---------|---------------|-----|
-| 1 | 목록 | childPosts | ✅ |
-| 2 | 미리보기 | title, excerpt, author, time | ✅ |
+| 1 | 가로 스크롤 카드 | childPosts | ✅ |
+| 2 | 미리보기 | 대표 이미지 또는 excerpt · 작성자 | ✅ |
 | 3 | 노출 개수 | **기획: max 7 + 더보기** | △ 전체 |
-| 4 | 작성 CTA | 「하위 글 작성」 | ✅ |
+| 4 | 작성 CTA | 「인증 글 작성」 | ✅ |
 
 **인터랙션**
 
@@ -113,7 +113,7 @@
 
 | 조건 | UI | 이동 |
 |------|-----|------|
-| 비로그인 | 읽기 OK; like/comment/하위글 → login | `/login?next=…` |
+| 비로그인 | 읽기 OK; like/comment/인증 글 → login | `/login?next=…` |
 | 로그인 | 전 기능 | — |
 | slug 없음 | 404 | — |
 | DRAFT | 미노출 | — |
@@ -124,8 +124,8 @@
 
 | 트리거 | 대상 |
 |--------|------|
-| 하위글 작성 | `/community/new?parent={slug}` |
-| 하위글 카드 | `/community/[child-slug]` |
+| 인증 글 작성 | `/community/new?parent={slug}` |
+| 인증 글 카드 | `/community/[child-slug]` |
 | 좋아요 | `POST /api/posts/[slug]/likes` |
 
 **관련 플로우:** [community-challenge.md](./flows/community-challenge.md)
@@ -145,10 +145,12 @@
 
 | | |
 |-|-|
-| **Page** | `src/app/(app)/(stack)/community/[slug]/page.tsx` |
+| **Page** | `src/app/(app)/community/(stack)/[slug]/page.tsx` |
 | **Components** | `post-child-list`, `post-comment-list`, `post-comment-composer` |
 | **Lib** | `src/lib/posts.ts` |
 | **API** | `/api/posts/[slug]/comments`, `…/likes` |
+| **Design** | GLIA Recovery Wellness — scope root `.glia-post`, `src/components/community/community-post-glia.css`, tokens `src/app/design-tokens/glia.css` |
+| **Mode** | Editorial(읽기) — 본문·댓글은 카드 금지. 680–720px 리딩 컬럼 + hairline divider로 위계. 카드는 `/community` 피드(Discovery)에서만 |
 
 ---
 
@@ -156,7 +158,7 @@
 
 | 항목 | 메모 |
 |------|------|
-| 하위글 7개 cap | + 더보기 페이지 |
+| 인증 글 7개 cap | + 더보기 페이지 |
 | 프로필 사진 | avatar |
 | 타인 프로필 | v2 |
 | 신고 | v2 |

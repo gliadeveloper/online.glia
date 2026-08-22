@@ -1,5 +1,4 @@
-import { AuthLayoutRoot } from "@/components/auth/corporate-trust/auth-layout-root";
-import { AuthLayoutShell } from "@/components/auth/corporate-trust/auth-layout-shell";
+import { GliaAuthRoot, GliaAuthShell } from "@/components/auth/glia/glia-auth-layout";
 
 export default function SignupRouteLayout({
   children,
@@ -7,8 +6,8 @@ export default function SignupRouteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthLayoutRoot>
-      <AuthLayoutShell>{children}</AuthLayoutShell>
-    </AuthLayoutRoot>
+    <GliaAuthRoot>
+      <GliaAuthShell>{children}</GliaAuthShell>
+    </GliaAuthRoot>
   );
 }

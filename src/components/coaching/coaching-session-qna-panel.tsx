@@ -3,10 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { TrustButton, TrustTextarea } from "@/components/corporate-trust/app-trust-ui";
-import { UserAvatar } from "@/components/ui/user-avatar";
-import { Typography } from "@/components/typography/typography";
 import type { CoachProfile } from "@/lib/coaching-display";
+import { displayCoachName } from "@/lib/coaching-display";
 import { formatPostRelativeTime } from "@/lib/post-content";
 
 type Message = {
@@ -25,6 +23,25 @@ type CoachingSessionQnaPanelProps = {
   messages: Message[];
 };
 
+function QnaAvatar({
+  name,
+  avatarUrl,
+}: {
+  name: string;
+  avatarUrl?: string | null;
+}) {
+  return (
+    <span className="glia-session__avatar glia-session__avatar--sm" aria-hidden="true">
+      {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={avatarUrl} alt="" />
+      ) : (
+        name.slice(0, 1).toUpperCase()
+      )}
+    </span>
+  );
+}
+
 export function CoachingSessionQnaPanel({
   sessionId,
   coach,
@@ -35,6 +52,7 @@ export function CoachingSessionQnaPanel({
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const coachName = displayCoachName(coach);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -77,55 +95,71 @@ export function CoachingSessionQnaPanel({
   }
 
   return (
-    <div className="coaching-qna">
+    <>
+      <form onSubmit={handleSubmit} className="glia-session__composer">
+        <label htmlFor={`coaching-qna-${sessionId}`} className="sr-only">
+          질문
+        </label>
+        <input
+          id={`coaching-qna-${sessionId}`}
+          type="text"
+          className="glia-session__composer-input"
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          placeholder={`${coachName} 코치에게 질문을 남겨주세요.`}
+          maxLength={2000}
+          disabled={loading}
+        />
+        <button
+          type="submit"
+          className="glia-session__composer-send"
+          disabled={loading || !body.trim()}
+          aria-label="질문 등록"
+        >
+          {loading ? "전송 중…" : "등록"}
+        </button>
+      </form>
+      {error ? (
+        <p role="alert" className="glia-session__error">
+          {error}
+        </p>
+      ) : null}
+
       {messages.length === 0 ? (
-        <Typography as="p" role="bodySecondary" color="secondary" className="coaching-qna__empty">
-          아직 질문이 없습니다. 궁금한 점을 남겨보세요.
-        </Typography>
+        <p className="glia-session__empty">아직 질문이 없습니다. 궁금한 점을 남겨보세요.</p>
       ) : (
-        <ul className="community-comment-list">
+        <ul className="glia-session__thread">
           {messages.map((message) => {
             const isCoach = message.authorRole === "COACH";
+            const name = isCoach ? message.authorName : "나";
 
             return (
               <li key={message.id}>
-                <article className="community-comment-item">
-                  {isCoach ? (
-                    <UserAvatar
-                      name={coach.name}
-                      email={coach.email}
-                      avatarUrl={message.authorAvatarUrl ?? coach.profile?.avatarUrl}
-                      size="sm"
-                    />
-                  ) : (
-                    <UserAvatar name="나" email="student@local" size="sm" label="나" />
-                  )}
-                  <div className="community-comment-item__body">
-                    <header className="community-comment-item__header">
-                      <Typography as="p" role="bodyCompact" weight="semibold" color="primary">
-                        {isCoach ? message.authorName : "나"}
-                      </Typography>
-                      <Typography as="p" role="caption" color="secondary">
+                <article className="glia-session__message">
+                  <QnaAvatar
+                    name={name}
+                    avatarUrl={
+                      isCoach ? (message.authorAvatarUrl ?? coach.profile?.avatarUrl) : null
+                    }
+                  />
+                  <div className="glia-session__message-body">
+                    <header className="glia-session__message-head">
+                      <p className="glia-session__message-author">
+                        {name}
+                        {isCoach ? (
+                          <span className="glia-session__message-badge">코치</span>
+                        ) : null}
+                      </p>
+                      <p className="glia-session__message-meta">
                         <time dateTime={message.createdAt}>
                           {formatPostRelativeTime(new Date(message.createdAt))}
                         </time>
-                      </Typography>
+                        {message.awaitingReply && !isCoach ? (
+                          <span className="glia-session__message-wait">답변 대기</span>
+                        ) : null}
+                      </p>
                     </header>
-
-                    <Typography
-                      as="p"
-                      role="bodySecondary"
-                      color="primary"
-                      className="community-comment-item__text whitespace-pre-wrap"
-                    >
-                      {message.bodyMarkdown}
-                    </Typography>
-
-                    {message.awaitingReply && !isCoach && (
-                      <Typography as="p" role="caption" color="secondary" className="coaching-qna__pending">
-                        답변 대기 중
-                      </Typography>
-                    )}
+                    <p className="glia-session__message-text">{message.bodyMarkdown}</p>
                   </div>
                 </article>
               </li>
@@ -133,36 +167,6 @@ export function CoachingSessionQnaPanel({
           })}
         </ul>
       )}
-
-      <form onSubmit={handleSubmit} className="community-comment-form coaching-qna__composer">
-        <label htmlFor={`coaching-qna-${sessionId}`} className="sr-only">
-          질문
-        </label>
-        <TrustTextarea
-          id={`coaching-qna-${sessionId}`}
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          placeholder="코칭 내용에 대해 질문을 남겨주세요."
-          rows={3}
-          maxLength={2000}
-          disabled={loading}
-        />
-
-        <div className="community-comment-form__footer">
-          <Typography as="p" role="caption" color="secondary">
-            {body.length.toLocaleString("ko-KR")} / 2,000
-          </Typography>
-          <TrustButton type="submit" variant="primary" disabled={loading || !body.trim()}>
-            {loading ? "전송 중…" : "질문 등록"}
-          </TrustButton>
-        </div>
-
-        {error && (
-          <Typography as="p" role="bodySecondary" color="secondary" className="community-comment-form__error">
-            {error}
-          </Typography>
-        )}
-      </form>
-    </div>
+    </>
   );
 }

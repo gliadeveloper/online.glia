@@ -46,7 +46,7 @@ export default async function DailyCheckReportPage({
         description="데일리 체크인 폼이 아직 준비되지 않았습니다."
         hideHeader
       >
-        <p className="check-in-hub__missing">데일리 체크인 폼이 아직 준비되지 않았습니다.</p>
+        <p className="glia-ci-empty">데일리 체크인 폼이 아직 준비되지 않았습니다.</p>
       </CheckInFlowShell>
     );
   }

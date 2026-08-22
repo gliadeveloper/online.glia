@@ -64,18 +64,19 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="community-write-form">
+    <form onSubmit={handleSubmit} className="glia-write__form">
       {parentPost && (
-        <div className="community-write-form__parent">
-          <span className="community-write-form__parent-label">부모 글</span>
-          <Link href={`/community/${parentPost.slug}`} className="community-write-form__parent-link">
+        <div className="glia-write__parent">
+          <span className="glia-write__parent-label">원본 글</span>
+          <Link href={`/community/${parentPost.slug}`} className="glia-write__parent-link">
+            <ParentIcon />
             {parentPost.title}
           </Link>
         </div>
       )}
 
-      <div className="community-write-form__field">
-        <label htmlFor="post-title" className="community-write-form__label">
+      <div className="glia-write__field">
+        <label htmlFor="post-title" className="glia-write__label">
           제목
         </label>
         <input
@@ -83,10 +84,10 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder={parentPost ? "하위 글 제목" : "무엇을 공유하고 싶으신가요?"}
+          placeholder={parentPost ? "인증 글 제목" : "무엇을 공유하고 싶으신가요?"}
           maxLength={120}
           disabled={submitting}
-          className="community-write-form__title-input corp-trust-focus shell-focus-ring"
+          className="glia-write__input"
         />
       </div>
 
@@ -101,28 +102,66 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
       />
 
       {error && (
-        <p role="alert" className="community-write-form__error">
+        <p role="alert" className="glia-write__error">
+          <ErrorIcon />
           {error}
         </p>
       )}
 
-      <div className="community-write-form__actions">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="community-write-form__submit shell-focus-ring"
-        >
-          {submitting ? "게시 중…" : parentPost ? "하위 글 게시" : "게시하기"}
+      <div className="glia-write__actions">
+        <button type="submit" disabled={submitting} className="glia-write__submit">
+          {submitting ? "게시 중…" : parentPost ? "인증 글 게시" : "게시하기"}
         </button>
         <button
           type="button"
           disabled={submitting}
           onClick={() => router.back()}
-          className="community-write-form__cancel shell-focus-ring"
+          className="glia-write__cancel"
         >
           취소
         </button>
       </div>
     </form>
+  );
+}
+
+function ParentIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="glia-write__parent-icon"
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10a6 6 0 0 1 6 6v5" />
+    </svg>
+  );
+}
+
+function ErrorIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="glia-write__error-icon"
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </svg>
   );
 }

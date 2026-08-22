@@ -11,14 +11,14 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 
 | 업계 패턴 | 우리 구현 | 비고 |
 |-----------|-----------|------|
-| **Root tabs / Primary destinations** | Tab mode `(tabs)/` | 홈·커뮤니티·코칭·내학습 |
+| **Root tabs / Primary destinations** | Tab mode `(tabs)/` | 홈·커뮤니티·내학습·코칭 |
 | **Hierarchical nav / Drill-down stack** | Stack mode `(stack)/` | 상세·폼·마이페이지 |
 | **Bottom tab bar** | `PrimaryNavBottom` | Mobile Tab only |
 | **Top navigation / Unified app header** | `UnifiedHeader` | Desktop Tab & Stack |
 | **App bar / Top app bar** | `MobileGlobalHeader` variant **`separated`** | Mobile Tab (홈 제외) |
 | **Immersive header on hero surface** | `MobileGlobalHeader` variant **`on-hero`** | Mobile Tab **홈 `/` only** |
 | **Immersive detail / Context header** | `BackNav` | Mobile Stack only |
-| **Feed home / Dashboard landing** | `HomeBrandHero` + feed | Mobile 홈 |
+| **Feed home / Dashboard landing** | `HomeHero` + body | Mobile 홈 |
 | **Home Brand Hero** | gradient canvas + `--radius-hero-bottom` → feed | L0 **역할**은 global, **surface**는 hero에 integrated |
 | **App shell scroll** | `100dvh` flex shell + `#main-content` scroll | Mobile `(app)` only · desktop은 document scroll |
 
@@ -43,10 +43,10 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 
 | 메뉴 | 경로 | 역할 |
 |------|------|------|
-| 홈 | `/` | 진입·요약·주요 CTA |
-| 커뮤니티 | `/community` | 공지·Q&A 등 (확장 예정) |
-| 코칭 | `/coaching` | 보유 코칭 상품·회차 허브 |
+| 홈 | `/` | 진입·회복 허브·주요 CTA |
+| 커뮤니티 | `/community` | 게시글 목록 |
 | 내학습 | `/learning` | 수강 코스 허브 |
+| 코칭 | `/coaching` | 보유 코칭 상품·회차 허브 |
 
 ### 2.2 내비게이션 모드 (Navigation Mode)
 
@@ -73,6 +73,9 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 | `/checkin/daily` | L2 | → `/checkin?tab=daily` redirect |
 | `/checkin/daily/[date]` | L3 | 데일리 체크 작성·수정 |
 | `/checkin/weekly/[date]` | L3 | 주간 체크 작성·수정 |
+| `/community/[slug]` | L2 | POST 상세. 스택 뒤로 = history.back, fallback `/community` |
+| `/community/new` | L2 | 글 작성. fallback `/community` |
+| `/community/[slug]/edit` | L3 | 글 수정. fallback `/community/[slug]` |
 | `/mypage` | L2 | 마이페이지 |
 
 홈 hero CTA는 오늘 데일리 폼(`/checkin/daily/{today}`)으로 직행. 주간은 `/checkin?tab=weekly`에서 discover.
@@ -86,7 +89,7 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 | 레이어 | ID (개념) | 구성 | 역할 |
 |--------|-----------|------|------|
 | **L0 Global** | global | 로고(placeholder) · 슬로건(placeholder) · 인증(로그인/마이페이지) | 앱 정체성·전역 계정 |
-| **L1 Primary** | primary | 홈 · 커뮤니티 · 코칭 · 내학습 | 섹션 간 이동 |
+| **L1 Primary** | primary | 홈 · 커뮤니티 · 내학습 · 코칭 | 섹션 간 이동 |
 | **L2 Context** | context | ← 뒤로 · 페이지 제목 | 계층 내 이전 단계 |
 | **L3 Content** | main | 페이지 본문 | 과업·정보 |
 
@@ -94,7 +97,7 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 
 | Variant | 경로 | Surface | 구현 |
 |---------|------|---------|------|
-| **`on-hero`** | `/` only | Hero gradient에 integrated, border 없음 | `MobileGlobalHeader variant="on-hero"` in `HomeBrandHero` |
+| **`on-hero`** | `/` only | Hero atmosphere에 integrated | `HomeHero` 워드마크 · 마이/로그인 |
 | **`separated`** | `/community`, `/coaching`, `/learning` | elevated bar + `border-b` | `MobileGlobalHeader` in shell |
 | *(off)* | Stack | L0 숨김 | — |
 
@@ -110,13 +113,13 @@ KRDS v1.0 접근성 가이드를 전제로 하며, viewport와 화면 깊이(dep
 |--------|--------|---------------|
 | L0 Global `[로고 + 인증]` | ✅ 상단 variant **`separated`** (**홈 `/` 제외**) | — |
 | **Home Brand Hero** | ✅ **`/` only** — L0 **`on-hero`** + hero copy/CTA + **`radius-hero-bottom`** → feed | — (contained hero band) |
-| L1 Primary `[홈·커뮤니티·코칭·내학습]` | ✅ **하단 탭** | ✅ **헤더 내 인라인** |
+| L1 Primary `[홈·커뮤니티·내학습·코칭]` | ✅ **하단 탭** | ✅ **헤더 내 인라인** |
 | L0+L1 통합 `[로고 + 메뉴 + 인증]` | — | ✅ **단일 헤더 한 줄** |
 | L2 Context `← + 제목` | ❌ | ❌ |
 | 본문 스크롤 | `#main-content` 단일 scroll (§4.4) | document scroll |
 | 본문 하단 여백 (바텀 탭 대응) | ❌ (탭은 scroll 밖) | ❌ |
 
-**Mobile Tab 요약:** 홈은 `HomeBrandHero`(L0 on-hero + hero + feed), 그 외 Tab은 상단 `[로고 + 인증] separated` + 하단 `[1차 메뉴]`
+**Mobile Tab 요약:** 홈은 `HomeHero`(L0 on-hero + hero + body), 그 외 Tab은 상단 `[로고 + 인증] separated` + 하단 `[1차 메뉴]`
 
 **Desktop Tab 요약:** 상단 `[로고 + 1차 메뉴 + 인증]` 한 줄
 
@@ -177,16 +180,13 @@ Mobile `(app)` (`AdaptiveShell`)은 **앱형 웹** scroll 모델을 쓴다. Desk
 
 L2 Context Nav는 **Mobile Stack에서만** 노출한다.
 
-| 현재 경로 | 뒤로 라벨 | 이동 대상 | 제목 |
-|-----------|-----------|-----------|------|
-| `/mypage` | 홈 | `/` | 마이페이지 |
-| `/checkin` | 홈 | `/` | 체크인 |
-| `/checkin/daily/[date]` | 체크인 | `/checkin?tab=daily` | 데일리 체크 |
-| `/checkin/weekly/[date]` | 체크인 | `/checkin?tab=weekly` | 주간 체크 |
+스택바 ← 는 **브라우저 뒤로가기와 동일**하다 (`history.back` / `router.back`).  
+읽은 글·들어온 경로가 한 칸씩 쌓이며, URL 트리의 논리적 부모로 점프하지 않는다.
 
 **규칙**
 
-- 뒤로 링크는 **한 단계 위** 또는 **논리적 부모**로만 연결한다.
+- 기본 동작은 **history 한 칸 뒤**. 커뮤니티 원본 글 → 하위 글이면 뒤로 시 원본 글로 돌아간다.
+- history가 없을 때만 (`history.length === 1`, 직접 진입·새 탭) `resolveStackNav`의 `backHref`로 fallback.
 - 선택 상태는 색상만 쓰지 않고, 밑줄·굵기·아이콘 등 형태 단서를 병행한다 (KRDS).
 - PC Stack에서는 context bar를 두지 않는다. 페이지 본문 내 제목·링크로 맥락을 제공한다.
 
@@ -226,7 +226,7 @@ L2 Context Nav는 **Mobile Stack에서만** 노출한다.
 
 ## 9. 신규 화면 추가 시 결정 절차
 
-1. **1차 메뉴 4개에 넣을 수 있는가?**  
+1. **1차 메뉴 4개에 넣을 수 있는가?**
    - Yes → Tab `(tabs)/`  
    - No → 2번
 
@@ -234,8 +234,8 @@ L2 Context Nav는 **Mobile Stack에서만** 노출한다.
    - Yes → Stack `(stack)/`  
    - No → Tab 또는 홈 하위 카드로 진입만 제공
 
-3. **Stack이면 context nav 매핑 추가**  
-   - `backHref`, `backLabel`, `title` 정의
+3. **Stack이면 context nav fallback 매핑 추가**  
+   - history가 없을 때의 `backHref`, `title` 정의
 
 4. **이 문서의 Policy Table에 해당하는지 확인**  
    - Mobile Stack이면 L0·L1 숨김, L2만 노출되는지

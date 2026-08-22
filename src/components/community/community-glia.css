@@ -1,0 +1,628 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/*
+ * GLIA Community — Recovery Wellness feed.
+ * Scope root: `.glia-community` (`/community` list only).
+ * Post detail lives in community-post-glia.css; write / edit in community-write-glia.css.
+ */
+
+.app-trust-root:has(.glia-community) .app-shell,
+.app-trust-root:has(.glia-community) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
+.app-trust-root .glia-community {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 100%;
+  margin: calc(var(--home-stack-lg) * -1);
+  width: calc(100% + var(--home-stack-lg) * 2);
+  /* Bottom tab bar sits outside the scroll area — only the FAB needs clearance. */
+  padding-bottom: 5.5rem;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+.app-trust-root .glia-community a:focus-visible,
+.app-trust-root .glia-community button:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-community__hero {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem var(--glia-gutter) 1.25rem;
+  background:
+    radial-gradient(120% 80% at 10% -20%, color-mix(in srgb, var(--glia-mint) 36%, transparent) 0%, transparent 58%),
+    radial-gradient(90% 70% at 100% 0%, color-mix(in srgb, var(--glia-soft-blue) 40%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, var(--glia-blue-light) 0%, var(--glia-bg) 100%);
+}
+
+.app-trust-root .glia-community__ambient {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.app-trust-root .glia-community__blob {
+  position: absolute;
+  border-radius: var(--glia-radius-pill);
+  filter: blur(44px);
+  opacity: 0.36;
+}
+
+.app-trust-root .glia-community__blob--mint {
+  top: -3rem;
+  left: -2rem;
+  width: 11rem;
+  height: 9rem;
+  background: var(--glia-mint);
+}
+
+.app-trust-root .glia-community__blob--blue {
+  top: -1rem;
+  right: -3.5rem;
+  width: 13rem;
+  height: 9rem;
+  background: var(--glia-soft-blue);
+}
+
+.app-trust-root .glia-community__blob--wash {
+  right: 24%;
+  bottom: -2.5rem;
+  width: 8rem;
+  height: 7rem;
+  background: var(--glia-mint-soft);
+  opacity: 0.28;
+}
+
+.app-trust-root .glia-community__hero-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 26rem;
+}
+
+.app-trust-root .glia-community__eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-glass);
+  border: 1px solid var(--glia-glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-community__eyebrow-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-gradient-primary);
+}
+
+.app-trust-root .glia-community__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-community__lede {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--glia-text-secondary);
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-community__layout {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+  padding-inline: var(--glia-gutter);
+}
+
+.app-trust-root .glia-community__main {
+  min-width: 0;
+}
+
+/* ── Feed ─────────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.app-trust-root .glia-feed__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-trust-root .glia-feed__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-feed__count {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-feed__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-trust-root .glia-post-card {
+  border-radius: var(--glia-radius-lg);
+  border: 1px solid var(--glia-border);
+  background: var(--glia-surface);
+  box-shadow: var(--glia-shadow-card);
+  transition:
+    transform var(--glia-motion),
+    box-shadow var(--glia-motion),
+    border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glia-shadow-card-hover);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-post-card__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.125rem 1.125rem 0.875rem;
+}
+
+.app-trust-root .glia-post-card__body {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-trust-root .glia-post-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post-card__excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.4rem 0 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--glia-text-secondary);
+}
+
+/* ── Feed — author + stats (shared components, GLIA surface) ───────────── */
+
+.app-trust-root .glia-community .community-author-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.app-trust-root .glia-community .community-author-row__name-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.4rem;
+  min-width: 0;
+}
+
+.app-trust-root .glia-community .community-author-row__name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-community .community-author-row__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--glia-radius-sm);
+  background: var(--glia-blue-light);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-community .community-author-row__time {
+  font-size: 0.75rem;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-community .community-author-row__time::before {
+  content: "·";
+  margin-right: 0.4rem;
+  color: var(--glia-border);
+}
+
+.app-trust-root .glia-community .community-avatar {
+  border: 1px solid var(--glia-glass-border);
+  background: var(--glia-gradient-wellness);
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-community .community-avatar--sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+.app-trust-root .glia-community .community-avatar > * {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.app-trust-root .glia-community .community-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--glia-surface-secondary);
+}
+
+.app-trust-root .glia-community .community-post-actions__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--glia-text-secondary);
+  transition: color var(--glia-motion);
+}
+
+.app-trust-root .glia-community span.community-post-actions__stat {
+  cursor: default;
+}
+
+.app-trust-root .glia-community a.community-post-actions__stat:hover {
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-community .community-post-actions__icon {
+  width: 1rem;
+  height: 1rem;
+  color: inherit;
+}
+
+/* ── Feed — empty ─────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-feed-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2.75rem 1.5rem 3rem;
+  border-radius: var(--glia-radius-lg);
+  border: 1px solid var(--glia-border);
+  background: var(--glia-gradient-surface);
+  box-shadow: var(--glia-shadow-card);
+  text-align: center;
+}
+
+.app-trust-root .glia-feed-empty__icon {
+  display: flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.35rem;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-mint);
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-feed-empty__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-feed-empty__hint {
+  margin: 0;
+  max-width: 18rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--glia-text-secondary);
+}
+
+/* ── Popular ──────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-popular {
+  overflow: hidden;
+  padding: 1.125rem 1.125rem 0.875rem;
+  border-radius: var(--glia-radius-lg);
+  border: 1px solid var(--glia-border);
+  background: var(--glia-gradient-surface);
+  box-shadow: var(--glia-shadow-card);
+}
+
+.app-trust-root .glia-popular__head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--glia-border);
+}
+
+.app-trust-root .glia-popular__icon {
+  display: flex;
+  width: 1.875rem;
+  height: 1.875rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-sm);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-popular__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-popular__empty {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-popular__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-trust-root .glia-popular__link {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.55rem 0.5rem;
+  margin-inline: -0.5rem;
+  border-radius: var(--glia-radius-md);
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--glia-motion);
+}
+
+.app-trust-root .glia-popular__link:hover {
+  background: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-popular__rank {
+  display: flex;
+  width: 1.375rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-surface-secondary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-popular__item:nth-child(-n + 3) .glia-popular__rank {
+  background: var(--glia-blue-light);
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-popular__body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.app-trust-root .glia-popular__post-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-popular__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-popular__author::after {
+  content: "·";
+  margin-left: 0.35rem;
+  color: var(--glia-border);
+}
+
+.app-trust-root .glia-popular__stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.app-trust-root .glia-popular__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.app-trust-root .glia-popular__stat svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* ── Write FAB ────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-fab {
+  position: fixed;
+  z-index: 40;
+  right: var(--glia-gutter);
+  bottom: calc(var(--nav-height-trust, var(--nav-height-mobile)) + env(safe-area-inset-bottom, 0px) + 1rem);
+  display: flex;
+  width: 3.5rem;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-gradient-primary);
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: var(--glia-shadow-button);
+  transition:
+    transform var(--glia-motion),
+    box-shadow var(--glia-motion);
+}
+
+.app-trust-root .glia-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(30, 131, 158, 0.32);
+}
+
+/* ── Desktop ──────────────────────────────────────────────────────────── */
+
+@media (min-width: 1024px) {
+  .app-trust-root .glia-community {
+    gap: 1.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .app-trust-root .glia-community__hero {
+    margin-top: 1.25rem;
+    padding-block: 1.5rem 1.625rem;
+    border-radius: var(--glia-radius-xl);
+  }
+
+  .app-trust-root .glia-community__hero-copy {
+    gap: 0.4rem;
+    max-width: 32rem;
+  }
+
+  .app-trust-root .glia-community__title {
+    font-size: 1.5rem;
+  }
+
+  .app-trust-root .glia-community__lede {
+    font-size: 0.875rem;
+  }
+
+  .app-trust-root .glia-community__layout {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    gap: 1.75rem;
+    padding-inline: 0;
+  }
+
+  .app-trust-root .glia-community__main {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .app-trust-root .glia-popular {
+    position: sticky;
+    top: calc(var(--header-height) + 1.25rem);
+    grid-column: 2;
+    grid-row: 1;
+    padding: 1.25rem 1.25rem 1rem;
+  }
+
+  .app-trust-root .glia-post-card__inner {
+    padding: 1.25rem 1.375rem 1rem;
+  }
+
+  .app-trust-root .glia-post-card__title {
+    font-size: 1.0625rem;
+  }
+
+  .app-trust-root .glia-fab {
+    right: max(var(--glia-shell-pad), calc((100vw - var(--glia-page-max)) / 2 + var(--glia-shell-pad)));
+    bottom: 2rem;
+  }
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .app-trust-root .glia-community *,
+  .app-trust-root .glia-community *::before,
+  .app-trust-root .glia-community *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .app-trust-root .glia-post-card:hover,
+  .app-trust-root .glia-fab:hover {
+    transform: none;
+  }
+}

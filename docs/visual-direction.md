@@ -62,7 +62,7 @@ Desktop: unified header + `HomeHeroDesktop` contained band.
 
 - ✅ `src/app/(app)/` + related components (CorpTrustScope)
 - ✅ Shop stack — nested `ShopTrustScope`
-- ✅ Auth `(auth)/` — separate auth trust scope
+- ❌ Auth `(auth)/` — **GLIA Recovery Wellness** (`.glia-auth`, `src/components/auth/glia/`). Corporate Trust **아님**
 - ❌ `admin`, `(customer)` — 별도 톤
 
 ---

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 export type CheckInHistoryItem = {
   id: string;
@@ -13,7 +14,6 @@ type CheckInHistoryListProps = {
   items: CheckInHistoryItem[];
   emptyMessage: string;
   labelledBy: string;
-  /** Full history page uses compact density */
   variant?: "hub" | "page";
 };
 
@@ -30,51 +30,31 @@ export function CheckInHistoryList({
   variant = "hub",
 }: CheckInHistoryListProps) {
   if (items.length === 0) {
-    return (
-      <p
-        className={`check-in-history__empty${variant === "hub" ? " check-in-history__empty--hub" : ""}`}
-      >
-        {emptyMessage}
-      </p>
-    );
+    return <p className="glia-ci-empty">{emptyMessage}</p>;
   }
 
-  const isHub = variant === "hub";
+  const isPage = variant === "page";
 
   return (
-    <ul
-      className={`check-in-history__list${isHub ? " check-in-history__list--hub-surface" : " check-in-history__list--page"}`}
-      aria-labelledby={labelledBy}
-    >
+    <ul className="glia-ci-list" aria-labelledby={labelledBy}>
       {items.map((item) => {
         const label = kindLabel(item.kind);
-        const secondary = isHub ? (item.subtitle ?? label) : null;
 
         return (
           <li key={item.id}>
-            <Link
-              href={item.href}
-              className={`check-in-history__row shell-focus-ring${isHub ? " check-in-history__row--hub" : ""}`}
-            >
-              {!isHub && label ? (
-                <span
-                  className={`check-in-history__kind check-in-history__kind--${item.kind}`}
-                  aria-hidden="true"
-                >
+            <Link href={item.href} className="glia-ci-row">
+              {isPage && label ? (
+                <span className={`glia-ci-kind${item.kind === "weekly" ? " glia-ci-kind--weekly" : ""}`}>
                   {label}
                 </span>
               ) : null}
-              <span className="check-in-history__body">
-                <span className="check-in-history__title">{item.title}</span>
-                {secondary ? (
-                  <span className="check-in-history__subtitle">{secondary}</span>
+              <span className="glia-ci-row__body">
+                <span className="glia-ci-row__title">{item.title}</span>
+                {!isPage && (item.subtitle ?? label) ? (
+                  <span className="glia-ci-row__meta">{item.subtitle ?? label}</span>
                 ) : null}
               </span>
-              <span className="check-in-history__chevron" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
+              <ChevronRight className="glia-ci-chevron" strokeWidth={2} size={16} />
               <span className="sr-only">{item.title} — 기록 보기</span>
             </Link>
           </li>

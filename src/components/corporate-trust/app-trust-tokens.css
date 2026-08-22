@@ -6,6 +6,9 @@
 }
 
 .app-trust-root .app-shell__main {
+  width: 100%;
+  max-width: var(--glia-page-max);
+  margin-inline: auto;
   color: var(--auth-text);
 }
 
@@ -20,11 +23,11 @@
 
 @media (min-width: 1024px) {
   .app-trust-root .app-shell__main--trust {
-    padding: 0 1.5rem var(--home-stack-xl);
+    padding: 0 var(--glia-shell-pad) var(--home-stack-xl);
   }
 
   .app-trust-root .app-shell__main--home {
-    padding: 0 1.5rem var(--home-stack-xl);
+    padding: 0 var(--glia-shell-pad) var(--home-stack-xl);
   }
 }
 
@@ -63,8 +66,7 @@
 @media (min-width: 1024px) {
   .app-trust-root .app-stack-page,
   .app-trust-root .check-in-hub-page,
-  .app-trust-root .app-tab-screen,
-  .app-trust-root .community-screen {
+  .app-trust-root .app-tab-screen {
     margin: 0 !important;
     width: 100% !important;
     max-width: none !important;
@@ -149,11 +151,6 @@
   width: 100%;
 }
 
-.corp-trust .app-stack-back {
-  color: var(--auth-primary);
-  font-weight: 600;
-}
-
 .corp-trust .app-status-banner {
   border-color: rgba(79, 70, 229, 0.18);
   background: #eef2ff;
@@ -174,123 +171,7 @@
   color: #3730a3;
 }
 
-/* ─── Page headers (tab + stack) ─────────────────────────────────────────── */
-
-.tab-trust-header {
-  position: relative;
-  overflow: hidden;
-  padding: 1.5rem var(--home-stack-lg) 1.75rem;
-  background: linear-gradient(155deg, #eef2ff 0%, #f5f3ff 42%, #ffffff 100%);
-  border-bottom: 1px solid var(--auth-border-subtle);
-  box-shadow: 0 12px 40px -24px rgba(79, 70, 229, 0.3);
-}
-
-@media (max-width: 1023px) {
-  .tab-trust-header:not(.tab-trust-header--in-card) {
-    margin-inline: calc(-1 * var(--home-stack-lg));
-    width: calc(100% + 2 * var(--home-stack-lg));
-  }
-}
-
-@media (min-width: 1024px) {
-  .tab-trust-header {
-    margin-inline: 0;
-    width: 100%;
-    border-radius: 0;
-  }
-}
-
-.tab-trust-header--compact {
-  padding-bottom: 1.25rem;
-}
-
-.tab-trust-header--stack {
-  margin-bottom: 0;
-}
-
-@media (max-width: 1023px) {
-  .tab-trust-header--stack:not(.tab-trust-header--in-card) {
-    margin-top: calc(-1 * var(--home-stack-lg));
-    margin-bottom: var(--home-stack-md);
-  }
-}
-
-.tab-trust-header__blob {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(64px);
-  pointer-events: none;
-}
-
-.tab-trust-header__blob--indigo {
-  top: -3.5rem;
-  right: -1.5rem;
-  height: 11rem;
-  width: 11rem;
-  background: rgba(99, 102, 241, 0.26);
-}
-
-.tab-trust-header__blob--violet {
-  bottom: -4rem;
-  left: -2rem;
-  height: 9rem;
-  width: 9rem;
-  background: rgba(167, 139, 250, 0.2);
-}
-
-.tab-trust-header__inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-}
-
-.tab-trust-header__eyebrow {
-  display: inline-flex;
-  width: fit-content;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(79, 70, 229, 0.15);
-  background: rgba(255, 255, 255, 0.75);
-  padding: 0.3125rem 0.75rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #4338ca;
-  backdrop-filter: blur(8px);
-}
-
-.tab-trust-header__eyebrow-dot {
-  height: 0.4375rem;
-  width: 0.4375rem;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  box-shadow: 0 0 10px rgba(79, 70, 229, 0.55);
-}
-
-.tab-trust-header__title {
-  font-size: 1.625rem;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--auth-text);
-}
-
-@media (min-width: 640px) {
-  .tab-trust-header__title {
-    font-size: 1.875rem;
-  }
-}
-
-.tab-trust-header__desc {
-  max-width: 28rem;
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  color: var(--auth-text-muted);
-}
+/* Page headers live in tab-page-header-glia.css (GLIA Recovery Wellness). */
 
 /* ─── Home ───────────────────────────────────────────────────────────────── */
 
@@ -389,36 +270,6 @@
 
 /* ─── Community ──────────────────────────────────────────────────────────── */
 
-.corp-trust .community-screen,
-.corp-trust .community-post-page,
-.corp-trust .community-write-page {
-  background: #ffffff;
-}
-
-.corp-trust .community-feed {
-  background: #ffffff;
-  padding-inline: 0;
-  padding-bottom: 0;
-}
-
-.corp-trust .community-feed__list {
-  gap: 0;
-  padding-top: 0;
-}
-
-.corp-trust .community-post-card {
-  border: none;
-  border-radius: 0;
-  background: #ffffff;
-  box-shadow: none;
-}
-
-.corp-trust .community-post-detail {
-  border: none;
-  background: transparent;
-  box-shadow: none;
-}
-
 .corp-trust .community-comment-dock {
   border-color: var(--auth-border-subtle);
   background: color-mix(in srgb, #ffffff 94%, transparent);
@@ -430,50 +281,28 @@
   box-shadow: var(--auth-shadow-button);
 }
 
-.corp-trust .community-fab,
-.corp-trust .community-related-posts__write-cta {
-  background: linear-gradient(135deg, var(--auth-primary) 0%, var(--auth-secondary) 100%);
-  box-shadow: var(--auth-shadow-button);
-  color: #ffffff;
-}
-
-.corp-trust .community-fab:hover {
-  box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.4);
-}
-
 /* ─── Check-in ───────────────────────────────────────────────────────────── */
 
-.corp-trust .check-in-form-page {
-  background: transparent;
-}
-
-@media (max-width: 1023px) {
-  .corp-trust .check-in-form-page {
-    background: var(--auth-bg);
-  }
-}
-
-/* ─── Check-in form ───────────────────────────────────────────────────────── */
-
 .corp-trust .check-in-date-strip__day--today {
-  border-color: rgba(79, 70, 229, 0.35);
-  background: #eef2ff;
-  color: #4338ca;
+  border-color: var(--glia-blue);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
 }
 
 .corp-trust .check-in-step-chrome {
-  border-color: var(--auth-border-subtle);
-  background: color-mix(in srgb, #ffffff 92%, transparent);
-  backdrop-filter: blur(12px);
+  border-color: var(--glia-border);
+  background: var(--glia-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .corp-trust .check-in-step-chrome__back {
-  color: var(--auth-primary);
+  color: var(--glia-blue);
 }
 
-.corp-trust .check-in-primary-btn {
-  background: linear-gradient(135deg, var(--auth-primary) 0%, var(--auth-secondary) 100%);
-  box-shadow: var(--auth-shadow-button);
+.corp-trust .check-in-step-chrome__back:hover {
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -574,18 +403,6 @@
   box-shadow: 0 2px 8px -2px rgba(79, 70, 229, 0.25);
 }
 
-.corp-trust .community-avatar {
-  border-color: rgba(79, 70, 229, 0.18);
-  background: #eef2ff;
-  color: #4338ca;
-  font-weight: 700;
-}
-
-.corp-trust .community-post-page__parent-link {
-  color: var(--auth-primary);
-  font-weight: 600;
-}
-
 .corp-trust .check-in-history__list--page .check-in-history__row {
   border-color: var(--auth-border-subtle);
   background: var(--auth-surface);
@@ -603,19 +420,6 @@
   background: var(--auth-surface);
   color: var(--auth-primary);
   font-weight: 600;
-}
-
-.corp-trust .check-in-form-page--step {
-  background: var(--auth-bg);
-}
-
-.corp-trust .check-in-form--step {
-  background: var(--auth-bg);
-}
-
-.corp-trust .check-in-form__footer-btn--primary {
-  background: linear-gradient(135deg, var(--auth-primary) 0%, var(--auth-secondary) 100%);
-  box-shadow: var(--auth-shadow-button);
 }
 
 .corp-trust .lesson-live-waiting {
@@ -707,41 +511,6 @@
   accent-color: var(--auth-primary);
 }
 
-/* Check-in form immersive */
-.corp-trust .check-in-form__progress-fill {
-  background: linear-gradient(90deg, var(--auth-primary) 0%, var(--auth-secondary) 100%);
-}
-
-.corp-trust .check-in-form__required {
-  color: var(--auth-primary);
-}
-
-.corp-trust .check-in-form__textarea:focus {
-  background: var(--auth-surface);
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(79, 70, 229, 0.45);
-}
-
-.corp-trust .check-in-form__emoji-choice--active {
-  border-color: rgba(79, 70, 229, 0.45);
-  background: #eef2ff;
-  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.2);
-}
-
-.corp-trust .check-in-form__nav-btn--next {
-  border-radius: 9999px;
-  background: linear-gradient(135deg, var(--auth-primary) 0%, var(--auth-secondary) 100%);
-  box-shadow: var(--auth-shadow-button);
-}
-
-.corp-trust .check-in-form__nav-btn--next:hover:not(:disabled) {
-  box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.35);
-}
-
-.corp-trust .check-in-form__footer--fixed {
-  background: color-mix(in srgb, #ffffff 92%, transparent);
-  border-color: var(--auth-border-subtle);
-}
-
 /* Community comments + coaching Q&A */
 .corp-trust .community-comment-form {
   border-color: var(--auth-border-subtle);
@@ -824,10 +593,6 @@
   color: #4338ca;
 }
 
-.corp-trust .community-post-actions__icon--active {
-  color: var(--auth-primary);
-}
-
 .trust-comment-like {
   color: #64748b;
   background: transparent;
@@ -840,24 +605,6 @@
 
 .trust-comment-like--active {
   color: var(--auth-primary);
-}
-
-/* Check-in form choices */
-.corp-trust .check-in-form__choice--active {
-  border-color: rgba(79, 70, 229, 0.45);
-  background: #eef2ff;
-  color: #312e81;
-}
-
-.corp-trust .check-in-form__prompt {
-  color: var(--auth-text);
-  font-weight: 700;
-}
-
-.corp-trust .check-in-form__textarea {
-  border: 1px solid var(--auth-border);
-  background: var(--auth-surface);
-  border-radius: 0.75rem;
 }
 
 .corp-trust .check-in-share-page {
@@ -883,51 +630,30 @@
   color: var(--auth-primary);
 }
 
-/* Check-in report + empty state */
-.corp-trust .check-in-state-page,
-.corp-trust .check-in-report-page {
+/* Check-in empty state */
+.corp-trust .check-in-state-page {
   background: var(--auth-bg);
 }
 
-.corp-trust .check-in-state-page__icon,
-.corp-trust .check-in-report__icon {
+.corp-trust .check-in-state-page__icon {
   background: #eef2ff;
   color: var(--auth-primary);
 }
 
-.corp-trust .check-in-report__title,
 .corp-trust .check-in-state-page__title {
   color: var(--auth-text);
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
-.corp-trust .check-in-report__item {
-  border: 1px solid var(--auth-border-subtle);
-  background: #f8fafc;
-  border-radius: 0.75rem;
-}
-
-.corp-trust .check-in-report__insight {
-  border-color: var(--auth-border);
-  background: #f8fafc;
-  border-radius: 0.75rem;
-}
-
-.corp-trust .check-in-state-page__footer,
-.corp-trust .check-in-report__footer {
+.corp-trust .check-in-state-page__footer {
   background: color-mix(in srgb, #ffffff 92%, transparent);
   border-color: var(--auth-border-subtle);
 }
 
-.corp-trust .check-in-report__footer .trust-btn,
 .corp-trust .check-in-state-page__footer .trust-btn {
   width: auto;
   min-height: calc(var(--radius-md) * 5.5);
-}
-
-.corp-trust .check-in-report__footer-btn--primary {
-  min-width: calc(var(--radius-md) * 7);
 }
 
 .corp-trust .status-pill {

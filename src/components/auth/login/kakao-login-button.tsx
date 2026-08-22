@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleAlert } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 import { getKakaoAuthErrorMessage } from "@/lib/auth-errors";
@@ -12,10 +13,7 @@ export function KakaoLoginButton() {
     : "/api/auth/kakao";
 
   return (
-    <a
-      href={href}
-      className="auth-trust-focus flex min-h-11 w-full items-center justify-center gap-2.5 rounded-full bg-[#FEE500] px-4 py-3 text-sm font-bold text-[#191919] shadow-[0_4px_14px_0_rgba(254,229,0,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#f5dc00] hover:shadow-[0_6px_18px_0_rgba(254,229,0,0.4)]"
-    >
+    <a href={href} className="glia-auth__kakao">
       <svg width={18} height={18} viewBox="0 0 24 24" aria-hidden="true">
         <path
           fill="currentColor"
@@ -34,7 +32,8 @@ export function LoginErrorAlert() {
   if (!error) return null;
 
   return (
-    <p role="alert" className="auth-trust-alert-error">
+    <p role="alert" className="glia-auth__alert">
+      <CircleAlert size={16} strokeWidth={2} className="glia-auth__alert-icon" />
       {getKakaoAuthErrorMessage(error)}
     </p>
   );

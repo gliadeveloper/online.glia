@@ -74,12 +74,24 @@ export default async function Event1Page() {
 
       <section style={{ paddingTop: 40 }}>
         <div className="narrow">
-          <div className="eyebrow">8주의 흐름</div>
+          <div className="eyebrow">커리큘럼 흐름</div>
           <h2>주제는 함께 배우지만,<br />과제는 같지 않습니다.</h2>
           <div className="weeks">
-            <div className="week"><span className="no">1주차</span><span className="t">호흡과 복부 — 몸 안쪽 감각 깨우기</span></div>
-            <div className="week"><span className="no">2주차</span><span className="t">발과 고관절 — 땅에서 올라오는 연결 만들기</span></div>
-            {[3, 4, 5, 6, 7, 8].map((week) => <div className="week" key={week}><span className="no">{week}주차</span><span className="t tbd">[주제 확정 예정]</span></div>)}
+            {[
+              "호흡과 복부 — 몸 안쪽 감각 깨우기",
+              "발과 고관절 — 그라운딩, 발이 딛고 올라오는 연결",
+              "골반과 척추 — 등뼈의 리듬 되찾기",
+              "손과 견관절 — 안정된 어깨를 위한 손과 어깨의 연결",
+              "몸통의 나선 — 균형있는 움직임을 위한 회전 운동",
+              "호흡의 아래층과 위층 — 눌린 호흡 공간 넓히기",
+              "앉은 몸, 보행 패턴 — 일상 자세 연결, 조각을 하나의 흐름으로",
+              "나만의 루틴 — 혼자 계속하는 법",
+            ].map((title, index) => (
+              <div className="week" key={title}>
+                <span className="no">{index + 1}주차</span>
+                <span className="t">{title}</span>
+              </div>
+            ))}
           </div>
           <div className="cur-note">같은 주차라도 받는 과제는 사람마다 다릅니다. 여러분이 매주 보내는 기록을 읽고, 지금의 몸 상태와 목표에 맞는 과제를 배정합니다. 8주 뒤에 가져가는 것은 동작 목록이 아니라, <strong>내 몸의 신호를 읽고 스스로 조절하는 방법</strong>입니다.</div>
         </div>

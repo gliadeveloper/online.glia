@@ -103,6 +103,23 @@ export function resolveStackNav(pathname: string): StackNavContext {
     return { backHref: `/learning/${slug}`, backLabel: "강의", title: "레슨" };
   }
 
+  if (pathname === "/community/new") {
+    return { backHref: "/community", backLabel: "커뮤니티", title: "글 작성" };
+  }
+
+  const communityEditMatch = pathname.match(/^\/community\/([^/]+)\/edit$/);
+  if (communityEditMatch) {
+    return {
+      backHref: `/community/${communityEditMatch[1]}`,
+      backLabel: "글",
+      title: "글 수정",
+    };
+  }
+
+  if (/^\/community\/[^/]+$/.test(pathname)) {
+    return { backHref: "/community", backLabel: "커뮤니티", title: "글" };
+  }
+
   if (/^\/coaching\/sessions\/[^/]+$/.test(pathname)) {
     return { backHref: "/coaching", backLabel: "코칭", title: "코칭 세션" };
   }

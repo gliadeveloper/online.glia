@@ -1,7 +1,8 @@
 # /coaching — 코칭 상품 목록
 
 > **상태:** implemented  
-> **마지막 갱신:** 2026-07-30
+> **비주얼:** GLIA Design System (`--glia-*` tokens · Pretendard · Discovery 카드)  
+> **마지막 갱신:** 2026-08-22
 
 ---
 
@@ -90,8 +91,9 @@
 | | |
 |-|-|
 | **Page** | `src/app/(app)/(tabs)/coaching/page.tsx` |
-| **Components** | `coaching-entitlement-card.tsx`, `user-avatar.tsx` |
+| **Components** | `coaching-entitlement-card.tsx` |
 | **Lib** | `coaching-customer.ts`, `coaching-display.ts` |
+| **Design** | GLIA Recovery Wellness — scope root `.glia-coaching`, `src/components/coaching/coaching-glia.css`, 토큰 `src/app/design-tokens/glia.css` |
 
 ---
 
@@ -105,7 +107,8 @@
 
 # /coaching/[entitlementId] — 회차 목록
 
-> **상태:** implemented
+> **상태:** implemented  
+> **비주얼:** GLIA Design System (`--glia-*` tokens · Pretendard · Discovery 카드)
 
 ---
 
@@ -157,4 +160,6 @@
 | | |
 |-|-|
 | **Page** | `src/app/(app)/(stack)/coaching/[entitlementId]/page.tsx` |
-| **Components** | `coaching-session-card.tsx`, `coaching-coach-profile.tsx` |
+| **Components** | `coaching-session-card.tsx` |
+| **Design** | GLIA Recovery Wellness — scope root `.glia-sessions` (Discovery), `src/components/coaching/coaching-stack-glia.css` |
+| **Mode** | Discovery (카드) — 회차를 고르는 화면. 회차 상세(`/coaching/sessions/[id]`)는 Editorial |

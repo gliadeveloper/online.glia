@@ -1,0 +1,707 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+.app-trust-root .glia-home {
+  --glia-section-gap: 1.75rem;
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+.app-trust-root .glia-home a:focus-visible,
+.app-trust-root .glia-home button:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+.app-trust-root .glia-home__feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--glia-section-gap);
+  padding: 1.15rem var(--glia-gutter) 2rem;
+}
+
+.app-trust-root .glia-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.app-trust-root .glia-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-trust-root .glia-section__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-section__caption {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-section__more {
+  flex-shrink: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--glia-blue);
+  text-decoration: none;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-home__hero {
+  position: relative;
+  overflow: hidden;
+  padding: calc(env(safe-area-inset-top) + 0.25rem) var(--glia-gutter) 1rem;
+  background:
+    radial-gradient(120% 80% at 12% -10%, color-mix(in srgb, var(--glia-mint) 38%, transparent) 0%, transparent 58%),
+    radial-gradient(90% 70% at 100% 8%, color-mix(in srgb, var(--glia-soft-blue) 42%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, var(--glia-blue-light) 0%, var(--glia-bg) 100%);
+}
+
+.app-trust-root .glia-home__ambient {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.app-trust-root .glia-home__blob {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(42px);
+  opacity: 0.38;
+}
+
+.app-trust-root .glia-home__blob--mint {
+  top: -2rem;
+  left: -1.5rem;
+  width: 11rem;
+  height: 11rem;
+  background: var(--glia-mint);
+}
+
+.app-trust-root .glia-home__blob--blue {
+  top: 1rem;
+  right: -3rem;
+  width: 14rem;
+  height: 10rem;
+  background: var(--glia-soft-blue);
+}
+
+.app-trust-root .glia-home__blob--wash {
+  right: 18%;
+  bottom: 1rem;
+  width: 8rem;
+  height: 8rem;
+  background: var(--glia-blue-light);
+  opacity: 0.7;
+}
+
+.app-trust-root .glia-home__chrome {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.app-trust-root .glia-home__wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--glia-text);
+  text-decoration: none;
+}
+
+.app-trust-root .glia-home__wordmark span {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.app-trust-root .glia-home__utilities {
+  display: flex;
+  align-items: center;
+}
+
+.app-trust-root .glia-home__utility {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--glia-blue);
+  background: var(--glia-glass);
+  border: 1px solid var(--glia-glass-border);
+  backdrop-filter: blur(16px);
+  text-decoration: none;
+  transition: background var(--glia-motion), transform var(--glia-motion);
+}
+
+.app-trust-root .glia-home__utility:hover {
+  background: var(--glia-surface);
+  transform: translateY(-1px);
+}
+
+.app-trust-root .glia-home__hero-copy {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.5rem;
+  max-width: 22rem;
+}
+
+.app-trust-root .glia-home__date {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-home__greeting {
+  margin: 0.15rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-home__headline {
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-checkin {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  padding: 0.8rem 0.85rem 0.8rem 1rem;
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-glass);
+  border: 1px solid var(--glia-glass-border);
+  box-shadow: var(--glia-shadow-card);
+  backdrop-filter: blur(16px);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--glia-motion), box-shadow var(--glia-motion), border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-checkin:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glia-shadow-card-hover);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-checkin__eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-checkin__title {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-btn {
+  display: inline-flex;
+  min-height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.9rem;
+  border-radius: var(--glia-radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform var(--glia-motion), box-shadow var(--glia-motion), background var(--glia-motion);
+}
+
+.app-trust-root .glia-checkin .glia-btn {
+  width: auto;
+}
+
+.app-trust-root .glia-btn--primary {
+  color: #ffffff;
+  background: var(--glia-gradient-primary);
+  box-shadow: var(--glia-shadow-button);
+}
+
+.app-trust-root .glia-btn--secondary {
+  color: var(--glia-blue);
+  background: var(--glia-surface);
+  border-color: var(--glia-border);
+}
+
+.app-trust-root .glia-checkin:hover .glia-btn--primary {
+  transform: translateY(-2px);
+}
+
+.app-trust-root .glia-checkin--done .glia-checkin__eyebrow {
+  color: var(--glia-success);
+}
+
+/* ── Alerts ───────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-alert-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.app-trust-root .glia-alert {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 72px;
+  padding: 0.9rem 1rem;
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  border: 1px solid var(--glia-border);
+  box-shadow: var(--glia-shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--glia-motion), box-shadow var(--glia-motion), border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-alert:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glia-shadow-card-hover);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-alert__icon {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-md);
+  color: var(--glia-blue);
+  background: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-alert--live .glia-alert__icon {
+  color: var(--glia-live);
+  background: var(--glia-live-bg);
+}
+
+.app-trust-root .glia-alert--session .glia-alert__icon {
+  color: var(--glia-coaching);
+  background: var(--glia-mint);
+}
+
+.app-trust-root .glia-alert--comment .glia-alert__icon {
+  color: var(--glia-blue-dark);
+  background: var(--glia-soft-blue);
+}
+
+.app-trust-root .glia-alert__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.app-trust-root .glia-alert__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-alert__title {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-trust-root .glia-alert__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-alert__expand {
+  min-height: 44px;
+  margin: 0.15rem auto 0;
+  padding: 0 0.75rem;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--glia-blue);
+  cursor: pointer;
+}
+
+/* ── Shortcuts ────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-shortcuts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.app-trust-root .glia-shortcuts:has(> :only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app-trust-root .glia-shortcut {
+  display: flex;
+  min-height: 6.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 1rem 0.9rem;
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  border: 1px solid var(--glia-border);
+  box-shadow: var(--glia-shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--glia-motion), box-shadow var(--glia-motion), border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-shortcut:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glia-shadow-card-hover);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-shortcut__icon {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-md);
+  color: var(--glia-blue);
+  background: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-shortcut--course .glia-shortcut__icon {
+  color: var(--glia-blue-dark);
+  background: var(--glia-soft-blue);
+}
+
+.app-trust-root .glia-shortcut--coaching .glia-shortcut__icon {
+  color: var(--glia-blue-dark);
+  background: var(--glia-mint);
+}
+
+.app-trust-root .glia-shortcut__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.app-trust-root .glia-shortcut__hint {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--glia-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Continue ─────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-continue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-trust-root .glia-continue-card {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem;
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  border: 1px solid var(--glia-border);
+  box-shadow: var(--glia-shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--glia-motion), box-shadow var(--glia-motion), border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-continue-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glia-shadow-card-hover);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-continue-card__media {
+  overflow: hidden;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface-secondary);
+}
+
+.app-trust-root .glia-continue-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-trust-root .glia-continue-card__fallback,
+.app-trust-root .glia-continue-card__media--coaching {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--glia-blue-dark);
+  background: var(--glia-mint);
+}
+
+.app-trust-root .glia-continue-card__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.app-trust-root .glia-continue-card__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-continue-card__title {
+  overflow: hidden;
+  margin-top: 0.15rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-trust-root .glia-continue-card__meta {
+  overflow: hidden;
+  margin-top: 0.15rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--glia-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-trust-root .glia-continue-card__chevron {
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-progress {
+  display: block;
+  width: 100%;
+  height: 0.35rem;
+  margin-top: 0.65rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-progress__bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--glia-gradient-primary);
+}
+
+/* ── Discover ─────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-discover {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-trust-root .glia-product {
+  display: grid;
+  grid-template-columns: 5.25rem 1fr auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem;
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  border: 1px solid var(--glia-border);
+  box-shadow: var(--glia-shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--glia-motion), box-shadow var(--glia-motion), border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-product:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glia-shadow-card-hover);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-product__media {
+  overflow: hidden;
+  width: 5.25rem;
+  height: 5.25rem;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-wellness);
+}
+
+.app-trust-root .glia-product__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-trust-root .glia-product__fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.app-trust-root .glia-product__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.app-trust-root .glia-product__kind {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-product__title {
+  overflow: hidden;
+  margin-top: 0.2rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-trust-root .glia-product__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  font-size: 0.9375rem;
+}
+
+.app-trust-root .glia-product__price strong {
+  font-weight: 700;
+}
+
+.app-trust-root .glia-product__price s {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-product__chevron {
+  color: var(--glia-text-secondary);
+}
+
+@media (min-width: 1024px) {
+  .app-trust-root .glia-home {
+    --glia-section-gap: 2.25rem;
+  }
+
+  .app-trust-root .glia-home__hero {
+    margin-top: 1.25rem;
+    border-radius: var(--glia-radius-xl);
+    padding-block: 1.25rem;
+  }
+
+  .app-trust-root .glia-home__hero-copy {
+    margin-top: 0.35rem;
+    max-width: 28rem;
+  }
+
+  .app-trust-root .glia-home__greeting {
+    font-size: 1.5rem;
+  }
+
+  .app-trust-root .glia-checkin {
+    max-width: 32rem;
+  }
+
+  .app-trust-root .glia-home__feed {
+    padding-block: 2.25rem 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-trust-root .glia-home *,
+  .app-trust-root .glia-home *::before,
+  .app-trust-root .glia-home *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .app-trust-root .glia-checkin:hover,
+  .app-trust-root .glia-alert:hover,
+  .app-trust-root .glia-shortcut:hover,
+  .app-trust-root .glia-continue-card:hover,
+  .app-trust-root .glia-product:hover,
+  .app-trust-root .glia-home__utility:hover,
+  .app-trust-root .glia-checkin:hover .glia-btn--primary {
+    transform: none;
+  }
+}

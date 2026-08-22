@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import { StatusPill } from "@/components/ui/status-pill";
-import { Typography } from "@/components/typography/typography";
 import type { CoachingSessionPublicationStatus } from "@/generated/prisma/client";
 import { getSessionDisplayLabel } from "@/lib/coaching";
 import { coachingPublicationLabels } from "@/lib/customer-labels";
@@ -10,17 +8,21 @@ type CoachingSessionCardProps = {
   sessionId: string;
   sessionNo: number;
   title: string;
-  coachName: string;
   scheduledAt: string;
   publicationStatus: CoachingSessionPublicationStatus;
   pendingReplyCount?: number;
 };
 
+function publicationVariant(status: CoachingSessionPublicationStatus) {
+  if (status === "PUBLISHED") return "published";
+  if (status === "DRAFT") return "draft";
+  return "empty";
+}
+
 export function CoachingSessionCard({
   sessionId,
   sessionNo,
   title,
-  coachName,
   scheduledAt,
   publicationStatus,
   pendingReplyCount = 0,
@@ -30,42 +32,35 @@ export function CoachingSessionCard({
     scheduledAt: new Date(scheduledAt),
   });
   const isPublished = publicationStatus === "PUBLISHED";
+  const variant = publicationVariant(publicationStatus);
 
   const content = (
-    <article className="app-panel app-panel--padded transition">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <Typography as="p" role="caption" weight="medium" color="action">
-            {sessionNo}회차
-          </Typography>
-          <Typography as="h3" role="bodyCompact" weight="semibold" color="primary" className="app-section-header__desc">
-            {title}
-          </Typography>
-          <Typography as="p" role="bodySecondary" color="secondary">
-            담당: {coachName}
-          </Typography>
-          <Typography as="p" role="bodySecondary" color="secondary" className="app-section-header__desc">
-            {displayLabel}
-          </Typography>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          <StatusPill tone="neutral" showCompleteIcon={false}>
+    <>
+      <span className="glia-session-card__no" aria-hidden="true">
+        {sessionNo}
+      </span>
+      <div className="glia-session-card__copy">
+        <div className="glia-session-card__heading">
+          <h3 className="glia-session-card__title">{title}</h3>
+          <span className={`glia-session-card__status glia-session-card__status--${variant}`}>
             {coachingPublicationLabels[publicationStatus]}
-          </StatusPill>
-          {pendingReplyCount > 0 && (
-            <StatusPill tone="pending" showCompleteIcon={false}>
-              답변 대기 {pendingReplyCount}
-            </StatusPill>
-          )}
+          </span>
         </div>
+        <p className="glia-session-card__meta">
+          {displayLabel}
+          {pendingReplyCount > 0 ? ` · 답변 대기 ${pendingReplyCount}` : ""}
+        </p>
       </div>
-    </article>
+    </>
   );
 
   if (isPublished) {
     return (
-      <li>
-        <Link href={`/coaching/sessions/${sessionId}`} className="shell-focus-ring block">
+      <li className="glia-session-card">
+        <Link
+          href={`/coaching/sessions/${sessionId}`}
+          className="glia-session-card__frame glia-session-card__frame--interactive"
+        >
           {content}
           <span className="sr-only">{title} 코칭 세션으로 이동</span>
         </Link>
@@ -73,5 +68,9 @@ export function CoachingSessionCard({
     );
   }
 
-  return <li>{content}</li>;
+  return (
+    <li className="glia-session-card">
+      <div className="glia-session-card__frame glia-session-card__frame--closed">{content}</div>
+    </li>
+  );
 }

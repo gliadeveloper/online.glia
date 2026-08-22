@@ -1,0 +1,132 @@
+/* Primary navigation — GLIA palette */
+
+/* Bottom tab bar height — readable outside the nav for fixed overlays (FAB 등) */
+.app-trust-root {
+  --nav-height-trust: 4.25rem;
+}
+
+.primary-nav-trust {
+  --nav-trust-primary: var(--glia-blue);
+  --nav-trust-secondary: var(--glia-blue-dark);
+  --nav-trust-muted: var(--glia-text-secondary);
+  --nav-trust-track: var(--glia-surface-secondary);
+  --nav-trust-track-border: var(--glia-border);
+  --nav-trust-shadow: var(--glia-shadow-card);
+  --nav-trust-bar-shadow: 0 -8px 30px rgba(30, 131, 158, 0.08);
+  --nav-height-mobile: var(--nav-height-trust);
+}
+
+.nav-tab-bar-trust {
+  background: var(--glia-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glia-border);
+  box-shadow: var(--nav-trust-bar-shadow);
+}
+
+.nav-tab-bar-trust::before {
+  content: none;
+}
+
+.nav-tab-item-trust {
+  color: var(--glia-text-secondary);
+  font-family: var(--glia-font);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: color var(--glia-motion);
+}
+
+.nav-tab-item-trust .nav-tab-icon {
+  transition: transform var(--glia-motion);
+}
+
+.nav-tab-item-trust[data-active="true"] {
+  color: var(--glia-blue);
+  font-weight: 600;
+}
+
+.nav-tab-item-trust[data-active="true"]::before {
+  content: none;
+}
+
+.nav-tab-item-trust:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .nav-tab-item-trust:hover .nav-tab-icon {
+    transform: scale(1.03);
+  }
+}
+
+.primary-nav-inline__link[data-active="false"]:hover {
+  background: var(--glia-surface);
+  color: var(--glia-text);
+}
+
+.primary-nav-inline__link[data-active="true"] {
+  background: var(--glia-blue-light);
+  box-shadow: none;
+  color: var(--glia-blue);
+}
+
+.primary-nav-inline__link:focus-visible,
+.primary-nav-inline__link[data-active="true"]:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--glia-surface),
+    0 0 0 4px var(--glia-focus-ring);
+}
+
+.unified-header-trust {
+  border-bottom-color: var(--glia-border);
+  box-shadow: 0 4px 24px -12px rgba(30, 131, 158, 0.12);
+}
+
+/* Stack back nav — GLIA palette */
+.app-trust-root .back-nav-trust {
+  border-bottom-color: var(--glia-border);
+  background: var(--glia-glass);
+  box-shadow: 0 4px 24px -12px rgba(30, 131, 158, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-family: var(--glia-font);
+}
+
+.app-trust-root .back-nav-trust__back {
+  min-height: 44px;
+  color: var(--glia-blue);
+  border-radius: var(--glia-radius-pill);
+}
+
+.app-trust-root .back-nav-trust__back:hover {
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .back-nav-trust__back:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+.app-trust-root .back-nav-trust__title {
+  color: var(--glia-text);
+}
+
+.app-trust-root .check-in-step-chrome.back-nav-trust {
+  background: var(--glia-glass);
+  border-bottom-color: var(--glia-border);
+}
+
+.app-trust-root .check-in-step-chrome__back {
+  color: var(--glia-blue);
+}
+
+.app-trust-root .check-in-step-chrome__back:hover {
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+}

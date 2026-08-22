@@ -1,7 +1,8 @@
 # /coaching/sessions/[id] — 코칭 회차 상세
 
 > **상태:** implemented  
-> **마지막 갱신:** 2026-07-30
+> **비주얼:** GLIA Design System (`--glia-*` · Pretendard · Editorial 읽기)  
+> **마지막 갱신:** 2026-08-22
 
 ---
 
@@ -83,6 +84,8 @@
 
 - `src/app/(app)/(stack)/coaching/sessions/[id]/page.tsx`
 - `coaching-coach-profile.tsx`, `coaching-session-qna-panel.tsx`, `coaching-markdown.tsx`
+- Design: GLIA Recovery Wellness — scope root `.glia-session` (Editorial), `src/components/coaching/coaching-stack-glia.css`
+- Mode: Editorial(읽기) — 본문·Q&A는 카드 금지. 680–720px 리딩 컬럼 + hairline. 카드는 회차 목록(Discovery)에서만
 
 ---
 

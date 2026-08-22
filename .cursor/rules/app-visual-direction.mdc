@@ -27,4 +27,5 @@ Before implementing or restyling `(app)` UI, read:
 
 - Apply to `(app)` routes and their components only.
 - Do not extend Corporate Trust to `admin` or `(customer)` unless explicitly asked.
-- Auth (`(auth)/`) and Shop stack use their own nested trust scopes.
+- Shop stack uses its own nested trust scope.
+- Auth (`(auth)/`) is **not** Corporate Trust — it uses the GLIA scope (`.glia-auth`, `src/components/auth/glia/`). See `AGENTS.md`.

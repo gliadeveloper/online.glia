@@ -14,6 +14,8 @@ import { getPublishedPostBySlug } from "@/lib/posts";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
+import "@/components/community/community-post-glia.css";
+
 export const dynamic = "force-dynamic";
 
 type CommunityPostPageProps = {
@@ -34,73 +36,86 @@ export default async function CommunityPostPage({ params }: CommunityPostPagePro
   const isOwner = user?.id === post.user.id;
 
   return (
-    <div className="community-post-page">
+    <div className="glia-post">
       <PostViewRecorder slug={post.slug} />
       <StackNavTitle title={post.title} />
 
-      {post.parentPost && (
-        <p className="community-post-page__parent">
-          ↩{" "}
-          <Link href={`/community/${post.parentPost.slug}`} className="community-post-page__parent-link">
-            {post.parentPost.title}
-          </Link>
-        </p>
-      )}
+      <article className="glia-post__article">
+        <header className="glia-post__header">
+          <div className="glia-post__tags">
+            <p className="glia-post__eyebrow">
+              <span className="glia-post__eyebrow-dot" aria-hidden="true" />
+              Community
+            </p>
 
-      <article className="community-post-detail">
-        <div className="community-post-detail__top">
-          <CommunityAuthorRow
-            user={post.user}
-            publishedAt={publishedAt}
-            headline={post.user.profile?.headline}
-          />
+            {post.parentPost && (
+              <Link href={`/community/${post.parentPost.slug}`} className="glia-post__parent">
+                <ParentIcon />
+                <span className="glia-post__parent-title">{post.parentPost.title}</span>
+              </Link>
+            )}
+          </div>
 
-          {isOwner && (
-            <CommunityPostOwnerMenu
-              slug={post.slug}
-              title={post.title}
-              parentSlug={post.parentPost?.slug}
+          <h1 className="glia-post__title">
+            {post.title}
+            {post.editedAt && <span className="glia-post__edited">수정됨</span>}
+          </h1>
+
+          <div className="glia-post__byline">
+            <CommunityAuthorRow
+              user={post.user}
+              publishedAt={publishedAt}
+              headline={post.user.profile?.headline}
             />
-          )}
-          {!isOwner && (
-            <CommunityReportButton
-              targetType="POST"
-              postSlug={post.slug}
-              isLoggedIn={!!user}
-            />
-          )}
-        </div>
 
-        <h1 className="community-post-detail__title">
-          {post.title}
-          {post.editedAt && <span className="community-post-detail__edited"> · 수정됨</span>}
-        </h1>
+            {isOwner ? (
+              <CommunityPostOwnerMenu
+                slug={post.slug}
+                title={post.title}
+                parentSlug={post.parentPost?.slug}
+              />
+            ) : (
+              <CommunityReportButton targetType="POST" postSlug={post.slug} isLoggedIn={!!user} />
+            )}
+          </div>
+        </header>
 
-        <div className="community-post-detail__body">
+        <div className="glia-post__body">
           <PostMarkdown content={post.bodyMarkdown} />
         </div>
+
+        <footer className="glia-post__reactions">
+          <CommunityPostActions
+            postSlug={post.slug}
+            likeCount={post.likeCount}
+            commentCount={post.commentCount}
+            viewCount={post.viewCount}
+            liked={post.likedByViewer}
+            isLoggedIn={!!user}
+            interactive
+          />
+        </footer>
       </article>
 
       {!post.parentPost && (
         <PostChildList parentSlug={post.slug} childPosts={post.childPosts} isLoggedIn={!!user} />
       )}
 
-      <div className="community-post-page__actions">
-        <CommunityPostActions
-          postSlug={post.slug}
-          likeCount={post.likeCount}
-          commentCount={post.commentCount}
-          viewCount={post.viewCount}
-          liked={post.likedByViewer}
-          isLoggedIn={!!user}
-          interactive
-        />
-      </div>
-
-      <section id="post-comments" aria-labelledby="post-comments-heading" className="community-post-comments">
-        <h2 id="post-comments-heading" className="sr-only">
-          댓글
-        </h2>
+      <section
+        id="post-comments"
+        aria-labelledby="post-comments-heading"
+        className="glia-post__section"
+      >
+        <div className="glia-post__section-head">
+          <h2 id="post-comments-heading" className="glia-post__section-title">
+            댓글
+            {post.commentCount > 0 && (
+              <span className="glia-post__section-count">
+                {post.commentCount.toLocaleString("ko-KR")}
+              </span>
+            )}
+          </h2>
+        </div>
 
         {user ? (
           <PostCommentComposer
@@ -112,17 +127,19 @@ export default async function CommunityPostPage({ params }: CommunityPostPagePro
         ) : (
           <div className="community-comment-inline community-comment-inline--guest">
             <p>
-              <Link href={`/login?next=/community/${post.slug}`} className="community-post-page__parent-link">
+              <Link
+                href={`/login?next=/community/${post.slug}`}
+                className="community-comment-inline__guest-link"
+              >
                 로그인
-              </Link>
-              {" "}
-              하신 후 댓글을 작성해 보세요.
+              </Link>{" "}
+              하신 후 회복 경험을 함께 나눠 보세요.
             </p>
           </div>
         )}
 
         {post.comments.length === 0 ? (
-          <p className="community-post-comments__empty">아직 작성된 댓글이 없어요.</p>
+          <p className="glia-post__empty">아직 작성된 댓글이 없어요. 첫 이야기를 남겨 보세요.</p>
         ) : (
           <PostCommentList
             postSlug={post.slug}
@@ -134,5 +151,24 @@ export default async function CommunityPostPage({ params }: CommunityPostPagePro
         )}
       </section>
     </div>
+  );
+}
+
+function ParentIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width={13}
+      height={13}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10a6 6 0 0 1 6 6v5" />
+    </svg>
   );
 }

@@ -1,6 +1,8 @@
 import { getWeekPeriodKey } from "@/lib/forms";
+import { firstMarkdownImage } from "@/lib/post-content";
 import { normalizePostSlugParam } from "@/lib/post-write";
 import { prisma } from "@/lib/prisma";
+import { normalizeProxiedR2MediaUrl } from "@/lib/media/proxied-media-url";
 
 const authorSelect = {
   id: true,
@@ -143,7 +145,7 @@ export async function getPublishedPostBySlug(slug: string, viewerUserId?: string
       childPosts: {
         where: publishedPostWhere,
         orderBy: { createdAt: "asc" },
-        select: postSummarySelect,
+        select: { ...postSummarySelect, bodyMarkdown: true },
       },
       comments: {
         where: { status: "PUBLISHED", parentId: null },
@@ -185,7 +187,13 @@ export async function getPublishedPostBySlug(slug: string, viewerUserId?: string
   return {
     ...rest,
     comments: mapCommentTree(comments),
-    childPosts: childPosts as import("@/lib/post-display").PostSummary[],
+    childPosts: childPosts.map(({ bodyMarkdown, ...child }) => {
+      const image = firstMarkdownImage(bodyMarkdown);
+      return {
+        ...child,
+        coverImageUrl: image ? normalizeProxiedR2MediaUrl(image) : null,
+      };
+    }),
     likedByViewer: likes.length > 0,
     likedCommentIds,
   };

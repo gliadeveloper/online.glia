@@ -1,0 +1,384 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/*
+ * GLIA Community — write / edit, focused task mode.
+ * Scope root: `.glia-write` (`/community/new`, `/community/[slug]/edit`).
+ *
+ * The user is composing one piece of content, so the page is a single calm
+ * column: no cards, no nested surfaces, hierarchy from typography and space.
+ * Feed uses community-glia.css, post detail uses community-post-glia.css.
+ */
+
+.app-trust-root:has(.glia-write) .app-shell,
+.app-trust-root:has(.glia-write) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
+.app-trust-root .glia-write {
+  --glia-write-measure: 42.5rem;
+  --glia-write-gutter: 1.25rem;
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  margin: calc(var(--home-stack-lg) * -1);
+  width: calc(100% + var(--home-stack-lg) * 2);
+  padding-bottom: 4rem;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+/* Atmospheric wash behind the masthead only — never competes with the form. */
+.app-trust-root .glia-write::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 16rem;
+  background:
+    radial-gradient(120% 100% at 4% 0%, color-mix(in srgb, var(--glia-mint) 28%, transparent) 0%, transparent 60%),
+    radial-gradient(100% 92% at 100% 0%, color-mix(in srgb, var(--glia-soft-blue) 22%, transparent) 0%, transparent 64%);
+}
+
+.app-trust-root .glia-write a:focus-visible,
+.app-trust-root .glia-write button:focus-visible,
+.app-trust-root .glia-write input:focus-visible,
+.app-trust-root .glia-write textarea:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+}
+
+/* ── Composing column ──────────────────────────────────────────────────── */
+
+.app-trust-root .glia-write__header,
+.app-trust-root .glia-write__form {
+  width: 100%;
+  max-width: var(--glia-write-measure);
+  margin-inline: auto;
+  padding-inline: var(--glia-write-gutter);
+}
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-write__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding-block: 1.5rem 1.5rem;
+}
+
+.app-trust-root .glia-write__eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-write__eyebrow-dot {
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue);
+}
+
+.app-trust-root .glia-write__title {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-write__lede {
+  margin: 0;
+  max-width: 32rem;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--glia-text-secondary);
+}
+
+/* ── Form ──────────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-write__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Parent context — a quiet information area, not a card. */
+.app-trust-root .glia-write__parent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-write__parent-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-write__parent-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--glia-text);
+  text-decoration: none;
+  transition: color var(--glia-motion);
+}
+
+.app-trust-root .glia-write__parent-link:hover {
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-write__parent-icon {
+  flex-shrink: 0;
+  color: var(--glia-blue);
+}
+
+/* ── Fields ────────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-write__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app-trust-root .glia-write__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-write__input,
+.app-trust-root .glia-write__textarea {
+  width: 100%;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  font-family: inherit;
+  color: var(--glia-text);
+  transition:
+    border-color var(--glia-motion),
+    box-shadow var(--glia-motion);
+}
+
+.app-trust-root .glia-write__input::placeholder,
+.app-trust-root .glia-write__textarea::placeholder {
+  color: var(--glia-text-secondary);
+  opacity: 0.75;
+}
+
+.app-trust-root .glia-write__input:focus,
+.app-trust-root .glia-write__textarea:focus {
+  outline: none;
+  border-color: var(--glia-blue);
+  box-shadow: 0 0 0 3px rgba(30, 131, 158, 0.14);
+}
+
+.app-trust-root .glia-write__input:focus-visible,
+.app-trust-root .glia-write__textarea:focus-visible {
+  outline: none;
+}
+
+.app-trust-root .glia-write__input:disabled,
+.app-trust-root .glia-write__textarea:disabled {
+  background: var(--glia-surface-secondary);
+  color: var(--glia-text-secondary);
+  cursor: not-allowed;
+}
+
+.app-trust-root .glia-write__input {
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+
+.app-trust-root .glia-write__textarea {
+  min-height: 22rem;
+  resize: vertical;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+.app-trust-root .glia-write__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.app-trust-root .glia-write__meta p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--glia-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Error — soft and approachable ─────────────────────────────────────── */
+
+.app-trust-root .glia-write__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--glia-radius-md);
+  background: color-mix(in srgb, var(--glia-error) 10%, var(--glia-surface));
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--glia-error) 62%, var(--glia-text));
+}
+
+.app-trust-root .glia-write__error-icon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--glia-error);
+}
+
+/* ── Actions ───────────────────────────────────────────────────────────── */
+
+.app-trust-root .glia-write__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--glia-border);
+}
+
+.app-trust-root .glia-write__submit,
+.app-trust-root .glia-write__cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.875rem;
+  padding: 0 1.375rem;
+  border-radius: var(--glia-radius-md);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--glia-motion),
+    box-shadow var(--glia-motion),
+    background var(--glia-motion),
+    border-color var(--glia-motion),
+    opacity var(--glia-motion);
+}
+
+.app-trust-root .glia-write__submit {
+  border: 0;
+  background: var(--glia-gradient-primary);
+  color: #ffffff;
+}
+
+.app-trust-root .glia-write__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--glia-shadow-button);
+}
+
+.app-trust-root .glia-write__submit:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.app-trust-root .glia-write__cancel {
+  border: 1px solid var(--glia-border);
+  background: var(--glia-surface);
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-write__cancel:hover:not(:disabled) {
+  background: var(--glia-blue-light);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-write__cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .app-trust-root .glia-write__submit,
+  .app-trust-root .glia-write__cancel {
+    flex: 1;
+    min-width: calc(50% - 0.3125rem);
+  }
+}
+
+/* ── Tablet and up ─────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .app-trust-root .glia-write {
+    --glia-write-measure: 45rem;
+    --glia-write-gutter: 2rem;
+
+    padding-bottom: 5rem;
+  }
+
+  .app-trust-root .glia-write__header {
+    gap: 0.75rem;
+    padding-block: 2.25rem 2rem;
+  }
+
+  .app-trust-root .glia-write__title {
+    font-size: 2.25rem;
+  }
+
+  .app-trust-root .glia-write__form {
+    gap: 1.75rem;
+  }
+
+  .app-trust-root .glia-write__textarea {
+    font-size: 1.0625rem;
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .app-trust-root .glia-write *,
+  .app-trust-root .glia-write *::before,
+  .app-trust-root .glia-write *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .app-trust-root .glia-write__submit:hover:not(:disabled) {
+    transform: none;
+  }
+}

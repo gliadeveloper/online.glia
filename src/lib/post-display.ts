@@ -27,6 +27,7 @@ export type PostSummary = {
   publishedAt: Date | null;
   createdAt: Date;
   user: PostAuthor;
+  coverImageUrl?: string | null;
 };
 
 export function displayAuthorName(user: {

@@ -1,7 +1,6 @@
 import Link from "next/link";
+import { CalendarClock } from "lucide-react";
 
-import { UserAvatar } from "@/components/ui/user-avatar";
-import { Typography } from "@/components/typography/typography";
 import {
   displayCoachName,
   formatCoachingExpiry,
@@ -21,6 +20,14 @@ type CoachingEntitlementCardProps = {
   coach: CoachProfile | null;
 };
 
+function statusVariant(status: CoachingEntitlementCardProps["status"]) {
+  if (status === "COMPLETED") return "completed";
+  if (status === "EXPIRED") return "expired";
+  if (status === "REVOKED") return "revoked";
+  if (status === "SUSPENDED") return "suspended";
+  return "active";
+}
+
 export function CoachingEntitlementCard({
   entitlementId,
   productTitle,
@@ -31,74 +38,82 @@ export function CoachingEntitlementCard({
   coach,
 }: CoachingEntitlementCardProps) {
   const coachName = coach ? displayCoachName(coach) : "담당 코치";
+  const initial = coachName.slice(0, 1).toUpperCase();
+  const progressPercent =
+    totalSessions === 0 ? 0 : Math.round((completedSessions / totalSessions) * 100);
+  const variant = statusVariant(status);
 
   return (
-    <li>
+    <li className="glia-entitlement">
       <Link
         href={`/coaching/${entitlementId}`}
-        className="app-card app-card--interactive shell-focus-ring"
+        className="glia-entitlement__frame glia-entitlement__frame--interactive"
       >
-        <div className="app-card__body">
-          <div className="flex items-start gap-3">
-            {coach && (
-              <UserAvatar
-                name={coach.name}
-                email={coach.email}
-                avatarUrl={coach.profile?.avatarUrl}
-                size="md"
-              />
+        <div className="glia-entitlement__top">
+          <span className="glia-entitlement__avatar" aria-hidden="true">
+            {coach?.profile?.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={coach.profile.avatarUrl} alt="" />
+            ) : (
+              initial
             )}
+          </span>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-start justify-between gap-3">
-                <Typography as="h2" role="sectionTitle" weight="semibold" color="primary" className="min-w-0">
-                  {productTitle}
-                </Typography>
-                <span className="app-chip shrink-0">{coachingEntitlementLabels[status]}</span>
-              </div>
-
-              <Typography as="p" role="bodySecondary" color="secondary" className="app-section-header__desc">
-                {coachName}
-              </Typography>
-
-              <dl className="app-section-header__desc flex flex-wrap gap-x-4 gap-y-1">
-                <div>
-                  <Typography as="dt" role="caption" color="secondary" className="inline">
-                    만료{" "}
-                  </Typography>
-                  <Typography as="dd" role="bodySecondary" color="primary" className="inline">
-                    {formatCoachingExpiry(validUntil)}
-                  </Typography>
-                </div>
-                <div>
-                  <Typography as="dt" role="caption" color="secondary" className="inline">
-                    진행{" "}
-                  </Typography>
-                  <Typography as="dd" role="bodySecondary" color="primary" className="inline">
-                    {formatCoachingProgress(completedSessions, totalSessions)}
-                  </Typography>
-                </div>
-              </dl>
+          <div className="glia-entitlement__copy">
+            <div className="glia-entitlement__heading">
+              <h3 className="glia-entitlement__title">{productTitle}</h3>
+              <span className={`glia-entitlement__status glia-entitlement__status--${variant}`}>
+                {coachingEntitlementLabels[status]}
+              </span>
             </div>
+            <p className="glia-entitlement__coach">{coachName}</p>
           </div>
         </div>
+
+        <div className="glia-entitlement__meta">
+          <span className="glia-entitlement__chip">
+            <CalendarClock size={12} aria-hidden="true" />
+            {formatCoachingExpiry(validUntil)}까지
+          </span>
+        </div>
+
+        <div className="glia-entitlement__progress">
+          <div className="glia-entitlement__progress-head">
+            <span className="glia-entitlement__progress-label">진행</span>
+            <span className="glia-entitlement__progress-value">
+              {formatCoachingProgress(completedSessions, totalSessions)} · {progressPercent}%
+            </span>
+          </div>
+          <div
+            role="progressbar"
+            aria-valuenow={progressPercent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`${productTitle} 회차 진행 ${progressPercent}%`}
+            className="glia-entitlement__progress-track"
+          >
+            <div
+              className="glia-entitlement__progress-bar"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+
         <span className="sr-only">{productTitle} 코칭 회차 목록으로 이동</span>
       </Link>
     </li>
   );
 }
 
-export function coachingEntitlementCardProps(
-  entitlement: {
-    id: string;
-    status: keyof typeof coachingEntitlementLabels;
-    validUntil: Date;
-    completedSessions: number;
-    totalSessions: number;
-    coachingOffering: { title: string; coach: CoachProfile | null };
-    sessions: { coach: CoachProfile }[];
-  },
-) {
+export function coachingEntitlementCardProps(entitlement: {
+  id: string;
+  status: keyof typeof coachingEntitlementLabels;
+  validUntil: Date;
+  completedSessions: number;
+  totalSessions: number;
+  coachingOffering: { title: string; coach: CoachProfile | null };
+  sessions: { coach: CoachProfile }[];
+}) {
   return {
     entitlementId: entitlement.id,
     productTitle: entitlement.coachingOffering.title,

@@ -48,7 +48,7 @@ export default async function WeeklyCheckFormPage({
         titleAccent="체크"
         description="주간 체크인 폼이 아직 준비되지 않았습니다."
       >
-        <p className="check-in-hub__missing">주간 체크인 폼이 아직 준비되지 않았습니다.</p>
+        <p className="glia-ci-empty">주간 체크인 폼이 아직 준비되지 않았습니다.</p>
       </CheckInFlowShell>
     );
   }
@@ -106,6 +106,8 @@ export default async function WeeklyCheckFormPage({
   return (
     <CheckInFlowShell
       {...shellProps}
+      hideHeader
+      variant="hub"
       contentClassName="check-in-flow__content check-in-flow__content--form"
     >
       <CheckInForm
@@ -120,6 +122,9 @@ export default async function WeeklyCheckFormPage({
         }))}
         reportHref={checkInReportPath("weekly", periodKey)}
         submitLabel={isRedo ? "다시 저장" : "주간 체크 저장"}
+        eyebrow="Weekly Check-in"
+        heading={`${periodTitle} 체크`}
+        lede={shellProps.description}
       />
     </CheckInFlowShell>
   );

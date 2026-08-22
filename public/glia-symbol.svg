@@ -1,0 +1,10 @@
+<svg width="229" height="195" viewBox="0 0 229 195" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M114.709 0L0 169.095L114.291 195L229 169.095L114.709 0ZM16.3272 164.255L114.709 18.7883L114.291 138.066L212.673 164.255L114.291 186.46L16.3272 164.255Z" fill="url(#glia-gradient)"/>
+  <defs>
+    <linearGradient id="glia-gradient" x1="114.5" y1="0" x2="114.5" y2="195" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CCF7D5"/>
+      <stop offset="0.494792" stop-color="#BFF2CB"/>
+      <stop offset="1" stop-color="#ADCDED"/>
+    </linearGradient>
+  </defs>
+</svg>

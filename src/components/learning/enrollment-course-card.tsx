@@ -1,6 +1,12 @@
 import Link from "next/link";
+import {
+  BookOpen,
+  CalendarClock,
+  CheckCircle2,
+  Clock,
+  Infinity as InfinityIcon,
+} from "lucide-react";
 
-import { Typography } from "@/components/typography/typography";
 import {
   formatEnrollmentAccessSummary,
   formatEnrollmentAccessUntil,
@@ -25,59 +31,56 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
   const accessSummary = formatEnrollmentAccessSummary(enrollment);
   const accessUntil = formatEnrollmentAccessUntil(enrollment);
   const isExpired = enrollment.status === "EXPIRED";
+  const isCompleted = enrollment.status === "COMPLETED";
+  const isLifetime = enrollment.accessDuration === "LIFETIME";
+  const statusVariant = isExpired ? "expired" : isCompleted ? "completed" : "active";
 
   const cardInner = (
     <>
-      <div className="app-card__media">
+      <div className="glia-course__media">
         {enrollment.course.thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={enrollment.course.thumbnailUrl} alt="" />
         ) : (
-          <div className="flex h-full items-center justify-center px-4 text-center">
-            <Typography as="p" role="bodySecondary" weight="medium" color="secondary">
-              {enrollment.course.title}
-            </Typography>
-          </div>
+          <span className="glia-course__media-fallback">
+            <BookOpen size={28} aria-hidden="true" />
+          </span>
         )}
+
+        <span className={`glia-course__status glia-course__status--${statusVariant}`}>
+          {isCompleted && <CheckCircle2 size={12} aria-hidden="true" />}
+          {isExpired && <Clock size={12} aria-hidden="true" />}
+          {enrollmentStatusLabels[enrollment.status]}
+        </span>
       </div>
 
-      <div className="app-card__body">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            {category && (
-              <Typography as="p" role="caption" weight="medium" color="action">
-                {category}
-              </Typography>
+      <div className="glia-course__body">
+        {category && <p className="glia-course__category">{category}</p>}
+
+        <h3 className="glia-course__title">{enrollment.course.title}</h3>
+
+        {enrollment.course.description && (
+          <p className="glia-course__desc">{enrollment.course.description}</p>
+        )}
+
+        <div className="glia-course__meta">
+          <span className="glia-course__chip">
+            {isLifetime ? (
+              <InfinityIcon size={12} aria-hidden="true" />
+            ) : (
+              <CalendarClock size={12} aria-hidden="true" />
             )}
-            <Typography as="h2" role="sectionTitle" weight="semibold" color="primary" className="app-section-header__desc">
-              {enrollment.course.title}
-            </Typography>
-            {enrollment.course.description && (
-              <Typography as="p" role="bodySecondary" color="secondary" className="line-clamp-2 app-section-header__desc">
-                {enrollment.course.description}
-              </Typography>
-            )}
-          </div>
-          <span className="app-chip shrink-0">{enrollmentStatusLabels[enrollment.status]}</span>
+            {accessSummary}
+          </span>
+          {accessUntil && <span className="glia-course__until">~ {accessUntil}까지</span>}
         </div>
 
-        <div className="app-section-header__desc flex flex-wrap items-center gap-2">
-          <span className="app-chip">{accessSummary}</span>
-          {accessUntil && (
-            <Typography as="span" role="caption" color="secondary">
-              ~ {accessUntil}까지
-            </Typography>
-          )}
-        </div>
-
-        <div className="app-section">
-          <div className="mb-2 flex justify-between">
-            <Typography as="span" role="bodySecondary" color="secondary">
-              진도
-            </Typography>
-            <Typography as="span" role="bodySecondary" color="secondary">
+        <div className="glia-course__progress">
+          <div className="glia-course__progress-head">
+            <span className="glia-course__progress-label">진도</span>
+            <span className="glia-course__progress-value">
               {completedLessons}/{totalLessons} · {progressPercent}%
-            </Typography>
+            </span>
           </div>
           <div
             role="progressbar"
@@ -85,9 +88,9 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label={`${enrollment.course.title} 학습 진도 ${progressPercent}%`}
-            className="app-progress"
+            className="glia-course__progress-track"
           >
-            <div className="app-progress__bar" style={{ width: `${progressPercent}%` }} />
+            <div className="glia-course__progress-bar" style={{ width: `${progressPercent}%` }} />
           </div>
         </div>
       </div>
@@ -96,15 +99,21 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
 
   if (isExpired) {
     return (
-      <li>
-        <div className="app-card opacity-90">
+      <li className="glia-course">
+        <div className="glia-course__frame glia-course__frame--expired">
           {cardInner}
-          <div className="app-card__footer">
-            <Link href={enrollment.extendHref} className="corp-trust-link corp-trust-focus shell-focus-ring">
+          <div className="glia-course__footer">
+            <Link
+              href={enrollment.extendHref}
+              className="glia-learning__btn glia-learning__btn--secondary"
+            >
               90일 수강 연장
             </Link>
             {enrollment.restoreHref && enrollment.restoreHref !== enrollment.extendHref && (
-              <Link href={enrollment.restoreHref} className="corp-trust-link corp-trust-focus shell-focus-ring text-[var(--auth-text-muted)]">
+              <Link
+                href={enrollment.restoreHref}
+                className="glia-learning__btn glia-learning__btn--ghost"
+              >
                 평생 수강 복구
               </Link>
             )}
@@ -115,13 +124,12 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
   }
 
   return (
-    <li>
+    <li className="glia-course">
       <Link
         href={`/learning/${enrollment.course.id}`}
-        className="app-card app-card--interactive shell-focus-ring"
+        className="glia-course__frame glia-course__frame--interactive"
       >
         {cardInner}
-        <span className="sr-only">{enrollment.course.title} 강의로 이동</span>
       </Link>
     </li>
   );

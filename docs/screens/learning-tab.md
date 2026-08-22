@@ -1,7 +1,8 @@
 # /learning — 내 학습 (Tab)
 
 > **상태:** implemented  
-> **마지막 갱신:** 2026-07-30
+> **비주얼:** GLIA Design System (`--glia-*` tokens · Pretendard · Discovery 카드)  
+> **마지막 갱신:** 2026-08-20
 
 ---
 
@@ -91,6 +92,13 @@
 
 - `src/app/(app)/(tabs)/learning/page.tsx`
 - `enrollment-course-card.tsx`
+
+| 항목 | 내용 |
+|------|------|
+| **Design** | GLIA Recovery Wellness — scope root `.glia-learning`, `src/components/learning/learning-glia.css`, 토큰 `src/app/design-tokens/glia.css` |
+| **Mode** | Discovery (카드) — 코스를 고르는 화면. 코스 상세·레슨은 별도 스타일 |
+| **Hero** | ambient gradient + 진도 요약(수강 중 / 수료 / 평균 진도) |
+| **Icon** | `lucide-react` |
 
 ---
 

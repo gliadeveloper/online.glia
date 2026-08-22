@@ -13,7 +13,7 @@ export function UnifiedHeader({ isLoggedIn }: UnifiedHeaderProps) {
       data-slot="unified-header"
       className="unified-header-trust"
     >
-      <div className="mx-auto flex h-[var(--header-height)] w-full max-w-5xl items-center gap-4 px-4 lg:px-6">
+      <div className="unified-header-trust__inner">
         <BrandMark />
         <PrimaryNavInline className="min-w-0 flex-1" />
         <HeaderAuthAction isLoggedIn={isLoggedIn} />

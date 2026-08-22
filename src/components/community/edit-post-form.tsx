@@ -59,9 +59,9 @@ export function EditPostForm({ slug, initialTitle, initialBodyMarkdown }: EditPo
   }
 
   return (
-    <form onSubmit={handleSubmit} className="community-write-form">
-      <div className="community-write-form__field">
-        <label htmlFor="edit-post-title" className="community-write-form__label">
+    <form onSubmit={handleSubmit} className="glia-write__form">
+      <div className="glia-write__field">
+        <label htmlFor="edit-post-title" className="glia-write__label">
           제목
         </label>
         <input
@@ -71,7 +71,7 @@ export function EditPostForm({ slug, initialTitle, initialBodyMarkdown }: EditPo
           onChange={(event) => setTitle(event.target.value)}
           maxLength={120}
           disabled={submitting}
-          className="community-write-form__title-input corp-trust-focus shell-focus-ring"
+          className="glia-write__input"
         />
       </div>
 
@@ -85,19 +85,41 @@ export function EditPostForm({ slug, initialTitle, initialBodyMarkdown }: EditPo
       />
 
       {error && (
-        <p role="alert" className="community-write-form__error">
+        <p role="alert" className="glia-write__error">
+          <ErrorIcon />
           {error}
         </p>
       )}
 
-      <div className="community-write-form__actions">
-        <button type="submit" disabled={submitting} className="community-write-form__submit shell-focus-ring">
+      <div className="glia-write__actions">
+        <button type="submit" disabled={submitting} className="glia-write__submit">
           {submitting ? "저장 중…" : "변경 저장"}
         </button>
-        <Link href={`/community/${slug}`} className="community-write-form__cancel shell-focus-ring">
+        <Link href={`/community/${slug}`} className="glia-write__cancel">
           취소
         </Link>
       </div>
     </form>
+  );
+}
+
+function ErrorIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="glia-write__error-icon"
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </svg>
   );
 }

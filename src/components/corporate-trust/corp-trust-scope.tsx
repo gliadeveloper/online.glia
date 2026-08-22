@@ -2,8 +2,6 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 
 import "./tokens.css";
 import "./app-trust-tokens.css";
-import "../checkin/check-in-hub.css";
-import "../community/community.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",

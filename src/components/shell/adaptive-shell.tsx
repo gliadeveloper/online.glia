@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import "@/components/shell/primary-nav-trust.css";
 import "@/components/shell/shell-chrome-trust.css";
+import "@/components/shell/nav-ref.css";
 
 import { BackNav } from "@/components/shell/back-nav";
 import { MobileGlobalHeader } from "@/components/shell/mobile-global-header";
@@ -56,7 +57,7 @@ export function AdaptiveShell({ mode, isLoggedIn, children }: AdaptiveShellProps
 
   const mainClassName = [
     "app-shell__main",
-    "mx-auto w-full max-w-5xl flex-1",
+    "flex-1",
     homeHero ? "app-shell__main--home" : "app-shell__main--trust",
   ].join(" ");
 

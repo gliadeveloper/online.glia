@@ -108,7 +108,7 @@ export async function seedCommunityPosts(userIds: SeedUserIds) {
 
 Next.js App Router에서는 **기본이 Server Component**입니다.
 
-궁금한 점은 **하위 글**로 이어서 작성하거나 댓글로 남겨주세요!`,
+궁금한 점은 **인증 글**로 이어서 작성하거나 댓글로 남겨주세요!`,
       comments: [
         { userId: userIds.coachId, body: "체크리스트 구성 좋네요. Server Action부터 적용해 보세요." },
         { userId: userIds.customerId, body: "표 정리가 특히 도움됐어요!" },
@@ -118,7 +118,7 @@ Next.js App Router에서는 **기본이 Server Component**입니다.
         {
           slug: "server-action-checkin-followup",
           userId: userIds.demoId,
-          title: "[하위 글] 체크인 폼에 Server Action 붙인 후기",
+          title: "[인증 글] 체크인 폼에 Server Action 붙인 후기",
           publishedAt: daysAgo(1),
           viewCount: 42,
           bodyMarkdown: `## 적용 범위
@@ -130,14 +130,14 @@ Next.js App Router에서는 **기본이 Server Component**입니다.
 export async function saveCheckIn() { /* ... */ }
 \`\`\`
 
-부모 글 주제(Server/Client 경계)의 **실전 follow-up** 입니다.`,
+원본 글 주제(Server/Client 경계)의 **실전 follow-up** 입니다.`,
           comments: [{ userId: userIds.coachId, body: "폼 pending UI까지 붙이면 UX가 한층 좋아집니다." }],
           postLikes: [userIds.coachId],
         },
         {
           slug: "use-client-boundary-notes",
           userId: userIds.coachId,
-          title: "[하위 글] use client는 leaf에만",
+          title: "[인증 글] use client는 leaf에만",
           publishedAt: daysAgo(1),
           viewCount: 31,
           bodyMarkdown: `상위 레이아웃에 \`use client\`를 두면 **하위 트리 전체**가 클라이언트로 내려갑니다.
@@ -190,10 +190,10 @@ const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! });
       viewCount: 56,
       bodyMarkdown: `Post 본문은 **Markdown** + 미리보기, **댓글**은 plain text입니다.
 
-- **하위 글**: 부모 Post에 연결된 새 Post`,
+- **인증 글**: 원본 Post에 연결된 새 Post`,
       comments: [
         { userId: userIds.demoId, body: "역할 분리가 명확해서 좋네요." },
-        { userId: userIds.customerId, body: "하위 글 작성 버튼 잘 보입니다 👍" },
+        { userId: userIds.customerId, body: "인증 글 작성 버튼 잘 보입니다 👍" },
       ],
       postLikes: [userIds.demoId, userIds.customerId],
     },
@@ -203,7 +203,7 @@ const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! });
       title: "90일 수강 vs 평생 — Shop 연장/복구 차이 질문",
       publishedAt: daysAgo(3),
       viewCount: 167,
-      bodyMarkdown: `**연장(extend)** vs **복구(restore)** 차이가 헷갈립니다. 답변은 댓글 또는 하위 글로!`,
+      bodyMarkdown: `**연장(extend)** vs **복구(restore)** 차이가 헷갈립니다. 답변은 댓글 또는 인증 글로!`,
       comments: [
         {
           userId: userIds.coachId,
@@ -217,10 +217,10 @@ const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! });
         {
           slug: "lms-access-shop-cta-screenshots",
           userId: userIds.customerId,
-          title: "[하위 글] Shop CTA 케이스별 정리",
+          title: "[인증 글] Shop CTA 케이스별 정리",
           publishedAt: daysAgo(2),
           viewCount: 38,
-          bodyMarkdown: `부모 질문 글에 대한 **정리 하위 글**입니다.
+          bodyMarkdown: `원본 질문 글에 대한 **정리 인증 글**입니다.
 
 | 상태 | VOD SKU | 번들 SKU |
 |------|---------|----------|

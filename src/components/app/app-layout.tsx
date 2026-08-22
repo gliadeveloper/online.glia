@@ -152,7 +152,7 @@ type AppStackBackLinkProps = {
 
 export function AppStackBackLink({ href, children }: AppStackBackLinkProps) {
   return (
-    <Link href={href} className="app-stack-back corp-trust-link corp-trust-focus shell-focus-ring">
+    <Link href={href} className="app-stack-back">
       {children}
     </Link>
   );

@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { AppStackPage } from "@/components/app";
 import { CheckInHubFooterCta } from "@/components/checkin/check-in-hub-footer-cta";
 import { CheckInHubPanel } from "@/components/checkin/check-in-hub-panel";
+import { CheckinShell } from "@/components/checkin/checkin-shell";
 import { getCheckInHubData } from "@/lib/checkin-hub";
-import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
 function resolveHubFooterCta(data: Awaited<ReturnType<typeof getCheckInHubData>>) {
@@ -41,25 +40,9 @@ export default async function CheckInHubPage() {
   const footerCta = resolveHubFooterCta(data);
 
   return (
-    <AppStackPage className="check-in-hub-page">
-      <StackNavTitle title="체크인" />
-
-      <article
-        className={`check-in-hub-card${footerCta.show ? " check-in-hub-card--with-footer" : ""}`}
-      >
-        <div className="check-in-hub-card__blobs" aria-hidden="true">
-          <div className="check-in-hub-card__blob check-in-hub-card__blob--indigo" />
-          <div className="check-in-hub-card__blob check-in-hub-card__blob--violet" />
-        </div>
-
-        <div className="check-in-hub-card__content">
-          <CheckInHubPanel data={data} />
-
-          {footerCta.show ? (
-            <CheckInHubFooterCta href={footerCta.href} label={footerCta.label} />
-          ) : null}
-        </div>
-      </article>
-    </AppStackPage>
+    <CheckinShell navTitle="체크인" withFooter={footerCta.show} variant="hub">
+      <CheckInHubPanel data={data} />
+      {footerCta.show ? <CheckInHubFooterCta href={footerCta.href} label={footerCta.label} /> : null}
+    </CheckinShell>
   );
 }

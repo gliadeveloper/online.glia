@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
-import { AuthPageCard } from "@/components/auth/corporate-trust/auth-page-card";
-import { AuthPageFooter } from "@/components/auth/corporate-trust/auth-page-footer";
+import { GliaAuthFooter } from "@/components/auth/glia/glia-auth-footer";
+import { GliaAuthPage } from "@/components/auth/glia/glia-auth-page";
 import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { getCurrentUser } from "@/lib/session";
 
@@ -13,17 +13,17 @@ type FindAccountPageProps = {
 
 function FindAccountContent({ loginHref }: { loginHref: string }) {
   return (
-    <div className="space-y-6">
-      <p className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-500">
+    <>
+      <p className="glia-auth__note">
         계정 찾기 기능은 준비 중입니다. 카카오로 로그인하거나 고객센터로 문의해 주세요.
       </p>
 
-      <Link href={loginHref} className="auth-trust-btn-primary auth-trust-focus w-full">
+      <Link href={loginHref} className="glia-auth__submit">
         로그인으로 돌아가기
       </Link>
 
-      <AuthPageFooter active="find-account" />
-    </div>
+      <GliaAuthFooter active="find-account" />
+    </>
   );
 }
 
@@ -38,14 +38,15 @@ export default async function FindAccountPage({ searchParams }: FindAccountPageP
   const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
 
   return (
-    <AuthPageCard
+    <GliaAuthPage
+      eyebrow="Find account"
       title="로그인 계정"
       titleAccent="찾기"
       description="가입하신 이메일 또는 카카오 계정으로 로그인 정보를 찾을 수 있습니다."
     >
-      <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-slate-100" aria-hidden="true" />}>
+      <Suspense fallback={<div className="glia-auth__skeleton" aria-hidden="true"><span /><span /></div>}>
         <FindAccountContent loginHref={loginHref} />
       </Suspense>
-    </AuthPageCard>
+    </GliaAuthPage>
   );
 }

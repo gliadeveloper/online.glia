@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Typography } from "@/components/typography/typography";
 import { typoRoleClass } from "@/lib/typography";
@@ -12,13 +11,56 @@ import {
   useStackNavTrailingLabel,
 } from "@/lib/stack-nav-context";
 
+function StackBackButton({
+  fallbackHref,
+  className,
+  iconSize,
+  showLabel,
+}: {
+  fallbackHref: string;
+  className: string;
+  iconSize: number;
+  showLabel: boolean;
+}) {
+  const router = useRouter();
+
+  return (
+    <button
+      type="button"
+      className={className}
+      aria-label="뒤로"
+      onClick={() => {
+        if (window.history.length > 1) {
+          router.back();
+          return;
+        }
+        router.push(fallbackHref);
+      }}
+    >
+      <svg
+        width={iconSize}
+        height={iconSize}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M15 6l-6 6 6 6" />
+      </svg>
+      <span className={showLabel ? "sr-only sm:not-sr-only" : "sr-only"}>뒤로</span>
+    </button>
+  );
+}
+
 /** Mobile stack: sole chrome — back + page title. */
 export function BackNav() {
   const pathname = usePathname();
   const resolved = resolveStackNav(pathname);
-  const { backHrefOverride, backLabelOverride } = useStackNavBackOverride();
+  const { backHrefOverride } = useStackNavBackOverride();
   const backHref = backHrefOverride ?? resolved.backHref;
-  const backLabel = backLabelOverride ?? resolved.backLabel;
   const { title, immersive } = resolved;
   const titleOverride = useStackNavTitleOverride();
   const trailingLabel = useStackNavTrailingLabel();
@@ -37,25 +79,12 @@ export function BackNav() {
         className="check-in-step-chrome back-nav-trust back-nav-trust--immersive lg:hidden"
       >
         <div className="check-in-step-chrome__inner">
-          <Link
-            href={backHref}
+          <StackBackButton
+            fallbackHref={backHref}
             className={`check-in-step-chrome__back back-nav-trust__back shell-focus-ring ${typoRoleClass("bodySecondary")}`}
-          >
-            <svg
-              width={22}
-              height={22}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M15 6l-6 6 6 6" />
-            </svg>
-            <span className="sr-only">{backLabel}</span>
-          </Link>
+            iconSize={22}
+            showLabel={false}
+          />
 
           {trailingLabel ? (
             <Typography as="span" role="caption" color="secondary" className="check-in-step-chrome__step">
@@ -77,25 +106,12 @@ export function BackNav() {
       className="back-nav-trust lg:hidden"
     >
       <div className="back-nav-trust__inner">
-        <Link
-          href={backHref}
+        <StackBackButton
+          fallbackHref={backHref}
           className={`back-nav-trust__back shell-focus-ring ${typoRoleClass("bodySecondary")}`}
-        >
-          <svg
-            width={20}
-            height={20}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M15 6l-6 6 6 6" />
-          </svg>
-          <span className="sr-only sm:not-sr-only">{backLabel}</span>
-        </Link>
+          iconSize={20}
+          showLabel
+        />
 
         <Typography
           as="h1"

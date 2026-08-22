@@ -1,10 +1,9 @@
 "use client";
 
+import { Check, HeartPulse } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { TrustAlert } from "@/components/corporate-trust/app-trust-ui";
-import { Typography } from "@/components/typography/typography";
 import { withCheckInReportSavedQuery } from "@/lib/checkin-routes";
 import { StackNavTrailingLabel } from "@/lib/stack-nav-context";
 
@@ -56,9 +55,7 @@ function validateQuestion(
   }
 
   if (question.type === "SHORT_TEXT" || question.type === "LONG_TEXT") {
-    return textValues[question.id]?.trim()
-      ? null
-      : `${question.prompt}에 답변해 주세요.`;
+    return textValues[question.id]?.trim() ? null : `${question.prompt}에 답변해 주세요.`;
   }
 
   return selected[question.id] ? null : `${question.prompt}에 답변해 주세요.`;
@@ -85,11 +82,11 @@ function CheckInQuestionField({
   const hasEmoji = question.options.some((option) => option.emoji);
 
   return (
-    <fieldset className="check-in-form__fieldset" aria-labelledby={`${inputId}-heading`}>
-      <Typography as="legend" id={`${inputId}-heading`} className="sr-only">
+    <fieldset className="glia-ci-form__fieldset" aria-labelledby={`${inputId}-heading`}>
+      <legend id={`${inputId}-heading`} className="sr-only">
         {question.prompt}
         {question.isRequired ? " (필수)" : ""}
-      </Typography>
+      </legend>
 
       {isText ? (
         <textarea
@@ -97,17 +94,15 @@ function CheckInQuestionField({
           value={textValues[question.id] ?? ""}
           onChange={(event) => onTextChange(question.id, event.target.value)}
           rows={question.type === "LONG_TEXT" ? 5 : 3}
-          placeholder="입력하세요"
+          placeholder="편하게 적어 보세요"
           aria-required={question.isRequired}
-          className="check-in-form__textarea corp-trust-input corp-trust-focus shell-focus-ring"
+          className="glia-ci-input"
         />
       ) : (
         <div
           role={question.options.length > 1 ? "radiogroup" : undefined}
           aria-labelledby={`${inputId}-heading`}
-          className={
-            hasEmoji ? "check-in-form__emoji-group" : "check-in-form__choice-group"
-          }
+          className={hasEmoji ? "glia-ci-emoji" : "glia-ci-choices"}
         >
           {question.options.map((option) => {
             const isActive = selected[question.id] === option.id;
@@ -120,11 +115,11 @@ function CheckInQuestionField({
                   onClick={() => onSelectOption(question.id, option.id)}
                   aria-pressed={isActive}
                   aria-label={option.label}
-                  className={`check-in-form__emoji-choice shell-focus-ring${isActive ? " check-in-form__emoji-choice--active" : ""}`}
+                  className={`glia-ci-emoji-btn${isActive ? " glia-ci-emoji-btn--on" : ""}`}
                 >
-                  <Typography as="span" role="bodyCompact" aria-hidden="true">
+                  <span className="glia-ci-emoji-btn__face" aria-hidden="true">
                     {option.emoji}
-                  </Typography>
+                  </span>
                 </button>
               );
             }
@@ -135,20 +130,22 @@ function CheckInQuestionField({
                 type="button"
                 onClick={() => onSelectOption(question.id, option.id)}
                 aria-pressed={isActive}
-                className={`check-in-form__choice shell-focus-ring${isActive ? " check-in-form__choice--active" : ""}`}
+                className={`glia-ci-choice${isActive ? " glia-ci-choice--on" : ""}`}
               >
-                <Typography as="span" role="bodySecondary" weight={isActive ? "semibold" : "regular"}>
-                  {option.label}
-                </Typography>
+                <span
+                  className={`glia-ci-choice__mark${isActive ? " glia-ci-choice__mark--on" : ""}`}
+                  aria-hidden="true"
+                >
+                  {isActive ? <Check strokeWidth={2.5} size={14} /> : null}
+                </span>
+                <span className="glia-ci-choice__label">{option.label}</span>
               </button>
             );
           })}
         </div>
       )}
 
-      {isChoice && question.isRequired && (
-        <p className="sr-only">하나를 선택해 주세요.</p>
-      )}
+      {isChoice && question.isRequired ? <p className="sr-only">하나를 선택해 주세요.</p> : null}
     </fieldset>
   );
 }
@@ -160,6 +157,9 @@ type CheckInFormProps = {
   initialAnswers?: InitialAnswer[];
   reportHref: string;
   submitLabel?: string;
+  eyebrow?: string;
+  heading?: string;
+  lede?: string;
 };
 
 export function CheckInForm({
@@ -169,6 +169,9 @@ export function CheckInForm({
   initialAnswers,
   reportHref,
   submitLabel = "저장",
+  eyebrow = "Check-in",
+  heading = "오늘의 체크",
+  lede = "짧게 돌아보고 오늘의 리듬을 남겨 보세요.",
 }: CheckInFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
@@ -299,80 +302,74 @@ export function CheckInForm({
     <>
       <StackNavTrailingLabel label={stepLabel} />
 
-      <form onSubmit={handleSubmit} className="check-in-form check-in-form--step" noValidate>
-        <div className="check-in-form__top-row" aria-hidden="true">
-          <span />
-          <Typography as="span" role="caption" color="secondary" className="check-in-form__step-label">
-            {stepLabel}
-          </Typography>
-        </div>
+      <form onSubmit={handleSubmit} className="glia-ci-form" noValidate>
+        <header className="glia-ci-form__hero">
+          <div className="glia-ci-form__ambient" aria-hidden="true">
+            <span className="glia-ci-form__blob glia-ci-form__blob--mint" />
+            <span className="glia-ci-form__blob glia-ci-form__blob--blue" />
+            <span className="glia-ci-form__blob glia-ci-form__blob--wash" />
+          </div>
 
-        <div
-          className="check-in-form__progress-track"
-          role="progressbar"
-          aria-valuenow={currentStep + 1}
-          aria-valuemin={1}
-          aria-valuemax={totalSteps}
-          aria-label={`체크인 ${stepLabel}`}
-        >
-          <span
-            className="check-in-form__progress-fill"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
+          <p className="glia-ci-form__eyebrow">{eyebrow}</p>
+          <h1 className="glia-ci-form__heading">{heading}</h1>
+          <p className="glia-ci-form__lede">{lede}</p>
 
-        <div className="check-in-form__step-body" key={question.id}>
-          <Typography
-            as="h2"
-            role="pageTitle"
-            weight="semibold"
-            color="primary"
-            className="check-in-form__prompt"
-          >
-            {question.prompt}
-            {question.isRequired && (
-              <span className="check-in-form__required" aria-hidden="true">
-                *
-              </span>
-            )}
-          </Typography>
-
-          <CheckInQuestionField
-            question={question}
-            selected={selected}
-            textValues={textValues}
-            onSelectOption={selectOption}
-            onTextChange={handleTextChange}
-          />
-
-          {error && (
-            <TrustAlert tone="error">{error}</TrustAlert>
-          )}
-        </div>
-
-        <div className="check-in-form__footer check-in-form__footer--fixed">
-          {!isFirstStep ? (
-            <button
-              type="button"
-              onClick={goBack}
-              className="check-in-form__nav-btn check-in-form__nav-btn--prev shell-focus-ring"
+          <div className="glia-ci-form__meter">
+            <p className="glia-ci-form__meter-label">{stepLabel}</p>
+            <div
+              className="glia-ci-form__progress"
+              role="progressbar"
+              aria-valuenow={currentStep + 1}
+              aria-valuemin={1}
+              aria-valuemax={totalSteps}
+              aria-label={`체크인 ${stepLabel}`}
             >
-              <Typography as="span" role="bodySecondary" weight="medium">
-                이전
-              </Typography>
+              <span style={{ width: `${progressPercent}%` }} />
+            </div>
+          </div>
+        </header>
+
+        <div className="glia-ci-form__panel">
+          <div className="glia-ci-form__step" key={question.id}>
+            <div className="glia-ci-form__prompt-row">
+              <span className="glia-ci-icon glia-ci-icon--recovery" aria-hidden="true">
+                <HeartPulse strokeWidth={2} size={24} />
+              </span>
+              <h2 className="glia-ci-form__prompt">
+                {question.prompt}
+                {question.isRequired ? (
+                  <span className="glia-ci-form__required" aria-hidden="true">
+                    *
+                  </span>
+                ) : null}
+              </h2>
+            </div>
+
+            <CheckInQuestionField
+              question={question}
+              selected={selected}
+              textValues={textValues}
+              onSelectOption={selectOption}
+              onTextChange={handleTextChange}
+            />
+
+            {error ? <p className="glia-ci-alert glia-ci-alert--error">{error}</p> : null}
+          </div>
+        </div>
+
+        <div className="glia-ci-form__footer">
+          {!isFirstStep ? (
+            <button type="button" onClick={goBack} className="glia-ci-btn glia-ci-btn--secondary">
+              이전
             </button>
-          ) : (
-            <span className="check-in-form__nav-spacer" aria-hidden="true" />
-          )}
+          ) : null}
 
           <button
             type="submit"
             disabled={submitting}
-            className="check-in-form__nav-btn check-in-form__nav-btn--next shell-focus-ring"
+            className="glia-ci-btn glia-ci-btn--primary glia-ci-form__submit"
           >
-            <Typography as="span" role="bodySecondary" weight="semibold">
-              {submitting ? "저장 중..." : isLastStep ? submitLabel : "다음"}
-            </Typography>
+            {submitting ? "저장 중..." : isLastStep ? submitLabel : "다음"}
           </button>
         </div>
       </form>

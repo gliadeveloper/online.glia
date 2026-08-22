@@ -7,12 +7,10 @@ export function CheckInHubStripTitle({ todayDailyDone, streak }: CheckInHubStrip
   if (todayDailyDone && streak > 0) {
     return (
       <>
-        연속{" "}
-        <span className="check-in-hub-status__headline-value corp-trust-gradient-text">{streak}</span>
-        <span className="corp-trust-gradient-text">일</span>
+        연속 <em>{streak}</em>일
       </>
     );
   }
 
-  return <>오늘</>;
+  return <>오늘의 회복</>;
 }

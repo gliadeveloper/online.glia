@@ -1,0 +1,971 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/*
+ * GLIA Community — post detail, editorial reading.
+ * Tokens only. The article is on the page, not in a card.
+ */
+
+.app-trust-root:has(.glia-post) .app-shell,
+.app-trust-root:has(.glia-post) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
+.app-trust-root .glia-post {
+  --glia-post-measure: 42.5rem;
+  --glia-post-gutter: 1.25rem;
+  --glia-post-rule: 1px solid var(--glia-border);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  margin: calc(var(--home-stack-lg) * -1);
+  width: calc(100% + var(--home-stack-lg) * 2);
+  padding: 2rem 0 4.5rem;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+.app-trust-root .glia-post::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 auto;
+  height: 22rem;
+  background:
+    radial-gradient(80% 70% at 8% -10%, color-mix(in srgb, var(--glia-mint) 32%, transparent), transparent 58%),
+    radial-gradient(70% 60% at 100% 0%, color-mix(in srgb, var(--glia-soft-blue) 26%, transparent), transparent 60%);
+}
+
+.app-trust-root .glia-post a:focus-visible,
+.app-trust-root .glia-post button:focus-visible,
+.app-trust-root .glia-post input:focus-visible,
+.app-trust-root .glia-post textarea:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+.app-trust-root .glia-post__article,
+.app-trust-root .glia-post__section,
+.app-trust-root .glia-post .community-related-posts {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--glia-post-measure);
+  margin-inline: auto;
+  padding-inline: var(--glia-post-gutter);
+}
+
+/* Header */
+
+.app-trust-root .glia-post__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.app-trust-root .glia-post__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.app-trust-root .glia-post__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post__eyebrow-dot {
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue);
+}
+
+.app-trust-root .glia-post__parent {
+  display: inline-flex;
+  overflow: hidden;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--glia-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app-trust-root .glia-post__parent:hover {
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post__parent-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-trust-root .glia-post__title {
+  margin: 0.15rem 0 0;
+  font-size: clamp(2rem, 7vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: var(--glia-text);
+  text-wrap: pretty;
+}
+
+.app-trust-root .glia-post__edited {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  vertical-align: middle;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-post__byline {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.app-trust-root .glia-post .community-author-row {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.app-trust-root .glia-post .community-author-row__name-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.4rem;
+}
+
+.app-trust-root .glia-post .community-author-row__name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post .community-author-row__badge {
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--glia-radius-sm);
+  background: var(--glia-blue-light);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-post .community-author-row__time {
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-post .community-author-row__time::before {
+  content: "·";
+  margin-right: 0.4rem;
+  color: var(--glia-border);
+}
+
+.app-trust-root .glia-post .community-avatar {
+  border: 0;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post .community-avatar--sm {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.app-trust-root .glia-post .community-avatar > * {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.app-trust-root .glia-post .community-post-owner-menu {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.15rem;
+}
+
+.app-trust-root .glia-post .community-post-owner-menu__edit,
+.app-trust-root .glia-post .community-post-owner-menu__delete,
+.app-trust-root .glia-post .community-report-btn,
+.app-trust-root .glia-post .community-comment-item__manage-btn,
+.app-trust-root .glia-post .community-comment-item__reply-btn,
+.app-trust-root .glia-post .trust-comment-like {
+  min-height: 2.75rem;
+  padding: 0 0.4rem;
+  border: 0;
+  border-radius: var(--glia-radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--glia-text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-trust-root .glia-post .community-comment-item__manage-btn,
+.app-trust-root .glia-post .community-comment-item__reply-btn,
+.app-trust-root .glia-post .trust-comment-like {
+  font-size: 0.75rem;
+}
+
+.app-trust-root .glia-post .community-post-owner-menu__edit:hover,
+.app-trust-root .glia-post .community-report-btn:hover:not(:disabled),
+.app-trust-root .glia-post .community-comment-item__manage-btn:hover:not(:disabled),
+.app-trust-root .glia-post .community-comment-item__reply-btn:hover:not(:disabled),
+.app-trust-root .glia-post .trust-comment-like:hover:not(:disabled) {
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-post .community-post-owner-menu__delete:hover:not(:disabled),
+.app-trust-root .glia-post .community-comment-item__manage-btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--glia-error) 10%, transparent);
+  color: var(--glia-error);
+}
+
+.app-trust-root .glia-post .community-post-owner-menu__delete:disabled {
+  opacity: 0.5;
+}
+
+.app-trust-root .glia-post .community-post-owner-menu__error,
+.app-trust-root .glia-post .community-post-actions__error,
+.app-trust-root .glia-post .community-comment-inline__error,
+.app-trust-root .glia-post .community-comment-item__error,
+.app-trust-root .glia-post .community-report-panel__error {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: var(--glia-error);
+}
+
+.app-trust-root .glia-post .community-post-owner-menu__error {
+  width: 100%;
+  text-align: right;
+}
+
+.app-trust-root .glia-post .trust-comment-like--active,
+.app-trust-root .glia-post .community-post-actions__icon--active {
+  color: var(--glia-blue);
+}
+
+/* Body */
+
+.app-trust-root .glia-post__body {
+  padding-block: 2.5rem 0.75rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown {
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.85;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post__body .post-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.app-trust-root .glia-post__body .post-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.app-trust-root .glia-post__body .post-markdown p {
+  margin: 0 0 1.75rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown h1,
+.app-trust-root .glia-post__body .post-markdown h2,
+.app-trust-root .glia-post__body .post-markdown h3 {
+  margin: 2rem 0 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.app-trust-root .glia-post__body .post-markdown h1 {
+  font-size: 1.375rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown h2 {
+  font-size: 1.25rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown h3 {
+  font-size: 1.125rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown ul,
+.app-trust-root .glia-post__body .post-markdown ol {
+  margin: 0 0 1.5rem;
+  padding-left: 1.25rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown li {
+  margin: 0.4rem 0;
+}
+
+.app-trust-root .glia-post__body .post-markdown li::marker {
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post__body .post-markdown blockquote {
+  margin: 1.75rem 0;
+  padding: 0 0 0 1rem;
+  border: 0;
+  border-left: 2px solid var(--glia-blue);
+  background: none;
+}
+
+.app-trust-root .glia-post__body .post-markdown blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.app-trust-root .glia-post__body .post-markdown hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: var(--glia-post-rule);
+}
+
+.app-trust-root .glia-post__body .post-markdown img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 2rem 0;
+  border-radius: var(--glia-radius-lg);
+}
+
+.app-trust-root .glia-post__body .post-markdown table {
+  width: 100%;
+  margin: 1.75rem 0;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown th,
+.app-trust-root .glia-post__body .post-markdown td {
+  padding: 0.5rem;
+  border-bottom: var(--glia-post-rule);
+  text-align: left;
+}
+
+.app-trust-root .glia-post__body .post-markdown th {
+  font-weight: 600;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-post__body .post-markdown code {
+  border-radius: var(--glia-radius-sm);
+  background: var(--glia-blue-light);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.9em;
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-post__body .post-markdown .post-markdown__pre {
+  margin: 1.75rem 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface-secondary);
+  padding: 1rem;
+}
+
+.app-trust-root .glia-post__body .post-markdown .post-markdown__pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post .post-markdown__link {
+  font-weight: 500;
+  color: var(--glia-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-word;
+}
+
+/* Engagement */
+
+.app-trust-root .glia-post__reactions {
+  border-top: var(--glia-post-rule);
+}
+
+.app-trust-root .glia-post__article:not(:has(+ .community-related-posts)) .glia-post__reactions {
+  border-bottom: var(--glia-post-rule);
+}
+
+.app-trust-root .glia-post .community-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.app-trust-root .glia-post .community-post-actions__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--glia-text-secondary);
+  text-decoration: none;
+}
+
+.app-trust-root .glia-post .community-post-actions__stat--button {
+  cursor: pointer;
+}
+
+.app-trust-root .glia-post button.community-post-actions__stat:hover:not(:disabled),
+.app-trust-root .glia-post a.community-post-actions__stat:hover {
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post .community-post-actions__stat span {
+  color: inherit;
+}
+
+.app-trust-root .glia-post .community-post-actions__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.app-trust-root .glia-post .community-post-actions__spacer,
+.app-trust-root .glia-post .community-post-actions__more {
+  display: none;
+}
+
+/* Sections */
+
+.app-trust-root .glia-post__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  padding-top: 2.75rem;
+}
+
+.app-trust-root .glia-post__section-head,
+.app-trust-root .glia-post .community-related-posts__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.app-trust-root .glia-post__section-title,
+.app-trust-root .glia-post .community-related-posts__title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post__section-count,
+.app-trust-root .glia-post .community-related-posts__count {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post .community-related-posts {
+  padding-block: 2.75rem;
+  border-top: 0;
+  border-bottom: var(--glia-post-rule);
+}
+
+.app-trust-root .glia-post .community-related-posts__header {
+  margin-bottom: 1rem;
+}
+
+.app-trust-root .glia-post .community-related-posts__write {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  border-radius: var(--glia-radius-sm);
+  color: var(--glia-blue);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background var(--glia-motion),
+    color var(--glia-motion);
+}
+
+.app-trust-root .glia-post .community-related-posts__write:hover {
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+}
+
+.app-trust-root .glia-post .community-related-posts__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.app-trust-root .glia-post .community-related-posts__empty p,
+.app-trust-root .glia-post__empty,
+.app-trust-root .glia-post .community-comment-inline--guest p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-post .community-related-posts__write-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+  text-decoration: none;
+  transition:
+    background var(--glia-motion),
+    border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-post .community-related-posts__write-cta:hover {
+  background: var(--glia-blue-light);
+  border-color: var(--glia-blue-light);
+}
+
+.app-trust-root .glia-post .community-related-posts__rail {
+  display: flex;
+  gap: 0.875rem;
+  margin: 0;
+  padding: 0.35rem 0 0.75rem;
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.app-trust-root .glia-post .community-related-posts__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.app-trust-root .glia-post .community-related-posts__slide {
+  flex: 0 0 13.5rem;
+  scroll-snap-align: start;
+}
+
+.app-trust-root .glia-post .community-related-posts__card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  min-height: 16.25rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--glia-shadow-card);
+  transition:
+    transform var(--glia-motion),
+    box-shadow var(--glia-motion),
+    border-color var(--glia-motion);
+}
+
+.app-trust-root .glia-post .community-related-posts__card:hover {
+  transform: translateY(-2px);
+  border-color: var(--glia-blue-light);
+  box-shadow: var(--glia-shadow-card-hover);
+}
+
+.app-trust-root .glia-post .community-related-posts__media {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--glia-gradient-wellness);
+}
+
+.app-trust-root .glia-post .community-related-posts__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-trust-root .glia-post .community-related-posts__quote {
+  display: -webkit-box;
+  overflow: hidden;
+  flex: 1;
+  min-height: 7rem;
+  padding: 0.875rem 1rem 0.5rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  background: var(--glia-gradient-surface);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post .community-related-posts__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 1rem 0.875rem;
+}
+
+.app-trust-root .glia-post .community-related-posts__card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post .community-related-posts__author {
+  font-size: 0.75rem;
+  color: var(--glia-text-secondary);
+}
+
+/* Comments */
+
+.app-trust-root .glia-post .community-comment-inline__guest-link {
+  font-weight: 600;
+  color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post .community-comment-inline__form {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.app-trust-root .glia-post .community-comment-inline__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  padding: 0 0.875rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: var(--glia-text);
+}
+
+.app-trust-root .glia-post .community-comment-inline__input:focus {
+  outline: none;
+  border-color: var(--glia-blue);
+  box-shadow: 0 0 0 3px rgba(30, 131, 158, 0.14);
+}
+
+.app-trust-root .glia-post .community-comment-inline__send {
+  flex-shrink: 0;
+  min-height: 2.75rem;
+  padding: 0 1.05rem;
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-surface);
+  cursor: pointer;
+  transition:
+    transform var(--glia-motion),
+    box-shadow var(--glia-motion),
+    opacity var(--glia-motion);
+}
+
+.app-trust-root .glia-post .community-comment-inline__send:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--glia-shadow-button);
+}
+
+.app-trust-root .glia-post .community-comment-inline__send:disabled {
+  opacity: 0.45;
+}
+
+.app-trust-root .glia-post .community-comment-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-trust-root .glia-post .community-comment-list > li + li {
+  border-top: var(--glia-post-rule);
+}
+
+.app-trust-root .glia-post .community-comment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.125rem 0;
+  border: 0;
+  background: none;
+}
+
+.app-trust-root .glia-post .community-comment-item__body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.app-trust-root .glia-post .community-comment-item__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
+.app-trust-root .glia-post .community-comment-item__author {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.app-trust-root .glia-post .community-comment-item__meta,
+.app-trust-root .glia-post .community-comment-item__edited {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-post .community-comment-item__text {
+  margin: 0.35rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.app-trust-root .glia-post .community-comment-item__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.25rem;
+  margin-top: 0.25rem;
+  margin-left: -0.4rem;
+}
+
+.app-trust-root .glia-post .community-comment-item__manage {
+  display: inline-flex;
+  margin-left: auto;
+}
+
+.app-trust-root .glia-post .community-comment-item__edit {
+  margin-top: 0.5rem;
+}
+
+.app-trust-root .glia-post .community-comment-item__edit .community-comment-inline__input {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: 0.625rem 0.75rem;
+  resize: vertical;
+}
+
+.app-trust-root .glia-post .community-comment-item__edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.app-trust-root .glia-post .community-comment-item__save,
+.app-trust-root .glia-post .community-report-panel__submit {
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-primary);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-surface);
+  cursor: pointer;
+}
+
+.app-trust-root .glia-post .community-comment-item__cancel,
+.app-trust-root .glia-post .community-report-panel__cancel {
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+  cursor: pointer;
+}
+
+.app-trust-root .glia-post .community-comment-replies {
+  margin: 0.5rem 0 0;
+  padding: 0 0 0 0.875rem;
+  border-left: var(--glia-post-rule);
+  list-style: none;
+}
+
+.app-trust-root .glia-post .community-comment-item--reply {
+  padding: 0.875rem 0;
+}
+
+.app-trust-root .glia-post .community-comment-replies > li + li {
+  border-top: var(--glia-post-rule);
+}
+
+.app-trust-root .glia-post .community-comment-item--reply .community-avatar--sm {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.app-trust-root .glia-post .community-comment-item__reply-form {
+  margin-top: 0.65rem;
+}
+
+.app-trust-root .glia-post .community-report-panel {
+  margin-top: 0.5rem;
+  padding: 0.875rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+}
+
+.app-trust-root .glia-post .community-report-panel__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.app-trust-root .glia-post .community-report-panel__reasons {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.app-trust-root .glia-post .community-report-panel__reason {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.app-trust-root .glia-post .community-report-panel__reason input {
+  accent-color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post .community-report-panel__detail {
+  width: 100%;
+  min-height: 3.25rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  padding: 0.5rem 0.625rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+
+.app-trust-root .glia-post .community-report-panel__detail:focus {
+  outline: none;
+  border-color: var(--glia-blue);
+}
+
+.app-trust-root .glia-post .community-report-panel__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .app-trust-root .glia-post {
+    --glia-post-measure: 45rem;
+    --glia-post-gutter: 2rem;
+
+    padding-top: 3rem;
+    padding-bottom: 5.5rem;
+  }
+
+  .app-trust-root .glia-post::before {
+    height: 26rem;
+  }
+
+  .app-trust-root .glia-post__header {
+    gap: 1.5rem;
+  }
+
+  .app-trust-root .glia-post__title {
+    font-size: 3rem;
+    line-height: 1.15;
+  }
+
+  .app-trust-root .glia-post__body {
+    padding-top: 3rem;
+  }
+
+  .app-trust-root .glia-post__body .post-markdown {
+    font-size: 1.125rem;
+    line-height: 1.9;
+  }
+
+  .app-trust-root .glia-post .community-related-posts {
+    padding-block: 3.25rem;
+  }
+
+  .app-trust-root .glia-post__section {
+    padding-top: 3.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-trust-root .glia-post *,
+  .app-trust-root .glia-post *::before,
+  .app-trust-root .glia-post *::after {
+    transition: none !important;
+  }
+
+  .app-trust-root .glia-post .community-related-posts__card:hover,
+  .app-trust-root .glia-post .community-comment-inline__send:hover:not(:disabled) {
+    transform: none;
+  }
+}

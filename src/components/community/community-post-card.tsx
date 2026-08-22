@@ -13,18 +13,18 @@ export function CommunityPostCard({ post }: CommunityPostCardProps) {
   const publishedAt = post.publishedAt ?? post.createdAt;
 
   return (
-    <article className="community-post-card">
-      <div className="community-post-card__inner">
+    <article className="glia-post-card">
+      <div className="glia-post-card__inner">
         <CommunityAuthorRow
           user={post.user}
           publishedAt={publishedAt}
           headline={post.user.profile?.headline}
         />
 
-        <Link href={`/community/${post.slug}`} className="community-post-card__body shell-focus-ring">
-          <h2 className="community-post-card__title">{post.title}</h2>
+        <Link href={`/community/${post.slug}`} className="glia-post-card__body shell-focus-ring">
+          <h3 className="glia-post-card__title">{post.title}</h3>
 
-          {post.excerpt && <p className="community-post-card__excerpt">{post.excerpt}</p>}
+          {post.excerpt && <p className="glia-post-card__excerpt">{post.excerpt}</p>}
 
           <span className="sr-only">{post.title} — 게시글 보기</span>
         </Link>

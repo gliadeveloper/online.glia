@@ -12,7 +12,7 @@
 |------|----------------|
 | customer UI / 바텀탭 화면 추가 | [§4 Customer App](#4-customer-app-app) → [screens/README.md](./screens/README.md) |
 | 특정 URL 구현·수정 | [docs/screens/](./screens/) 해당 md |
-| 색·타이포·컴포넌트 토큰 | [§4.2 Corporate Trust](#42-corporate-trust) → [visual-direction.md](./visual-direction.md) |
+| 색·타이포·컴포넌트 토큰 | [§4.2 Corporate Trust](#42-corporate-trust) · [§4.2a Auth GLIA](#42a-auth--glia-recovery-wellness) · [visual-direction.md](./visual-direction.md) |
 | Shop / 수강권 / 만료 / 연장 | [§5 Commerce & LMS Access](#5-commerce--lms-access) |
 | 코치 포털 기능 추가 | [§7 Coach Portal](#7-coach-portal) |
 | 라이브·녹화·다시보기 | [§8 Live Lessons](#8-live-lessons) |
@@ -29,7 +29,7 @@
 | **Customer `(app)`** | `src/app/(app)/` | 로그인 회원 | **Corporate Trust** (indigo chrome) |
 | **Coach Portal** | `/coach/*` | `COACH` 역할 | 별도 dark sidebar shell |
 | **Admin** | `/admin/*` | `ADMIN` 역할 | Admin shell (violet accent) |
-| **Login** | `/login` | 비로그인 | 독립 레이아웃 |
+| **Auth `(auth)`** | `/login`, `/login/find-account`, `/signup/*` | 비로그인 | **GLIA Recovery Wellness** |
 | **Legacy `(customer)`** | `src/app/(customer)/` | dashboard 등 잔존 | 신규 customer UI **금지** — `(app)`만 사용. `/lms/*` 페이지 **제거됨** → `/learning` |
 
 ### 1.1 Customer `(app)` IA
@@ -39,7 +39,7 @@
 | **Tab** | `(tabs)/` | 「앱 어디로?」 | `/`, `/community`, `/learning` |
 | **Stack** | `(stack)/` | 「이 과업을 끝낼까?」 | `/checkin/*`, `/mypage`, `/shop/*`, `/learning/[slug]/*` |
 
-**1차 메뉴 (고정 4개):** 홈 · 커뮤니티 · 코칭 · 내학습 — 변경 시 [navigation-chrome-policy.md](./navigation-chrome-policy.md) 선행 갱신.
+**1차 메뉴 (고정 4개):** 홈 · 커뮤니티 · 내학습 · 코칭 — 변경 시 [navigation-chrome-policy.md](./navigation-chrome-policy.md) 선행 갱신.
 
 ### 1.2 인증 · 미들웨어
 
@@ -100,7 +100,8 @@
 ### 4.1 적용 범위
 
 - ✅ `src/app/(app)/`, shell·home·learning·community·shop·checkin·coaching 관련 components
-- ❌ `admin`, `(customer)`, `login`, `coach` — Corporate Trust **미적용** (별도 요청 시만)
+- ❌ `admin`, `(customer)`, `(auth)`, `coach` — Corporate Trust **미적용** (별도 요청 시만)
+- `(auth)` (`/login`, `/signup/*`) — **GLIA Recovery Wellness**. 아래 [§4.2a](#42a-auth--glia-recovery-wellness)
 
 ### 4.2 Corporate Trust
 
@@ -115,6 +116,20 @@
 **한 줄 요청 (에이전트):** 「Corporate Trust」 / 「corp-trust」 / 「design-system 따라」
 
 → [visual-direction.md](./visual-direction.md) · `src/components/corporate-trust/`
+
+### 4.2a Auth — GLIA Recovery Wellness
+
+`/login`, `/login/find-account`, `/signup/*`는 작업 완수(focused-task) 화면. **카드 금지.** 타이포·여백·헤어라인으로 위계.
+
+| 축 | 규칙 |
+|----|------|
+| Accent | GLIA Blue `#1E839E` · Primary Dark `#17677D` · mint/soft-blue ambience |
+| Tokens | `src/app/design-tokens/glia.css` (`--glia-*`) |
+| Scope | `.glia-auth` — `src/components/auth/glia/` |
+| Font | Pretendard |
+| 금지 | Indigo / Violet, Corporate Trust 카드 셸 |
+
+**한 줄 요청:** 「GLIA」 / 「glia-auth」
 
 ### 4.3 Navigation & Chrome
 

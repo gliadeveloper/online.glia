@@ -34,7 +34,7 @@ export function PrimaryNavInline({ className = "" }: PrimaryNavInlineProps) {
                 data-active={active ? "true" : "false"}
                 className={`primary-nav-inline__link shell-focus-ring ${typoRoleClass("bodySecondary")}`}
               >
-                <Icon filled={active} className="size-5 shrink-0" />
+                <Icon className="size-5 shrink-0" />
                 <span>{label}</span>
               </Link>
             </li>

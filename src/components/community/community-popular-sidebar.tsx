@@ -9,38 +9,41 @@ type CommunityPopularSidebarProps = {
 
 export function CommunityPopularSidebar({ posts }: CommunityPopularSidebarProps) {
   return (
-    <aside className="community-popular" aria-labelledby="community-popular-heading">
-      <div className="community-popular__head">
-        <h2 id="community-popular-heading" className="community-popular__title">
+    <aside className="glia-popular" aria-labelledby="community-popular-heading">
+      <div className="glia-popular__head">
+        <span className="glia-popular__icon">
+          <PulseIcon />
+        </span>
+        <h2 id="community-popular-heading" className="glia-popular__title">
           이번주 인기글
         </h2>
       </div>
 
       {posts.length === 0 ? (
-        <p className="community-popular__empty">이번 주 인기 글이 아직 없습니다.</p>
+        <p className="glia-popular__empty">이번 주 인기 글이 아직 없습니다.</p>
       ) : (
-        <ol className="community-popular__list">
+        <ol className="glia-popular__list">
           {posts.map((post, index) => (
-            <li key={post.id} className="community-popular__item">
-              <Link href={`/community/${post.slug}`} className="community-popular__link shell-focus-ring">
-                <span className="community-popular__rank" aria-hidden="true">
+            <li key={post.id} className="glia-popular__item">
+              <Link href={`/community/${post.slug}`} className="glia-popular__link shell-focus-ring">
+                <span className="glia-popular__rank" aria-hidden="true">
                   {index + 1}
                 </span>
 
-                <span className="community-popular__body">
-                  <span className="community-popular__post-title">{post.title}</span>
-                  <span className="community-popular__meta">
-                    <span className="community-popular__author">{displayAuthorName(post.user)}</span>
-                    <span className="community-popular__stats" aria-label={`좋아요 ${post.likeCount}, 댓글 ${post.commentCount}, 조회 ${post.viewCount}`}>
-                      <span className="community-popular__stat">
+                <span className="glia-popular__body">
+                  <span className="glia-popular__post-title">{post.title}</span>
+                  <span className="glia-popular__meta">
+                    <span className="glia-popular__author">{displayAuthorName(post.user)}</span>
+                    <span className="glia-popular__stats" aria-label={`좋아요 ${post.likeCount}, 댓글 ${post.commentCount}, 조회 ${post.viewCount}`}>
+                      <span className="glia-popular__stat">
                         <HeartIcon />
                         {post.likeCount.toLocaleString("ko-KR")}
                       </span>
-                      <span className="community-popular__stat">
+                      <span className="glia-popular__stat">
                         <CommentIcon />
                         {post.commentCount.toLocaleString("ko-KR")}
                       </span>
-                      <span className="community-popular__stat">
+                      <span className="glia-popular__stat">
                         <ViewIcon />
                         {post.viewCount.toLocaleString("ko-KR")}
                       </span>
@@ -57,6 +60,24 @@ export function CommunityPopularSidebar({ posts }: CommunityPopularSidebarProps)
         </ol>
       )}
     </aside>
+  );
+}
+
+function PulseIcon() {
+  return (
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 12h4l2.5-6 4 12L16 12h5" />
+    </svg>
   );
 }
 

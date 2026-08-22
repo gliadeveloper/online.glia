@@ -10,7 +10,7 @@
 | **Tab/Stack** | Tab |
 | **Chrome** | Mobile separated header + bottom tab |
 | **목적** | POST 피드 탐색 |
-| **진입** | 하단 탭 「커뮤니티」, 홈 링크 |
+| **진입** | 하단 탭 「커뮤니티」 |
 | **정책 SSOT** | [policies.md](../policies.md) §10 Community |
 
 ---
@@ -28,7 +28,7 @@
 | 7 | 좋아요 수 | ✅ | |
 | 8 | 댓글 수 | ✅ | |
 | 9 | 조회수 | ✅ | |
-| — | 하위글 수 | ✅ (childPostCount > 0) | 챌린지 인증글 |
+| — | 인증 글 수 | ✅ (childPostCount > 0) | 챌린지 인증 |
 
 ### 글로벌 액션
 

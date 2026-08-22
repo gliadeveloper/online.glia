@@ -13,7 +13,7 @@ export function CommunityWriteFab({ isLoggedIn }: CommunityWriteFabProps) {
   return (
     <Link
       href={href}
-      className="community-fab shell-focus-ring"
+      className="glia-fab shell-focus-ring"
       aria-label={label}
     >
       <svg

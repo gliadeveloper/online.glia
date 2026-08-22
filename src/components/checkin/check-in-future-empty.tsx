@@ -1,4 +1,5 @@
-import { TrustButtonLink } from "@/components/corporate-trust/app-trust-ui";
+import Link from "next/link";
+import { Calendar } from "lucide-react";
 
 type CheckInFutureEmptyProps = {
   title: string;
@@ -14,35 +15,20 @@ export function CheckInFutureEmpty({
   actionLabel,
 }: CheckInFutureEmptyProps) {
   return (
-    <section className="check-in-state-page" aria-labelledby="check-in-future-heading">
+    <section className="check-in-state-page glia-ci-state" aria-labelledby="check-in-future-heading">
       <div className="check-in-state-page__body">
-        <div className="check-in-state-page__icon" aria-hidden="true">
-          <svg
-            width={32}
-            height={32}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.75}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x={3} y={4} width={18} height={18} rx={2} />
-            <path d="M16 2v4M8 2v4M3 10h18" />
-          </svg>
-        </div>
-
+        <span className="glia-ci-icon glia-ci-icon--recovery" aria-hidden="true">
+          <Calendar strokeWidth={2} size={24} />
+        </span>
         <h1 id="check-in-future-heading" className="check-in-state-page__title">
           {title}
         </h1>
-
         <p className="check-in-state-page__description">{description}</p>
       </div>
-
       <div className="check-in-state-page__footer">
-        <TrustButtonLink href={actionHref} className="check-in-state-page__action">
+        <Link href={actionHref} className="check-in-state-page__action glia-ci-btn glia-ci-btn--primary">
           {actionLabel}
-        </TrustButtonLink>
+        </Link>
       </div>
     </section>
   );

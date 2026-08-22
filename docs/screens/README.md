@@ -10,10 +10,10 @@
 
 | URL | Tab/Stack | 문서 | 목적 |
 |-----|-----------|------|------|
-| `/` | Tab | [home.md](./home.md) · [IA](./flows/home-ia.md) | 진입·체크인 CTA·피드 |
+| `/` | Tab | [home.md](./home.md) · [IA](./flows/home-ia.md) | 회복 허브·체크인·여정·탐색 |
 | `/community` | Tab | [community-list.md](./community-list.md) | POST 목록 |
-| `/community/[slug]` | Stack | [community-post.md](./community-post.md) | POST 상세·하위글·댓글 |
-| `/community/new` | Stack | [community-new.md](./community-new.md) | 글/하위글 작성 |
+| `/community/[slug]` | Stack | [community-post.md](./community-post.md) | POST 상세·인증 글·댓글 |
+| `/community/new` | Stack | [community-new.md](./community-new.md) | 글/인증 글 작성 |
 | `/learning` | Tab | [learning-tab.md](./learning-tab.md) | 수강·코칭 허브 |
 | `/learning/[slug]` | Stack | [learning-course.md](./learning-course.md) | 코스 상세·커리큘럼 |
 | `/learning/[slug]/lessons/[lessonId]` | Stack | [learning-lesson.md](./learning-lesson.md) | 레sson 플레이어 |
@@ -32,7 +32,7 @@
 |------|------|
 | [flows/home-ia.md](./flows/home-ia.md) | **홈 IA** — 계층·슬롯·nav graph |
 | [flows/purchase-to-learning.md](./flows/purchase-to-learning.md) | Shop → 결제 → 내학습 → 레sson |
-| [flows/community-challenge.md](./flows/community-challenge.md) | 부모글 → 하위글(인증) |
+| [flows/community-challenge.md](./flows/community-challenge.md) | 원본 글 → 인증 글 |
 
 ---
 

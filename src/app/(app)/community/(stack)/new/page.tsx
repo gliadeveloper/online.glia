@@ -5,6 +5,8 @@ import { getChildPostParentBySlug } from "@/lib/posts";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
+import "@/components/community/community-write-glia.css";
+
 export const dynamic = "force-dynamic";
 
 type CommunityNewPostPageProps = {
@@ -29,15 +31,21 @@ export default async function CommunityNewPostPage({ searchParams }: CommunityNe
   const isChild = !!parentPost;
 
   return (
-    <div className="community-write-page">
-      <StackNavTitle title={isChild ? "하위 글 작성" : "글 작성"} />
+    <div className="glia-write">
+      <StackNavTitle title={isChild ? "인증 글 작성" : "글 작성"} />
 
-      <header className="community-write-page__header">
-        <h1 className="community-write-page__title">{isChild ? "하위 글 작성" : "글 작성"}</h1>
-        <p className="community-write-page__desc">
+      <header className="glia-write__header">
+        <p className="glia-write__eyebrow">
+          <span className="glia-write__eyebrow-dot" aria-hidden="true" />
+          Community
+        </p>
+
+        <h1 className="glia-write__title">{isChild ? "인증 글 작성" : "글 작성"}</h1>
+
+        <p className="glia-write__lede">
           {isChild
-            ? "부모 글에 연결되는 Markdown 글을 작성합니다."
-            : "Markdown으로 학습 노트·질문·후기를 공유하세요."}
+            ? "원본 글에 이어지는 인증 기록을 Markdown으로 남겨 보세요."
+            : "오늘의 회복 기록, 궁금한 점, 함께 나누고 싶은 후기를 Markdown으로 적어 보세요."}
         </p>
       </header>
 

@@ -57,18 +57,11 @@ export default async function CheckInHistoryPage({ searchParams }: CheckInHistor
         />
 
         {totalPages > 1 && (
-          <nav aria-label="페이지" className="check-in-history-pagination">
+          <nav aria-label="페이지" className="glia-ci-pager">
             {page > 1 ? (
-              <Link
-                href={`/checkin/history?page=${page - 1}`}
-                className="check-in-history-pagination__btn shell-focus-ring"
-              >
-                이전
-              </Link>
+              <Link href={`/checkin/history?page=${page - 1}`}>이전</Link>
             ) : (
-              <span className="check-in-history-pagination__btn check-in-history-pagination__btn--disabled">
-                이전
-              </span>
+              <span aria-disabled="true">이전</span>
             )}
 
             <span>
@@ -76,16 +69,9 @@ export default async function CheckInHistoryPage({ searchParams }: CheckInHistor
             </span>
 
             {page < totalPages ? (
-              <Link
-                href={`/checkin/history?page=${page + 1}`}
-                className="check-in-history-pagination__btn shell-focus-ring"
-              >
-                다음
-              </Link>
+              <Link href={`/checkin/history?page=${page + 1}`}>다음</Link>
             ) : (
-              <span className="check-in-history-pagination__btn check-in-history-pagination__btn--disabled">
-                다음
-              </span>
+              <span aria-disabled="true">다음</span>
             )}
           </nav>
         )}

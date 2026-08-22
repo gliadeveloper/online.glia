@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleAlert } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -55,12 +56,12 @@ export function LoginForm() {
   const showDemoHints = process.env.NODE_ENV === "development";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <fieldset className="space-y-5">
+    <form onSubmit={handleSubmit} className="glia-auth__form">
+      <fieldset className="glia-auth__fields">
         <legend className="sr-only">이메일 로그인</legend>
 
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+        <div className="glia-auth__field">
+          <label htmlFor="email" className="glia-auth__label">
             이메일
           </label>
           <input
@@ -69,14 +70,14 @@ export function LoginForm() {
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="auth-trust-input"
+            className="glia-auth__input"
             placeholder="you@example.com"
             required
           />
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-semibold text-slate-700">
+        <div className="glia-auth__field">
+          <label htmlFor="password" className="glia-auth__label">
             비밀번호
           </label>
           <input
@@ -85,24 +86,25 @@ export function LoginForm() {
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="auth-trust-input"
+            className="glia-auth__input"
             required
           />
         </div>
       </fieldset>
 
-      {error && <p role="alert" className="auth-trust-alert-error">{error}</p>}
+      {error && (
+        <p role="alert" className="glia-auth__alert">
+          <CircleAlert size={16} strokeWidth={2} className="glia-auth__alert-icon" />
+          {error}
+        </p>
+      )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="auth-trust-btn-primary auth-trust-focus w-full"
-      >
+      <button type="submit" disabled={loading} className="glia-auth__submit">
         {loading ? "로그인 중..." : "이메일로 로그인"}
       </button>
 
       {showDemoHints && (
-        <p className="text-center text-xs leading-relaxed text-slate-500">
+        <p className="glia-auth__hint">
           데모: customer@localhost / demo-password
           <br />
           demo@localhost (번들 구매) · admin@localhost (관리자)

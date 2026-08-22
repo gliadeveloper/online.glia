@@ -1,3 +1,5 @@
+import "./tab-page-header-glia.css";
+
 type TabPageHeaderProps = {
   eyebrow: string;
   title: string;
@@ -28,9 +30,6 @@ export function TabPageHeader({
 
   return (
     <header className={`tab-trust-header${variantClass}${inCardClass}`}>
-      <div className="tab-trust-header__blob tab-trust-header__blob--indigo" aria-hidden="true" />
-      <div className="tab-trust-header__blob tab-trust-header__blob--violet" aria-hidden="true" />
-
       <div className="tab-trust-header__inner">
         <p className="tab-trust-header__eyebrow">
           <span className="tab-trust-header__eyebrow-dot" aria-hidden="true" />
@@ -40,8 +39,7 @@ export function TabPageHeader({
         <h2 className="tab-trust-header__title">
           {titleAccent ? (
             <>
-              {title}{" "}
-              <span className="corp-trust-gradient-text">{titleAccent}</span>
+              {title} <span className="tab-trust-header__title-accent">{titleAccent}</span>
             </>
           ) : (
             title
