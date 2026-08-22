@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   description: "온라인 학습 플랫폼",
 };
 
+/** Runtime data (Prisma, session) — skip DB during `next build` in Docker. */
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
