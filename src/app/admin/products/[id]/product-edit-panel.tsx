@@ -9,7 +9,7 @@ import {
   type ProductDescriptionEditorHandle,
 } from "@/components/shop/product-description-editor";
 import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
-import { parseProductSupplies, suppliesToText } from "@/lib/products";
+import { parseProductSupplies, suppliesToText } from "@/lib/product-supplies";
 
 type ProductItem = {
   id: string;

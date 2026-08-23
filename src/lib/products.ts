@@ -1,9 +1,13 @@
+import "server-only";
+
 import type { Prisma, Product, ProductItemKind, ProductKind } from "@/generated/prisma/client";
 import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
+
+export { parseProductSupplies, suppliesToText } from "@/lib/product-supplies";
 
 export const productInclude = {
   items: {
@@ -30,23 +34,6 @@ export const productKindLabels: Record<ProductKind, string> = {
   COACHING_ONLY: "코칭 단품",
   BUNDLE: "번들",
 };
-
-export function parseProductSupplies(value: unknown): string[] | undefined {
-  if (value === undefined) return undefined;
-  if (value === null) return [];
-  if (typeof value === "string") {
-    return value
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-  }
-  if (!Array.isArray(value)) return [];
-  return value.map((item) => String(item).trim()).filter(Boolean);
-}
-
-export function suppliesToText(supplies: string[] | null | undefined) {
-  return (supplies ?? []).join("\n");
-}
 
 type ProductItemInput = {
   kind: ProductItemKind;

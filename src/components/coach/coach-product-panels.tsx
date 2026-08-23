@@ -10,7 +10,7 @@ import {
 } from "@/components/shop/product-description-editor";
 import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 import { getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
-import { parseProductSupplies, suppliesToText } from "@/lib/products";
+import { parseProductSupplies, suppliesToText } from "@/lib/product-supplies";
 import type { ProductKind } from "@/generated/prisma/client";
 
 type ProductRow = {
