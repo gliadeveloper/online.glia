@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { hasSessionTokenFormat, SESSION_COOKIE } from "@/lib/session-cookie";
 
-const protectedPrefixes = ["/shop", "/learning", "/coaching", "/checkin", "/orders", "/admin", "/coach", "/mypage"];
+const protectedPrefixes = ["/learning", "/coaching", "/checkin", "/orders", "/admin", "/coach", "/mypage"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -39,7 +39,6 @@ export const config = {
   matcher: [
     "/dashboard",
     "/dashboard/:path*",
-    "/shop/:path*",
     "/lms/:path*",
     "/learning/:path*",
     "/coaching/:path*",

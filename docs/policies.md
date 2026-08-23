@@ -45,7 +45,8 @@
 
 | 정책 | 내용 |
 |------|------|
-| 보호 경로 | `/learning`, `/shop`, `/checkin`, `/orders`, `/coaching`, `/mypage`, `/admin`, `/coach` 등 — 세션 쿠키 없으면 `/login?next=` |
+| 보호 경로 | `/learning`, `/checkin`, `/orders`, `/coaching`, `/mypage`, `/admin`, `/coach` 등 — 세션 쿠키 없으면 `/login?next=` |
+| Shop 공개 | `/shop`, `/shop/[id]` 목록·상세는 비로그인 조회. 신청·결제는 로그인 |
 | 로그인 | 이메일 + Kakao OAuth (선택, env 설정 시) |
 | Stack 로그인 필수 | `/mypage`, `/checkin/*` — 미로그인 redirect |
 | 인증 UI (Mobile Stack) | immersive — 헤더 인증 버튼 **숨김** (Tab/PC unified header에서 접근) |

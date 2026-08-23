@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
+
 import { CommunityPostFeed } from "@/components/community/community-post-feed";
 import { CommunityPopularSidebar } from "@/components/community/community-popular-sidebar";
 import { CommunityWriteFab } from "@/components/community/community-write-fab";
 import { getPopularPostsThisWeek, getPublishedPosts } from "@/lib/posts";
 import { getCurrentUser } from "@/lib/session";
+import { buildPageMetadata, communityOgImages } from "@/lib/site-metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "커뮤니티",
+  description: "회복 기록과 인증 글을 나누는 GLIA 커뮤니티.",
+  path: "/community",
+  images: communityOgImages,
+});
 
 import "@/components/community/community-glia.css";
 

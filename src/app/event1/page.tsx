@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { EVENT1_PRODUCT_ID, EVENT1_PRODUCT_TITLE } from "@/lib/shop-event1-product";
+import { JsonLd } from "@/components/seo/json-ld";
 import { prisma } from "@/lib/prisma";
+import { EVENT1_PRODUCT_ID, EVENT1_PRODUCT_TITLE } from "@/lib/shop-event1-product";
+import {
+  absoluteUrl,
+  buildPageMetadata,
+  event1OgImages,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site-metadata";
 
 import "./event1.css";
 
-export const metadata: Metadata = {
-  title: "GLIA 온라인 8주 — 1기 모집",
-  description: "몸의 신호를 읽고 스스로 조절하는 8주 온라인 프로그램",
-};
+const EVENT1_TITLE = "GLIA 온라인 8주 — 1기 모집";
+const EVENT1_DESCRIPTION = "몸의 신호를 읽고 스스로 조절하는 8주 온라인 프로그램. 정원 6명.";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: EVENT1_TITLE,
+  description: EVENT1_DESCRIPTION,
+  path: "/event1",
+  images: event1OgImages,
+  absoluteTitle: true,
+});
 
 export default async function Event1Page() {
   const product = await prisma.product.findFirst({
@@ -25,6 +39,21 @@ export default async function Event1Page() {
 
   return (
     <main className="event1">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Event",
+          name: EVENT1_TITLE,
+          description: EVENT1_DESCRIPTION,
+          startDate: "2026-09-07",
+          endDate: "2026-11-02",
+          eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+          eventStatus: "https://schema.org/EventScheduled",
+          image: absoluteUrl(event1OgImages[0].url),
+          location: { "@type": "VirtualLocation", url: absoluteUrl("/event1") },
+          organizer: { "@type": "Organization", name: SITE_NAME, url: SITE_URL.origin },
+        }}
+      />
       <header className="hero">
         <div className="narrow hero-inner">
           <div className="eyebrow">GLIA 온라인 8주 · 1기 모집</div>

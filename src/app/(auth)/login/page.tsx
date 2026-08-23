@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { GliaAuthPage } from "@/components/auth/glia/glia-auth-page";
@@ -5,6 +6,15 @@ import { LoginScreen } from "@/components/auth/login/login-screen";
 import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { getKakaoConfig } from "@/lib/kakao-auth";
 import { getCurrentUser } from "@/lib/session";
+import { buildPageMetadata, defaultOgImages, noIndexRobots } from "@/lib/site-metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "로그인",
+  description: "GLIA 계정으로 로그인합니다.",
+  path: "/login",
+  images: defaultOgImages,
+  robots: noIndexRobots,
+});
 
 type LoginPageProps = {
   searchParams: Promise<{ next?: string; error?: string; method?: string }>;

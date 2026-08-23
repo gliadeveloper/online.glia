@@ -1,11 +1,18 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { CreatePostForm } from "@/components/community/create-post-form";
 import { getChildPostParentBySlug } from "@/lib/posts";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
+import { noIndexRobots } from "@/lib/site-metadata";
 
 import "@/components/community/community-write-glia.css";
+
+export const metadata: Metadata = {
+  title: "글 작성",
+  robots: noIndexRobots,
+};
 
 export const dynamic = "force-dynamic";
 

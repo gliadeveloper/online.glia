@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -10,7 +11,16 @@ import { PostCommentComposer } from "@/components/community/post-comment-compose
 import { PostCommentList } from "@/components/community/post-comment-list";
 import { PostMarkdown } from "@/components/community/post-markdown";
 import { PostViewRecorder } from "@/components/community/post-view-recorder";
-import { getPublishedPostBySlug } from "@/lib/posts";
+import { JsonLd } from "@/components/seo/json-ld";
+import { firstMarkdownImage } from "@/lib/post-content";
+import { displayAuthorName } from "@/lib/post-display";
+import { getPublishedPostBySlug, getPublishedPostShareBySlug } from "@/lib/posts";
+import {
+  absoluteUrl,
+  buildPageMetadata,
+  communityOgImages,
+  toOgImage,
+} from "@/lib/site-metadata";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
@@ -21,6 +31,30 @@ export const dynamic = "force-dynamic";
 type CommunityPostPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: CommunityPostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPublishedPostShareBySlug(slug);
+  if (!post) notFound();
+
+  const description = post.excerpt?.trim() || post.title;
+  const cover = firstMarkdownImage(post.bodyMarkdown);
+  const authorName = displayAuthorName(post.user);
+
+  return buildPageMetadata({
+    title: post.title,
+    description,
+    path: `/community/${post.slug}`,
+    type: "article",
+    images: cover ? [toOgImage(cover, post.title)] : communityOgImages,
+    article: {
+      publishedTime: (post.publishedAt ?? post.updatedAt).toISOString(),
+      modifiedTime: (post.editedAt ?? post.updatedAt).toISOString(),
+      authors: [authorName],
+      section: post.parentPostId ? "인증 글" : "커뮤니티",
+    },
+  });
+}
 
 export default async function CommunityPostPage({ params }: CommunityPostPageProps) {
   const { slug } = await params;
@@ -34,9 +68,24 @@ export default async function CommunityPostPage({ params }: CommunityPostPagePro
   const publishedAt = post.publishedAt ?? post.createdAt;
   const likedCommentIds = [...post.likedCommentIds];
   const isOwner = user?.id === post.user.id;
+  const cover = firstMarkdownImage(post.bodyMarkdown);
+  const shareImage = cover ? toOgImage(cover, post.title) : communityOgImages[0];
 
   return (
     <div className="glia-post">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: post.title,
+          description: post.excerpt ?? post.title,
+          datePublished: publishedAt.toISOString(),
+          dateModified: (post.editedAt ?? post.updatedAt).toISOString(),
+          author: { "@type": "Person", name: displayAuthorName(post.user) },
+          image: absoluteUrl(shareImage.url),
+          mainEntityOfPage: absoluteUrl(`/community/${post.slug}`),
+        }}
+      />
       <PostViewRecorder slug={post.slug} />
       <StackNavTitle title={post.title} />
 

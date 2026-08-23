@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getWeekPeriodKey } from "@/lib/forms";
 import { firstMarkdownImage } from "@/lib/post-content";
 import { normalizePostSlugParam } from "@/lib/post-write";
@@ -198,6 +200,25 @@ export async function getPublishedPostBySlug(slug: string, viewerUserId?: string
     likedCommentIds,
   };
 }
+
+export const getPublishedPostShareBySlug = cache(async (slug: string) => {
+  const normalizedSlug = normalizePostSlugParam(slug);
+
+  return prisma.post.findFirst({
+    where: { slug: normalizedSlug, ...publishedPostWhere },
+    select: {
+      slug: true,
+      title: true,
+      excerpt: true,
+      bodyMarkdown: true,
+      publishedAt: true,
+      editedAt: true,
+      updatedAt: true,
+      parentPostId: true,
+      user: { select: { name: true, email: true } },
+    },
+  });
+});
 
 function mapCommentTree(
   comments: Array<{

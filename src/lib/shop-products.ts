@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 const courseCatalogSelect = {
@@ -66,11 +68,11 @@ export async function getActiveProducts(limit?: number) {
   return limit ? sorted.slice(0, limit) : sorted;
 }
 
-export async function getProductById(id: string) {
+export const getProductById = cache(async (id: string) => {
   return prisma.product.findFirst({
     where: { id, isActive: true },
     include: productCatalogInclude,
   });
-}
+});
 
 export type CatalogProduct = Awaited<ReturnType<typeof getActiveProducts>>[number];
