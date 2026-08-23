@@ -7,8 +7,6 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useEffect } from "react";
 
-import { isProxiedR2MediaUrl, resolveProxiedMediaUrl } from "@/lib/media/proxied-media-url";
-
 import "./lesson-block-editor.css";
 import "./lesson-block-note-view.css";
 
@@ -22,10 +20,6 @@ export function LessonBlockNoteView({ blocks, className }: LessonBlockNoteViewPr
   const editor = useCreateBlockNote(
     {
       initialContent: blocks,
-      resolveFileUrl: async (url: string) => {
-        if (!isProxiedR2MediaUrl(url)) return url;
-        return resolveProxiedMediaUrl(url);
-      },
     },
     [blocks],
   );

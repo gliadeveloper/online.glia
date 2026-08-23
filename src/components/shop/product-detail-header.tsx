@@ -2,6 +2,7 @@ import type { ProductKind } from "@/generated/prisma/client";
 
 import { ShopKindBadge } from "@/components/shop/shop-trust-ui";
 import { formatKrw, productKindLabels } from "@/lib/customer-labels";
+import { productDescriptionExcerpt } from "@/lib/shop-product-copy";
 import { getProductHighlights } from "@/components/shop/product-cover-visual";
 import type { CatalogProduct } from "@/lib/shop-products";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
@@ -48,7 +49,9 @@ export function ProductDetailHeader({
           </p>
 
           {product.description ? (
-            <p className="shop-trust-header__desc shop-trust-header__desc--detail">{product.description}</p>
+            <p className="shop-trust-header__desc shop-trust-header__desc--detail">
+              {productDescriptionExcerpt(product.description, 180)}
+            </p>
           ) : null}
 
           {highlights.length > 0 ? (

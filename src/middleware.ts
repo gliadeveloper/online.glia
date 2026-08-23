@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { hasSessionTokenFormat, SESSION_COOKIE } from "@/lib/session-cookie";
 
-const protectedPrefixes = ["/dashboard", "/shop", "/learning", "/coaching", "/checkin", "/orders", "/admin", "/coach", "/mypage"];
+const protectedPrefixes = ["/shop", "/learning", "/coaching", "/checkin", "/orders", "/admin", "/coach", "/mypage"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,6 +10,13 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/lms" || pathname.startsWith("/lms/")) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.replace(/^\/lms/, "/learning");
+    return NextResponse.redirect(url);
+  }
+
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.search = request.nextUrl.search;
     return NextResponse.redirect(url);
   }
 
@@ -30,6 +37,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard",
     "/dashboard/:path*",
     "/shop/:path*",
     "/lms/:path*",

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
-import { productInclude, updateProduct } from "@/lib/products";
+import { parseProductSupplies, productInclude, updateProduct } from "@/lib/products";
 import { prisma } from "@/lib/prisma";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -38,6 +38,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       action?: "activate" | "deactivate";
       title?: string;
       description?: string;
+      descriptionMetadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
+      supplies?: unknown;
       listPrice?: number;
       salePrice?: number | null;
     };
@@ -59,6 +61,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       productId: id,
       title: body.title,
       description: body.description,
+      descriptionMetadata: body.descriptionMetadata,
+      supplies: parseProductSupplies(body.supplies),
       listPrice: body.listPrice,
       salePrice: body.salePrice,
     });

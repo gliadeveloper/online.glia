@@ -6,6 +6,7 @@ import {
   getCoachProductCatalog,
   updateCoachProduct,
 } from "@/lib/coach-commerce";
+import { parseProductSupplies } from "@/lib/products";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -30,6 +31,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     const body = (await request.json()) as {
       title?: string;
       description?: string;
+      descriptionMetadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
+      supplies?: unknown;
       listPrice?: number;
       salePrice?: number | null;
       isActive?: boolean;
@@ -43,6 +46,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       productId: id,
       title: body.title,
       description: body.description,
+      descriptionMetadata: body.descriptionMetadata,
+      supplies: parseProductSupplies(body.supplies),
       listPrice: body.listPrice,
       salePrice: body.salePrice,
       isActive: body.isActive,

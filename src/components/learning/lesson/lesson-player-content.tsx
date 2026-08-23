@@ -154,8 +154,8 @@ export function LessonNavFooter({ courseId, prevLesson, nextLesson }: LessonNavF
           다음: {nextLesson.title} →
         </Link>
       ) : (
-        <Link href={`/learning/${courseId}`} className="lesson-player-nav__link shell-focus-ring">
-          커리큘럼으로 돌아가기
+        <Link href="/learning" className="lesson-player-nav__link shell-focus-ring">
+          내 학습으로
         </Link>
       )}
     </nav>

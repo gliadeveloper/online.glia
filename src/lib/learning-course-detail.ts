@@ -54,3 +54,21 @@ export async function getEnrolledCourseDetail(userId: string, courseId: string) 
 }
 
 export type EnrolledCourseDetail = NonNullable<Awaited<ReturnType<typeof getEnrolledCourseDetail>>>;
+
+export function resumeLessonId(
+  modules: Array<{ lessons: Array<{ id: string }> }>,
+  progress: Map<string, ProgressStatus> | Array<{ lessonId: string; status: string }>,
+) {
+  const lessons = modules.flatMap((module) => module.lessons);
+  if (lessons.length === 0) return null;
+
+  const done = progress instanceof Map
+    ? progress
+    : new Map(progress.map((item) => [item.lessonId, item.status]));
+
+  return lessons.find((lesson) => done.get(lesson.id) !== "COMPLETED")?.id ?? lessons[0].id;
+}
+
+export function resumeLessonHref(courseId: string, lessonId: string | null) {
+  return lessonId ? `/learning/${courseId}/lessons/${lessonId}` : `/learning/${courseId}`;
+}

@@ -110,35 +110,3 @@ export function getProductHighlights(product: CatalogProduct): string[] {
 
   return [...new Set(highlights)].slice(0, 4);
 }
-
-export function getProductAudienceCopy(kind: ProductKind): { title: string; bullets: string[] } {
-  switch (kind) {
-    case "COACHING_ONLY":
-      return {
-        title: "이런 분께 추천해요",
-        bullets: [
-          "1:1 맞춤 피드백이 필요한 분",
-          "목표 달성을 위해 코치와 함께하고 싶은 분",
-          "체계적인 세션으로 성장 속도를 높이고 싶은 분",
-        ],
-      };
-    case "BUNDLE":
-      return {
-        title: "이런 분께 추천해요",
-        bullets: [
-          "강의와 코칭을 한 번에 시작하고 싶은 분",
-          "학습 + 실행을 함께 가져가고 싶은 분",
-          "가장 합리적인 올인원 패키지를 찾는 분",
-        ],
-      };
-    default:
-      return {
-        title: "이런 분께 추천해요",
-        bullets: [
-          "내 속도에 맞춰 반복 학습하고 싶은 분",
-          "이론부터 실전까지 VOD로 탄탄히 쌓고 싶은 분",
-          "언제 어디서나 수강할 수 있는 유연함이 필요한 분",
-        ],
-      };
-  }
-}

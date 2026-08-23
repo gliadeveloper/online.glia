@@ -1,11 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 
-import { AppSection, AppSectionHeader, AppStackPage } from "@/components/app";
-import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
-import { CourseDetailHeader } from "@/components/learning/course-detail-header";
-import { CourseModuleList } from "@/components/learning/course-module-list";
+import { AppStackPage } from "@/components/app";
 import { EnrollmentExpiredNotice } from "@/components/learning/enrollment-expired-notice";
-import { getEnrolledCourseDetail } from "@/lib/learning-course-detail";
+import { getEnrolledCourseDetail, resumeLessonHref, resumeLessonId } from "@/lib/learning-course-detail";
 import { getCourseShopStateById } from "@/lib/shop-purchase-state";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
@@ -36,12 +33,8 @@ export default async function LearningCoursePage({ params }: LearningCoursePageP
         <EnrollmentExpiredNotice
           courseTitle={detail.course.title}
           enrollment={detail.enrollment}
-          extendHref={
-            courseShopState?.kind === "expired" ? courseShopState.extendHref : "/shop"
-          }
-          restoreHref={
-            courseShopState?.kind === "expired" ? courseShopState.restoreHref : undefined
-          }
+          extendHref={courseShopState?.kind === "expired" ? courseShopState.extendHref : "/shop"}
+          restoreHref={courseShopState?.kind === "expired" ? courseShopState.restoreHref : undefined}
         />
       </AppStackPage>
     );
@@ -51,32 +44,5 @@ export default async function LearningCoursePage({ params }: LearningCoursePageP
     notFound();
   }
 
-  const { course, enrollment, progressMap, completedCount, totalLessons, progressPercent } = detail;
-
-  return (
-    <AppStackPage>
-      <StackNavTitle title={course.title} />
-
-      <TabPageHeader
-        eyebrow="Learning"
-        title="커리큘럼"
-        titleAccent="학습"
-        description={course.description ?? `${course.title} 강의를 이어서 진행하세요.`}
-        variant="stack"
-      />
-
-      <CourseDetailHeader
-        course={course}
-        enrollment={enrollment}
-        completedCount={completedCount}
-        totalLessons={totalLessons}
-        progressPercent={progressPercent}
-      />
-
-      <AppSection labelledBy="curriculum-heading">
-        <AppSectionHeader title="커리큘럼" titleId="curriculum-heading" />
-        <CourseModuleList courseId={id} modules={course.modules} progressMap={progressMap} />
-      </AppSection>
-    </AppStackPage>
-  );
+  redirect(resumeLessonHref(id, resumeLessonId(detail.course.modules, detail.progressMap)));
 }

@@ -1102,6 +1102,10 @@ model Product {
   id             String      @id @default(uuid())
   title          String
   description    String?
+  /// BlockNote JSON (`{ blocknote: { version, blocks } }`), same as CoachingSession.bodyMetadata.
+  descriptionMetadata Json?
+  /// PDP 준비물. Empty hides the section.
+  supplies       String[]    @default([])
   kind           ProductKind
   listPrice      Int
   salePrice      Int?

@@ -5,12 +5,10 @@ import "@blocknote/core/fonts/inter.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 
 import { getBlockNoteBlocksFromMetadata } from "@/lib/blocknote-content";
 import { normalizeMarkdownDraft, prepareMarkdownContent } from "@/lib/markdown-content";
-import { isProxiedR2MediaUrl, resolveProxiedMediaUrl } from "@/lib/media/proxied-media-url";
-
 import "./lesson-block-editor.css";
 
 export type BlockNoteEditorFieldHandle = {
@@ -29,21 +27,12 @@ export const BlockNoteEditorField = forwardRef<BlockNoteEditorFieldHandle, Block
     const initialBlocks = useMemo(() => getBlockNoteBlocksFromMetadata(metadata), [metadata]);
     const loadedFromMarkdownRef = useRef(false);
 
-    const resolveFileUrl = useCallback(async (url: string) => {
-      if (!isProxiedR2MediaUrl(url)) {
-        return url;
-      }
-
-      return resolveProxiedMediaUrl(url);
-    }, []);
-
     const editor = useCreateBlockNote(
       {
         initialContent: initialBlocks ?? undefined,
         uploadFile,
-        resolveFileUrl,
       },
-      [uploadFile, resolveFileUrl],
+      [uploadFile],
     );
 
     useEffect(() => {

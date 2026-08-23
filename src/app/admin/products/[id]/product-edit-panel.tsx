@@ -1,9 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { ProductKind } from "@/generated/prisma/client";
+import {
+  ProductDescriptionEditor,
+  type ProductDescriptionEditorHandle,
+} from "@/components/shop/product-description-editor";
+import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
+import { parseProductSupplies, suppliesToText } from "@/lib/products";
 
 type ProductItem = {
   id: string;
@@ -21,6 +27,8 @@ type ProductEditPanelProps = {
   kind: ProductKind;
   title: string;
   description: string | null;
+  descriptionMetadata: unknown;
+  supplies: string[];
   listPrice: number;
   salePrice: number | null;
   items: ProductItem[];
@@ -33,6 +41,8 @@ export function ProductEditPanel({
   kind,
   title: initialTitle,
   description: initialDescription,
+  descriptionMetadata: initialDescriptionMetadata,
+  supplies: initialSupplies,
   listPrice: initialListPrice,
   salePrice: initialSalePrice,
   items,
@@ -45,8 +55,9 @@ export function ProductEditPanel({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const editorRef = useRef<ProductDescriptionEditorHandle>(null);
   const [title, setTitle] = useState(initialTitle);
-  const [description, setDescription] = useState(initialDescription ?? "");
+  const [supplies, setSupplies] = useState(suppliesToText(initialSupplies));
   const [listPrice, setListPrice] = useState(String(initialListPrice));
   const [salePrice, setSalePrice] = useState(
     initialSalePrice != null ? String(initialSalePrice) : "",
@@ -65,12 +76,23 @@ export function ProductEditPanel({
     setError(null);
 
     try {
+      const exported = editorRef.current
+        ? await editorRef.current.exportForSave()
+        : { body: initialDescription ?? "", blocks: [] };
+      const description = exported.body.trim() || undefined;
+      const descriptionMetadata = buildContentMetadataWithBlockNote(
+        initialDescriptionMetadata,
+        exported.blocks,
+      );
+
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
-          description: description || undefined,
+          description,
+          descriptionMetadata,
+          supplies: parseProductSupplies(supplies),
           listPrice: Number(listPrice),
           salePrice: salePrice ? Number(salePrice) : null,
         }),
@@ -140,7 +162,7 @@ export function ProductEditPanel({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">상품 편집</h2>
               <button type="button" onClick={() => setOpen(false)} className="text-zinc-400">
@@ -178,12 +200,22 @@ export function ProductEditPanel({
                     required
                   />
                 </label>
+                <div className="block space-y-2 text-sm">
+                  <span className="font-medium">소개</span>
+                  <ProductDescriptionEditor
+                    ref={editorRef}
+                    productId={productId}
+                    description={initialDescription}
+                    descriptionMetadata={initialDescriptionMetadata}
+                    disabled={busy}
+                  />
+                </div>
                 <label className="block space-y-2 text-sm">
-                  <span className="font-medium">설명</span>
+                  <span className="font-medium">준비물 (줄마다 한 항목)</span>
                   <textarea
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    rows={3}
+                    value={supplies}
+                    onChange={(event) => setSupplies(event.target.value)}
+                    rows={5}
                     className="w-full rounded-xl border border-zinc-200 px-3 py-2"
                   />
                 </label>

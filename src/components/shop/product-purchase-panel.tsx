@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
+
 import { ProductApplyButton } from "@/components/shop/product-apply-button";
-import { ShopButtonLink } from "@/components/shop/shop-trust-ui";
 import type { CatalogProduct } from "@/lib/shop-products";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
 
@@ -20,15 +21,15 @@ export function ProductDetailStickyBar({
 }: ProductDetailStickyBarProps) {
   if (shopState.kind === "owned") {
     return (
-      <div className="shop-pdp-sticky-bar lg:hidden">
+      <div className="shop-pdp-sticky-bar">
         <div className="shop-pdp-sticky-bar__inner">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">{product.title}</p>
-            <p className="text-xs text-emerald-600">수강 중</p>
+          <div className="shop-pdp-sticky-bar__copy">
+            <p className="shop-pdp-sticky-bar__title">{product.title}</p>
+            <p className="shop-pdp-sticky-bar__owned">수강 중</p>
           </div>
-          <ShopButtonLink href={shopState.learnHref} className="shop-pdp-sticky-bar__cta">
+          <Link href={shopState.learnHref} className="shop-pdp-apply-btn shop-pdp-apply-btn--compact shop-pdp-sticky-bar__cta">
             학습하기
-          </ShopButtonLink>
+          </Link>
         </div>
       </div>
     );
@@ -37,11 +38,11 @@ export function ProductDetailStickyBar({
   const pending = shopState.kind === "pending";
 
   return (
-    <div className="shop-pdp-sticky-bar lg:hidden">
+    <div className="shop-pdp-sticky-bar">
       <div className="shop-pdp-sticky-bar__inner">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-900">{product.title}</p>
-          <p className={`text-base font-bold ${pending ? "text-amber-600" : "text-slate-900"}`}>
+        <div className="shop-pdp-sticky-bar__copy">
+          <p className="shop-pdp-sticky-bar__title">{product.title}</p>
+          <p className={pending ? "shop-pdp-sticky-bar__pending" : "shop-pdp-sticky-bar__price"}>
             {pending ? "승인 대기 중" : priceLabel}
           </p>
         </div>
@@ -52,13 +53,14 @@ export function ProductDetailStickyBar({
           className="shop-pdp-sticky-bar__cta"
           disabled={pending}
           pendingOrderId={pending ? shopState.orderId : undefined}
+          productTitle={product.title}
+          priceLabel={priceLabel}
         />
       </div>
     </div>
   );
 }
 
-// Legacy export kept for any imports — purchase panel replaced by sidebar apply flow.
 export function ProductPurchasePanel() {
   return null;
 }

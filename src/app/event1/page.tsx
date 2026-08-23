@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { EVENT1_PRODUCT_ID, EVENT1_PRODUCT_TITLE } from "@/lib/shop-event1-product";
 import { prisma } from "@/lib/prisma";
 
 import "./event1.css";
@@ -10,11 +11,12 @@ export const metadata: Metadata = {
   description: "몸의 신호를 읽고 스스로 조절하는 8주 온라인 프로그램",
 };
 
-const programTitle = "8주 신경계 회복 챌린지(코칭권 포함)";
-
 export default async function Event1Page() {
   const product = await prisma.product.findFirst({
-    where: { title: programTitle, isActive: true },
+    where: {
+      isActive: true,
+      OR: [{ id: EVENT1_PRODUCT_ID }, { title: EVENT1_PRODUCT_TITLE }],
+    },
     select: { id: true },
   });
   if (!product) notFound();

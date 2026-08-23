@@ -97,10 +97,8 @@ export function resolveStackNav(pathname: string): StackNavContext {
     return { backHref: "/learning", backLabel: "내 학습", title: "강의" };
   }
 
-  const learningLessonMatch = pathname.match(/^\/learning\/([^/]+)\/lessons\/[^/]+$/);
-  if (learningLessonMatch) {
-    const slug = learningLessonMatch[1];
-    return { backHref: `/learning/${slug}`, backLabel: "강의", title: "레슨" };
+  if (/^\/learning\/[^/]+\/lessons\/[^/]+$/.test(pathname)) {
+    return { backHref: "/learning", backLabel: "내 학습", title: "레슨" };
   }
 
   if (pathname === "/community/new") {

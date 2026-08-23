@@ -1,10 +1,21 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
 
+.app-trust-root:has(.glia-home) .app-shell,
+.app-trust-root:has(.glia-home) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
 .app-trust-root .glia-home {
   --glia-section-gap: 1.75rem;
   position: relative;
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   min-height: 100%;
+  margin: calc(var(--home-stack-lg) * -1);
+  width: calc(100% + var(--home-stack-lg) * 2);
+  padding-bottom: 2.5rem;
   background: var(--glia-bg);
   color: var(--glia-text);
   font-family: var(--glia-font);
@@ -71,7 +82,7 @@
 .app-trust-root .glia-home__hero {
   position: relative;
   overflow: hidden;
-  padding: calc(env(safe-area-inset-top) + 0.25rem) var(--glia-gutter) 1rem;
+  padding: 1rem var(--glia-gutter) 1.25rem;
   background:
     radial-gradient(120% 80% at 12% -10%, color-mix(in srgb, var(--glia-mint) 38%, transparent) 0%, transparent 58%),
     radial-gradient(90% 70% at 100% 8%, color-mix(in srgb, var(--glia-soft-blue) 42%, transparent) 0%, transparent 62%),
@@ -168,7 +179,6 @@
 .app-trust-root .glia-home__hero-copy {
   position: relative;
   z-index: 1;
-  margin-top: 0.5rem;
   max-width: 22rem;
 }
 
@@ -661,16 +671,17 @@
 @media (min-width: 1024px) {
   .app-trust-root .glia-home {
     --glia-section-gap: 2.25rem;
+    gap: 1.5rem;
+    padding-bottom: 3rem;
   }
 
   .app-trust-root .glia-home__hero {
     margin-top: 1.25rem;
     border-radius: var(--glia-radius-xl);
-    padding-block: 1.25rem;
+    padding-block: 1.5rem 1.625rem;
   }
 
   .app-trust-root .glia-home__hero-copy {
-    margin-top: 0.35rem;
     max-width: 28rem;
   }
 

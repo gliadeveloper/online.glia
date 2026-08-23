@@ -405,7 +405,7 @@ Primary nav: Home / Community / Learning — outline (inactive) / filled (active
 | 영역 | 상태 |
 |------|------|
 | `(app)` — 홈·커뮤니티·내학습·체크인·마이페이지 | ✅ 이 문서 적용 |
-| `(customer)` — dashboard, lms, shop 등 | ❌ 레거시 (violet shell). 점진 이관 |
+| `(customer)` | ❌ 제거됨. `/dashboard` → `/`, `/lms/*` → `/learning` |
 | `admin` | ❌ 별도 admin shell |
 | `login` | ❌ 미적용 (추후 통합) |
 

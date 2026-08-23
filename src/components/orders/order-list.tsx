@@ -1,9 +1,7 @@
 import Link from "next/link";
 
-import { AppButtonLink, AppEmptyState, AppPanel } from "@/components/app";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
-import { Typography } from "@/components/typography/typography";
-import { formatKrw, productKindLabels } from "@/lib/customer-labels";
+import { formatKrw } from "@/lib/customer-labels";
 import type { UserOrder } from "@/lib/orders";
 
 type OrderListProps = {
@@ -13,50 +11,36 @@ type OrderListProps = {
 export function OrderList({ orders }: OrderListProps) {
   if (orders.length === 0) {
     return (
-      <AppEmptyState
-        message="아직 주문 내역이 없습니다."
-        action={<AppButtonLink href="/shop">상품 둘러보기</AppButtonLink>}
-      />
+      <div className="glia-orders__empty">
+        <p className="glia-orders__empty-title">아직 주문 내역이 없습니다</p>
+        <p className="glia-orders__empty-hint">프로그램을 신청하면 이곳에서 상태를 확인할 수 있어요.</p>
+        <Link href="/shop" className="glia-orders__btn glia-orders__btn--primary">
+          상품 둘러보기
+        </Link>
+      </div>
     );
   }
 
   return (
-    <AppPanel flush className="app-list-panel">
-      <ul className="app-list-panel__list">
-        {orders.map((order) => {
-          const titles = order.lines.map((line) => line.product.title).join(", ");
-          const kinds = [...new Set(order.lines.map((line) => productKindLabels[line.product.kind]))].join(
-            " · ",
-          );
+    <ul className="glia-orders__list">
+      {orders.map((order) => {
+        const titles = order.lines.map((line) => line.product.title).join(", ");
 
-          return (
-            <li key={order.id}>
-              <Link href={`/orders/${order.id}`} className="app-list-row shell-focus-ring">
-                <div className="app-list-row__inner app-list-row__inner--top">
-                  <div className="min-w-0">
-                    <Typography as="p" role="bodyCompact" weight="medium" color="primary">
-                      {titles}
-                    </Typography>
-                    <Typography as="p" role="bodySecondary" color="secondary">
-                      {order.createdAt.toLocaleString("ko-KR")}
-                    </Typography>
-                    <Typography as="p" role="caption" color="secondary">
-                      {kinds}
-                    </Typography>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-2">
-                    <Typography as="p" role="bodyCompact" weight="semibold" color="primary">
-                      {formatKrw(order.total)}
-                    </Typography>
-                    <OrderStatusPill status={order.status} />
-                  </div>
-                </div>
-                <span className="sr-only">주문 상세 보기</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </AppPanel>
+        return (
+          <li key={order.id}>
+            <Link href={`/orders/${order.id}`} className="glia-orders__row">
+              <div className="glia-orders__copy">
+                <p className="glia-orders__name">{titles || "주문"}</p>
+                <p className="glia-orders__meta">{order.createdAt.toLocaleString("ko-KR")}</p>
+              </div>
+              <div className="glia-orders__side">
+                <p className="glia-orders__price">{formatKrw(order.total)}</p>
+                <OrderStatusPill status={order.status} variant="glia" />
+              </div>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

@@ -1,0 +1,396 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/*
+ * Account — Recovery Wellness.
+ * Scope: `.glia-mypage` on /mypage, /mypage/edit
+ */
+
+.app-trust-root:has(.glia-mypage) .app-shell,
+.app-trust-root:has(.glia-mypage) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
+.corp-trust .mypage-page.app-stack-page:has(.glia-mypage) {
+  gap: 0;
+  margin: 0;
+  width: 100%;
+  padding: 0;
+}
+
+.glia-mypage {
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
+  padding: 1.15rem 0 2.75rem;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+.glia-mypage a:focus-visible,
+.glia-mypage button:focus-visible,
+.glia-mypage input:focus-visible,
+.glia-mypage textarea:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+/* ── Head ─────────────────────────────────────────────────────────────── */
+
+.glia-mypage__head {
+  padding: 0.15rem var(--glia-gutter) 1.25rem;
+  border-bottom: 1px solid var(--glia-border);
+}
+
+.glia-mypage__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glia-blue);
+}
+
+.glia-mypage__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--glia-text);
+}
+
+.glia-mypage__lede {
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--glia-text-secondary);
+}
+
+/* ── Profile ──────────────────────────────────────────────────────────── */
+
+.glia-mypage__profile {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.35rem var(--glia-gutter) 1.25rem;
+}
+
+.glia-mypage__avatar {
+  display: flex;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.glia-mypage__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.glia-mypage__identity {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.glia-mypage__name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.glia-mypage__headline,
+.glia-mypage__email {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--glia-text-secondary);
+}
+
+.glia-mypage__bio {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--glia-text);
+  white-space: pre-wrap;
+}
+
+.glia-mypage__methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.glia-mypage__chip {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-surface-secondary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--glia-blue-dark);
+}
+
+.glia-mypage__edit {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+  text-decoration: none;
+}
+
+.glia-mypage__edit:hover {
+  text-decoration: underline;
+}
+
+/* ── Menu ─────────────────────────────────────────────────────────────── */
+
+.glia-mypage__menu {
+  border-top: 1px solid var(--glia-border);
+}
+
+.glia-mypage__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.glia-mypage__list > li + li {
+  border-top: 1px solid var(--glia-border);
+}
+
+.glia-mypage__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
+  padding: 0.85rem var(--glia-gutter);
+  color: inherit;
+  text-decoration: none;
+}
+
+.glia-mypage__row:hover .glia-mypage__row-label {
+  color: var(--glia-blue);
+}
+
+.glia-mypage__row-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-mypage__row-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-mypage__row-meta::after {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 1.5px solid currentColor;
+  border-top: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0.55;
+}
+
+/* ── Account / logout ─────────────────────────────────────────────────── */
+
+.glia-mypage__account {
+  padding: 1.25rem var(--glia-gutter) 0;
+}
+
+.glia-mypage__logout {
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-text-secondary);
+  cursor: pointer;
+}
+
+.glia-mypage__logout:hover:not(:disabled) {
+  color: var(--glia-text);
+}
+
+.glia-mypage__logout:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ── Edit form ────────────────────────────────────────────────────────── */
+
+.glia-mypage__preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--glia-border);
+}
+
+.glia-mypage__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  padding: 1.35rem var(--glia-gutter) 0;
+}
+
+.glia-mypage__req {
+  margin-left: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+}
+
+.glia-mypage__fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.glia-mypage__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.glia-mypage__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-mypage__input,
+.glia-mypage__textarea {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  color: var(--glia-text);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.glia-mypage__textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.glia-mypage__input:focus,
+.glia-mypage__textarea:focus {
+  border-color: var(--glia-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--glia-focus-ring);
+}
+
+.glia-mypage__alert {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.glia-mypage__alert--error {
+  color: var(--glia-error);
+}
+
+.glia-mypage__alert--ok {
+  color: var(--glia-success);
+}
+
+.glia-mypage__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.glia-mypage__btn {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.1rem;
+  border-radius: var(--glia-radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.glia-mypage__btn--primary {
+  border: 0;
+  background: var(--glia-gradient-primary);
+  box-shadow: var(--glia-shadow-button);
+  color: #fff;
+}
+
+.glia-mypage__btn--ghost {
+  border: 1px solid var(--glia-border);
+  background: var(--glia-surface);
+  color: var(--glia-blue);
+}
+
+.glia-mypage__btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+  box-shadow: none;
+}
+
+.glia-mypage__note {
+  margin: 1.5rem 0 0;
+  padding: 0 var(--glia-gutter);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: var(--glia-text-secondary);
+}
+
+.glia-mypage__note a {
+  color: var(--glia-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.glia-mypage__note a:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 1024px) {
+  .glia-mypage__head,
+  .glia-mypage__profile,
+  .glia-mypage__row,
+  .glia-mypage__account,
+  .glia-mypage__form,
+  .glia-mypage__note {
+    padding-inline: var(--glia-gutter-lg);
+  }
+}

@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { TrustAlert, TrustButton } from "@/components/corporate-trust/app-trust-ui";
-
 type CompleteLessonButtonProps = {
   lessonId: string;
   courseId: string;
@@ -50,27 +48,22 @@ export function CompleteLessonButton({
   }
 
   return (
-    <div className={compact ? "lesson-player-complete-wrap" : "space-y-2"}>
-      <TrustButton
+    <div className={compact ? "lesson-player-complete-wrap" : undefined}>
+      <button
         type="button"
-        variant="primary"
         onClick={handleComplete}
         disabled={busy || done}
         className={
           compact
-            ? [
-                "lesson-player-complete-btn",
-                done ? "lesson-player-complete-btn--done" : "",
-              ]
+            ? ["lesson-player-complete-btn", done ? "lesson-player-complete-btn--done" : ""]
                 .filter(Boolean)
                 .join(" ")
-            : undefined
+            : "lesson-task__btn"
         }
       >
         {done ? "완료됨" : busy ? "저장 중..." : label}
-      </TrustButton>
-      {error && !compact ? <TrustAlert tone="error">{error}</TrustAlert> : null}
-      {error && compact ? (
+      </button>
+      {error ? (
         <p className="lesson-player-complete-error" role="alert">
           {error}
         </p>

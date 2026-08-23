@@ -23,7 +23,9 @@ export async function getUserEnrollments(userId: string) {
           categories: { include: { category: { select: { name: true } } } },
           modules: {
             orderBy: { order: "asc" },
-            include: { _count: { select: { lessons: true } } },
+            include: {
+              lessons: { orderBy: { order: "asc" }, select: { id: true } },
+            },
           },
         },
       },

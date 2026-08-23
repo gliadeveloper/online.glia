@@ -1,4 +1,4 @@
-import type { ProductItemKind, ProductKind } from "@/generated/prisma/client";
+import type { Prisma, ProductItemKind, ProductKind } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
 import {
@@ -132,6 +132,8 @@ export async function createCoachProduct(params: {
   coachId: string;
   title: string;
   description?: string;
+  descriptionMetadata?: Prisma.InputJsonValue | null;
+  supplies?: string[];
   kind: ProductKind;
   listPrice: number;
   salePrice?: number;
@@ -144,6 +146,8 @@ export async function createCoachProduct(params: {
     actorId: params.coachId,
     title: params.title,
     description: params.description,
+    descriptionMetadata: params.descriptionMetadata,
+    supplies: params.supplies,
     kind: params.kind,
     listPrice: params.listPrice,
     salePrice: params.salePrice,
@@ -157,6 +161,8 @@ export async function updateCoachProduct(params: {
   productId: string;
   title?: string;
   description?: string;
+  descriptionMetadata?: Prisma.InputJsonValue | null;
+  supplies?: string[];
   listPrice?: number;
   salePrice?: number | null;
   isActive?: boolean;
@@ -168,6 +174,8 @@ export async function updateCoachProduct(params: {
     productId: params.productId,
     title: params.title,
     description: params.description,
+    descriptionMetadata: params.descriptionMetadata,
+    supplies: params.supplies,
     listPrice: params.listPrice,
     salePrice: params.salePrice,
     isActive: params.isActive,

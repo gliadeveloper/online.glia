@@ -3,7 +3,7 @@
 /*
  * GLIA Learning — Recovery Wellness study hub.
  * Scope root: `.glia-learning` (`/learning` tab only).
- * Discovery mode: course cards. Course detail / lesson player keep their own styles.
+ * Discovery mode: course cards. Lesson player lives in `lesson-player.css`.
  */
 
 .app-trust-root:has(.glia-learning) .app-shell,

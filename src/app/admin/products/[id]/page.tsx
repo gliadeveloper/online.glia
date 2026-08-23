@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ProductActions } from "@/app/admin/products/[id]/product-actions";
 import { ProductEditPanel } from "@/app/admin/products/[id]/product-edit-panel";
 import { StatusBadge } from "@/components/admin/status-badge";
+import { ProductDescriptionView } from "@/components/shop/product-description-view";
 import { formatKrw, requireAdmin } from "@/lib/admin";
 import { getProductDisplayPrice, productInclude, productKindLabels } from "@/lib/products";
 import { prisma } from "@/lib/prisma";
@@ -53,6 +54,8 @@ export default async function AdminProductDetailPage({ params }: Props) {
           kind={product.kind}
           title={product.title}
           description={product.description}
+          descriptionMetadata={product.descriptionMetadata}
+          supplies={product.supplies ?? []}
           listPrice={product.listPrice}
           salePrice={product.salePrice}
           items={product.items}
@@ -80,11 +83,14 @@ export default async function AdminProductDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {product.description && (
-        <p className="rounded-2xl border border-zinc-200 bg-white p-5 text-zinc-600 shadow-sm">
-          {product.description}
-        </p>
-      )}
+      {product.description ? (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <ProductDescriptionView
+            description={product.description}
+            descriptionMetadata={product.descriptionMetadata}
+          />
+        </div>
+      ) : null}
 
       <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div className="border-b border-zinc-100 px-5 py-4">

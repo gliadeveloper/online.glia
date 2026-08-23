@@ -18,6 +18,7 @@ export function CreateProductPanel({ courses, offerings }: CreateProductPanelPro
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [supplies, setSupplies] = useState("");
   const [listPrice, setListPrice] = useState("99000");
   const [salePrice, setSalePrice] = useState("");
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
@@ -48,6 +49,10 @@ export function CreateProductPanel({ courses, offerings }: CreateProductPanelPro
           slug,
           title,
           description: description || undefined,
+          supplies: supplies
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean),
           kind,
           listPrice: Number(listPrice),
           salePrice: salePrice ? Number(salePrice) : undefined,
@@ -95,8 +100,12 @@ export function CreateProductPanel({ courses, offerings }: CreateProductPanelPro
           <input value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
         </label>
         <label className="space-y-2 text-sm sm:col-span-2">
-          <span className="font-medium">설명</span>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
+          <span className="font-medium">소개 (마크다운)</span>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} className="w-full rounded-xl border border-zinc-200 px-4 py-3" placeholder="생성 후 블록 에디터로 다듬을 수 있습니다." />
+        </label>
+        <label className="space-y-2 text-sm sm:col-span-2">
+          <span className="font-medium">준비물 (줄마다 한 항목)</span>
+          <textarea value={supplies} onChange={(e) => setSupplies(e.target.value)} rows={4} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
         </label>
         <label className="space-y-2 text-sm">
           <span className="font-medium">정가 (원)</span>

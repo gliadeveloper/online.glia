@@ -17,16 +17,8 @@
   padding: var(--home-stack-lg) var(--home-stack-lg) var(--home-stack-xl);
 }
 
-.app-trust-root .app-shell__main--home {
-  padding: 0 0 var(--home-stack-sm);
-}
-
 @media (min-width: 1024px) {
   .app-trust-root .app-shell__main--trust {
-    padding: 0 var(--glia-shell-pad) var(--home-stack-xl);
-  }
-
-  .app-trust-root .app-shell__main--home {
     padding: 0 var(--glia-shell-pad) var(--home-stack-xl);
   }
 }

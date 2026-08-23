@@ -15,7 +15,7 @@ export default async function HomePage() {
   return (
     <div className="glia-home">
       <h1 className="sr-only">홈</h1>
-      <HomeCheckin isLoggedIn={home.isLoggedIn} checkin={home.checkin} />
+      <HomeCheckin checkin={home.checkin} />
       <div className="glia-home__feed">
         <HomeAlerts items={home.alerts} />
         <HomeShortcuts items={home.shortcuts} />

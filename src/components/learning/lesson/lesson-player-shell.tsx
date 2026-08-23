@@ -41,7 +41,7 @@ export function LessonPlayerShell({
   const [sidebarTab, setSidebarTab] = useState<LessonPlayerTab>("curriculum");
 
   return (
-    <div className="lesson-player">
+    <div className="lesson-player glia-lesson">
       <div className="lesson-player__container">
         <div className="lesson-player__layout">
           <div className="lesson-player__main">

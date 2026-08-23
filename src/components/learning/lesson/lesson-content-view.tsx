@@ -14,7 +14,7 @@ const LessonBlockNoteView = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="min-h-[6rem] animate-pulse rounded-lg bg-slate-100/80" aria-hidden="true" />
+      <div className="lesson-block-note-view__loading" aria-hidden="true" />
     ),
   },
 );

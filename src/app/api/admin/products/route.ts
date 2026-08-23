@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
-import { createProduct, productInclude } from "@/lib/products";
+import { createProduct, parseProductSupplies, productInclude } from "@/lib/products";
 import type { ProductItemKind, ProductKind } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
@@ -30,6 +30,8 @@ export async function POST(request: Request) {
       userId?: string;
       title?: string;
       description?: string;
+      descriptionMetadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
+      supplies?: unknown;
       kind?: ProductKind;
       listPrice?: number;
       salePrice?: number;
@@ -54,6 +56,8 @@ export async function POST(request: Request) {
       actorId: userId,
       title: body.title,
       description: body.description,
+      descriptionMetadata: body.descriptionMetadata,
+      supplies: parseProductSupplies(body.supplies),
       kind: body.kind,
       listPrice: body.listPrice,
       salePrice: body.salePrice,

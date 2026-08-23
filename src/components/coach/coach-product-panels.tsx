@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
+import {
+  ProductDescriptionEditor,
+  type ProductDescriptionEditorHandle,
+} from "@/components/shop/product-description-editor";
+import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 import { getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
+import { parseProductSupplies, suppliesToText } from "@/lib/products";
 import type { ProductKind } from "@/generated/prisma/client";
 
 type ProductRow = {
@@ -88,6 +94,7 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
   const [kind, setKind] = useState<ProductKind>("COURSE_ONLY");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [supplies, setSupplies] = useState("");
   const [listPrice, setListPrice] = useState("99000");
   const [salePrice, setSalePrice] = useState("");
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
@@ -117,6 +124,7 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
         body: JSON.stringify({
           title,
           description: description || undefined,
+          supplies: parseProductSupplies(supplies),
           kind,
           listPrice: Number(listPrice),
           salePrice: salePrice ? Number(salePrice) : undefined,
@@ -163,8 +171,13 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
       </label>
 
       <label className="block space-y-2 text-sm">
-        <span className="font-medium">설명</span>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
+        <span className="font-medium">소개 (마크다운)</span>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} className="w-full rounded-xl border border-zinc-200 px-4 py-3" placeholder="생성 후 블록 에디터로 다듬을 수 있습니다." />
+      </label>
+
+      <label className="block space-y-2 text-sm">
+        <span className="font-medium">준비물 (줄마다 한 항목)</span>
+        <textarea value={supplies} onChange={(e) => setSupplies(e.target.value)} rows={4} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
       </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -212,6 +225,8 @@ type CoachProductEditPanelProps = {
   kind: ProductKind;
   title: string;
   description: string | null;
+  descriptionMetadata: unknown;
+  supplies: string[];
   listPrice: number;
   salePrice: number | null;
   isActive: boolean;
@@ -226,8 +241,9 @@ type CoachProductEditPanelProps = {
 
 export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
   const router = useRouter();
+  const editorRef = useRef<ProductDescriptionEditorHandle>(null);
   const [title, setTitle] = useState(props.title);
-  const [description, setDescription] = useState(props.description ?? "");
+  const [supplies, setSupplies] = useState(suppliesToText(props.supplies));
   const [listPrice, setListPrice] = useState(String(props.listPrice));
   const [salePrice, setSalePrice] = useState(props.salePrice != null ? String(props.salePrice) : "");
   const [isActive, setIsActive] = useState(props.isActive);
@@ -258,13 +274,24 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
             ];
 
     try {
+      const exported = editorRef.current
+        ? await editorRef.current.exportForSave()
+        : { body: props.description ?? "", blocks: [] };
+      const description = exported.body.trim() || undefined;
+      const descriptionMetadata = buildContentMetadataWithBlockNote(
+        props.descriptionMetadata,
+        exported.blocks,
+      );
+
       const [metaRes, itemsRes] = await Promise.all([
         fetch(`/api/coach/products/${props.productId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             title,
-            description: description || undefined,
+            description,
+            descriptionMetadata,
+            supplies: parseProductSupplies(supplies),
             listPrice: Number(listPrice),
             salePrice: salePrice ? Number(salePrice) : null,
             isActive,
@@ -308,9 +335,20 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
         </label>
 
+        <div className="block space-y-2 text-sm">
+          <span className="font-medium">소개</span>
+          <ProductDescriptionEditor
+            ref={editorRef}
+            productId={props.productId}
+            description={props.description}
+            descriptionMetadata={props.descriptionMetadata}
+            disabled={busy}
+          />
+        </div>
+
         <label className="block space-y-2 text-sm">
-          <span className="font-medium">설명</span>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
+          <span className="font-medium">준비물 (줄마다 한 항목)</span>
+          <textarea value={supplies} onChange={(e) => setSupplies(e.target.value)} rows={4} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">

@@ -1,9 +1,7 @@
 import Link from "next/link";
 
-import { AppPanel } from "@/components/app";
-import { Typography } from "@/components/typography/typography";
-import type { MyPageData } from "@/lib/mypage";
 import type { UserRole } from "@/generated/prisma/client";
+import type { MyPageData } from "@/lib/mypage";
 
 type MyPageMenuProps = {
   stats: MyPageData["stats"];
@@ -67,37 +65,17 @@ export function MyPageMenu({ stats, role }: MyPageMenuProps) {
   }
 
   return (
-    <section aria-labelledby="mypage-menu-heading">
-      <Typography
-        as="h2"
-        id="mypage-menu-heading"
-        role="sectionTitle"
-        weight="semibold"
-        color="primary"
-        className="app-section-header__desc"
-      >
-        메뉴
-      </Typography>
-
-      <AppPanel flush className="app-list-panel">
-        <ul className="app-list-panel__list">
-          {items.map((item) => (
-            <li key={item.href}>
-              <Link href={item.href} className="app-list-row shell-focus-ring">
-                <div className="app-list-row__inner">
-                  <Typography as="span" role="bodyCompact" weight="medium" color="primary">
-                    {item.label}
-                  </Typography>
-                  <Typography as="span" role="bodySecondary" color="secondary">
-                    {item.hint}
-                  </Typography>
-                </div>
-                <span className="sr-only">{item.label}로 이동</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </AppPanel>
-    </section>
+    <nav className="glia-mypage__menu" aria-label="마이페이지 메뉴">
+      <ul className="glia-mypage__list">
+        {items.map((item) => (
+          <li key={item.href}>
+            <Link href={item.href} className="glia-mypage__row">
+              <span className="glia-mypage__row-label">{item.label}</span>
+              <span className="glia-mypage__row-meta">{item.hint}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

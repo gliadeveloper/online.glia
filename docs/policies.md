@@ -30,7 +30,7 @@
 | **Coach Portal** | `/coach/*` | `COACH` 역할 | 별도 dark sidebar shell |
 | **Admin** | `/admin/*` | `ADMIN` 역할 | Admin shell (violet accent) |
 | **Auth `(auth)`** | `/login`, `/login/find-account`, `/signup/*` | 비로그인 | **GLIA Recovery Wellness** |
-| **Legacy `(customer)`** | `src/app/(customer)/` | dashboard 등 잔존 | 신규 customer UI **금지** — `(app)`만 사용. `/lms/*` 페이지 **제거됨** → `/learning` |
+| **Legacy `(customer)`** | — | `/dashboard`·`/lms/*` **제거됨** | 신규 customer UI **금지** — `(app)`만 사용. `/dashboard` → `/`, `/lms/*` → `/learning` |
 
 ### 1.1 Customer `(app)` IA
 

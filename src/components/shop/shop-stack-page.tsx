@@ -6,12 +6,12 @@ type ShopStackPageProps = {
 };
 
 /**
- * Shop stack pages — App shell L3 wrapper + Corporate Trust content scope.
+ * Shop stack pages — App shell L3 wrapper.
  *
  * AdaptiveShell (#main-content)
  *   └─ ShopStackPage (= AppStackPage + shop-trust-content)
- *        ├─ StackNavTitle
- *        └─ shop UI (Corporate Trust styled)
+ *        ├─ /shop      `.glia-shop` (GLIA catalog)
+ *        └─ /shop/[id] `.glia-pdp` (GLIA product detail)
  */
 export function ShopStackPage({ children, className }: ShopStackPageProps) {
   return (

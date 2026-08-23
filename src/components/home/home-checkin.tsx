@@ -1,14 +1,12 @@
 import Link from "next/link";
 
-import { HomeChrome } from "@/components/home/home-chrome";
 import type { HomeCheckin as HomeCheckinData } from "@/lib/home";
 
 type HomeCheckinProps = {
-  isLoggedIn: boolean;
   checkin: HomeCheckinData;
 };
 
-export function HomeCheckin({ isLoggedIn, checkin }: HomeCheckinProps) {
+export function HomeCheckin({ checkin }: HomeCheckinProps) {
   return (
     <section className="glia-home__hero" aria-labelledby="home-checkin-heading">
       <div className="glia-home__ambient" aria-hidden="true">
@@ -16,8 +14,6 @@ export function HomeCheckin({ isLoggedIn, checkin }: HomeCheckinProps) {
         <span className="glia-home__blob glia-home__blob--blue" />
         <span className="glia-home__blob glia-home__blob--wash" />
       </div>
-
-      <HomeChrome isLoggedIn={isLoggedIn} />
 
       <div className="glia-home__hero-copy">
         <p className="glia-home__date">{checkin.dateLabel}</p>

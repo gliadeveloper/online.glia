@@ -13,10 +13,15 @@ const toneByStatus: Record<OrderStatus, StatusPillTone> = {
 
 type OrderStatusPillProps = {
   status: OrderStatus;
+  variant?: "default" | "glia";
 };
 
-export function OrderStatusPill({ status }: OrderStatusPillProps) {
+export function OrderStatusPill({ status, variant = "default" }: OrderStatusPillProps) {
   const tone = toneByStatus[status];
+
+  if (variant === "glia") {
+    return <span className={`glia-orders__status glia-orders__status--${tone}`}>{orderStatusLabels[status]}</span>;
+  }
 
   return (
     <StatusPill tone={tone} showCompleteIcon={status === "PAID"} className="shrink-0">

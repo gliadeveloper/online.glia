@@ -49,24 +49,22 @@ export function ProductCurriculumSection({ courses }: ProductCurriculumSectionPr
   );
 
   return (
-    <section id="pdp-curriculum" className="shop-pdp-block" aria-labelledby="pdp-curriculum-heading">
-      <h2 id="pdp-curriculum-heading" className="shop-pdp-block__title">
-        클래스 커리큘럼
+    <section id="pdp-curriculum" className="glia-pdp__section" aria-labelledby="pdp-curriculum-heading">
+      <h2 id="pdp-curriculum-heading" className="glia-pdp__section-title">
+        커리큘럼
       </h2>
 
-      <div className="shop-pdp-curriculum-meta">
-        <span>총 {totalLessons}강</span>
-        {totalMinutes > 0 ? <span>· 총 {formatDuration(totalMinutes)}</span> : null}
-      </div>
+      <p className="glia-pdp__meta">
+        총 {totalLessons}강
+        {totalMinutes > 0 ? ` · ${formatDuration(totalMinutes)}` : ""}
+      </p>
 
-      <div className="shop-pdp-curriculum">
+      <div className="glia-pdp__weeks">
         {courses.map((course: CatalogCourse) => (
-          <div key={course.id} className="shop-pdp-curriculum-course">
-            {courses.length > 1 ? (
-              <p className="shop-pdp-curriculum-course__title">{course.title}</p>
-            ) : null}
+          <div key={course.id} className="glia-pdp__weeks-group">
+            {courses.length > 1 ? <p className="glia-pdp__course-title">{course.title}</p> : null}
 
-            {course.modules.map((module: CatalogModule) => {
+            {course.modules.map((module: CatalogModule, weekIndex: number) => {
               const isOpen = openModuleId === module.id;
               const moduleMinutes = module.lessons.reduce(
                 (sum: number, lesson: CatalogLesson) => sum + (lesson.duration ?? 0),
@@ -74,26 +72,29 @@ export function ProductCurriculumSection({ courses }: ProductCurriculumSectionPr
               );
 
               return (
-                <div key={module.id} className="shop-pdp-curriculum-module">
+                <div key={module.id} className="glia-pdp__week">
                   <button
                     type="button"
-                    className="shop-pdp-curriculum-module__trigger shell-focus-ring"
+                    className="glia-pdp__week-trigger"
                     aria-expanded={isOpen}
                     onClick={() => setOpenModuleId(isOpen ? null : module.id)}
                   >
-                    <span className="shop-pdp-curriculum-module__title">{module.title}</span>
-                    <span className="shop-pdp-curriculum-module__meta">
+                    <span className="glia-pdp__week-title">
+                      <span className="glia-pdp__week-index">{weekIndex + 1}</span>
+                      {module.title}
+                    </span>
+                    <span className="glia-pdp__week-meta">
                       {module.lessons.length}강
                       {moduleMinutes > 0 ? ` · ${formatDuration(moduleMinutes)}` : ""}
                     </span>
                   </button>
 
                   {isOpen ? (
-                    <ul className="shop-pdp-curriculum-lessons">
+                    <ul className="glia-pdp__lessons">
                       {module.lessons.map((lesson: CatalogLesson) => (
-                        <li key={lesson.id} className="shop-pdp-curriculum-lesson">
-                          <span className="shop-pdp-curriculum-lesson__title">{lesson.title}</span>
-                          <span className="shop-pdp-curriculum-lesson__meta">
+                        <li key={lesson.id} className="glia-pdp__lesson">
+                          <span className="glia-pdp__lesson-title">{lesson.title}</span>
+                          <span className="glia-pdp__lesson-meta">
                             {lessonTypeLabels[lesson.type] ?? lesson.type}
                             {lesson.duration ? ` · ${formatDuration(lesson.duration)}` : ""}
                           </span>

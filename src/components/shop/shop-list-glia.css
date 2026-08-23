@@ -1,0 +1,316 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/*
+ * Shop catalog — lookbook list (not a learning-tab clone).
+ * Scope: `.glia-shop` on /shop
+ */
+
+.app-trust-root:has(.glia-shop) .app-shell,
+.app-trust-root:has(.glia-shop) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
+.corp-trust .shop-list-page.app-stack-page:has(.glia-shop) {
+  gap: 0;
+  margin: 0;
+  width: 100%;
+  padding: 0;
+}
+
+.glia-shop {
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
+  padding: 1.15rem 0 2.75rem;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+.glia-shop a:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+/* ── Page head ────────────────────────────────────────────────────────── */
+
+.glia-shop__head {
+  padding: 0.15rem var(--glia-gutter) 1.25rem;
+  border-bottom: 1px solid var(--glia-border);
+}
+
+.glia-shop__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glia-blue);
+}
+
+.glia-shop__head-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.glia-shop__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--glia-text);
+}
+
+.glia-shop__count {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--glia-text-secondary);
+}
+
+.glia-shop__lede {
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--glia-text-secondary);
+}
+
+/* ── Lookbook list ────────────────────────────────────────────────────── */
+
+.glia-shop__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.glia-shop__list > li + li {
+  border-top: 1px solid var(--glia-border);
+}
+
+.glia-shop-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.15rem var(--glia-gutter);
+  color: inherit;
+  text-decoration: none;
+}
+
+.glia-shop-item__visual {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-wellness);
+}
+
+.glia-shop-item__visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--glia-motion-long);
+}
+
+.glia-shop-item:hover .glia-shop-item__visual img {
+  transform: scale(1.03);
+}
+
+.glia-shop-item__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.glia-shop-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.glia-shop-item__kind {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.22rem 0.65rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.glia-shop-item__kind::before {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue);
+}
+
+.glia-shop-item__status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--glia-blue-dark);
+}
+
+.glia-shop-item__status--complete {
+  color: var(--glia-coaching);
+}
+
+.glia-shop-item__status--pending {
+  color: #8a5a12;
+}
+
+.glia-shop-item__title {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.15rem 0 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  color: var(--glia-text);
+}
+
+.glia-shop-item__byline {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-shop-item__desc {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.1rem 0 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--glia-text-secondary);
+}
+
+.glia-shop-item__includes {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--glia-blue-dark);
+}
+
+.glia-shop-item__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+}
+
+.glia-shop-item__price {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--glia-text);
+}
+
+.glia-shop-item__cta {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+}
+
+.glia-shop-item:hover .glia-shop-item__cta {
+  text-decoration: underline;
+}
+
+@media (min-width: 1024px) {
+  .glia-shop__head,
+  .glia-shop-item,
+  .glia-shop__note,
+  .glia-shop__empty {
+    padding-inline: var(--glia-gutter-lg);
+  }
+}
+
+@media (min-width: 800px) {
+  .glia-shop-item {
+    grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.95fr);
+    align-items: center;
+    gap: 1.75rem;
+    padding-block: 1.5rem;
+  }
+
+  .glia-shop-item__visual {
+    aspect-ratio: 3 / 2;
+  }
+
+  .glia-shop-item__title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Empty / note ─────────────────────────────────────────────────────── */
+
+.glia-shop__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 2.5rem var(--glia-gutter);
+}
+
+.glia-shop__empty-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-shop__empty-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--glia-text-secondary);
+}
+
+.glia-shop__note {
+  margin: 0;
+  padding: 0.25rem var(--glia-gutter) 0;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: var(--glia-text-secondary);
+}
+
+.glia-shop__note a {
+  color: var(--glia-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.glia-shop__note a:hover {
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glia-shop-item__visual img {
+    transition: none;
+  }
+
+  .glia-shop-item:hover .glia-shop-item__visual img {
+    transform: none;
+  }
+}

@@ -24,11 +24,11 @@ type ProductReviewSectionProps = {
   hasExistingReview: boolean;
 };
 
-function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "lg" }) {
+function StarRating({ rating }: { rating: number }) {
   return (
-    <span className={`shop-pdp-stars shop-pdp-stars--${size}`} aria-label={`${rating}점`}>
+    <span className="glia-pdp__stars" aria-label={`${rating}점`}>
       {Array.from({ length: 5 }, (_, index) => (
-        <span key={index} className={index < rating ? "shop-pdp-stars__on" : "shop-pdp-stars__off"}>
+        <span key={index} className={index < rating ? "glia-pdp__stars--on" : "glia-pdp__stars--off"}>
           ★
         </span>
       ))}
@@ -89,30 +89,32 @@ export function ProductReviewSection({
   }
 
   return (
-    <section id="pdp-reviews" className="shop-pdp-block" aria-labelledby="pdp-reviews-heading">
-      <div className="shop-pdp-block__header-row">
-        <h2 id="pdp-reviews-heading" className="shop-pdp-block__title">
+    <section id="pdp-reviews" className="glia-pdp__section" aria-labelledby="pdp-reviews-heading">
+      <div className="glia-pdp__section-head">
+        <h2 id="pdp-reviews-heading" className="glia-pdp__section-title">
           리뷰
         </h2>
-        {reviewCount > 0 ? (
-          <p className="shop-pdp-review-summary">
-            <StarRating rating={Math.round(averageRating)} size="lg" />
-            <span className="shop-pdp-review-summary__score">{averageRating.toFixed(1)}</span>
-            <span className="shop-pdp-review-summary__count">{reviewCount}개</span>
-          </p>
-        ) : null}
+        <p className="glia-pdp__review-summary">
+          {reviewCount > 0 ? (
+            <>
+              <StarRating rating={Math.round(averageRating)} />
+              <span className="glia-pdp__review-score">{averageRating.toFixed(1)}</span>
+            </>
+          ) : null}
+          <span>{reviewCount}개</span>
+        </p>
       </div>
 
       {canReview && !hasExistingReview ? (
-        <form onSubmit={handleSubmit} className="shop-pdp-review-form">
-          <p className="shop-pdp-review-form__label">별점</p>
-          <div className="shop-pdp-review-form__stars">
+        <form onSubmit={handleSubmit} className="glia-pdp__review-form">
+          <p className="glia-pdp__review-label">별점</p>
+          <div className="glia-pdp__review-stars">
             {[1, 2, 3, 4, 5].map((value) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setRating(value)}
-                className={`shop-pdp-review-form__star${rating >= value ? " is-active" : ""}`}
+                className={`glia-pdp__review-star${rating >= value ? " is-active" : ""}`}
                 aria-label={`${value}점`}
               >
                 ★
@@ -125,17 +127,13 @@ export function ProductReviewSection({
             placeholder="수강 경험을 공유해 주세요 (선택)"
             rows={3}
             maxLength={1000}
-            className="shop-pdp-review-form__textarea corp-trust-input corp-trust-focus shell-focus-ring"
+            className="glia-pdp__review-textarea"
           />
-          <button
-            type="submit"
-            disabled={pending}
-            className="shop-pdp-review-form__submit shell-focus-ring"
-          >
+          <button type="submit" disabled={pending} className="glia-pdp__review-submit">
             {pending ? "등록 중…" : "리뷰 등록"}
           </button>
           {error ? (
-            <p role="alert" className="shop-pdp-review-form__error">
+            <p role="alert" className="glia-pdp__error">
               {error}
             </p>
           ) : null}
@@ -143,26 +141,31 @@ export function ProductReviewSection({
       ) : null}
 
       {isLoggedIn && !canReview ? (
-        <p className="shop-pdp-review-note">수강 중인 분만 리뷰를 작성할 수 있습니다.</p>
+        <p className="glia-pdp__note">수강 중인 분만 리뷰를 작성할 수 있습니다.</p>
       ) : null}
 
       {reviews.length === 0 ? (
-        <p className="shop-pdp-review-empty">아직 작성된 리뷰가 없어요.</p>
+        <div className="glia-pdp__review-empty">
+          <p className="glia-pdp__review-empty-title">아직 리뷰가 없습니다</p>
+          <p className="glia-pdp__review-empty-hint">
+            {canReview
+              ? "수강 경험을 첫 리뷰로 남겨 주세요."
+              : "수강을 시작한 분이 첫 기록을 남겨 주세요."}
+          </p>
+        </div>
       ) : (
-        <ul className="shop-pdp-review-grid">
+        <ul className="glia-pdp__reviews">
           {reviews.map((review) => (
-            <li key={review.id} className="shop-pdp-review-card">
-              <div className="shop-pdp-review-card__top">
+            <li key={review.id} className="glia-pdp__review">
+              <div className="glia-pdp__review-top">
                 <StarRating rating={review.rating} />
-                <span className="shop-pdp-review-card__author">{formatReviewAuthor(review.user)}</span>
-                <span className="shop-pdp-review-card__time">{formatRelativeTime(review.createdAt)}</span>
+                <span className="glia-pdp__review-author">{formatReviewAuthor(review.user)}</span>
+                <span className="glia-pdp__review-time">{formatRelativeTime(review.createdAt)}</span>
               </div>
               {review.comment ? (
-                <p className="shop-pdp-review-card__body">{review.comment}</p>
+                <p className="glia-pdp__review-body">{review.comment}</p>
               ) : (
-                <p className="shop-pdp-review-card__body shop-pdp-review-card__body--muted">
-                  별점만 남긴 리뷰입니다.
-                </p>
+                <p className="glia-pdp__review-body glia-pdp__review-body--muted">별점만 남긴 리뷰입니다.</p>
               )}
             </li>
           ))}

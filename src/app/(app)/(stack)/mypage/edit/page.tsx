@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { AppFootnote, AppPanel, AppStackPage } from "@/components/app";
-import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
+import { AppStackPage } from "@/components/app";
 import { ProfileEditForm } from "@/components/mypage/profile-edit-form";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getMyProfileForEdit } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/session";
+
+import "@/components/mypage/mypage-glia.css";
 
 export default async function MyPageEditPage() {
   const user = await getCurrentUser();
@@ -20,18 +21,16 @@ export default async function MyPageEditPage() {
   }
 
   return (
-    <AppStackPage>
+    <AppStackPage className="mypage-page">
       <StackNavTitle title="프로필 수정" />
 
-      <TabPageHeader
-        eyebrow="Profile"
-        title="프로필"
-        titleAccent="수정"
-        description="이름과 소개 정보를 업데이트하세요."
-        variant="stack"
-      />
+      <div className="glia-mypage">
+        <header className="glia-mypage__head">
+          <p className="glia-mypage__kicker">Profile</p>
+          <h1 className="glia-mypage__title">프로필 수정</h1>
+          <p className="glia-mypage__lede">이름, 소개, 프로필 이미지를 업데이트하세요.</p>
+        </header>
 
-      <AppPanel>
         <ProfileEditForm
           initial={{
             name: profile.name ?? "",
@@ -40,14 +39,11 @@ export default async function MyPageEditPage() {
             avatarUrl: profile.profile?.avatarUrl ?? "",
           }}
         />
-      </AppPanel>
 
-      <AppFootnote>
-        이메일 변경은 지원하지 않습니다.{" "}
-        <Link href="/mypage" className="corp-trust-link corp-trust-focus rounded-sm">
-          마이페이지로 돌아가기
-        </Link>
-      </AppFootnote>
+        <p className="glia-mypage__note">
+          이메일 변경은 지원하지 않습니다. <Link href="/mypage">마이페이지로 돌아가기</Link>
+        </p>
+      </div>
     </AppStackPage>
   );
 }

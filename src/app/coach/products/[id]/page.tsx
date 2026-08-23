@@ -35,6 +35,8 @@ export default async function CoachProductDetailPage({ params }: PageProps) {
         kind={product.kind}
         title={product.title}
         description={product.description}
+        descriptionMetadata={product.descriptionMetadata}
+        supplies={product.supplies ?? []}
         listPrice={product.listPrice}
         salePrice={product.salePrice}
         isActive={product.isActive}

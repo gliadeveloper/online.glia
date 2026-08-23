@@ -1,4 +1,5 @@
-import type { Product, ProductItemKind, ProductKind } from "@/generated/prisma/client";
+import type { Prisma, Product, ProductItemKind, ProductKind } from "@/generated/prisma/client";
+import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
@@ -30,6 +31,23 @@ export const productKindLabels: Record<ProductKind, string> = {
   BUNDLE: "번들",
 };
 
+export function parseProductSupplies(value: unknown): string[] | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return [];
+  if (typeof value === "string") {
+    return value
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => String(item).trim()).filter(Boolean);
+}
+
+export function suppliesToText(supplies: string[] | null | undefined) {
+  return (supplies ?? []).join("\n");
+}
+
 type ProductItemInput = {
   kind: ProductItemKind;
   courseId?: string;
@@ -41,6 +59,8 @@ export async function createProduct(params: {
   actorId: string;
   title: string;
   description?: string;
+  descriptionMetadata?: Prisma.InputJsonValue | null;
+  supplies?: string[];
   kind: ProductKind;
   listPrice: number;
   salePrice?: number;
@@ -55,6 +75,8 @@ export async function createProduct(params: {
     data: {
       title: params.title.trim(),
       description: params.description?.trim(),
+      descriptionMetadata: params.descriptionMetadata ?? undefined,
+      supplies: params.supplies ?? [],
       kind: params.kind,
       listPrice: params.listPrice,
       salePrice: params.salePrice,
@@ -90,6 +112,8 @@ export async function updateProduct(params: {
   productId: string;
   title?: string;
   description?: string;
+  descriptionMetadata?: Prisma.InputJsonValue | null;
+  supplies?: string[];
   listPrice?: number;
   salePrice?: number | null;
   isActive?: boolean;
@@ -99,11 +123,20 @@ export async function updateProduct(params: {
     throw new ApiError("Product not found", 404, "PRODUCT_NOT_FOUND");
   }
 
+  const descriptionMetadata =
+    params.descriptionMetadata === undefined
+      ? undefined
+      : params.descriptionMetadata === null
+        ? PrismaRuntime.JsonNull
+        : params.descriptionMetadata;
+
   const product = await prisma.product.update({
     where: { id: params.productId },
     data: {
       title: params.title?.trim(),
       description: params.description?.trim(),
+      descriptionMetadata,
+      supplies: params.supplies,
       listPrice: params.listPrice,
       salePrice: params.salePrice,
       isActive: params.isActive,

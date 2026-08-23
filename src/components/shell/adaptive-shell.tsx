@@ -24,10 +24,6 @@ type AdaptiveShellProps = {
   children: React.ReactNode;
 };
 
-function isHomeHeroRoute(pathname: string, mode: NavMode) {
-  return mode === "tab" && pathname === "/";
-}
-
 /**
  * Chrome policy-driven shell.
  *
@@ -35,7 +31,6 @@ function isHomeHeroRoute(pathname: string, mode: NavMode) {
  * |----------|-------------------------|----------------------------|
  * | desktop  | unified [logo+nav+auth] | unified [logo+nav+auth] only |
  * | mobile   | [logo+auth] + bottom tab| immersive context bar only   |
- * | mobile home | Home Brand Hero (L0 on-hero + hero content) + bottom tab |
  *
  * Mobile: 100dvh app shell — `#main-content` is the sole scroll container.
  */
@@ -44,7 +39,6 @@ export function AdaptiveShell({ mode, isLoggedIn, children }: AdaptiveShellProps
   const mainRef = useRef<HTMLElement>(null);
   const policy = CHROME_POLICIES[mode];
   const skip = getSkipLinkPolicy(mode);
-  const homeHero = isHomeHeroRoute(pathname, mode);
 
   useEffect(() => {
     const main = mainRef.current;
@@ -55,13 +49,9 @@ export function AdaptiveShell({ mode, isLoggedIn, children }: AdaptiveShellProps
     main.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [pathname]);
 
-  const mainClassName = [
-    "app-shell__main",
-    "flex-1",
-    homeHero ? "app-shell__main--home" : "app-shell__main--trust",
-  ].join(" ");
+  const mainClassName = ["app-shell__main", "flex-1", "app-shell__main--trust"].join(" ");
 
-  const showMobileGlobalHeader = policy.mobileGlobalHeader && !homeHero;
+  const showMobileGlobalHeader = policy.mobileGlobalHeader;
 
   return (
     <div className="app-shell flex min-h-screen flex-col text-[var(--color-text-primary)]">

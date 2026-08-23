@@ -3,14 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  TrustAlert,
-  TrustButton,
-  TrustField,
-  TrustInput,
-  TrustTextarea,
-} from "@/components/corporate-trust/app-trust-ui";
-
 type ProfileEditFormProps = {
   initial: {
     name: string;
@@ -58,61 +50,91 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <fieldset className="space-y-4">
-        <legend className="trust-field__label text-base">기본 정보</legend>
+  const previewName = name.trim() || "회원";
+  const previewInitial = previewName.charAt(0);
 
-        <TrustField label="이름" required>
-          <TrustInput
+  return (
+    <form onSubmit={handleSubmit} className="glia-mypage__form">
+      <div className="glia-mypage__preview" aria-hidden="true">
+        <div className="glia-mypage__avatar">
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt="" />
+          ) : (
+            previewInitial
+          )}
+        </div>
+        <div className="glia-mypage__identity">
+          <p className="glia-mypage__name">{previewName}</p>
+          {headline.trim() ? <p className="glia-mypage__headline">{headline}</p> : null}
+        </div>
+      </div>
+
+      <fieldset className="glia-mypage__fieldset">
+        <label className="glia-mypage__field">
+          <span className="glia-mypage__label">
+            이름 <span className="glia-mypage__req">필수</span>
+          </span>
+          <input
+            className="glia-mypage__input"
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
             required
             maxLength={50}
           />
-        </TrustField>
+        </label>
 
-        <TrustField label="한 줄 소개">
-          <TrustInput
+        <label className="glia-mypage__field">
+          <span className="glia-mypage__label">한 줄 소개</span>
+          <input
+            className="glia-mypage__input"
             type="text"
             value={headline}
             onChange={(event) => setHeadline(event.target.value)}
             maxLength={100}
-            placeholder="예: 프론트엔드 학습 중"
+            placeholder="예: 호흡과 정렬을 기록하는 중"
           />
-        </TrustField>
+        </label>
 
-        <TrustField label="소개">
-          <TrustTextarea
+        <label className="glia-mypage__field">
+          <span className="glia-mypage__label">소개</span>
+          <textarea
+            className="glia-mypage__textarea"
             value={bio}
             onChange={(event) => setBio(event.target.value)}
             rows={4}
             maxLength={500}
             placeholder="간단한 자기소개를 입력하세요."
           />
-        </TrustField>
+        </label>
 
-        <TrustField label="프로필 이미지 URL">
-          <TrustInput
+        <label className="glia-mypage__field">
+          <span className="glia-mypage__label">프로필 이미지 URL</span>
+          <input
+            className="glia-mypage__input"
             type="url"
             value={avatarUrl}
             onChange={(event) => setAvatarUrl(event.target.value)}
             placeholder="https://"
           />
-        </TrustField>
+        </label>
       </fieldset>
 
-      {error && <TrustAlert tone="error">{error}</TrustAlert>}
-      {success && <TrustAlert tone="success">프로필이 저장되었습니다.</TrustAlert>}
+      {error ? (
+        <p role="alert" className="glia-mypage__alert glia-mypage__alert--error">
+          {error}
+        </p>
+      ) : null}
+      {success ? <p className="glia-mypage__alert glia-mypage__alert--ok">프로필이 저장되었습니다.</p> : null}
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <TrustButton type="button" variant="secondary" onClick={() => router.push("/mypage")}>
+      <div className="glia-mypage__actions">
+        <button type="submit" disabled={loading} className="glia-mypage__btn glia-mypage__btn--primary">
+          {loading ? "저장 중…" : "저장"}
+        </button>
+        <button type="button" onClick={() => router.push("/mypage")} className="glia-mypage__btn glia-mypage__btn--ghost">
           취소
-        </TrustButton>
-        <TrustButton type="submit" variant="primary" disabled={loading}>
-          {loading ? "저장 중..." : "저장"}
-        </TrustButton>
+        </button>
       </div>
     </form>
   );

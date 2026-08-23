@@ -1,0 +1,1335 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/*
+ * Shop product detail — program offer page.
+ * Full-bleed hero + purchase rail. Intro stays readable; not a post clone.
+ * Scope: `.glia-pdp` on /shop/[id]
+ */
+
+.app-trust-root:has(.glia-pdp) .app-shell,
+.app-trust-root:has(.glia-pdp) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
+.app-trust-root:has(.glia-pdp) .app-shell__main--trust {
+  max-width: none;
+  padding: 0;
+}
+
+.corp-trust .shop-pdp-page.app-stack-page:has(.glia-pdp) {
+  gap: 0;
+  margin: 0;
+  width: 100%;
+  padding: 0;
+}
+
+@media (max-width: 1023px) {
+  .corp-trust .shop-pdp-page.app-stack-page:has(.glia-pdp) {
+    margin: 0;
+    width: 100%;
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (min-width: 1024px) {
+  .corp-trust .shop-pdp-page.app-stack-page:has(.glia-pdp) {
+    padding-bottom: 3rem;
+  }
+}
+
+.glia-pdp {
+  --glia-pdp-rule: 1px solid var(--glia-border);
+  --glia-pdp-read: 42rem;
+  --glia-pdp-page: var(--glia-page-max);
+  --glia-pdp-nav-top: 0px;
+  --glia-pdp-nav-h: 3.25rem;
+  --glia-pdp-slide-w: min(56rem, 86vw);
+  --glia-pdp-slide-gap: 0.75rem;
+  --glia-pdp-slide-i: 0;
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+.glia-pdp a:focus-visible,
+.glia-pdp button:focus-visible,
+.glia-pdp textarea:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--glia-focus-ring);
+}
+
+@media (min-width: 1024px) {
+  .glia-pdp {
+    /* UnifiedHeader is sticky on the document; sit just below it. */
+    --glia-pdp-nav-top: calc(var(--header-height) + 1px);
+  }
+}
+
+/* Full-width peek carousel */
+
+.glia-pdp__hero {
+  position: relative;
+  overflow: hidden;
+  padding: 0.85rem 0 1.15rem;
+  background:
+    radial-gradient(80% 90% at 0% 0%, color-mix(in srgb, var(--glia-mint) 28%, transparent) 0%, transparent 58%),
+    radial-gradient(70% 80% at 100% 0%, color-mix(in srgb, var(--glia-soft-blue) 26%, transparent) 0%, transparent 60%),
+    var(--glia-surface-secondary);
+}
+
+@media (min-width: 1024px) {
+  .glia-pdp {
+    --glia-pdp-slide-w: min(56rem, 70vw);
+    --glia-pdp-slide-gap: 1rem;
+  }
+
+  .glia-pdp__hero {
+    padding: 1.25rem 0 1.5rem;
+  }
+}
+
+.glia-pdp__gallery {
+  position: relative;
+  overflow: hidden;
+}
+
+.glia-pdp__track {
+  display: flex;
+  gap: var(--glia-pdp-slide-gap);
+  transform: translateX(
+    calc(
+      50% - (var(--glia-pdp-slide-i) * (var(--glia-pdp-slide-w) + var(--glia-pdp-slide-gap))) -
+        (var(--glia-pdp-slide-w) / 2)
+    )
+  );
+  transition: transform 520ms ease-out;
+}
+
+.glia-pdp__slide {
+  flex: 0 0 var(--glia-pdp-slide-w);
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  box-shadow: var(--glia-shadow-card);
+  aspect-ratio: 16 / 9;
+  opacity: 0.46;
+  transform: scale(0.96);
+  transition:
+    opacity 520ms ease-out,
+    transform 520ms ease-out;
+}
+
+.glia-pdp__slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.glia-pdp__slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.glia-pdp__count {
+  position: absolute;
+  top: 0.85rem;
+  right: max(0.85rem, calc((100% - var(--glia-pdp-slide-w)) / 2 + 0.85rem));
+  z-index: 2;
+  margin: 0;
+  padding: 0.22rem 0.6rem;
+  border-radius: var(--glia-radius-pill);
+  background: color-mix(in srgb, var(--glia-text) 52%, transparent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.glia-pdp__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-surface);
+  color: var(--glia-blue);
+  box-shadow: var(--glia-shadow-card);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.glia-pdp__arrow--prev {
+  left: max(0.5rem, calc((100% - var(--glia-pdp-slide-w)) / 2 - 1.35rem));
+}
+
+.glia-pdp__arrow--next {
+  right: max(0.5rem, calc((100% - var(--glia-pdp-slide-w)) / 2 - 1.35rem));
+}
+
+.glia-pdp__arrow:hover {
+  background: var(--glia-blue-light);
+}
+
+.glia-pdp__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.35rem var(--glia-gutter) 0.35rem;
+}
+
+@media (min-width: 1024px) {
+  .glia-pdp__identity {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+.glia-pdp__eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.glia-pdp__eyebrow::before {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue);
+}
+
+.glia-pdp__title {
+  margin: 0;
+  font-size: clamp(1.75rem, 5.4vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+  text-wrap: pretty;
+}
+
+.glia-pdp__byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.85rem;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__byline strong {
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-pdp__identity-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  margin: 0;
+}
+
+.glia-pdp__price-sale {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.glia-pdp__price-list {
+  font-size: 0.875rem;
+  color: var(--glia-text-secondary);
+  text-decoration: line-through;
+}
+
+.glia-pdp__price-rate {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--glia-blue);
+}
+
+.glia-pdp__owned {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-success);
+}
+
+/* Nav */
+
+.glia-pdp__nav {
+  position: sticky;
+  top: var(--glia-pdp-nav-top);
+  z-index: 35;
+  border-bottom: var(--glia-pdp-rule);
+  background: var(--glia-bg);
+}
+
+.glia-pdp__nav-list {
+  display: flex;
+  gap: 1.15rem;
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--glia-gutter);
+  overflow-x: auto;
+}
+
+@media (min-width: 1024px) {
+  .glia-pdp__nav {
+    margin-inline: 0;
+  }
+
+  .glia-pdp__nav-list {
+    padding-inline: 0;
+  }
+}
+
+.glia-pdp__nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.05rem;
+  color: var(--glia-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: color var(--glia-motion), box-shadow var(--glia-motion);
+}
+
+.glia-pdp__nav-link:hover {
+  color: var(--glia-text);
+}
+
+.glia-pdp__nav-link.is-active {
+  color: var(--glia-blue);
+  box-shadow: inset 0 -2px 0 var(--glia-blue);
+}
+
+.glia-pdp__nav-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+}
+
+/* Layout */
+
+.glia-pdp__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  max-width: var(--glia-pdp-page);
+  margin-inline: auto;
+  padding: 0;
+}
+
+@media (min-width: 1024px) {
+  .glia-pdp__layout {
+    grid-template-columns: minmax(0, 1fr) 21.5rem;
+    grid-template-areas: "main buy";
+    align-items: start;
+    gap: 3.5rem;
+    padding: 1.75rem var(--glia-shell-pad) 0;
+  }
+
+  .glia-pdp__main {
+    grid-area: main;
+  }
+
+  .glia-pdp__buy {
+    grid-area: buy;
+  }
+}
+
+.glia-pdp__main {
+  min-width: 0;
+}
+
+.glia-pdp__read {
+  min-width: 0;
+}
+
+/* Sections — editorial, not cards */
+
+.glia-pdp__section {
+  scroll-margin-top: calc(var(--glia-pdp-nav-top) + var(--glia-pdp-nav-h) + 0.5rem);
+  padding: 2rem var(--glia-gutter) 2.25rem;
+  border-top: var(--glia-pdp-rule);
+}
+
+.glia-pdp__section#pdp-reviews,
+.glia-pdp__section#pdp-creator {
+  min-height: 22rem;
+}
+
+.glia-pdp__section:first-child {
+  border-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .glia-pdp__section {
+    padding: 2.5rem 0;
+  }
+
+  .glia-pdp__section:first-child {
+    padding-top: 1.75rem;
+  }
+}
+
+.glia-pdp__section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.glia-pdp__section-title {
+  margin: 0 0 1.15rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.glia-pdp__section-head .glia-pdp__section-title {
+  margin-bottom: 0;
+}
+
+.glia-pdp__meta {
+  margin: 0 0 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+/* Intro body */
+
+.glia-pdp__body,
+.glia-pdp__body .post-markdown,
+.glia-pdp__body .lesson-markdown-prose,
+.glia-pdp__body .lesson-block-note-view {
+  max-width: var(--glia-pdp-read);
+  font-family: var(--glia-font);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.85;
+  color: var(--glia-text);
+}
+
+.glia-pdp__body .post-markdown > *:first-child,
+.glia-pdp__body .lesson-block-note-view > *:first-child {
+  margin-top: 0;
+}
+
+.glia-pdp__body .post-markdown p {
+  margin: 0 0 1.6rem;
+}
+
+.glia-pdp__body .post-markdown h1,
+.glia-pdp__body .post-markdown h2,
+.glia-pdp__body .post-markdown h3 {
+  margin: 2rem 0 0.7rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.glia-pdp__body .post-markdown h2 {
+  font-size: 1.25rem;
+}
+
+.glia-pdp__body .post-markdown h3 {
+  font-size: 1.125rem;
+}
+
+.glia-pdp__body .post-markdown ul,
+.glia-pdp__body .post-markdown ol {
+  margin: 0 0 1.5rem;
+  padding-left: 1.2rem;
+}
+
+.glia-pdp__body .post-markdown li {
+  margin: 0.4rem 0;
+}
+
+.glia-pdp__body .post-markdown li::marker {
+  color: var(--glia-blue);
+}
+
+.glia-pdp__body .post-markdown a,
+.glia-pdp__body .post-markdown__link,
+.glia-pdp__body .bn-inline-content a {
+  font-weight: 500;
+  color: var(--glia-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.glia-pdp__body .lesson-block-note-view .bn-container,
+.glia-pdp__body .lesson-block-note-view .bn-editor {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.glia-pdp__muted {
+  margin: 0;
+  max-width: var(--glia-pdp-read);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--glia-text-secondary);
+}
+
+/* Supplies — program kit, not an article list */
+
+.glia-pdp__supplies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: var(--glia-pdp-read);
+}
+
+.glia-pdp__supply {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  color: var(--glia-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.glia-pdp__supply::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue);
+}
+
+/* Curriculum */
+
+.glia-pdp__weeks {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.glia-pdp__weeks-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.glia-pdp__week {
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+}
+
+.glia-pdp__week-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.glia-pdp__week-index {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.7rem;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.glia-pdp__week-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  font-size: 0.9875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--glia-text);
+}
+
+.glia-pdp__week-meta {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__lessons {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem 0.85rem;
+}
+
+.glia-pdp__lesson {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--glia-border) 70%, transparent);
+}
+
+.glia-pdp__lesson-title {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--glia-text);
+}
+
+.glia-pdp__lesson-meta {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__course-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-blue-dark);
+}
+
+/* Reviews — conversation, not cards */
+
+.glia-pdp__review-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__review-score {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--glia-text);
+}
+
+.glia-pdp__stars {
+  display: inline-flex;
+  gap: 0.08rem;
+  letter-spacing: 0.04em;
+}
+
+.glia-pdp__stars--on {
+  color: var(--glia-warning);
+}
+
+.glia-pdp__stars--off {
+  color: var(--glia-border);
+}
+
+.glia-pdp__reviews {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.glia-pdp__review {
+  padding: 1.15rem 0;
+  border-top: var(--glia-pdp-rule);
+}
+
+.glia-pdp__review:first-child {
+  border-top: 0;
+  padding-top: 0.25rem;
+}
+
+.glia-pdp__review-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.7rem;
+  margin-bottom: 0.45rem;
+}
+
+.glia-pdp__review-author {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-pdp__review-time {
+  font-size: 0.75rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__review-body {
+  margin: 0;
+  max-width: var(--glia-pdp-read);
+  font-size: 0.9875rem;
+  line-height: 1.75;
+  color: var(--glia-text);
+}
+
+.glia-pdp__review-body--muted {
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+}
+
+.glia-pdp__review-label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-pdp__review-stars {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.glia-pdp__review-star {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: transparent;
+  font-size: 1.25rem;
+  color: var(--glia-border);
+  cursor: pointer;
+}
+
+.glia-pdp__review-star.is-active {
+  color: var(--glia-warning);
+}
+
+.glia-pdp__review-textarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  color: var(--glia-text);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.glia-pdp__review-textarea:focus {
+  border-color: var(--glia-blue);
+  box-shadow: 0 0 0 3px rgba(30, 131, 158, 0.14);
+  outline: none;
+}
+
+.glia-pdp__review-submit {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0 1.15rem;
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--glia-shadow-button);
+}
+
+.glia-pdp__review-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.glia-pdp__review-submit:disabled {
+  opacity: 0.65;
+  cursor: default;
+  box-shadow: none;
+}
+
+.glia-pdp__note {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__review-empty {
+  display: flex;
+  min-height: 12rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.glia-pdp__review-empty-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-pdp__review-empty-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--glia-error);
+}
+
+/* Creator */
+
+.glia-pdp__creator {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  max-width: var(--glia-pdp-read);
+}
+
+.glia-pdp__avatar {
+  display: flex;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.glia-pdp__creator-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--glia-text);
+}
+
+.glia-pdp__creator-headline {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__creator-bio {
+  margin: 0.7rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--glia-text);
+}
+
+/* Offer card — visible on mobile as checkout confirmation */
+
+.glia-pdp__buy {
+  padding: 0.85rem var(--glia-gutter) 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .glia-pdp__buy {
+    position: sticky;
+    top: calc(var(--glia-pdp-nav-top) + 1.25rem);
+    padding: 0;
+  }
+}
+
+.glia-pdp__buy-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.35rem 1.25rem 1.4rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  box-shadow: var(--glia-shadow-card);
+}
+
+.glia-pdp__buy-creator {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__buy-avatar {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.glia-pdp__buy-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  margin: 0;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--glia-radius-pill);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue-dark);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.glia-pdp__buy-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: var(--glia-text);
+}
+
+.glia-pdp__buy-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-pdp__buy-rating--muted {
+  font-weight: 500;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__buy-rating span:last-child {
+  font-weight: 500;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__buy-price {
+  margin: 0.25rem 0 0;
+}
+
+.glia-pdp__buy-original {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.55rem;
+  margin: 0 0 0.2rem;
+}
+
+.glia-pdp__buy-price .glia-pdp__price-sale {
+  font-size: 1.5rem;
+}
+
+.glia-pdp__buy-owned {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-success);
+}
+
+.glia-pdp__buy-actions {
+  margin-top: 0.35rem;
+}
+
+.glia-pdp__bundle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0.15rem 0 0;
+  padding: 0.85rem 0 0;
+  border-top: var(--glia-pdp-rule);
+}
+
+.glia-pdp__bundle-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__bundle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.glia-pdp__bundle-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.75rem 0.8rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface-secondary);
+}
+
+.glia-pdp__bundle-price {
+  flex-shrink: 0;
+  margin: 0.15rem 0 0 auto;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--glia-text);
+}
+
+.glia-pdp__bundle-icon {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-blue-light);
+  color: var(--glia-blue);
+}
+
+.glia-pdp__bundle-icon--coaching {
+  background: var(--glia-mint);
+  color: var(--glia-blue-dark);
+}
+
+.glia-pdp__bundle-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.glia-pdp__bundle-kind {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--glia-blue);
+}
+
+.glia-pdp__bundle-icon--coaching + .glia-pdp__bundle-copy .glia-pdp__bundle-kind {
+  color: var(--glia-blue-dark);
+}
+
+.glia-pdp__bundle-title {
+  margin: 0.15rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--glia-text);
+}
+
+.glia-pdp__bundle-meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.15rem;
+}
+
+.glia-pdp__total-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--glia-text);
+}
+
+.glia-pdp__total-row .glia-pdp__price-sale {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 1023px) {
+  .glia-pdp__buy-creator,
+  .glia-pdp__buy-eyebrow,
+  .glia-pdp__buy-title,
+  .glia-pdp__buy-rating,
+  .glia-pdp__buy-actions {
+    display: none;
+  }
+}
+
+/* Apply CTA */
+
+.glia-pdp .shop-pdp-apply-btn,
+.shop-pdp-apply-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-primary);
+  color: #fff;
+  font-family: var(--glia-font);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--glia-shadow-button);
+  text-decoration: none;
+  transition: transform var(--glia-motion), box-shadow var(--glia-motion);
+}
+
+.glia-pdp .shop-pdp-apply-btn:hover:not(:disabled),
+.shop-pdp-apply-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.shop-pdp-apply-btn--compact {
+  min-height: 2.75rem;
+  width: auto;
+  min-width: 7rem;
+  padding-inline: 1.15rem;
+  font-size: 0.875rem;
+}
+
+.shop-pdp-apply-btn:disabled,
+.shop-pdp-apply-btn--pending {
+  background: var(--glia-surface-secondary);
+  color: var(--glia-text-secondary);
+  box-shadow: none;
+  cursor: default;
+  transform: none;
+}
+
+.shop-pdp-apply-error {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--glia-error);
+}
+
+/* Sticky bar */
+
+.shop-pdp-sticky-bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  border-top: 1px solid var(--glia-border);
+  background: var(--glia-glass);
+  padding: 0.75rem var(--glia-gutter) calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  backdrop-filter: blur(16px);
+}
+
+@media (min-width: 1024px) {
+  .shop-pdp-sticky-bar {
+    display: none;
+  }
+}
+
+.shop-pdp-sticky-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.875rem;
+}
+
+.shop-pdp-sticky-bar__copy {
+  min-width: 0;
+}
+
+.shop-pdp-sticky-bar__title {
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-pdp-sticky-bar__price {
+  margin: 0.1rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--glia-text);
+}
+
+.shop-pdp-sticky-bar__owned {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--glia-success);
+}
+
+.shop-pdp-sticky-bar__pending {
+  margin: 0.1rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--glia-warning);
+}
+
+.shop-pdp-sticky-bar__cta {
+  flex-shrink: 0;
+}
+
+/* Modal — portaled to body */
+
+.shop-pdp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(24, 50, 56, 0.38);
+}
+
+.shop-pdp-modal__panel {
+  width: min(100%, 22rem);
+  padding: 1.5rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-lg);
+  background: var(--glia-surface);
+  box-shadow: var(--glia-shadow-float);
+}
+
+.shop-pdp-modal__title {
+  margin: 0 0 0.7rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--glia-text);
+}
+
+.shop-pdp-modal__body {
+  margin: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--glia-text-secondary);
+}
+
+.shop-pdp-modal__product {
+  display: block;
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--glia-text);
+}
+
+.shop-pdp-modal__price {
+  display: block;
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+}
+
+.shop-pdp-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.shop-pdp-modal__dismiss {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: transparent;
+  color: var(--glia-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glia-pdp .shop-pdp-apply-btn,
+  .shop-pdp-apply-btn,
+  .glia-pdp__review-submit,
+  .glia-pdp__nav-link,
+  .glia-pdp__slide,
+  .glia-pdp__track {
+    transition: none;
+  }
+
+  .glia-pdp .shop-pdp-apply-btn:hover:not(:disabled),
+  .shop-pdp-apply-btn:hover:not(:disabled),
+  .glia-pdp__review-submit:hover:not(:disabled) {
+    transform: none;
+  }
+}

@@ -3,8 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { TrustAlert, TrustButton } from "@/components/corporate-trust/app-trust-ui";
-
 type Question = {
   id: string;
   prompt: string;
@@ -108,49 +106,45 @@ export function QuizPlayer({
   }
 
   return (
-    <section className="trust-card p-6">
-      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      {description && <p className="mt-2 text-sm text-slate-600">{description}</p>}
-      <p className="mt-2 text-xs text-slate-500">
+    <section className="lesson-task">
+      <h2 className="lesson-task__title">{title}</h2>
+      {description ? <p className="lesson-task__desc">{description}</p> : null}
+      <p className="lesson-task__meta">
         합격 점수 {passingScore}% · {questions.length}문항
       </p>
 
       {result ? (
         <div
           role="status"
-          className={`mt-6 rounded-xl px-5 py-4 ${
-            result.isPassed ? "trust-alert trust-alert--success" : "trust-alert trust-alert--info"
+          className={`lesson-task__result ${
+            result.isPassed ? "lesson-task__result--pass" : "lesson-task__result--fail"
           }`}
         >
-          <p className="font-semibold">
+          <p className="lesson-task__result-title">
             {result.isPassed ? "합격!" : "아직 합격 점수에 미달입니다"}
           </p>
-          <p className="mt-1 text-sm opacity-90">
+          <p className="lesson-task__result-body">
             점수 {Math.round(result.score)}%
             {result.correctCount > 0
               ? ` · ${result.correctCount}/${result.totalQuestions} 정답`
               : ""}
           </p>
-          {!result.isPassed && (
-            <button
-              type="button"
-              onClick={() => setResult(null)}
-              className="trust-link corp-trust-focus mt-3 text-sm font-semibold underline"
-            >
+          {!result.isPassed ? (
+            <button type="button" onClick={() => setResult(null)} className="lesson-task__retry">
               다시 응시하기
             </button>
-          )}
+          ) : null}
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <form onSubmit={handleSubmit} className="lesson-task__form">
           {questions.map((question, index) => (
-            <fieldset key={question.id} className="trust-quiz-fieldset">
-              <legend className="trust-quiz-legend">
+            <fieldset key={question.id} className="lesson-task__fieldset">
+              <legend className="lesson-task__legend">
                 {index + 1}. {question.prompt}
               </legend>
-              <div className="mt-3 space-y-2">
+              <div className="lesson-task__options">
                 {question.options.map((option) => (
-                  <label key={option.id} className="trust-quiz-option">
+                  <label key={option.id} className="lesson-task__option">
                     <input
                       type="radio"
                       name={question.id}
@@ -159,7 +153,6 @@ export function QuizPlayer({
                       onChange={() =>
                         setAnswers((current) => ({ ...current, [question.id]: option.id }))
                       }
-                      className="shell-focus-ring"
                     />
                     {option.label}
                   </label>
@@ -167,10 +160,14 @@ export function QuizPlayer({
               </div>
             </fieldset>
           ))}
-          {error && <TrustAlert tone="error">{error}</TrustAlert>}
-          <TrustButton type="submit" variant="primary" disabled={busy}>
+          {error ? (
+            <p className="lesson-task__alert lesson-task__alert--error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <button type="submit" className="lesson-task__btn" disabled={busy}>
             {busy ? "채점 중..." : "제출하기"}
-          </TrustButton>
+          </button>
         </form>
       )}
     </section>

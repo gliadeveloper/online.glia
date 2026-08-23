@@ -13,6 +13,8 @@ type ProductApplyButtonProps = {
   className?: string;
   disabled?: boolean;
   pendingOrderId?: string;
+  productTitle?: string;
+  priceLabel?: string;
 };
 
 export function ProductApplyButton({
@@ -23,10 +25,13 @@ export function ProductApplyButton({
   className,
   disabled = false,
   pendingOrderId,
+  productTitle,
+  priceLabel,
 }: ProductApplyButtonProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [doneOpen, setDoneOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(pendingOrderId ?? null);
@@ -35,9 +40,23 @@ export function ProductApplyButton({
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!confirmOpen && !doneOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !loading) {
+        setConfirmOpen(false);
+        setDoneOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [confirmOpen, doneOpen, loading]);
+
   const isPending = disabled || !!submittedOrderId;
 
-  async function handleClick() {
+  function handleClick() {
     if (isPending) {
       if (submittedOrderId) {
         router.push(`/orders/${submittedOrderId}`);
@@ -50,6 +69,11 @@ export function ProductApplyButton({
       return;
     }
 
+    setError(null);
+    setConfirmOpen(true);
+  }
+
+  async function handleConfirm() {
     setLoading(true);
     setError(null);
 
@@ -66,6 +90,7 @@ export function ProductApplyButton({
       const data = (await response.json()) as { error?: string; id?: string; code?: string };
 
       if (!response.ok) {
+        setConfirmOpen(false);
         if (data.code === "APPLICATION_PENDING" || data.code === "ALREADY_OWNED") {
           setError(data.error ?? "신청할 수 없습니다.");
         } else {
@@ -77,9 +102,11 @@ export function ProductApplyButton({
       if (data.id) {
         setSubmittedOrderId(data.id);
       }
-      setOpen(true);
+      setConfirmOpen(false);
+      setDoneOpen(true);
       router.refresh();
     } catch {
+      setConfirmOpen(false);
       setError("네트워크 오류가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -93,7 +120,7 @@ export function ProductApplyButton({
         onClick={handleClick}
         disabled={loading || isPending}
         className={[
-          "shop-pdp-apply-btn corp-trust-focus shell-focus-ring",
+          "shop-pdp-apply-btn",
           compact ? "shop-pdp-apply-btn--compact" : "",
           isPending ? "shop-pdp-apply-btn--pending" : "",
           className ?? "",
@@ -110,9 +137,57 @@ export function ProductApplyButton({
         </p>
       ) : null}
 
-      {mounted && open && submittedOrderId
+      {mounted && confirmOpen
         ? createPortal(
-            <div className="shop-pdp-modal" role="presentation" onClick={() => setOpen(false)}>
+            <div
+              className="shop-pdp-modal"
+              role="presentation"
+              onClick={() => {
+                if (!loading) setConfirmOpen(false);
+              }}
+            >
+              <div
+                className="shop-pdp-modal__panel"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="apply-confirm-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <h2 id="apply-confirm-title" className="shop-pdp-modal__title">
+                  이 프로그램으로 신청할까요?
+                </h2>
+                <p className="shop-pdp-modal__body">
+                  {productTitle ? <strong className="shop-pdp-modal__product">{productTitle}</strong> : null}
+                  {priceLabel ? <span className="shop-pdp-modal__price">{priceLabel}</span> : null}
+                  신청 후 코치가 확인하면 수강이 시작됩니다. 지금 결제가 진행되지는 않습니다.
+                </p>
+                <div className="shop-pdp-modal__actions">
+                  <button
+                    type="button"
+                    className="shop-pdp-apply-btn shop-pdp-modal__confirm"
+                    onClick={handleConfirm}
+                    disabled={loading}
+                  >
+                    {loading ? "신청 중…" : "신청하기"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmOpen(false)}
+                    disabled={loading}
+                    className="shop-pdp-modal__dismiss shell-focus-ring"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {mounted && doneOpen && submittedOrderId
+        ? createPortal(
+            <div className="shop-pdp-modal" role="presentation" onClick={() => setDoneOpen(false)}>
               <div
                 className="shop-pdp-modal__panel"
                 role="dialog"
@@ -131,14 +206,14 @@ export function ProductApplyButton({
                 <div className="shop-pdp-modal__actions">
                   <Link
                     href={`/orders/${submittedOrderId}`}
-                    className="shop-pdp-apply-btn shop-pdp-modal__confirm corp-trust-focus shell-focus-ring"
-                    onClick={() => setOpen(false)}
+                    className="shop-pdp-apply-btn shop-pdp-modal__confirm"
+                    onClick={() => setDoneOpen(false)}
                   >
                     신청 내역 보기
                   </Link>
                   <button
                     type="button"
-                    onClick={() => setOpen(false)}
+                    onClick={() => setDoneOpen(false)}
                     className="shop-pdp-modal__dismiss shell-focus-ring"
                   >
                     확인

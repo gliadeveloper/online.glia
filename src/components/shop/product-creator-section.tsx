@@ -12,21 +12,21 @@ export function ProductCreatorSection({ instructor }: ProductCreatorSectionProps
   const bio = instructor.profile?.bio ?? instructor.profile?.headline;
 
   return (
-    <section id="pdp-creator" className="shop-pdp-block" aria-labelledby="pdp-creator-heading">
-      <h2 id="pdp-creator-heading" className="shop-pdp-block__title">
+    <section id="pdp-creator" className="glia-pdp__section" aria-labelledby="pdp-creator-heading">
+      <h2 id="pdp-creator-heading" className="glia-pdp__section-title">
         크리에이터
       </h2>
 
-      <div className="shop-pdp-creator">
-        <div className="shop-pdp-creator__avatar" aria-hidden="true">
+      <div className="glia-pdp__creator">
+        <div className="glia-pdp__avatar" aria-hidden="true">
           {displayName(instructor).slice(0, 1)}
         </div>
-        <div className="shop-pdp-creator__body">
-          <p className="shop-pdp-creator__name">{displayName(instructor)}</p>
+        <div>
+          <p className="glia-pdp__creator-name">{displayName(instructor)}</p>
           {instructor.profile?.headline ? (
-            <p className="shop-pdp-creator__headline">{instructor.profile.headline}</p>
+            <p className="glia-pdp__creator-headline">{instructor.profile.headline}</p>
           ) : null}
-          {bio ? <p className="shop-pdp-creator__bio">{bio}</p> : null}
+          {bio ? <p className="glia-pdp__creator-bio">{bio}</p> : null}
         </div>
       </div>
     </section>

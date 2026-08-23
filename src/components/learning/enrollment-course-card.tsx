@@ -12,6 +12,7 @@ import {
   formatEnrollmentAccessUntil,
 } from "@/lib/enrollment-access";
 import { enrollmentStatusLabels } from "@/lib/customer-labels";
+import { resumeLessonHref, resumeLessonId } from "@/lib/learning-course-detail";
 import type { UserEnrollment } from "@/lib/learning-enrollments";
 
 type EnrollmentCourseCardProps = {
@@ -20,7 +21,7 @@ type EnrollmentCourseCardProps = {
 
 export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) {
   const totalLessons = enrollment.course.modules.reduce(
-    (sum, module) => sum + module._count.lessons,
+    (sum, module) => sum + module.lessons.length,
     0,
   );
   const completedLessons = enrollment.progress.filter(
@@ -126,7 +127,10 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
   return (
     <li className="glia-course">
       <Link
-        href={`/learning/${enrollment.course.id}`}
+        href={resumeLessonHref(
+          enrollment.course.id,
+          resumeLessonId(enrollment.course.modules, enrollment.progress),
+        )}
         className="glia-course__frame glia-course__frame--interactive"
       >
         {cardInner}

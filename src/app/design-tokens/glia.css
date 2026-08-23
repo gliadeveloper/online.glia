@@ -65,7 +65,10 @@
   .app-trust-root .glia-community,
   .app-trust-root .glia-learning,
   .app-trust-root .glia-coaching,
-  .app-trust-root .glia-sessions {
+  .app-trust-root .glia-sessions,
+  .app-trust-root .glia-shop,
+  .app-trust-root .glia-mypage,
+  .app-trust-root .glia-orders {
     margin: 0 auto;
     width: 100%;
     max-width: var(--glia-page-max);
@@ -75,7 +78,10 @@
   .app-trust-root .glia-community__hero,
   .app-trust-root .glia-learning__hero,
   .app-trust-root .glia-coaching__hero,
-  .app-trust-root .glia-sessions__hero {
+  .app-trust-root .glia-sessions__hero,
+  .app-trust-root .glia-shop__head,
+  .app-trust-root .glia-mypage__head,
+  .app-trust-root .glia-orders__head {
     padding-inline: var(--glia-gutter-lg);
   }
 

@@ -5,6 +5,7 @@ import {
   createCoachProduct,
   listCoachProducts,
 } from "@/lib/coach-commerce";
+import { parseProductSupplies } from "@/lib/products";
 import type { ProductKind } from "@/generated/prisma/client";
 
 export async function GET(request: Request) {
@@ -24,6 +25,8 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       title?: string;
       description?: string;
+      descriptionMetadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
+      supplies?: unknown;
       kind?: ProductKind;
       listPrice?: number;
       salePrice?: number;
@@ -51,6 +54,8 @@ export async function POST(request: Request) {
       coachId: userId,
       title: body.title,
       description: body.description,
+      descriptionMetadata: body.descriptionMetadata,
+      supplies: parseProductSupplies(body.supplies),
       kind: body.kind,
       listPrice: body.listPrice,
       salePrice: body.salePrice,

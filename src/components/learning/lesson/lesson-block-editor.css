@@ -26,7 +26,7 @@
 }
 
 .lesson-block-editor .bn-inline-content a {
-  color: #4f46e5;
+  color: var(--glia-blue);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;

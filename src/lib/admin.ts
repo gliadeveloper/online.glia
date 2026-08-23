@@ -12,7 +12,7 @@ export async function requireAdmin() {
   }
 
   if (user.role !== "ADMIN") {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   return user;

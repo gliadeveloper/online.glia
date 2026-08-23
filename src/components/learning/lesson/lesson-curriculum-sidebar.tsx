@@ -70,7 +70,7 @@ export function LessonCurriculumSidebar({
     <nav aria-label="커리큘럼" className={compact ? "lesson-curriculum lesson-curriculum--compact" : "lesson-curriculum"}>
       {modules.map((module) => (
         <section key={module.id} className="lesson-curriculum__chapter">
-          <p className="lesson-curriculum__chapter-label">CHAPTER {module.order}</p>
+          <p className="lesson-curriculum__chapter-label">모듈 {module.order}</p>
           <h2 className="lesson-curriculum__chapter-title">{module.title}</h2>
 
           <ul className="lesson-curriculum__list">

@@ -1,24 +1,24 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import {
-  AppButtonLink,
-  AppPanel,
-  AppStackBackLink,
-  AppStackPage,
-  AppStatusBanner,
-} from "@/components/app";
-import { TabPageHeader } from "@/components/corporate-trust/tab-page-header";
+import { AppStackPage } from "@/components/app";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
-import { Typography } from "@/components/typography/typography";
-import { formatKrw, productKindLabels } from "@/lib/customer-labels";
+import { formatKrw } from "@/lib/customer-labels";
 import { getUserOrder } from "@/lib/orders";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
+
+import "@/components/orders/orders-glia.css";
 
 type OrderDetailPageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ purchased?: string }>;
 };
+
+function itemKindLabel(kind: string) {
+  if (kind === "COACHING_ACCESS") return "코칭";
+  return "강의";
+}
 
 export default async function OrderDetailPage({ params, searchParams }: OrderDetailPageProps) {
   const user = await getCurrentUser();
@@ -35,91 +35,81 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
   }
 
   const product = order.lines[0]?.product;
+  const hasCourse = product?.items.some((item) => item.courseId);
+  const hasCoaching = product?.items.some((item) => item.coachingOfferingId);
 
   return (
-    <AppStackPage>
+    <AppStackPage className="orders-page">
       <StackNavTitle title="주문 상세" />
 
-      <TabPageHeader
-        eyebrow="Order"
-        title="주문"
-        titleAccent="상세"
-        description={product?.title ?? "결제 정보와 포함 항목을 확인하세요."}
-        variant="stack"
-      />
+      <div className="glia-orders">
+        <header className="glia-orders__head">
+          <p className="glia-orders__kicker">Order</p>
+          <h1 className="glia-orders__title">주문 상세</h1>
+          <p className="glia-orders__lede">{product?.title ?? "결제 정보와 포함 항목을 확인하세요."}</p>
+        </header>
 
-      <AppStackBackLink href="/orders">← 주문 내역</AppStackBackLink>
+        {purchased === "1" && order.status === "PAID" ? (
+          <p className="glia-orders__notice">승인이 완료되었습니다. 아래에서 수강·코칭을 시작하세요.</p>
+        ) : null}
+        {order.status === "PENDING" ? (
+          <p className="glia-orders__notice">코치 승인 대기 중입니다. 승인 후 내 학습에서 수강을 시작할 수 있어요.</p>
+        ) : null}
+        {order.status === "CANCELLED" ? (
+          <p className="glia-orders__notice">신청이 거절되었습니다. 상품 페이지에서 다시 신청할 수 있어요.</p>
+        ) : null}
 
-      {purchased === "1" && order.status === "PAID" && (
-        <AppStatusBanner>승인이 완료되었습니다. 아래에서 수강·코칭 이용을 시작하세요.</AppStatusBanner>
-      )}
-
-      {order.status === "PENDING" && (
-        <AppStatusBanner>코치 승인 대기 중입니다. 승인 완료 후 내 학습에서 수강을 시작할 수 있어요.</AppStatusBanner>
-      )}
-
-      {order.status === "CANCELLED" && (
-        <AppStatusBanner>신청이 거절되었습니다. 상품 페이지에서 다시 신청할 수 있어요.</AppStatusBanner>
-      )}
-
-      <AppPanel>
-        <div className="app-list-row__inner app-list-row__inner--top">
-          <div className="min-w-0">
-            <Typography as="h1" role="pageTitle" weight="semibold" color="primary">
-              {product?.title ?? "주문"}
-            </Typography>
-            <Typography as="p" role="bodySecondary" color="secondary" className="app-section-header__desc">
-              {order.createdAt.toLocaleString("ko-KR")} · #{order.id.slice(0, 8)}
-            </Typography>
+        <div className="glia-orders__detail">
+          <div className="glia-orders__detail-top">
+            <div>
+              <h2 className="glia-orders__detail-title">{product?.title ?? "주문"}</h2>
+              <p className="glia-orders__meta">
+                {order.createdAt.toLocaleString("ko-KR")} · #{order.id.slice(0, 8)}
+              </p>
+            </div>
+            <OrderStatusPill status={order.status} variant="glia" />
           </div>
-          <OrderStatusPill status={order.status} />
-        </div>
 
-        <Typography as="p" role="sectionTitle" weight="semibold" color="primary" className="app-section">
-          {formatKrw(order.total)}
-        </Typography>
+          <p className="glia-orders__detail-price">{formatKrw(order.total)}</p>
 
-        {product && (
-          <div className="app-section">
-            <Typography as="h2" role="label" weight="medium" color="secondary">
-              포함 항목
-            </Typography>
-            <ul className="app-section">
-              {product.items.map((item) => (
-                <li key={item.id} className="app-panel app-panel--padded">
-                  <Typography as="p" role="bodySecondary" weight="medium" color="primary">
-                    {item.course?.title ?? item.coachingOffering?.title}
-                  </Typography>
-                  <Typography as="p" role="caption" color="secondary">
-                    {item.kind}
-                  </Typography>
-                </li>
-              ))}
-            </ul>
+          {product ? (
+            <>
+              <h3 className="glia-orders__section-title">포함 항목</h3>
+              <ul className="glia-orders__items">
+                {product.items.map((item) => (
+                  <li key={item.id} className="glia-orders__item">
+                    <p className="glia-orders__item-title">
+                      {item.course?.title ?? item.coachingOffering?.title}
+                    </p>
+                    <p className="glia-orders__item-kind">{itemKindLabel(item.kind)}</p>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+
+          <div className="glia-orders__actions">
+            {order.status === "PAID" && hasCourse ? (
+              <Link href="/learning" className="glia-orders__btn glia-orders__btn--primary">
+                내 학습으로
+              </Link>
+            ) : null}
+            {order.status === "PAID" && hasCoaching ? (
+              <Link href="/coaching" className="glia-orders__btn glia-orders__btn--ghost">
+                코칭 보기
+              </Link>
+            ) : null}
+            {order.status === "PENDING" && product ? (
+              <Link href={`/shop/${product.id}`} className="glia-orders__btn glia-orders__btn--ghost">
+                상품으로 돌아가기
+              </Link>
+            ) : null}
+            <Link href="/orders" className="glia-orders__btn glia-orders__btn--ghost">
+              목록
+            </Link>
           </div>
-        )}
-
-        <div className="app-card__footer">
-          {order.status === "PAID" && product?.items.some((item) => item.courseId) && (
-            <AppButtonLink href="/learning">내 학습으로</AppButtonLink>
-          )}
-          {order.status === "PAID" && product?.items.some((item) => item.coachingOfferingId) && (
-            <AppButtonLink href="/coaching" variant="secondary">
-              코칭 예약
-            </AppButtonLink>
-          )}
-          {order.status === "PENDING" && product && (
-            <AppButtonLink href={`/shop/${product.id}`} variant="secondary">
-              상품으로 돌아가기
-            </AppButtonLink>
-          )}
-          {product && (
-            <Typography as="span" role="caption" color="secondary" className="self-center">
-              {productKindLabels[product.kind]}
-            </Typography>
-          )}
         </div>
-      </AppPanel>
+      </div>
     </AppStackPage>
   );
 }

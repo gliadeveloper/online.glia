@@ -3,12 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  TrustAlert,
-  TrustButton,
-  TrustField,
-  TrustTextarea,
-} from "@/components/corporate-trust/app-trust-ui";
 import { submissionStatusLabels } from "@/lib/customer-labels";
 import type { SubmissionStatus } from "@/generated/prisma/client";
 
@@ -71,27 +65,31 @@ export function AssignmentForm({
   }
 
   return (
-    <section className="trust-card p-6">
-      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      {description && <p className="mt-2 text-sm text-slate-600">{description}</p>}
-      <p className="mt-2 text-xs text-slate-500">
+    <section className="lesson-task">
+      <h2 className="lesson-task__title">{title}</h2>
+      {description ? <p className="lesson-task__desc">{description}</p> : null}
+      <p className="lesson-task__meta">
         만점 {maxScore}점
         {dueDate ? ` · 마감 ${new Date(dueDate).toLocaleDateString("ko-KR")}` : ""}
       </p>
 
-      {existing && (
-        <div className="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-sm">
-          <p className="font-semibold text-slate-900">{submissionStatusLabels[existing.status]}</p>
-          {existing.score != null && (
-            <p className="mt-1 text-slate-600">점수 {existing.score}점</p>
-          )}
-          {existing.feedback && <p className="mt-2 text-slate-600">피드백: {existing.feedback}</p>}
+      {existing ? (
+        <div className="lesson-task__status">
+          <p className="lesson-task__status-title">{submissionStatusLabels[existing.status]}</p>
+          {existing.score != null ? (
+            <p className="lesson-task__status-body">점수 {existing.score}점</p>
+          ) : null}
+          {existing.feedback ? (
+            <p className="lesson-task__status-body">피드백: {existing.feedback}</p>
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-        <TrustField label="제출 내용">
-          <TrustTextarea
+      <form onSubmit={handleSubmit} className="lesson-task__form">
+        <label className="lesson-task__field">
+          <span className="lesson-task__label">제출 내용</span>
+          <textarea
+            className="lesson-task__textarea"
             value={content}
             onChange={(event) => setContent(event.target.value)}
             rows={8}
@@ -99,19 +97,25 @@ export function AssignmentForm({
             disabled={submitted && existing?.status === "GRADED"}
             placeholder="과제 내용, GitHub 링크, 구현 설명 등을 작성하세요."
           />
-        </TrustField>
+        </label>
 
-        {error && <TrustAlert tone="error">{error}</TrustAlert>}
+        {error ? (
+          <p className="lesson-task__alert lesson-task__alert--error" role="alert">
+            {error}
+          </p>
+        ) : null}
 
-        {(!submitted || existing?.status === "RETURNED") && (
-          <TrustButton type="submit" variant="primary" disabled={busy}>
+        {!submitted || existing?.status === "RETURNED" ? (
+          <button type="submit" className="lesson-task__btn" disabled={busy}>
             {busy ? "제출 중..." : submitted ? "다시 제출" : "과제 제출"}
-          </TrustButton>
-        )}
+          </button>
+        ) : null}
 
-        {submitted && existing?.status !== "RETURNED" && (
-          <TrustAlert tone="success">제출이 완료되었습니다.</TrustAlert>
-        )}
+        {submitted && existing?.status !== "RETURNED" ? (
+          <p className="lesson-task__alert lesson-task__alert--success" role="status">
+            제출이 완료되었습니다.
+          </p>
+        ) : null}
       </form>
     </section>
   );

@@ -135,7 +135,7 @@ export function AdminShell({ userName, userEmail, children }: AdminShellProps) {
 
           <div className="space-y-2 border-t border-zinc-800 px-3 py-4">
             <Link
-              href="/dashboard"
+              href="/"
               className="block rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-400 transition hover:bg-zinc-900 hover:text-white"
             >
               고객 화면 보기
@@ -159,7 +159,7 @@ export function AdminShell({ userName, userEmail, children }: AdminShellProps) {
               </div>
               <div className="flex gap-2">
                 <Link
-                  href="/dashboard"
+                  href="/"
                   className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300"
                 >
                   고객 화면
