@@ -118,6 +118,28 @@
   transition: transform var(--glia-motion-long);
 }
 
+.glia-shop-item__fallback {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  color: var(--glia-blue-dark);
+}
+
+.glia-shop-item__fallback span {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.glia-shop-item__fallback strong {
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
 .glia-shop-item:hover .glia-shop-item__visual img {
   transform: scale(1.03);
 }

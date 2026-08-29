@@ -59,7 +59,12 @@ export function ProductListCard({ product, shopState }: ProductListCardProps) {
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={cover.src} alt="" />
-        ) : null}
+        ) : (
+          <div className="glia-shop-item__fallback" aria-hidden="true">
+            <span>{programKindLabel(product.kind)}</span>
+            <strong>GLIA</strong>
+          </div>
+        )}
       </div>
 
       <div className="glia-shop-item__copy">

@@ -77,7 +77,7 @@ export function ProductDetailPanel({
   return (
     <article className="glia-pdp">
       <header className="glia-pdp__hero">
-        <ProductHeroGallery images={heroImages} />
+        <ProductHeroGallery images={heroImages} title={product.title} eyebrow={programEyebrow} />
       </header>
 
       <div className="glia-pdp__layout">

@@ -5,13 +5,6 @@ export type ProductHeroImage = {
   alt: string;
 };
 
-const FALLBACK_HERO_IMAGES: ProductHeroImage[] = [
-  { src: "/shop/hero/alignment.jpg", alt: "정렬과 자세를 알아차리는 순간" },
-  { src: "/shop/hero/breath.jpg", alt: "호흡과 몸의 신호를 관찰하는 순간" },
-  { src: "/shop/hero/movement.jpg", alt: "천천히 걷는 회복의 움직임" },
-  { src: "/shop/hero/recovery.jpg", alt: "신경계가 쉬는 회복의 자리" },
-];
-
 function extractMarkdownImages(description: string | null | undefined) {
   if (!description) return [];
 
@@ -28,6 +21,7 @@ function extractMarkdownImages(description: string | null | undefined) {
     });
 }
 
+/** Course thumbnail + intro markdown images only. No stock filler. */
 export function getProductHeroImages(product: CatalogProduct): ProductHeroImage[] {
   const fromCourses = product.items
     .map((item) => item.course?.thumbnailUrl?.trim())
@@ -42,12 +36,6 @@ export function getProductHeroImages(product: CatalogProduct): ProductHeroImage[
     seen.add(image.src);
     collected.push(image);
     if (collected.length >= 4) return collected;
-  }
-
-  for (const fallback of FALLBACK_HERO_IMAGES) {
-    if (collected.length >= 4) break;
-    if (seen.has(fallback.src)) continue;
-    collected.push(fallback);
   }
 
   return collected;

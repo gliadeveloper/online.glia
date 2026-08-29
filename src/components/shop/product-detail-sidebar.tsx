@@ -175,7 +175,7 @@ export function ProductDetailSidebar({
         <div className="glia-pdp__buy-actions">
           {owned ? (
             <Link href={shopState.learnHref} className="shop-pdp-apply-btn">
-              학습하러 가기
+              학습하기
             </Link>
           ) : (
             <ProductApplyButton

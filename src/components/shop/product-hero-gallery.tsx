@@ -7,9 +7,11 @@ import type { ProductHeroImage } from "@/lib/shop-product-hero";
 
 type ProductHeroGalleryProps = {
   images: ProductHeroImage[];
+  title: string;
+  eyebrow: string;
 };
 
-export function ProductHeroGallery({ images }: ProductHeroGalleryProps) {
+export function ProductHeroGallery({ images, title, eyebrow }: ProductHeroGalleryProps) {
   const [index, setIndex] = useState(0);
   const pauseRef = useRef(false);
   const touchStartX = useRef<number | null>(null);
@@ -39,7 +41,14 @@ export function ProductHeroGallery({ images }: ProductHeroGalleryProps) {
     return () => window.clearInterval(timer);
   }, [images.length]);
 
-  if (images.length === 0) return null;
+  if (images.length === 0) {
+    return (
+      <div className="glia-pdp__placeholder" role="img" aria-label={`${title} 이미지 없음`}>
+        <p className="glia-pdp__placeholder-kind">{eyebrow}</p>
+        <p className="glia-pdp__placeholder-mark">GLIA</p>
+      </div>
+    );
+  }
 
   return (
     <div
