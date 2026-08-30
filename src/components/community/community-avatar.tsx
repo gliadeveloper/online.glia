@@ -1,6 +1,6 @@
 import { Typography } from "@/components/typography/typography";
 import { displayAuthorName, type PostAuthor } from "@/lib/post-display";
-import { profileAvatarSrc } from "@/lib/profile";
+import { profileAvatarSrc } from "@/lib/profile-avatar";
 
 type CommunityAvatarProps = {
   user: Pick<PostAuthor, "name" | "email"> & {

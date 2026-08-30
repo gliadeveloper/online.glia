@@ -3,7 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 
 import { prisma } from "@/lib/prisma";
-import { profileAvatarSrc } from "@/lib/profile";
+import { profileAvatarSrc } from "@/lib/profile-avatar";
 import {
   SESSION_COOKIE,
   verifySessionToken,

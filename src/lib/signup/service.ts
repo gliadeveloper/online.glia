@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { editableAvatarUrl } from "@/lib/profile";
+import { editableAvatarUrl } from "@/lib/profile-avatar";
 import {
   generateVerificationCode,
   hashPassword,

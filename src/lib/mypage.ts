@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCheckInOverview } from "@/lib/forms";
-import { profileAvatarSrc } from "@/lib/profile";
+import { profileAvatarSrc } from "@/lib/profile-avatar";
 
 export async function getMyPageData(userId: string) {
   const [user, enrollmentCount, entitlementCount, checkIns, orderCount] = await Promise.all([

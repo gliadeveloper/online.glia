@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { AppStackPage } from "@/components/app";
 import { ProfileEditForm } from "@/components/mypage/profile-edit-form";
 import { StackNavTitle } from "@/lib/stack-nav-context";
-import { getMyProfileForEdit, profileAvatarSrc } from "@/lib/profile";
+import { getMyProfileForEdit } from "@/lib/profile";
+import { profileAvatarSrc } from "@/lib/profile-avatar";
 import { getCurrentUser } from "@/lib/session";
 
 import "@/components/mypage/mypage-glia.css";
