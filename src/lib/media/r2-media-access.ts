@@ -37,10 +37,6 @@ async function assertCoachingMediaAccess(userId: string, sessionId: string) {
 
 export async function assertR2MediaAccess(userId: string, objectKey: string) {
   if (parseAvatarMediaObjectKey(objectKey)) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      throw new ApiError("Login required", 401, "UNAUTHORIZED");
-    }
     return { objectKey };
   }
 

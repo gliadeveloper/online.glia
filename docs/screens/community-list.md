@@ -19,7 +19,7 @@
 
 | # | 요소 | v1 | 비고 |
 |---|------|-----|------|
-| 1 | 작성자 프로필 | 이니셜 placeholder | v2: avatar |
+| 1 | 작성자 프로필 | `avatarUrl` 또는 이니셜 | ✅ |
 | 2 | 작성자 닉네임 | ✅ `displayAuthorName` | |
 | 3 | 올린 시간 | ✅ 상대/절대 ([README](./README.md)) | |
 | 4 | POST 제목 | ✅ | |

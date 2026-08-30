@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { ApiError, jsonError, resolveUserId } from "@/lib/api";
+import { parseAvatarMediaObjectKey } from "@/lib/media/avatar-image";
 import { assertR2MediaAccess } from "@/lib/media/r2-media-access";
 import { getR2Object } from "@/lib/media/r2";
 
@@ -13,8 +14,10 @@ export async function GET(request: Request) {
       throw new ApiError("key is required", 400, "VALIDATION_ERROR");
     }
 
-    const userId = await resolveUserId(request);
-    await assertR2MediaAccess(userId, objectKey);
+    if (!parseAvatarMediaObjectKey(objectKey)) {
+      const userId = await resolveUserId(request);
+      await assertR2MediaAccess(userId, objectKey);
+    }
 
     const object = await getR2Object(objectKey);
     const body = object.Body;

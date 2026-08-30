@@ -2,7 +2,7 @@ export type PostAuthor = {
   id: string;
   name: string | null;
   email: string;
-  profile: { headline: string | null } | null;
+  profile: { headline: string | null; avatarUrl: string | null } | null;
 };
 
 export type PostCommentItem = {

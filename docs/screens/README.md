@@ -53,7 +53,7 @@
 ### 작성자 표시
 
 - **닉네임:** `User.name` → 없으면 email `@` 앞부분 (`displayAuthorName`)
-- **프로필 사진:** v1 미구현 → 이니셜 placeholder (추후 `Profile.avatarUrl` 검토)
+- **프로필 사진:** `Profile.avatarUrl` · 없으면 이니셜
 
 ### 비로그인 기본
 

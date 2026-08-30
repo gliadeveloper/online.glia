@@ -3,6 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 
 import { prisma } from "@/lib/prisma";
+import { profileAvatarSrc } from "@/lib/profile";
 import {
   SESSION_COOKIE,
   verifySessionToken,
@@ -33,6 +34,7 @@ export async function getCurrentUser() {
       name: true,
       role: true,
       status: true,
+      profile: { select: { avatarUrl: true } },
     },
   });
 
@@ -45,5 +47,6 @@ export async function getCurrentUser() {
     email: user.email,
     name: user.name,
     role: user.role,
+    avatarUrl: profileAvatarSrc(user.profile?.avatarUrl) || null,
   };
 }

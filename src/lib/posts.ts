@@ -10,7 +10,7 @@ const authorSelect = {
   id: true,
   name: true,
   email: true,
-  profile: { select: { headline: true } },
+  profile: { select: { headline: true, avatarUrl: true } },
 } as const;
 
 const postSummarySelect = {

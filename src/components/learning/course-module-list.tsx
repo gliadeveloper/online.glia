@@ -23,7 +23,7 @@ export function CourseModuleList({ courseId, modules, progressMap }: CourseModul
         >
           <div className="app-module-panel__header">
             <Typography as="p" role="caption" color="secondary">
-              모듈 {module.order}
+              MODULE {module.order}
             </Typography>
             <Typography as="h2" id={`module-${module.id}-title`} role="sectionTitle" weight="semibold" color="primary">
               {module.title}

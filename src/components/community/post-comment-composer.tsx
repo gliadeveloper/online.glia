@@ -12,7 +12,11 @@ type PostCommentComposerProps = {
   parentCommentId?: string | null;
   formId?: string;
   variant?: "default" | "dock" | "inline";
-  user?: { name: string | null; email: string };
+  user?: {
+    name: string | null;
+    email: string;
+    profile?: { avatarUrl?: string | null } | null;
+  };
   onSubmitted?: () => void;
 };
 
