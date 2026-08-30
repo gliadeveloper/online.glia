@@ -8,6 +8,17 @@ export type ProfileUpdateInput = {
   avatarUrl?: string | null;
 };
 
+/** Only http(s) counts as a user-entered image URL. Signup presets are data: URIs. */
+export function editableAvatarUrl(value: string | null | undefined): string {
+  if (!value?.trim()) return "";
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "http:" || url.protocol === "https:" ? value.trim() : "";
+  } catch {
+    return "";
+  }
+}
+
 function trimOrNull(value: string | null | undefined) {
   if (value === undefined) return undefined;
   if (value === null) return null;
@@ -19,7 +30,12 @@ export async function updateMyProfile(userId: string, input: ProfileUpdateInput)
   const name = input.name?.trim();
   const headline = trimOrNull(input.headline);
   const bio = trimOrNull(input.bio);
-  const avatarUrl = trimOrNull(input.avatarUrl);
+  const avatarUrl = (() => {
+    const trimmed = trimOrNull(input.avatarUrl);
+    if (trimmed === undefined) return undefined;
+    if (trimmed === null) return null;
+    return editableAvatarUrl(trimmed) || null;
+  })();
 
   if (name !== undefined && name.length === 0) {
     throw new ApiError("name is required", 400, "VALIDATION_ERROR");

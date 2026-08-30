@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AppStackPage } from "@/components/app";
 import { ProfileEditForm } from "@/components/mypage/profile-edit-form";
 import { StackNavTitle } from "@/lib/stack-nav-context";
-import { getMyProfileForEdit } from "@/lib/profile";
+import { editableAvatarUrl, getMyProfileForEdit } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/session";
 
 import "@/components/mypage/mypage-glia.css";
@@ -36,7 +36,7 @@ export default async function MyPageEditPage() {
             name: profile.name ?? "",
             headline: profile.profile?.headline ?? "",
             bio: profile.profile?.bio ?? "",
-            avatarUrl: profile.profile?.avatarUrl ?? "",
+            avatarUrl: editableAvatarUrl(profile.profile?.avatarUrl),
           }}
         />
 

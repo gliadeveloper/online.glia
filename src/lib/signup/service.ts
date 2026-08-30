@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { editableAvatarUrl } from "@/lib/profile";
 import {
   generateVerificationCode,
   hashPassword,
@@ -6,7 +7,6 @@ import {
 } from "@/lib/signup/crypto";
 import {
   SIGNUP_DRAFT_TTL_SECONDS,
-  getAvatarPresetUrl,
   isSignupEmailVerificationEnabled,
 } from "@/lib/signup/constants";
 
@@ -91,13 +91,11 @@ export async function completeEmailSignup(draftId: string) {
   if (!draft?.emailVerifiedAt || !draft.termsAcceptedAt || !draft.userId || !draft.nickname) {
     throw new Error("SIGNUP_INCOMPLETE");
   }
-  if (!draft.avatarPresetId && !draft.avatarUrl) {
+  if (!draft.avatarPresetId && !editableAvatarUrl(draft.avatarUrl)) {
     throw new Error("AVATAR_REQUIRED");
   }
 
-  const avatarUrl =
-    draft.avatarUrl ??
-    (draft.avatarPresetId ? getAvatarPresetUrl(draft.avatarPresetId) : null);
+  const avatarUrl = editableAvatarUrl(draft.avatarUrl) || null;
 
   const termsAcceptedAt = draft.termsAcceptedAt;
 
@@ -150,13 +148,11 @@ export async function completeKakaoOnboarding(input: {
   avatarUrl?: string | null;
   marketingConsent: boolean;
 }) {
-  const avatarUrl =
-    input.avatarUrl ??
-    (input.avatarPresetId ? getAvatarPresetUrl(input.avatarPresetId) : null);
-
-  if (!avatarUrl) {
+  if (!input.avatarPresetId && !editableAvatarUrl(input.avatarUrl)) {
     throw new Error("AVATAR_REQUIRED");
   }
+
+  const avatarUrl = editableAvatarUrl(input.avatarUrl) || null;
 
   const now = new Date();
 
@@ -187,7 +183,7 @@ export async function completeKakaoOnboarding(input: {
         profile: {
           upsert: {
             create: { avatarUrl },
-            update: { avatarUrl },
+            update: avatarUrl ? { avatarUrl } : {},
           },
         },
       },
