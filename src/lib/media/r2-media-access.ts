@@ -2,6 +2,7 @@ import { ApiError } from "@/lib/api";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { prisma } from "@/lib/prisma";
 
+import { parseAvatarMediaObjectKey } from "./avatar-image";
 import { parseCoachingMediaObjectKey, parseCourseMediaObjectKey } from "./content-metadata";
 
 async function assertCoachingMediaAccess(userId: string, sessionId: string) {
@@ -35,6 +36,14 @@ async function assertCoachingMediaAccess(userId: string, sessionId: string) {
 }
 
 export async function assertR2MediaAccess(userId: string, objectKey: string) {
+  if (parseAvatarMediaObjectKey(objectKey)) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new ApiError("Login required", 401, "UNAUTHORIZED");
+    }
+    return { objectKey };
+  }
+
   const coaching = parseCoachingMediaObjectKey(objectKey);
   if (coaching) {
     return assertCoachingMediaAccess(userId, coaching.sessionId);

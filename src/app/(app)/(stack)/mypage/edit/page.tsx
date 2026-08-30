@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AppStackPage } from "@/components/app";
 import { ProfileEditForm } from "@/components/mypage/profile-edit-form";
 import { StackNavTitle } from "@/lib/stack-nav-context";
-import { editableAvatarUrl, getMyProfileForEdit } from "@/lib/profile";
+import { getMyProfileForEdit, profileAvatarSrc } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/session";
 
 import "@/components/mypage/mypage-glia.css";
@@ -28,7 +28,7 @@ export default async function MyPageEditPage() {
         <header className="glia-mypage__head">
           <p className="glia-mypage__kicker">Profile</p>
           <h1 className="glia-mypage__title">프로필 수정</h1>
-          <p className="glia-mypage__lede">이름, 소개, 프로필 이미지를 업데이트하세요.</p>
+          <p className="glia-mypage__lede">이름, 소개, 프로필 사진을 업데이트하세요.</p>
         </header>
 
         <ProfileEditForm
@@ -36,7 +36,7 @@ export default async function MyPageEditPage() {
             name: profile.name ?? "",
             headline: profile.profile?.headline ?? "",
             bio: profile.profile?.bio ?? "",
-            avatarUrl: editableAvatarUrl(profile.profile?.avatarUrl),
+            avatarUrl: profileAvatarSrc(profile.profile?.avatarUrl),
           }}
         />
 

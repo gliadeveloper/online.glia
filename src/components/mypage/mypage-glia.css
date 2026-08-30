@@ -246,12 +246,53 @@
 
 /* ── Edit form ────────────────────────────────────────────────────────── */
 
-.glia-mypage__preview {
+.glia-mypage__preview,
+.glia-mypage__photo {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding-bottom: 1.25rem;
   border-bottom: 1px solid var(--glia-border);
+}
+
+.glia-mypage__photo-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.glia-mypage__photo-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--glia-text-secondary);
+}
+
+.glia-mypage__photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+}
+
+.glia-mypage__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.glia-mypage__photo-actions .glia-mypage__btn {
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  font-size: 0.8125rem;
 }
 
 .glia-mypage__form {

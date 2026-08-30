@@ -15,7 +15,7 @@
 
 ## 구성
 
-- 프로필 요약 (name, email, headline)
+- 프로필 요약 (name, email, headline, avatar)
 - 메뉴: 프로필 수정, 주문 내역, 로그아웃
 - → `/mypage/edit`, `/orders`
 
@@ -32,7 +32,7 @@
 ## 커뮤니티 연동
 
 - **닉네임** = `User.name` (수정 → `/mypage/edit`)
-- v2: avatar
+- **프로필 사진** = `Profile.avatarUrl` (R2 업로드 · 바꾸기 · 삭제, URL 입력 없음)
 
 ---
 

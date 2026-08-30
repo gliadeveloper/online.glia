@@ -19,6 +19,21 @@ export function editableAvatarUrl(value: string | null | undefined): string {
   }
 }
 
+/** Preview/src: uploaded R2 proxy, public http(s), never data: presets. */
+export function profileAvatarSrc(value: string | null | undefined): string {
+  if (!value?.trim()) return "";
+  const trimmed = value.trim();
+  if (trimmed.startsWith("/api/media/r2?")) {
+    try {
+      const key = new URL(trimmed, "http://localhost").searchParams.get("key") ?? "";
+      return key.startsWith("avatars/") ? trimmed : "";
+    } catch {
+      return "";
+    }
+  }
+  return editableAvatarUrl(trimmed);
+}
+
 function trimOrNull(value: string | null | undefined) {
   if (value === undefined) return undefined;
   if (value === null) return null;
@@ -34,7 +49,7 @@ export async function updateMyProfile(userId: string, input: ProfileUpdateInput)
     const trimmed = trimOrNull(input.avatarUrl);
     if (trimmed === undefined) return undefined;
     if (trimmed === null) return null;
-    return editableAvatarUrl(trimmed) || null;
+    return profileAvatarSrc(trimmed) || null;
   })();
 
   if (name !== undefined && name.length === 0) {
@@ -53,15 +68,8 @@ export async function updateMyProfile(userId: string, input: ProfileUpdateInput)
     throw new ApiError("bio must be 500 characters or less", 400, "VALIDATION_ERROR");
   }
 
-  if (avatarUrl) {
-    try {
-      const url = new URL(avatarUrl);
-      if (!["http:", "https:"].includes(url.protocol)) {
-        throw new Error("invalid protocol");
-      }
-    } catch {
-      throw new ApiError("avatarUrl must be a valid http(s) URL", 400, "VALIDATION_ERROR");
-    }
+  if (avatarUrl && !profileAvatarSrc(avatarUrl)) {
+    throw new ApiError("avatarUrl must be a valid uploaded image", 400, "VALIDATION_ERROR");
   }
 
   return prisma.$transaction(async (tx) => {

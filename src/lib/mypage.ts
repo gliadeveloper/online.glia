@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCheckInOverview } from "@/lib/forms";
+import { profileAvatarSrc } from "@/lib/profile";
 
 export async function getMyPageData(userId: string) {
   const [user, enrollmentCount, entitlementCount, checkIns, orderCount] = await Promise.all([
@@ -56,7 +57,7 @@ export async function getMyPageData(userId: string) {
     user,
     displayEmail,
     displayName: user.name ?? kakaoIdentity?.providerDisplayName ?? "회원",
-    avatarUrl: user.profile?.avatarUrl ?? null,
+    avatarUrl: profileAvatarSrc(user.profile?.avatarUrl) || null,
     headline: user.profile?.headline ?? null,
     bio: user.profile?.bio ?? null,
     authMethods: {
