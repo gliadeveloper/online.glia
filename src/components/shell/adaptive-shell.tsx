@@ -17,10 +17,12 @@ import {
   getSkipLinkPolicy,
   type NavMode,
 } from "@/lib/chrome-policy";
+import type { UserRole } from "@/generated/prisma/client";
 
 type AdaptiveShellProps = {
   mode: NavMode;
   isLoggedIn: boolean;
+  userRole?: UserRole | null;
   children: React.ReactNode;
 };
 
@@ -34,7 +36,7 @@ type AdaptiveShellProps = {
  *
  * Mobile: 100dvh app shell — `#main-content` is the sole scroll container.
  */
-export function AdaptiveShell({ mode, isLoggedIn, children }: AdaptiveShellProps) {
+export function AdaptiveShell({ mode, isLoggedIn, userRole, children }: AdaptiveShellProps) {
   const pathname = usePathname();
   const mainRef = useRef<HTMLElement>(null);
   const policy = CHROME_POLICIES[mode];
@@ -62,13 +64,13 @@ export function AdaptiveShell({ mode, isLoggedIn, children }: AdaptiveShellProps
 
       {policy.desktopUnifiedHeader && (
         <div className="sticky top-0 z-40 hidden lg:block">
-          <UnifiedHeader isLoggedIn={isLoggedIn} />
+          <UnifiedHeader isLoggedIn={isLoggedIn} userRole={userRole} />
         </div>
       )}
 
       {showMobileGlobalHeader && (
         <div className="app-shell__chrome z-40 lg:hidden">
-          <MobileGlobalHeader isLoggedIn={isLoggedIn} />
+          <MobileGlobalHeader isLoggedIn={isLoggedIn} userRole={userRole} />
         </div>
       )}
 

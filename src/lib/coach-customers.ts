@@ -23,10 +23,48 @@ export type CoachCustomerRow = {
     validUntil: string | null;
   }>;
   lastActivityAt: string | null;
+  pendingOrderCount: number;
 };
 
+function emptyCustomerRow(
+  user: { id: string; name: string | null; email: string },
+): CoachCustomerRow {
+  return {
+    userId: user.id,
+    name: user.name,
+    email: user.email,
+    enrollments: [],
+    coachingEntitlements: [],
+    lastActivityAt: null,
+    pendingOrderCount: 0,
+  };
+}
+
+async function listCoachProductIds(coachId: string) {
+  const products = await prisma.product.findMany({
+    include: {
+      items: {
+        include: {
+          course: { select: { instructorId: true } },
+          coachingOffering: { select: { coachId: true } },
+        },
+      },
+    },
+  });
+
+  return products
+    .filter((product) =>
+      product.items.some(
+        (item) =>
+          item.course?.instructorId === coachId || item.coachingOffering?.coachId === coachId,
+      ),
+    )
+    .map((product) => product.id);
+}
+
 export async function listCoachCustomers(coachId: string): Promise<CoachCustomerRow[]> {
-  const [enrollments, entitlements] = await Promise.all([
+  const productIds = await listCoachProductIds(coachId);
+  const [enrollments, entitlements, applicants] = await Promise.all([
     prisma.enrollment.findMany({
       where: { course: { instructorId: coachId } },
       include: {
@@ -43,19 +81,24 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
       },
       orderBy: { createdAt: "desc" },
     }),
+    productIds.length
+      ? prisma.order.findMany({
+          where: { lines: { some: { productId: { in: productIds } } } },
+          select: {
+            userId: true,
+            status: true,
+            createdAt: true,
+            user: { select: { id: true, name: true, email: true } },
+          },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
   ]);
 
   const map = new Map<string, CoachCustomerRow>();
 
   for (const enrollment of enrollments) {
-    const existing = map.get(enrollment.userId) ?? {
-      userId: enrollment.userId,
-      name: enrollment.user.name,
-      email: enrollment.user.email,
-      enrollments: [],
-      coachingEntitlements: [],
-      lastActivityAt: null,
-    };
+    const existing = map.get(enrollment.userId) ?? emptyCustomerRow(enrollment.user);
 
     existing.enrollments.push({
       id: enrollment.id,
@@ -75,14 +118,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
   }
 
   for (const entitlement of entitlements) {
-    const existing = map.get(entitlement.userId) ?? {
-      userId: entitlement.userId,
-      name: entitlement.user.name,
-      email: entitlement.user.email,
-      enrollments: [],
-      coachingEntitlements: [],
-      lastActivityAt: null,
-    };
+    const existing = map.get(entitlement.userId) ?? emptyCustomerRow(entitlement.user);
 
     existing.coachingEntitlements.push({
       id: entitlement.id,
@@ -101,62 +137,70 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
     map.set(entitlement.userId, existing);
   }
 
+  for (const order of applicants) {
+    const existing = map.get(order.userId) ?? emptyCustomerRow(order.user);
+
+    if (order.status === "PENDING") {
+      existing.pendingOrderCount += 1;
+    }
+
+    const activityAt = order.createdAt.toISOString();
+    if (!existing.lastActivityAt || activityAt > existing.lastActivityAt) {
+      existing.lastActivityAt = activityAt;
+    }
+
+    map.set(order.userId, existing);
+  }
+
   return [...map.values()].sort((a, b) => {
+    if (a.pendingOrderCount !== b.pendingOrderCount) {
+      return b.pendingOrderCount - a.pendingOrderCount;
+    }
     const aTime = a.lastActivityAt ?? "";
     const bTime = b.lastActivityAt ?? "";
     return bTime.localeCompare(aTime);
   });
 }
 
-export async function getCoachCustomerDetail(coachId: string, customerUserId: string) {
-  const user = await prisma.user.findUnique({
+async function findCoachCustomerUser(customerUserId: string) {
+  const byId = await prisma.user.findUnique({
     where: { id: customerUserId },
     select: { id: true, name: true, email: true, createdAt: true },
   });
+  if (byId) return byId;
+
+  return prisma.user.findUnique({
+    where: { userId: customerUserId },
+    select: { id: true, name: true, email: true, createdAt: true },
+  });
+}
+
+export async function getCoachCustomerDetail(coachId: string, customerUserId: string) {
+  const user = await findCoachCustomerUser(customerUserId);
 
   if (!user) {
     throw new ApiError("Customer not found", 404, "USER_NOT_FOUND");
   }
 
-  const productIds = (
-    await prisma.product.findMany({
-      include: {
-        items: {
-          include: {
-            course: { select: { instructorId: true } },
-            coachingOffering: { select: { coachId: true } },
-          },
-        },
-      },
-    })
-  )
-    .filter(
-      (product) =>
-        product.items.length > 0 &&
-        product.items.every(
-          (item) =>
-            item.course?.instructorId === coachId || item.coachingOffering?.coachId === coachId,
-        ),
-    )
-    .map((product) => product.id);
+  const productIds = await listCoachProductIds(coachId);
 
   const [enrollments, entitlements, sessions, orders] = await Promise.all([
     prisma.enrollment.findMany({
-      where: { userId: customerUserId, course: { instructorId: coachId } },
+      where: { userId: user.id, course: { instructorId: coachId } },
       include: {
         course: { select: { id: true, title: true, status: true } },
       },
       orderBy: { enrolledAt: "desc" },
     }),
     prisma.coachingEntitlement.findMany({
-      where: { userId: customerUserId, coachId },
+      where: { userId: user.id, coachId },
       include: {
         coachingOffering: { select: { id: true, title: true, slug: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
     prisma.coachingSession.findMany({
-      where: { userId: customerUserId, coachId },
+      where: { userId: user.id, coachId },
       orderBy: [{ scheduledAt: "desc" }, { sessionNo: "asc" }],
       include: {
         entitlement: {
@@ -167,7 +211,7 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
     productIds.length
       ? prisma.order.findMany({
           where: {
-            userId: customerUserId,
+            userId: user.id,
             lines: { some: { productId: { in: productIds } } },
           },
           orderBy: { createdAt: "desc" },
@@ -181,7 +225,7 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
       : Promise.resolve([]),
   ]);
 
-  if (enrollments.length === 0 && entitlements.length === 0) {
+  if (enrollments.length === 0 && entitlements.length === 0 && orders.length === 0) {
     throw new ApiError("Customer access denied", 403, "FORBIDDEN");
   }
 

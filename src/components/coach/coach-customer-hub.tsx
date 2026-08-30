@@ -70,11 +70,18 @@ export function CoachCustomerHub({ customers }: CoachCustomerHubProps) {
                 <p className="font-semibold text-zinc-900">{customer.name ?? "이름 없음"}</p>
                 <p className="text-sm text-zinc-500">{customer.email}</p>
               </div>
-              {customer.lastActivityAt && (
-                <p className="text-xs text-zinc-400">
-                  최근 활동 {formatDate(customer.lastActivityAt)}
-                </p>
-              )}
+              <div className="flex flex-col items-end gap-1">
+                {customer.pendingOrderCount > 0 ? (
+                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                    승인 대기 {customer.pendingOrderCount}
+                  </span>
+                ) : null}
+                {customer.lastActivityAt && (
+                  <p className="text-xs text-zinc-400">
+                    최근 활동 {formatDate(customer.lastActivityAt)}
+                  </p>
+                )}
+              </div>
             </div>
 
             {customer.enrollments.length > 0 && (

@@ -198,6 +198,8 @@ L2 Context Nav는 **Mobile Stack에서만** 노출한다.
 |------|----------------|------|
 | 비로그인 | 로그인 | `/login?next={현재경로}` |
 | 로그인 | 마이페이지 | `/mypage` (Stack) |
+| 로그인 · `COACH` | **코치** · 마이페이지 | `/coach` · `/mypage`. 1차 탭에는 넣지 않음 |
+| 로그인 · `ADMIN` | **관리** · 마이페이지 | `/admin` · `/mypage` |
 
 - Mobile Stack(immersive)에서는 인증 버튼을 **숨긴다**. 로그인·마이페이지는 Tab 루트 또는 PC unified header에서 접근한다.
 - Stack 중 로그인 필수 페이지(`/mypage`, `/checkin/*`)는 미로그인 시 login으로 redirect한다.

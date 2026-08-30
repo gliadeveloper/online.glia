@@ -70,6 +70,7 @@
 | Order / Refund | ✅ 전체 | ✅ **본인 상품 라인만** 조회 |
 | Coaching entitlement 수동 부여 | ✅ | ✅ **본인 offering만** |
 | Course / Curriculum | ✅ 전체 | ✅ **`Course.instructorId = coach`** |
+| 사용자 역할 변경 (USER / COACH / ADMIN) | ✅ `/admin/users/[id]` | ❌ |
 
 ---
 

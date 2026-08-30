@@ -49,7 +49,7 @@ export function MyPageMenu({ stats, role }: MyPageMenuProps) {
   }
 
   if (role === "ADMIN") {
-    items.push({
+    items.unshift({
       href: "/admin",
       label: "관리 콘솔",
       hint: "관리자",
@@ -57,10 +57,10 @@ export function MyPageMenu({ stats, role }: MyPageMenuProps) {
   }
 
   if (role === "COACH") {
-    items.push({
+    items.unshift({
       href: "/coach",
       label: "코치 포털",
-      hint: "세션·공유·피드백",
+      hint: "고객·상품·코칭",
     });
   }
 

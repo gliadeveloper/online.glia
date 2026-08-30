@@ -8,5 +8,9 @@ export default async function TabsLayout({
 }) {
   const user = await getCurrentUser();
 
-  return <TabShell isLoggedIn={!!user}>{children}</TabShell>;
+  return (
+    <TabShell isLoggedIn={!!user} userRole={user?.role}>
+      {children}
+    </TabShell>
+  );
 }

@@ -5,6 +5,8 @@ import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, formatKrw, requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
+import { UserRoleActions } from "./user-role-actions";
+
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminUserDetailPage({ params }: Props) {
@@ -17,6 +19,7 @@ export default async function AdminUserDetailPage({ params }: Props) {
       id: true,
       email: true,
       name: true,
+      userId: true,
       role: true,
       createdAt: true,
       enrollments: {
@@ -58,7 +61,12 @@ export default async function AdminUserDetailPage({ params }: Props) {
         <StatusBadge value={user.role} />
       </div>
 
-      <p className="text-sm text-zinc-500">가입 {formatDateTime(user.createdAt)}</p>
+      <p className="text-sm text-zinc-500">
+        가입 {formatDateTime(user.createdAt)}
+        {user.userId ? ` · @${user.userId}` : ""}
+      </p>
+
+      <UserRoleActions userId={user.id} currentRole={user.role} userEmail={user.email} />
 
       <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
         <div className="border-b border-zinc-100 px-5 py-4">

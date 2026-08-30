@@ -109,6 +109,12 @@
 }
 
 /* Header auth */
+.header-auth-trust-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
 .header-auth-trust {
   display: inline-flex;
   min-height: 2.75rem;
@@ -132,6 +138,16 @@
 .header-auth-trust--login:hover {
   background: var(--glia-blue-light);
   color: var(--glia-blue);
+}
+
+.header-auth-trust--portal {
+  background: var(--glia-blue);
+  color: #fff;
+}
+
+.header-auth-trust--portal:hover {
+  background: var(--glia-blue-dark);
+  color: #fff;
 }
 
 .header-auth-trust--mypage {

@@ -7,9 +7,15 @@ type OrderApplicationActionsProps = {
   orderId: string;
   status: string;
   apiBase: "/api/coach/orders" | "/api/admin/orders";
+  compact?: boolean;
 };
 
-export function OrderApplicationActions({ orderId, status, apiBase }: OrderApplicationActionsProps) {
+export function OrderApplicationActions({
+  orderId,
+  status,
+  apiBase,
+  compact = false,
+}: OrderApplicationActionsProps) {
   const router = useRouter();
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
@@ -45,16 +51,24 @@ export function OrderApplicationActions({ orderId, status, apiBase }: OrderAppli
   }
 
   return (
-    <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 p-5 space-y-3">
-      <h2 className="font-semibold text-indigo-950">신청 승인</h2>
-      <p className="text-sm text-indigo-900">
-        승인 시 수강권·코칭권이 자동으로 부여됩니다. 거절 시 신청이 취소됩니다.
-      </p>
+    <div
+      className={
+        compact
+          ? "mt-4 space-y-3 rounded-xl border border-amber-200 bg-amber-50/70 p-4"
+          : "space-y-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-5"
+      }
+    >
+      <div>
+        <h2 className="font-semibold text-zinc-900">{compact ? "이 신청을 승인할까요?" : "신청 승인"}</h2>
+        <p className="mt-1 text-sm text-zinc-600">
+          승인하면 수강권·코칭권이 바로 부여됩니다. 거절하면 신청이 취소됩니다.
+        </p>
+      </div>
       <input
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         placeholder="거절 사유 (선택)"
-        className="w-full rounded-xl border border-indigo-200 bg-white px-4 py-2 text-sm"
+        className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm"
       />
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
       <div className="flex flex-wrap gap-3">
@@ -62,7 +76,7 @@ export function OrderApplicationActions({ orderId, status, apiBase }: OrderAppli
           type="button"
           onClick={() => handleAction("approve")}
           disabled={loading !== null}
-          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-xl bg-(--glia-blue) px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
         >
           {loading === "approve" ? "승인 중…" : "승인하기"}
         </button>

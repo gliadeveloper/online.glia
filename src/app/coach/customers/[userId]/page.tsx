@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CoachCustomerDetailPanel } from "@/components/coach/coach-customer-detail-panel";
+import { ApiError } from "@/lib/api";
 import { requireCoach } from "@/lib/coach";
 import { getCoachCustomerDetail } from "@/lib/coach-customers";
 
@@ -14,8 +15,11 @@ export default async function CoachCustomerDetailPage({ params }: PageProps) {
   let detail;
   try {
     detail = await getCoachCustomerDetail(coach.id, userId);
-  } catch {
-    notFound();
+  } catch (error) {
+    if (error instanceof ApiError && (error.status === 404 || error.status === 403)) {
+      notFound();
+    }
+    throw error;
   }
 
   return (

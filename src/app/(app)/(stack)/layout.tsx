@@ -8,5 +8,9 @@ export default async function StackLayout({
 }) {
   const user = await getCurrentUser();
 
-  return <StackShell isLoggedIn={!!user}>{children}</StackShell>;
+  return (
+    <StackShell isLoggedIn={!!user} userRole={user?.role}>
+      {children}
+    </StackShell>
+  );
 }
