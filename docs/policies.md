@@ -246,6 +246,7 @@ Coach: `/coach/coaching`, `/coach/sessions/[id]`
 | `VIDEO` | YouTube URL (iframe) |
 | `TEXT` | BlockNote 본문 |
 | `LIVE` | Zoom URL (`LINK` 콘텐츠) |
+| 수업자료 | `LessonMaterial` — R2 첨부(PDF/PPT 등). 본문 `Content`와 분리. 수강권·코치·admin만 다운로드 |
 | 발행 | publish checklist 통과 후 `PUBLISHED` |
 
 ---

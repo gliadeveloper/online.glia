@@ -588,6 +588,7 @@ model Lesson {
 
   module      Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   contents    Content[]
+  materials   LessonMaterial[]
   progress    LessonProgress[]
   quiz        Quiz?
   assignment  Assignment?
@@ -614,6 +615,25 @@ model Content {
 
   @@index([lessonId, order])
   @@map("contents")
+}
+
+/// Downloadable class file, separate from lesson body Content (VIDEO/HTML/LINK).
+model LessonMaterial {
+  id           String   @id @default(cuid())
+  lessonId     String
+  title        String
+  originalName String
+  contentType  String
+  byteSize     Int
+  objectKey    String
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, sortOrder])
+  @@map("lesson_materials")
 }
 
 // ─── Enrollment & Progress ─────────────────────────────────────────────────────

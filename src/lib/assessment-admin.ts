@@ -12,6 +12,17 @@ export const lessonDetailInclude = {
     },
   },
   contents: { orderBy: { order: "asc" as const } },
+  materials: {
+    orderBy: { sortOrder: "asc" as const },
+    select: {
+      id: true,
+      title: true,
+      originalName: true,
+      contentType: true,
+      byteSize: true,
+      sortOrder: true,
+    },
+  },
   quiz: {
     include: {
       questions: {

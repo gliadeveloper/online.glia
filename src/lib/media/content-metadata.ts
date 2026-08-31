@@ -18,6 +18,16 @@ export function buildLessonImageObjectKey(params: {
   return `courses/${params.courseId}/lessons/${params.lessonId}/images/${Date.now()}-${safeName}`;
 }
 
+export function buildLessonMaterialObjectKey(params: {
+  courseId: string;
+  lessonId: string;
+  materialId: string;
+  fileName: string;
+}) {
+  const safeName = params.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 180) || "file";
+  return `courses/${params.courseId}/lessons/${params.lessonId}/materials/${params.materialId}-${safeName}`;
+}
+
 export function buildCoachingImageObjectKey(params: {
   sessionId: string;
   fileName: string;

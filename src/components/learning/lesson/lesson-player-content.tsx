@@ -4,8 +4,13 @@ import { LessonContentView } from "@/components/learning/lesson/lesson-content-v
 import { LessonVideoPlayer } from "@/components/learning/lesson/lesson-video-player";
 import type { Prisma } from "@/generated/prisma/client";
 import { getBlockNoteBlocksFromMetadata } from "@/lib/blocknote-content";
-import { getLessonMarkdownContent, isLessonMarkdownContent } from "@/lib/lesson-markdown-content";
-import { getLessonYoutubeUrl, isYoutubeUrl } from "@/lib/media/youtube";
+import {
+  formatLessonMaterialSize,
+  lessonMaterialTypeLabel,
+  type LessonMaterialPublic,
+} from "@/lib/lesson-material-constants";
+import { isLessonMarkdownContent } from "@/lib/lesson-markdown-content";
+import { isYoutubeUrl } from "@/lib/media/youtube";
 import { getLessonZoomUrl, isZoomUrl } from "@/lib/media/zoom";
 
 type LessonContent = {
@@ -83,46 +88,31 @@ export function LessonTextBody({ contents, description }: LessonTextBodyProps) {
 }
 
 type LessonMaterialsPanelProps = {
-  contents: LessonContent[];
-  lessonTitle: string;
+  lessonId: string;
+  materials: LessonMaterialPublic[];
 };
 
-export function LessonMaterialsPanel({ contents, lessonTitle }: LessonMaterialsPanelProps) {
-  const mainMarkdown = getLessonMarkdownContent(contents);
-  const materials = contents.filter((content) => {
-    if (content.type === "VIDEO") return false;
-    if (mainMarkdown && content.id === mainMarkdown.id) return false;
-    return Boolean(content.body || content.url || content.title);
-  });
-
+export function LessonMaterialsPanel({ lessonId, materials }: LessonMaterialsPanelProps) {
   if (materials.length === 0) {
     return <p className="lesson-player-materials__empty">등록된 수업자료가 없습니다.</p>;
   }
 
   return (
     <>
-      {materials.map((content) => (
-        <article key={content.id} className="lesson-player-materials__item">
-          {content.title ? (
-            <h3 className="lesson-player-materials__title">{content.title}</h3>
-          ) : null}
-          {content.body && isLessonMarkdownContent(content) ? (
-            <LessonContentView
-              body={content.body}
-              metadata={content.metadata}
-              className="lesson-player-materials__markdown"
-            />
-          ) : null}
-          {content.url ? (
-            <a
-              href={content.url}
-              target="_blank"
-              rel="noreferrer"
-              className="lesson-player-materials__link shell-focus-ring"
-            >
-              {content.type === "PDF" ? "PDF 열기" : "자료 열기"} →
-            </a>
-          ) : null}
+      {materials.map((material) => (
+        <article key={material.id} className="lesson-player-materials__item">
+          <h3 className="lesson-player-materials__title">{material.title}</h3>
+          <p className="lesson-player-materials__meta">
+            {lessonMaterialTypeLabel(material.contentType, material.originalName)} ·{" "}
+            {formatLessonMaterialSize(material.byteSize)}
+            {material.title !== material.originalName ? ` · ${material.originalName}` : null}
+          </p>
+          <a
+            href={`/api/learning/lessons/${lessonId}/materials/${material.id}`}
+            className="lesson-player-materials__link shell-focus-ring"
+          >
+            다운로드
+          </a>
         </article>
       ))}
     </>

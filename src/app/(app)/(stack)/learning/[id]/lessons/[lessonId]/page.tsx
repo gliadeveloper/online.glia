@@ -204,7 +204,7 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
         progressMap={courseDetail.progressMap}
         player={player}
         materials={
-          <LessonMaterialsPanel contents={lesson.contents} lessonTitle={lesson.title} />
+          <LessonMaterialsPanel lessonId={lesson.id} materials={lesson.materials} />
         }
         actions={actions}
         body={showBody ? bodyContent : null}

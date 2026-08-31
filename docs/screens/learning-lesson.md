@@ -23,7 +23,7 @@
 | **QUIZ** | Quiz player |
 | **ASSIGNMENT** | 제출 폼 |
 
-공통: 이전/다음 레sson navigation (해당 시)
+공통: 이전/다음 레sson navigation (해당 시) · **수업자료** 탭(`LessonMaterial` 다운로드, 본문 `Content`와 분리)
 
 ---
 
@@ -51,7 +51,16 @@
 
 ---
 
+## 수업자료
+
+레슨 본문(`Content`: VIDEO/HTML/LINK)과 별도 `LessonMaterial` 첨부로 등록합니다. 수강 중(또는 코치/admin)만 `/api/learning/lessons/[lessonId]/materials/[materialId]`에서 다운로드합니다. 공개 CDN URL을 쓰지 않습니다.
+
+코치: `/coach/lessons/[id]` · 관리자: `/admin/lessons/[id]`
+
+---
+
 ## 구현 참고
 
 - `src/app/(app)/(stack)/learning/[slug]/lessons/[lessonId]/page.tsx`
 - `lesson-live-panel.tsx`, `lesson-video-player.tsx`, `quiz-player.tsx`
+- `lesson-materials-manager.tsx` · `src/lib/lesson-materials.ts`

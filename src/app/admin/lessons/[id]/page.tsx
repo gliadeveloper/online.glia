@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { LessonAssessmentPanel } from "@/app/admin/lessons/[id]/lesson-assessment-panel";
 import { LessonMarkdownEditor } from "@/components/learning/lesson/lesson-markdown-editor";
+import { LessonMaterialsManager } from "@/components/learning/lesson/lesson-materials-manager";
 import { requireAdmin } from "@/lib/admin";
 import { getLessonDetail } from "@/lib/assessment-admin";
 import { lessonSupportsMarkdownEditor } from "@/lib/lesson-markdown-content";
@@ -70,6 +71,12 @@ export default async function AdminLessonDetailPage({ params }: Props) {
           apiRole="admin"
         />
       ) : null}
+
+      <LessonMaterialsManager
+        lessonId={lesson.id}
+        materials={lesson.materials}
+        apiRole="admin"
+      />
 
       {lesson.type === "VIDEO" ? (
         <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">

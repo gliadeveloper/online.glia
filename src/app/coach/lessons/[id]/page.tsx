@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CoachLessonAssessmentPanel } from "@/components/coach/coach-lesson-assessment-panel";
 import { CoachLessonEditor } from "@/components/coach/coach-lesson-editor";
+import { LessonMaterialsManager } from "@/components/learning/lesson/lesson-materials-manager";
 import { ApiError } from "@/lib/api";
 import { getLessonDetail } from "@/lib/assessment-admin";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
@@ -42,6 +43,12 @@ export default async function CoachLessonPage({ params }: Props) {
         lessonTitle={lesson.title}
         contents={lesson.contents}
         courseTitle={course.title}
+      />
+
+      <LessonMaterialsManager
+        lessonId={lesson.id}
+        materials={lesson.materials}
+        apiRole="coach"
       />
 
       <CoachLessonAssessmentPanel
