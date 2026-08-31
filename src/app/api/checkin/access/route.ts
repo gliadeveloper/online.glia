@@ -7,11 +7,15 @@ export async function GET(request: Request) {
   try {
     const userId = await resolveUserId(request);
     const query = new URL(request.url).searchParams.get("q") ?? "";
-    const [activeCoaches, results] = await Promise.all([
+    const [activeCoaches, search] = await Promise.all([
       listCheckInAccesses(userId),
       searchCoachesForCheckInAccess({ userId, query }),
     ]);
-    return NextResponse.json({ activeCoaches, results });
+    return NextResponse.json({
+      activeCoaches,
+      results: search.results,
+      matchedSelf: search.matchedSelf,
+    });
   } catch (error) {
     return jsonError(error);
   }

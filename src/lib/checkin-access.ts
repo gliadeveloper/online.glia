@@ -19,27 +19,35 @@ export async function listCheckInAccesses(userId: string) {
 
 export async function searchCoachesForCheckInAccess(params: { userId: string; query: string }) {
   const query = params.query.trim().toLowerCase();
-  if (query.length < 2) return [];
+  if (query.length < 2) return { results: [], matchedSelf: false };
 
   const coaches = await prisma.user.findMany({
     where: {
-      id: { not: params.userId },
       role: "COACH",
       status: "ACTIVE",
-      userId: { startsWith: query, mode: "insensitive" },
+      OR: [
+        { userId: { contains: query, mode: "insensitive" } },
+        { name: { contains: query, mode: "insensitive" } },
+      ],
     },
     orderBy: { userId: "asc" },
-    take: 10,
+    take: 11,
     select: coachSelect,
   });
 
+  const matchedSelf = coaches.some((coach) => coach.id === params.userId);
+  const others = coaches.filter((coach) => coach.id !== params.userId).slice(0, 10);
+
   const activeAccesses = await prisma.coachCheckInAccess.findMany({
-    where: { userId: params.userId, revokedAt: null, coachId: { in: coaches.map((coach) => coach.id) } },
+    where: { userId: params.userId, revokedAt: null, coachId: { in: others.map((coach) => coach.id) } },
     select: { coachId: true },
   });
   const activeCoachIds = new Set(activeAccesses.map((access) => access.coachId));
 
-  return coaches.map((coach) => ({ ...coach, accessGranted: activeCoachIds.has(coach.id) }));
+  return {
+    results: others.map((coach) => ({ ...coach, accessGranted: activeCoachIds.has(coach.id) })),
+    matchedSelf,
+  };
 }
 
 export async function grantCheckInAccess(params: { userId: string; coachPublicUserId: string }) {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CoachSessionFeedbackPanel } from "@/components/coach/coach-session-feedback-panel";
+import { CoachSessionQnaPanel } from "@/components/coach/coach-session-qna-panel";
 import { formatDateTime } from "@/lib/admin";
 import { getCoachSessionDetail } from "@/lib/coaching-coach";
 import { requireCoach } from "@/lib/coach";
@@ -60,6 +61,22 @@ export default async function CoachSessionDetailPage({ params }: Props) {
           />
         </div>
       </section>
+
+      <CoachSessionQnaPanel
+        sessionId={session.id}
+        studentName={session.user.name ?? session.user.email}
+        published={session.publicationStatus === "PUBLISHED"}
+        messages={
+          session.conversation?.messages.map((message) => ({
+            id: message.id,
+            authorRole: message.authorRole,
+            authorName: message.author.name ?? message.author.email,
+            bodyMarkdown: message.bodyMarkdown,
+            awaitingReply: message.awaitingReply,
+            createdAt: message.createdAt.toISOString(),
+          })) ?? []
+        }
+      />
     </div>
   );
 }

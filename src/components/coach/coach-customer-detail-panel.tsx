@@ -121,6 +121,9 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
                 <p className="mt-1 text-sm text-zinc-500">
                   {session.entitlement.coachingOffering.title} · {formatDateTime(session.scheduledAt)} ·{" "}
                   {session.progressStatus}
+                  {(session.conversation?.messages.length ?? 0) > 0
+                    ? ` · 답변 대기 ${session.conversation?.messages.length}`
+                    : ""}
                 </p>
               </li>
             ))}

@@ -39,6 +39,7 @@ function CoachIdentity({ coach }: { coach: Coach }) {
 export function CheckInAccessManager({ initialActiveCoaches }: { initialActiveCoaches: ActiveCoach[] }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchCoach[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const [activeCoaches, setActiveCoaches] = useState(initialActiveCoaches);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -49,17 +50,25 @@ export function CheckInAccessManager({ initialActiveCoaches }: { initialActiveCo
     event.preventDefault();
     const normalized = query.trim().toLowerCase();
     if (normalized.length < 2) {
-      setError("코치 ID를 2자 이상 입력해 주세요.");
+      setError("코치 ID 또는 닉네임을 2자 이상 입력해 주세요.");
       return;
     }
     setLoading(true);
     setError(null);
     setMessage(null);
+    setHasSearched(true);
     try {
       const response = await fetch(`/api/checkin/access?q=${encodeURIComponent(normalized)}`);
-      const data = (await response.json()) as { results?: SearchCoach[]; error?: string };
+      const data = (await response.json()) as {
+        results?: SearchCoach[];
+        matchedSelf?: boolean;
+        error?: string;
+      };
       if (!response.ok) throw new Error(data.error ?? "검색에 실패했습니다.");
       setResults(data.results ?? []);
+      if ((data.results?.length ?? 0) === 0 && data.matchedSelf) {
+        setError("지금 로그인한 계정이 그 코치예요. 회원 계정으로 들어가 추가해 주세요.");
+      }
     } catch (searchError) {
       setError(searchError instanceof Error ? searchError.message : "검색에 실패했습니다.");
     } finally {
@@ -129,7 +138,7 @@ export function CheckInAccessManager({ initialActiveCoaches }: { initialActiveCo
               <h2 id="coach-search-heading" className="glia-ci__section-title">
                 코치 ID로 검색
               </h2>
-              <p className="glia-ci__section-meta">허용할 코치의 아이디를 입력해 주세요.</p>
+              <p className="glia-ci__section-meta">허용할 코치의 ID 또는 닉네임을 입력해 주세요.</p>
             </div>
           </div>
           <label htmlFor="coach-user-id" className="sr-only">
@@ -140,7 +149,7 @@ export function CheckInAccessManager({ initialActiveCoaches }: { initialActiveCo
               id="coach-user-id"
               value={query}
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
-              placeholder="예: coach_kim"
+              placeholder="예: coach_ok"
               autoCapitalize="none"
               autoCorrect="off"
             />
@@ -186,9 +195,11 @@ export function CheckInAccessManager({ initialActiveCoaches }: { initialActiveCo
             ))}
           </ul>
         </section>
-      ) : query && !loading ? (
+      ) : hasSearched && !loading ? (
         <section className="glia-ci__section">
-          <p className="glia-ci-sharing__empty">일치하는 코치 ID가 없어요. ID를 다시 확인해 주세요.</p>
+          <p className="glia-ci-sharing__empty">
+            일치하는 코치가 없어요. 코치 ID나 닉네임을 다시 확인해 주세요.
+          </p>
         </section>
       ) : null}
 

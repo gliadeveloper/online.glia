@@ -40,6 +40,7 @@ export default async function CoachCoachingPage() {
           sessionNo: session.sessionNo,
           title: session.title,
           scheduledAt: session.scheduledAt.toISOString(),
+          pendingReplyCount: session.conversation?.messages.length ?? 0,
           user: session.user,
           entitlement: session.entitlement,
         }))}

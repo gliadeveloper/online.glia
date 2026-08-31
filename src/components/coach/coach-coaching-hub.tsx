@@ -11,6 +11,7 @@ type SessionRow = {
   sessionNo: number;
   title: string;
   scheduledAt: string;
+  pendingReplyCount: number;
   user: { name: string | null; email: string };
   entitlement: { coachingOffering: { title: string } };
 };
@@ -55,9 +56,12 @@ export function CoachCoachingHub(props: CoachCoachingHubProps) {
 
   const upcomingSessions = useMemo(
     () =>
-      [...props.sessions].sort(
-        (a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime(),
-      ),
+      [...props.sessions].sort((a, b) => {
+        if (a.pendingReplyCount !== b.pendingReplyCount) {
+          return b.pendingReplyCount - a.pendingReplyCount;
+        }
+        return new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime();
+      }),
     [props.sessions],
   );
 
@@ -109,9 +113,16 @@ export function CoachCoachingHub(props: CoachCoachingHubProps) {
                       {session.entitlement.coachingOffering.title}
                     </p>
                   </div>
-                  <p className="text-right text-sm text-zinc-500">
-                    {formatDateTime(new Date(session.scheduledAt))}
-                  </p>
+                  <div className="text-right">
+                    {session.pendingReplyCount > 0 ? (
+                      <p className="text-sm font-semibold text-amber-700">
+                        답변 대기 {session.pendingReplyCount}
+                      </p>
+                    ) : null}
+                    <p className="text-sm text-zinc-500">
+                      {formatDateTime(new Date(session.scheduledAt))}
+                    </p>
+                  </div>
                 </div>
               </Link>
             ))

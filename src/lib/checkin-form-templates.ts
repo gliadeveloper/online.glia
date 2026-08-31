@@ -48,21 +48,43 @@ export const CHECKIN_FORM_TEMPLATES: Record<CheckInFormKind, CheckInFormTemplate
     schedule: "DAILY",
     questions: [
       {
-        prompt: "Q1. 지난밤 수면은 어땠나요?",
+        prompt: "Q1. 지금 내 신경계 상태는?",
         type: "SINGLE_CHOICE",
         order: 1,
         options: moodOptions,
       },
       {
-        prompt: "Q2. 지금 내 신경계 상태는?",
+        prompt: "Q2. 지난밤 수면은 어땠나요?",
         type: "SINGLE_CHOICE",
         order: 2,
         options: moodOptions,
       },
       {
-        prompt: "Q3. 어제의 숨·움직임 숙제는?",
-        type: "SINGLE_CHOICE",
+        prompt: "Q3. 어젯밤, 밤 10시~새벽 2시 사이에 잠들어 있었나요?",
+        type: "YES_NO",
         order: 3,
+        options: [
+          { label: "예", value: "yes", order: 1 },
+          { label: "아니오", value: "no", order: 2 },
+        ],
+      },
+      {
+        prompt: "Q4. 지난 밤 디지털 기기 사용의 마지막 시간은?",
+        type: "SINGLE_CHOICE",
+        order: 4,
+        options: [
+          { label: "밤 9시 이전까지", value: "before_21", order: 1 },
+          { label: "밤 10시 이전까지", value: "before_22", order: 2 },
+          { label: "밤 11시 이전까지", value: "before_23", order: 3 },
+          { label: "밤 12시 이전까지", value: "before_24", order: 4 },
+          { label: "밤 12시 ~ 새벽 2시 사이", value: "between_00_02", order: 5 },
+          { label: "새벽 2시 이후", value: "after_02", order: 6 },
+        ],
+      },
+      {
+        prompt: "Q5. 어제의 개별 과제는 적용하셨나요?",
+        type: "SINGLE_CHOICE",
+        order: 5,
         options: [
           { label: "했어요", value: "done", order: 1 },
           { label: "조금 했어요", value: "partial", order: 2 },
@@ -70,18 +92,9 @@ export const CHECKIN_FORM_TEMPLATES: Record<CheckInFormKind, CheckInFormTemplate
         ],
       },
       {
-        prompt: "Q4. 어젯밤, 밤 10시~새벽 2시 사이에 잠들어 있었나요?",
-        type: "YES_NO",
-        order: 4,
-        options: [
-          { label: "예", value: "yes", order: 1 },
-          { label: "아니오", value: "no", order: 2 },
-        ],
-      },
-      {
         prompt: "한 줄 메모 남기기 (선택)",
         type: "SHORT_TEXT",
-        order: 5,
+        order: 6,
         isRequired: false,
         options: [],
       },

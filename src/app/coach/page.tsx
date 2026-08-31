@@ -113,7 +113,14 @@ export default async function CoachDashboardPage() {
                         {session.entitlement.coachingOffering.title}
                       </p>
                     </div>
-                    <p className="text-right text-sm text-zinc-500">{formatDateTime(session.scheduledAt)}</p>
+                    <div className="text-right">
+                      {(session.conversation?.messages.length ?? 0) > 0 ? (
+                        <p className="text-sm font-semibold text-amber-700">
+                          답변 대기 {session.conversation?.messages.length}
+                        </p>
+                      ) : null}
+                      <p className="text-sm text-zinc-500">{formatDateTime(session.scheduledAt)}</p>
+                    </div>
                   </div>
                 </Link>
               );

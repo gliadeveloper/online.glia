@@ -14,6 +14,14 @@ export const coachSessionListInclude = {
       coachingOffering: { select: { title: true } },
     },
   },
+  conversation: {
+    select: {
+      messages: {
+        where: { awaitingReply: true },
+        select: { id: true },
+      },
+    },
+  },
 } as const;
 
 export async function listCoachSessions(coachId: string) {

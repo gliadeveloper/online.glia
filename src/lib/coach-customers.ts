@@ -206,6 +206,14 @@ export async function getCoachCustomerDetail(coachId: string, customerUserId: st
         entitlement: {
           select: { coachingOffering: { select: { title: true } } },
         },
+        conversation: {
+          select: {
+            messages: {
+              where: { awaitingReply: true },
+              select: { id: true },
+            },
+          },
+        },
       },
     }),
     productIds.length
