@@ -5,6 +5,8 @@ import { parseLessonImageUploadForm } from "@/lib/media/lesson-image-upload-rout
 import { uploadLessonImageBuffer } from "@/lib/media/r2-image-upload";
 import { prisma } from "@/lib/prisma";
 
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   try {
     const userId = await resolveUserId(request);

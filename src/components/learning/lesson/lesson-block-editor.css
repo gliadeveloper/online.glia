@@ -32,6 +32,23 @@
   text-underline-offset: 2px;
 }
 
+.lesson-block-editor .bn-visual-media-wrapper,
+.lesson-block-note-view .bn-visual-media-wrapper {
+  max-width: 100%;
+}
+
+.lesson-block-editor .bn-visual-media-wrapper video,
+.lesson-block-note-view .bn-visual-media-wrapper video,
+.lesson-block-editor video.bn-visual-media,
+.lesson-block-note-view video.bn-visual-media {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 28rem;
+  border-radius: 0.75rem;
+  background: #0f172a;
+}
+
 .lesson-markdown-editor {
   display: flex;
   flex-direction: column;

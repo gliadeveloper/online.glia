@@ -1,27 +1,40 @@
-import { MAX_LESSON_IMAGE_BYTES } from "@/lib/media/lesson-image-constants";
+import {
+  inferLessonMediaContentType,
+  LESSON_MEDIA_TYPE_ERROR,
+  lessonMediaKind,
+  lessonMediaSizeError,
+  maxLessonMediaBytes,
+} from "@/lib/media/lesson-image-constants";
 
-type UploadCoachingImageParams = {
+type UploadCoachingMediaParams = {
   file: File;
   sessionId: string;
   apiRole: "admin" | "coach";
 };
 
-type UploadImageResponse = {
+type UploadMediaResponse = {
   publicUrl?: string;
   error?: string;
 };
 
-export async function uploadCoachingImage({
+export async function uploadCoachingImage(params: UploadCoachingMediaParams): Promise<string> {
+  return uploadCoachingMedia(params);
+}
+
+export async function uploadCoachingMedia({
   file,
   sessionId,
   apiRole,
-}: UploadCoachingImageParams): Promise<string> {
-  if (!file.type.startsWith("image/")) {
-    throw new Error("이미지 파일만 업로드할 수 있습니다.");
+}: UploadCoachingMediaParams): Promise<string> {
+  const contentType = inferLessonMediaContentType(file.name, file.type);
+  const kind = lessonMediaKind(contentType);
+
+  if (!kind) {
+    throw new Error(LESSON_MEDIA_TYPE_ERROR);
   }
 
-  if (file.size > MAX_LESSON_IMAGE_BYTES) {
-    throw new Error("이미지는 10MB 이하만 업로드할 수 있습니다.");
+  if (file.size > maxLessonMediaBytes(kind)) {
+    throw new Error(lessonMediaSizeError(kind));
   }
 
   const formData = new FormData();
@@ -36,9 +49,9 @@ export async function uploadCoachingImage({
     },
   );
 
-  const data = (await response.json()) as UploadImageResponse;
+  const data = (await response.json()) as UploadMediaResponse;
   if (!response.ok || !data.publicUrl) {
-    throw new Error(data.error ?? "이미지 업로드에 실패했습니다.");
+    throw new Error(data.error ?? "업로드에 실패했습니다.");
   }
 
   return data.publicUrl;

@@ -47,7 +47,7 @@
 | 2 | 작성자 닉네임 | `displayAuthorName` | ✅ |
 | 3 | 올린 시간 | [시간 규칙](./README.md) | ✅ |
 | 4 | 제목 | h1 | ✅ |
-| 5 | 본문 | Markdown | ✅ |
+| 5 | 본문 | 에디터에서 쓰는 즉시 서식 적용. 저장 Markdown → `react-markdown` | ✅ |
 | 6 | 좋아요 | 토글 + count | ✅ |
 | 7 | 댓글 수 | → `#post-comments` | ✅ |
 | 8 | 조회수 | 진입 increment | ✅ |

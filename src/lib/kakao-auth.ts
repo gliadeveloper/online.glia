@@ -131,17 +131,37 @@ function normalizeEmail(email: string | undefined, kakaoId: string) {
   };
 }
 
+function generatedKakaoDisplayName(kakaoId: string) {
+  return `카카오 사용자 ${kakaoId}`;
+}
+
 function getKakaoProfile(data: KakaoUserResponse) {
+  const kakaoId = String(data.id);
   const nickname =
-    data.kakao_account?.profile?.nickname ??
-    data.properties?.nickname ??
-    `카카오 사용자 ${data.id}`;
+    data.kakao_account?.profile?.nickname?.trim() ||
+    data.properties?.nickname?.trim() ||
+    generatedKakaoDisplayName(kakaoId);
   const avatarUrl =
     data.kakao_account?.profile?.profile_image_url ?? data.properties?.profile_image ?? null;
   const email =
     data.kakao_account?.is_email_valid === false ? undefined : data.kakao_account?.email;
 
   return { nickname, avatarUrl, email };
+}
+
+function resolveAppDisplayName(existingName: string | null | undefined, kakaoNickname: string, kakaoId: string) {
+  const current = existingName?.trim() || null;
+  const generated = generatedKakaoDisplayName(kakaoId);
+
+  if (current && current !== generated) {
+    return current;
+  }
+
+  if (kakaoNickname && kakaoNickname !== generated) {
+    return kakaoNickname;
+  }
+
+  return current;
 }
 
 type UpsertKakaoUserInput = {
@@ -170,7 +190,7 @@ export async function upsertUserFromKakao(
         providerAccountId,
       },
     },
-    include: { user: true },
+    include: { user: { include: { profile: true } } },
   });
 
   if (existingIdentity) {
@@ -191,10 +211,19 @@ export async function upsertUserFromKakao(
         },
       });
 
+      const nextName = resolveAppDisplayName(
+        existingIdentity.user.name,
+        profile.nickname,
+        providerAccountId,
+      );
+      const hasUploadedAvatar = Boolean(
+        existingIdentity.user.profile?.avatarUrl?.startsWith("/api/media/r2"),
+      );
+
       const user = await tx.user.update({
         where: { id: existingIdentity.userId },
         data: {
-          name: profile.nickname,
+          ...(nextName ? { name: nextName } : {}),
           lastLoginAt: new Date(),
           ...(profile.email && existingIdentity.user.emailKind === "PLACEHOLDER"
             ? {
@@ -209,7 +238,7 @@ export async function upsertUserFromKakao(
       await tx.profile.upsert({
         where: { userId: user.id },
         update: {
-          avatarUrl: profile.avatarUrl ?? undefined,
+          avatarUrl: hasUploadedAvatar ? undefined : profile.avatarUrl ?? undefined,
         },
         create: {
           userId: user.id,
@@ -223,7 +252,10 @@ export async function upsertUserFromKakao(
   }
 
   const linkedUser = profile.email
-    ? await prisma.user.findUnique({ where: { email: profile.email } })
+    ? await prisma.user.findUnique({
+        where: { email: profile.email },
+        include: { profile: true },
+      })
     : null;
 
   if (linkedUser) {
@@ -244,10 +276,13 @@ export async function upsertUserFromKakao(
         },
       });
 
+      const nextName = resolveAppDisplayName(linkedUser.name, profile.nickname, providerAccountId);
+      const hasUploadedAvatar = Boolean(linkedUser.profile?.avatarUrl?.startsWith("/api/media/r2"));
+
       const user = await tx.user.update({
         where: { id: linkedUser.id },
         data: {
-          name: linkedUser.name ?? profile.nickname,
+          ...(nextName ? { name: nextName } : {}),
           emailKind: linkedUser.emailKind === "PLACEHOLDER" ? "VERIFIED" : linkedUser.emailKind,
           emailVerifiedAt: linkedUser.emailVerifiedAt ?? new Date(),
           lastLoginAt: new Date(),
@@ -256,7 +291,7 @@ export async function upsertUserFromKakao(
 
       await tx.profile.upsert({
         where: { userId: user.id },
-        update: { avatarUrl: profile.avatarUrl ?? undefined },
+        update: { avatarUrl: hasUploadedAvatar ? undefined : profile.avatarUrl ?? undefined },
         create: { userId: user.id, avatarUrl: profile.avatarUrl },
       });
 

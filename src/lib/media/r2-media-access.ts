@@ -3,6 +3,7 @@ import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { prisma } from "@/lib/prisma";
 
 import { parseAvatarMediaObjectKey } from "./avatar-image";
+import { parseCommunityMediaObjectKey } from "./community-media";
 import { parseCoachingMediaObjectKey, parseCourseMediaObjectKey } from "./content-metadata";
 
 async function assertCoachingMediaAccess(userId: string, sessionId: string) {
@@ -36,7 +37,7 @@ async function assertCoachingMediaAccess(userId: string, sessionId: string) {
 }
 
 export async function assertR2MediaAccess(userId: string, objectKey: string) {
-  if (parseAvatarMediaObjectKey(objectKey)) {
+  if (parseAvatarMediaObjectKey(objectKey) || parseCommunityMediaObjectKey(objectKey)) {
     return { objectKey };
   }
 

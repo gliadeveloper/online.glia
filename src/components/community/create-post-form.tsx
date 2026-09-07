@@ -96,7 +96,7 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
         label="본문"
         value={bodyMarkdown}
         onChange={setBodyMarkdown}
-        placeholder={"## 소제목\n\n내용을 Markdown으로 작성해 보세요."}
+        placeholder="내용을 적어 보세요. 도구를 누르면 바로 적용됩니다."
         minRows={16}
         disabled={submitting}
       />

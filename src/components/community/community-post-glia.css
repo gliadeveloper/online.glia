@@ -357,12 +357,18 @@
   border-top: var(--glia-post-rule);
 }
 
-.app-trust-root .glia-post__body .post-markdown img {
+.app-trust-root .glia-post__body .post-markdown img,
+.app-trust-root .glia-post__body .post-markdown .post-markdown__video {
   display: block;
   width: 100%;
   height: auto;
   margin: 2rem 0;
   border-radius: var(--glia-radius-lg);
+}
+
+.app-trust-root .glia-post__body .post-markdown .post-markdown__video {
+  max-height: 28rem;
+  background: #0f172a;
 }
 
 .app-trust-root .glia-post__body .post-markdown table {

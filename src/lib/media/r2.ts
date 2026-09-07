@@ -76,22 +76,51 @@ export async function putR2Object(params: {
   return { objectKey: params.objectKey, bucket: config.bucket };
 }
 
-export async function getR2Object(objectKey: string) {
+function isRangeNotSatisfiable(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as { name?: string; Code?: string; $metadata?: { httpStatusCode?: number } };
+  return (
+    candidate.$metadata?.httpStatusCode === 416 ||
+    candidate.name === "InvalidRange" ||
+    candidate.Code === "InvalidRange"
+  );
+}
+
+/** HTTP Range like `bytes=0-1023` or `bytes=1024-`. Invalid values are ignored. */
+export function parseHttpByteRange(header: string | null): string | undefined {
+  if (!header) return undefined;
+  const trimmed = header.trim();
+  if (!/^bytes=\d*-\d*$/.test(trimmed) || trimmed === "bytes=-") {
+    return undefined;
+  }
+  return trimmed;
+}
+
+export async function getR2Object(objectKey: string, range?: string) {
   const config = requireR2Config();
   const client = createR2Client(config);
 
-  const result = await client.send(
-    new GetObjectCommand({
-      Bucket: config.bucket,
-      Key: objectKey,
-    }),
-  );
+  try {
+    const result = await client.send(
+      new GetObjectCommand({
+        Bucket: config.bucket,
+        Key: objectKey,
+        ...(range ? { Range: range } : {}),
+      }),
+    );
 
-  if (!result.Body) {
-    throw new ApiError("Object not found", 404, "NOT_FOUND");
+    if (!result.Body) {
+      throw new ApiError("Object not found", 404, "NOT_FOUND");
+    }
+
+    return result;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    if (isRangeNotSatisfiable(error)) {
+      throw new ApiError("Requested range not satisfiable", 416, "RANGE_NOT_SATISFIABLE");
+    }
+    throw error;
   }
-
-  return result;
 }
 
 export async function deleteR2Object(objectKey: string) {

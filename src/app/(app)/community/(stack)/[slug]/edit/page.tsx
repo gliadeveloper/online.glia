@@ -46,7 +46,7 @@ export default async function CommunityEditPostPage({ params }: CommunityEditPos
 
         <h1 className="glia-write__title">글 수정</h1>
 
-        <p className="glia-write__lede">제목과 본문을 다듬은 뒤 저장하세요.</p>
+        <p className="glia-write__lede">제목과 본문을 다듬은 뒤 저장하세요. 사진·영상은 도구에서 바로 넣을 수 있습니다.</p>
       </header>
 
       <EditPostForm

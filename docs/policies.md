@@ -244,7 +244,7 @@ Coach: `/coach/coaching`, `/coach/sessions/[id]`
 | 레슨 타입 | 정책 |
 |-----------|------|
 | `VIDEO` | YouTube URL (iframe) |
-| `TEXT` | BlockNote 본문 |
+| `TEXT` | BlockNote 본문 (이미지 10MB · 영상 mp4/webm/mov 200MB, R2) |
 | `LIVE` | Zoom URL (`LINK` 콘텐츠) |
 | 수업자료 | `LessonMaterial` — R2 첨부(PDF/PPT 등). 본문 `Content`와 분리. 수강권·코치·admin만 다운로드 |
 | 발행 | publish checklist 통과 후 `PUBLISHED` |
@@ -290,7 +290,7 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 
 | 영역 | 정책 |
 |------|------|
-| **Community** | Markdown 게시글 · 댓글 · 좋아요 · `(app)` Tab `/community` |
+| **Community** | Markdown 게시글(이미지 10MB · 영상 mp4/webm/mov 200MB, R2) · 댓글 · 좋아요 · `(app)` Tab `/community` |
 | **Check-in** | Daily / Weekly · Stack `/checkin/*` · 사용자 관리형 코치 접근 권한 (`CoachCheckInAccess`) |
 
 ---
@@ -301,7 +301,7 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 |------|------|
 | Next.js | **Training data와 다른 breaking API** — `node_modules/next/dist/docs/` 참고 ([AGENTS.md](../AGENTS.md)) |
 | DB | Prisma + SQLite (dev) |
-| 미디어 | YouTube (VOD) · Zoom (live) · R2 (BlockNote 이미지 등) |
+| 미디어 | YouTube (VOD) · Zoom (live) · R2 (레슨·코칭 BlockNote·커뮤니티 Markdown 이미지·영상) |
 | 커밋 | 사용자 요청 시에만 |
 | Customer UI 작업 | App Tone v1 문서 세트 준수 |
 

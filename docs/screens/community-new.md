@@ -16,7 +16,9 @@
 
 ## 구성
 
-- Markdown composer (제목 + 본문)
+- Markdown 에디터 (쓰는 즉시 서식·사진·영상 적용, 미리보기 탭 없음)
+- 저장은 Markdown (`![alt](url)`). 상세는 `react-markdown`
+- 사진·영상 첨부 → R2 (이미지 10MB, 영상 200MB)
 - parent 쿼리 있으면: 원본 글 context 표시
 - 제출 → `/community/[new-slug]`
 
@@ -35,6 +37,8 @@
 
 - `src/app/(app)/community/(stack)/new/page.tsx`
 - `src/components/community/create-post-form.tsx`
+- `src/components/community/markdown-composer.tsx`
+- `POST /api/posts/media`
 - 글 수정(`/community/[slug]/edit`)도 같은 디자인/폼 구조 사용
 
 ---

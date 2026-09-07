@@ -5,7 +5,7 @@ import "@blocknote/core/fonts/inter.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import "./lesson-block-editor.css";
 import "./lesson-block-note-view.css";
@@ -17,6 +17,7 @@ type LessonBlockNoteViewProps = {
 
 /** Read-only default BlockNote view (same blocks as editor). */
 export function LessonBlockNoteView({ blocks, className }: LessonBlockNoteViewProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const editor = useCreateBlockNote(
     {
       initialContent: blocks,
@@ -28,8 +29,31 @@ export function LessonBlockNoteView({ blocks, className }: LessonBlockNoteViewPr
     editor.isEditable = false;
   }, [editor]);
 
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const applyPlaybackAttrs = () => {
+      for (const video of root.querySelectorAll("video")) {
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+        if (!video.getAttribute("preload")) {
+          video.setAttribute("preload", "metadata");
+        }
+      }
+    };
+
+    applyPlaybackAttrs();
+    const observer = new MutationObserver(applyPlaybackAttrs);
+    observer.observe(root, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [blocks]);
+
   return (
-    <div className={["lesson-block-note-view", className].filter(Boolean).join(" ")}>
+    <div
+      ref={rootRef}
+      className={["lesson-block-note-view", className].filter(Boolean).join(" ")}
+    >
       <BlockNoteView
         editor={editor}
         editable={false}

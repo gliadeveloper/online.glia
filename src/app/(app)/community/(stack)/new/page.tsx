@@ -51,8 +51,8 @@ export default async function CommunityNewPostPage({ searchParams }: CommunityNe
 
         <p className="glia-write__lede">
           {isChild
-            ? "원본 글에 이어지는 인증 기록을 Markdown으로 남겨 보세요."
-            : "오늘의 회복 기록, 궁금한 점, 함께 나누고 싶은 후기를 Markdown으로 적어 보세요."}
+            ? "원본 글에 이어지는 인증 기록을 남겨 보세요. 사진과 영상도 첨부할 수 있습니다."
+            : "오늘의 회복 기록, 궁금한 점, 함께 나누고 싶은 후기를 적어 보세요. 사진과 영상도 첨부할 수 있습니다."}
         </p>
       </header>
 

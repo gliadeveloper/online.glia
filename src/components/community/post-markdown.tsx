@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import { Children, isValidElement } from "react";
+import { Children, isValidElement, type ReactNode } from "react";
 
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { isMarkdownVideoUrl } from "@/lib/post-content";
 import { prepareMarkdownContent, resolveMarkdownHref } from "@/lib/markdown-content";
 import { normalizeProxiedR2MediaUrl } from "@/lib/media/proxied-media-url";
 
@@ -12,11 +15,11 @@ type PostMarkdownProps = {
   className?: string;
 };
 
-function linkLabel(children: React.ReactNode, href?: string) {
+function linkLabel(children: ReactNode, href?: string) {
   const text = Children.toArray(children)
     .map((child) => {
       if (typeof child === "string" || typeof child === "number") return String(child);
-      if (isValidElement<{ children?: React.ReactNode }>(child) && child.props.children) {
+      if (isValidElement<{ children?: ReactNode }>(child) && child.props.children) {
         return Children.toArray(child.props.children).join("");
       }
       return "";
@@ -33,7 +36,7 @@ function MarkdownLink({
   children,
 }: {
   href?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   const resolved = resolveMarkdownHref(href);
   const label = linkLabel(children, href);
@@ -64,6 +67,21 @@ function MarkdownImage({ src, alt }: { src?: string | Blob; alt?: string }) {
   if (!src || typeof src !== "string") return null;
 
   const resolvedSrc = normalizeProxiedR2MediaUrl(src);
+
+  if (isMarkdownVideoUrl(src) || isMarkdownVideoUrl(resolvedSrc)) {
+    return (
+      <video
+        src={resolvedSrc}
+        controls
+        playsInline
+        preload="metadata"
+        className="post-markdown__video my-4 max-w-full rounded-lg"
+        aria-label={alt || "영상"}
+      >
+        이 브라우저에서는 영상을 재생할 수 없습니다.
+      </video>
+    );
+  }
 
   return (
     // eslint-disable-next-line @next/next/no-img-element -- lesson R2 proxy URLs

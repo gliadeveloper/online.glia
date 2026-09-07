@@ -19,7 +19,7 @@
 |------|-----|
 | **VIDEO** | YouTube iframe + 완료 버튼 |
 | **LIVE** | Zoom 입장 링크 (URL 등록 시) |
-| **TEXT** | BlockNote 본문 |
+| **TEXT** | BlockNote 본문 (이미지·영상) |
 | **QUIZ** | Quiz player |
 | **ASSIGNMENT** | 제출 폼 |
 

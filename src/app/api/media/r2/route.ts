@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 
 import { ApiError, jsonError, resolveUserId } from "@/lib/api";
 import { parseAvatarMediaObjectKey } from "@/lib/media/avatar-image";
+import { parseCommunityMediaObjectKey } from "@/lib/media/community-media";
 import { assertR2MediaAccess } from "@/lib/media/r2-media-access";
-import { getR2Object } from "@/lib/media/r2";
+import { getR2Object, parseHttpByteRange } from "@/lib/media/r2";
 
 export async function GET(request: Request) {
   try {
@@ -14,12 +15,17 @@ export async function GET(request: Request) {
       throw new ApiError("key is required", 400, "VALIDATION_ERROR");
     }
 
-    if (!parseAvatarMediaObjectKey(objectKey)) {
+    const isPublicMedia = Boolean(
+      parseAvatarMediaObjectKey(objectKey) || parseCommunityMediaObjectKey(objectKey),
+    );
+
+    if (!isPublicMedia) {
       const userId = await resolveUserId(request);
       await assertR2MediaAccess(userId, objectKey);
     }
 
-    const object = await getR2Object(objectKey);
+    const range = parseHttpByteRange(request.headers.get("range"));
+    const object = await getR2Object(objectKey, range);
     const body = object.Body;
 
     if (!body || typeof body === "string") {
@@ -31,11 +37,23 @@ export async function GET(request: Request) {
         ? body.transformToWebStream()
         : body;
 
+    const headers = new Headers({
+      "Content-Type": object.ContentType ?? "application/octet-stream",
+      "Accept-Ranges": "bytes",
+      "Cache-Control": isPublicMedia ? "public, max-age=300" : "private, max-age=300",
+    });
+
+    if (object.ContentLength != null) {
+      headers.set("Content-Length", String(object.ContentLength));
+    }
+
+    if (object.ContentRange) {
+      headers.set("Content-Range", object.ContentRange);
+    }
+
     return new NextResponse(stream as BodyInit, {
-      headers: {
-        "Content-Type": object.ContentType ?? "application/octet-stream",
-        "Cache-Control": "private, max-age=300",
-      },
+      status: object.ContentRange ? 206 : 200,
+      headers,
     });
   } catch (error) {
     return jsonError(error);

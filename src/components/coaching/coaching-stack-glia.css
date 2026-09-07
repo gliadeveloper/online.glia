@@ -774,12 +774,20 @@
   border-top: var(--glia-session-rule);
 }
 
-.app-trust-root .glia-session__body .post-markdown img {
+.app-trust-root .glia-session__body .post-markdown img,
+.app-trust-root .glia-session__body .post-markdown .post-markdown__video {
   display: block;
   width: 100%;
   height: auto;
   margin: 2rem 0;
   border-radius: var(--glia-radius-lg);
+}
+
+.app-trust-root .glia-session__body .post-markdown .post-markdown__video,
+.app-trust-root .glia-session__body .bn-visual-media-wrapper video,
+.app-trust-root .glia-session__body video.bn-visual-media {
+  max-height: 28rem;
+  background: #0f172a;
 }
 
 .app-trust-root .glia-session__body .post-markdown a,

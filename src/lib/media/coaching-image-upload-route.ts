@@ -1,5 +1,12 @@
 import { ApiError } from "@/lib/api";
-import { MAX_LESSON_IMAGE_BYTES } from "@/lib/media/lesson-image-constants";
+import {
+  inferLessonMediaContentType,
+  lessonMediaKind,
+  lessonMediaSizeError,
+  LESSON_MEDIA_TYPE_ERROR,
+  MAX_LESSON_MEDIA_BYTES,
+  maxLessonMediaBytes,
+} from "@/lib/media/lesson-image-constants";
 
 export async function parseCoachingImageUploadForm(request: Request) {
   const formData = await request.formData();
@@ -14,16 +21,26 @@ export async function parseCoachingImageUploadForm(request: Request) {
     throw new ApiError("sessionId is required", 400, "VALIDATION_ERROR");
   }
 
-  if (file.size > MAX_LESSON_IMAGE_BYTES) {
-    throw new ApiError("이미지는 10MB 이하만 업로드할 수 있습니다.", 400, "VALIDATION_ERROR");
+  if (file.size > MAX_LESSON_MEDIA_BYTES) {
+    throw new ApiError(lessonMediaSizeError("video"), 400, "VALIDATION_ERROR");
   }
 
-  const contentType = file.type.trim() || "application/octet-stream";
+  const contentType = inferLessonMediaContentType(file.name, file.type);
+  const kind = lessonMediaKind(contentType);
+
+  if (!kind) {
+    throw new ApiError(LESSON_MEDIA_TYPE_ERROR, 400, "VALIDATION_ERROR");
+  }
+
+  if (file.size > maxLessonMediaBytes(kind)) {
+    throw new ApiError(lessonMediaSizeError(kind), 400, "VALIDATION_ERROR");
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer());
 
   return {
     sessionId,
-    fileName: file.name || "image",
+    fileName: file.name || (kind === "video" ? "video" : "image"),
     contentType,
     buffer,
   };

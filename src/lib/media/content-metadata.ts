@@ -9,13 +9,26 @@ export function parseContentMetadata(value: Prisma.JsonValue | null | undefined)
   return value as ContentMetadata;
 }
 
+function safeMediaFileName(fileName: string) {
+  return fileName.replace(/[^a-zA-Z0-9._-]/g, "_") || "file";
+}
+
 export function buildLessonImageObjectKey(params: {
   courseId: string;
   lessonId: string;
   fileName: string;
 }) {
-  const safeName = params.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const safeName = safeMediaFileName(params.fileName);
   return `courses/${params.courseId}/lessons/${params.lessonId}/images/${Date.now()}-${safeName}`;
+}
+
+export function buildLessonVideoObjectKey(params: {
+  courseId: string;
+  lessonId: string;
+  fileName: string;
+}) {
+  const safeName = safeMediaFileName(params.fileName);
+  return `courses/${params.courseId}/lessons/${params.lessonId}/videos/${Date.now()}-${safeName}`;
 }
 
 export function buildLessonMaterialObjectKey(params: {
@@ -32,8 +45,16 @@ export function buildCoachingImageObjectKey(params: {
   sessionId: string;
   fileName: string;
 }) {
-  const safeName = params.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const safeName = safeMediaFileName(params.fileName);
   return `coaching/${params.sessionId}/images/${Date.now()}-${safeName}`;
+}
+
+export function buildCoachingVideoObjectKey(params: {
+  sessionId: string;
+  fileName: string;
+}) {
+  const safeName = safeMediaFileName(params.fileName);
+  return `coaching/${params.sessionId}/videos/${Date.now()}-${safeName}`;
 }
 
 export function parseCoachingMediaObjectKey(objectKey: string): {

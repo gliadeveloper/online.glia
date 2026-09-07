@@ -5,6 +5,8 @@ import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { parseLessonImageUploadForm } from "@/lib/media/lesson-image-upload-route";
 import { uploadLessonImageBuffer } from "@/lib/media/r2-image-upload";
 
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   try {
     const userId = await resolveUserId(request);

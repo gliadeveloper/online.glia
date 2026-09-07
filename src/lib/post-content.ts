@@ -1,11 +1,28 @@
 const MARKDOWN_STRIP_RE =
   /```[\s\S]*?```|`[^`]+`|\[([^\]]+)\]\([^)]+\)|[#>*_~\-]+/g;
 
-const MARKDOWN_IMAGE_RE = /!\[(?:[^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/;
+const MARKDOWN_IMAGE_RE = /!\[(?:[^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+const MARKDOWN_VIDEO_URL_RE = /(?:\/videos\/|\.(?:mp4|webm|mov|m4v)(?:$|[?#]))/i;
+
+export function isMarkdownVideoUrl(url: string) {
+  try {
+    const parsed = url.startsWith("http") ? new URL(url) : new URL(url, "http://localhost");
+    const key = parsed.searchParams.get("key") ?? parsed.pathname;
+    return MARKDOWN_VIDEO_URL_RE.test(decodeURIComponent(key));
+  } catch {
+    return MARKDOWN_VIDEO_URL_RE.test(url);
+  }
+}
 
 export function firstMarkdownImage(markdown: string): string | null {
-  const match = markdown.match(MARKDOWN_IMAGE_RE);
-  return match?.[1] ?? null;
+  for (const match of markdown.matchAll(MARKDOWN_IMAGE_RE)) {
+    const url = match[1];
+    if (url && !isMarkdownVideoUrl(url)) {
+      return url;
+    }
+  }
+
+  return null;
 }
 
 export function excerptFromMarkdown(markdown: string, maxLength = 160): string {

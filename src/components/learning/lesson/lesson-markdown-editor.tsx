@@ -106,8 +106,8 @@ export function LessonMarkdownEditor({
         <div className="mb-4">
           <h2 className="font-semibold text-zinc-900">블록 에디터</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Notion처럼 블록 단위로 작성합니다. `/` 로 제목·목록 등을 추가할 수 있습니다.
-            이미지는 블록에 끌어다 놓거나 업로드하세요(R2).
+            Notion처럼 블록 단위로 작성합니다. `/` 로 제목·목록·영상 등을 추가할 수 있습니다.
+            이미지는 10MB, 영상(mp4·webm·mov)은 200MB까지입니다. 10분 안팎은 H.264 mp4로 보내는 것이 안전합니다.
           </p>
         </div>
 
