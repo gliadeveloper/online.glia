@@ -11,6 +11,7 @@ export const coachSessionListInclude = {
   user: { select: { id: true, name: true, email: true } },
   entitlement: {
     select: {
+      id: true,
       coachingOffering: { select: { title: true } },
     },
   },
@@ -18,7 +19,8 @@ export const coachSessionListInclude = {
     select: {
       messages: {
         where: { awaitingReply: true },
-        select: { id: true },
+        orderBy: { createdAt: "asc" as const },
+        select: { id: true, bodyMarkdown: true, createdAt: true },
       },
     },
   },
@@ -52,6 +54,88 @@ export async function getCoachSessionDetail(sessionId: string, coachId: string) 
   return session;
 }
 
+export async function countCoachPendingReplies(coachId: string) {
+  return prisma.coachingSessionMessage.count({
+    where: {
+      awaitingReply: true,
+      conversation: { coachId },
+    },
+  });
+}
+
+export async function getCoachEntitlementBoard(entitlementId: string, coachId: string) {
+  const entitlement = await prisma.coachingEntitlement.findUnique({
+    where: { id: entitlementId },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      coachingOffering: { select: { id: true, title: true, slug: true } },
+      sessions: {
+        orderBy: { sessionNo: "asc" },
+        include: coachSessionListInclude,
+      },
+    },
+  });
+
+  if (!entitlement) {
+    throw new ApiError("Coaching entitlement not found", 404, "ENTITLEMENT_NOT_FOUND");
+  }
+
+  if (entitlement.coachId !== coachId) {
+    throw new ApiError("Forbidden", 403, "FORBIDDEN");
+  }
+
+  return entitlement;
+}
+
+export async function coachUpdateEntitlementSchedules(params: {
+  coachId: string;
+  entitlementId: string;
+  sessions: Array<{ id: string; scheduledAt: Date }>;
+}) {
+  const entitlement = await prisma.coachingEntitlement.findUnique({
+    where: { id: params.entitlementId },
+    select: {
+      id: true,
+      coachId: true,
+      sessions: { select: { id: true } },
+    },
+  });
+
+  if (!entitlement) {
+    throw new ApiError("Coaching entitlement not found", 404, "ENTITLEMENT_NOT_FOUND");
+  }
+
+  if (entitlement.coachId !== params.coachId) {
+    throw new ApiError("Forbidden", 403, "FORBIDDEN");
+  }
+
+  const allowed = new Set(entitlement.sessions.map((session) => session.id));
+  for (const row of params.sessions) {
+    if (!allowed.has(row.id)) {
+      throw new ApiError("Session does not belong to this entitlement", 400, "VALIDATION_ERROR");
+    }
+  }
+
+  await prisma.$transaction(
+    params.sessions.map((row) =>
+      prisma.coachingSession.update({
+        where: { id: row.id },
+        data: { scheduledAt: row.scheduledAt },
+      }),
+    ),
+  );
+
+  await writeAuditLog({
+    actorId: params.coachId,
+    entityType: "CoachingEntitlement",
+    entityId: params.entitlementId,
+    action: "SESSION_SCHEDULES_UPDATED",
+    metadata: { count: params.sessions.length, actorRole: "COACH" },
+  });
+
+  return getCoachEntitlementBoard(params.entitlementId, params.coachId);
+}
+
 export async function coachUpdateSession(params: {
   coachId: string;
   sessionId: string;
@@ -59,6 +143,7 @@ export async function coachUpdateSession(params: {
   bodyMarkdown?: string | null;
   bodyMetadata?: Prisma.InputJsonValue | null;
   publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
+  scheduledAt?: Date;
 }) {
   const session = await prisma.coachingSession.findUnique({
     where: { id: params.sessionId },
@@ -110,6 +195,7 @@ export async function coachUpdateSession(params: {
         bodyMarkdown,
         bodyMetadata,
         publicationStatus,
+        scheduledAt: params.scheduledAt,
         publishedAt: publishing ? now : publicationStatus === "EMPTY" ? null : undefined,
         publishedById: publishing ? params.coachId : publicationStatus === "EMPTY" ? null : undefined,
       },

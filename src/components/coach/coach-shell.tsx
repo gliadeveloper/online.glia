@@ -17,10 +17,11 @@ const navItems = [
 type CoachShellProps = {
   userName: string;
   userEmail: string;
+  pendingQnaCount?: number;
   children: React.ReactNode;
 };
 
-export function CoachShell({ userName, userEmail, children }: CoachShellProps) {
+export function CoachShell({ userName, userEmail, pendingQnaCount = 0, children }: CoachShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -46,21 +47,35 @@ export function CoachShell({ userName, userEmail, children }: CoachShellProps) {
 
           <nav className="flex-1 space-y-1 px-3 py-4">
             {navItems.map((item) => {
+              const coachingActive =
+                item.href === "/coach/coaching" &&
+                (pathname.startsWith("/coach/coaching") || pathname.startsWith("/coach/sessions"));
               const active = item.exact
                 ? pathname === item.href
-                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                : coachingActive ||
+                  (item.href !== "/coach/coaching" &&
+                    (pathname === item.href || pathname.startsWith(`${item.href}/`)));
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                     active
                       ? "bg-emerald-600 text-white shadow-lg shadow-emerald-950/40"
                       : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                   }`}
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  {item.href === "/coach/coaching" && pendingQnaCount > 0 ? (
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        active ? "bg-white/20 text-white" : "bg-amber-500/20 text-amber-300"
+                      }`}
+                    >
+                      {pendingQnaCount}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}

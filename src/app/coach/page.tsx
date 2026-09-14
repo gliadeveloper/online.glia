@@ -3,7 +3,8 @@ import Link from "next/link";
 import { listCoachSessions } from "@/lib/coaching-coach";
 import { requireCoach } from "@/lib/coach";
 import { getCoachDashboardStats } from "@/lib/coach-customers";
-import { formatDateTime, formatKrw } from "@/lib/admin";
+import { formatDateTime, formatKrw } from "@/lib/admin-format";
+import { groupPublishBoard, qnaInboxRows, toCoachPublishRow } from "@/lib/coach-coaching-board";
 
 const statLinks = [
   { key: "productCount", label: "상품", href: "/coach/products" },
@@ -11,8 +12,8 @@ const statLinks = [
   { key: "customerCount", label: "고객", href: "/coach/customers" },
   { key: "courseCount", label: "코스", href: "/coach/courses" },
   { key: "liveCount", label: "라이브 레슨", href: "/coach/live" },
-  { key: "entitlementCount", label: "활성 코칭권", href: "/coach/coaching" },
-  { key: "sessionCount", label: "코칭 세션", href: "/coach/coaching" },
+  { key: "entitlementCount", label: "활성 코칭권", href: "/coach/coaching?tab=entitlements" },
+  { key: "sessionCount", label: "코칭 세션", href: "/coach/coaching?tab=publish" },
 ] as const;
 
 export default async function CoachDashboardPage() {
@@ -23,6 +24,10 @@ export default async function CoachDashboardPage() {
   ]);
 
   const recentSessions = sessions.slice(0, 5);
+  const rows = sessions.map(toCoachPublishRow);
+  const board = groupPublishBoard(rows);
+  const qnaCount = qnaInboxRows(rows).length;
+  const dueCount = board.overdue.length + board.today.length;
 
   return (
     <div className="space-y-8">
@@ -55,6 +60,32 @@ export default async function CoachDashboardPage() {
         </p>
       )}
 
+      {(dueCount > 0 || qnaCount > 0) && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Link
+            href="/coach/coaching?tab=publish"
+            className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm transition hover:border-amber-300"
+          >
+            <p className="text-sm text-amber-800">밀린 발행</p>
+            <p className="mt-1 text-3xl font-semibold text-amber-950">{board.overdue.length}</p>
+          </Link>
+          <Link
+            href="/coach/coaching?tab=publish"
+            className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm transition hover:border-emerald-300"
+          >
+            <p className="text-sm text-emerald-800">오늘 발행</p>
+            <p className="mt-1 text-3xl font-semibold text-emerald-950">{board.today.length}</p>
+          </Link>
+          <Link
+            href="/coach/coaching?tab=qna"
+            className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-emerald-200"
+          >
+            <p className="text-sm text-zinc-500">미답 Q&A</p>
+            <p className="mt-1 text-3xl font-semibold text-zinc-900">{qnaCount}</p>
+          </Link>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-3">
         <Link
           href="/coach/products/new"
@@ -85,7 +116,7 @@ export default async function CoachDashboardPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-zinc-900">최근 코칭 세션</h2>
-          <Link href="/coach/coaching" className="text-sm text-emerald-700 hover:underline">
+          <Link href="/coach/coaching?tab=publish" className="text-sm text-emerald-700 hover:underline">
             전체 보기
           </Link>
         </div>

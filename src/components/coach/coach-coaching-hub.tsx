@@ -2,25 +2,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { formatDateTime } from "@/lib/admin-format";
-
-type SessionRow = {
-  id: string;
-  sessionNo: number;
-  title: string;
-  scheduledAt: string;
-  pendingReplyCount: number;
-  user: { name: string | null; email: string };
-  entitlement: { coachingOffering: { title: string } };
-};
+import { CoachPublishBoard } from "@/components/coach/coach-publish-board";
+import { CoachQnaInbox } from "@/components/coach/coach-qna-inbox";
+import {
+  displayName,
+  type CoachHubTab,
+  type CoachPublishRow,
+  type PublishBoard,
+} from "@/lib/coach-coaching-board";
+import { coachingEntitlementLabels } from "@/lib/customer-labels";
+import type { CoachingEntitlementStatus } from "@/generated/prisma/client";
 
 type EntitlementRow = {
   id: string;
-  status: string;
+  status: CoachingEntitlementStatus;
   completedSessions: number;
   totalSessions: number;
+  publishedCount: number;
+  pendingReplyCount: number;
   validUntil: string | null;
   user: { id: string; name: string | null; email: string };
   coachingOffering: { id: string; title: string };
@@ -33,14 +34,15 @@ type OfferingRow = {
   totalSessions: number;
   validDays: number;
   isActive: boolean;
-  _count?: { entitlements: number };
 };
 
 type CustomerOption = { id: string; label: string };
 type OfferingOption = { id: string; label: string };
 
 type CoachCoachingHubProps = {
-  sessions: SessionRow[];
+  tab: CoachHubTab;
+  board: PublishBoard;
+  qnaRows: CoachPublishRow[];
   entitlements: EntitlementRow[];
   offerings: OfferingRow[];
   customerOptions: CustomerOption[];
@@ -48,170 +50,151 @@ type CoachCoachingHubProps = {
   courseOptions: Array<{ id: string; label: string }>;
 };
 
-type Tab = "sessions" | "entitlements" | "offerings";
+const tabs: Array<{ key: CoachHubTab; label: string }> = [
+  { key: "publish", label: "발행" },
+  { key: "qna", label: "미답 Q&A" },
+  { key: "entitlements", label: "코칭권" },
+  { key: "offerings", label: "상품" },
+];
 
 export function CoachCoachingHub(props: CoachCoachingHubProps) {
-  const [tab, setTab] = useState<Tab>("sessions");
-  const router = useRouter();
-
-  const upcomingSessions = useMemo(
-    () =>
-      [...props.sessions].sort((a, b) => {
-        if (a.pendingReplyCount !== b.pendingReplyCount) {
-          return b.pendingReplyCount - a.pendingReplyCount;
-        }
-        return new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime();
-      }),
-    [props.sessions],
-  );
+  const dueCount = props.board.overdue.length + props.board.today.length;
+  const qnaCount = props.qnaRows.length;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["sessions", "세션"],
-            ["entitlements", "코칭권"],
-            ["offerings", "상품(오퍼링)"],
-          ] as const
-        ).map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
-              tab === key
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "border border-zinc-200 bg-white text-zinc-600 hover:border-emerald-200"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+        {tabs.map((item) => {
+          const badge =
+            item.key === "publish" ? dueCount : item.key === "qna" ? qnaCount : 0;
+          const active = props.tab === item.key;
+          return (
+            <Link
+              key={item.key}
+              href={`/coach/coaching?tab=${item.key}`}
+              className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
+                active
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "border border-zinc-200 bg-white text-zinc-600 hover:border-emerald-200"
+              }`}
+            >
+              {item.label}
+              {badge > 0 ? (
+                <span className={`ml-2 ${active ? "text-emerald-100" : "text-amber-700"}`}>{badge}</span>
+              ) : null}
+            </Link>
+          );
+        })}
       </div>
 
-      {tab === "sessions" && (
-        <div className="space-y-3">
-          {upcomingSessions.length === 0 ? (
-            <div className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center text-sm text-zinc-500">
-              배정된 세션이 없습니다.
-            </div>
-          ) : (
-            upcomingSessions.map((session) => (
+      {props.tab === "publish" ? <CoachPublishBoard board={props.board} /> : null}
+      {props.tab === "qna" ? <CoachQnaInbox rows={props.qnaRows} /> : null}
+
+      {props.tab === "entitlements" ? (
+        <EntitlementsPanel
+          entitlements={props.entitlements}
+          customers={props.customerOptions}
+          offerings={props.offeringOptions}
+        />
+      ) : null}
+
+      {props.tab === "offerings" ? (
+        <OfferingsPanel offerings={props.offerings} courses={props.courseOptions} />
+      ) : null}
+    </div>
+  );
+}
+
+function EntitlementsPanel({
+  entitlements,
+  customers,
+  offerings,
+}: {
+  entitlements: EntitlementRow[];
+  customers: CustomerOption[];
+  offerings: OfferingOption[];
+}) {
+  const router = useRouter();
+
+  return (
+    <div className="space-y-4">
+      <GrantEntitlementForm customers={customers} offerings={offerings} onGranted={() => router.refresh()} />
+
+      <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        {entitlements.length === 0 ? (
+          <li className="px-5 py-12 text-center text-sm text-zinc-500">부여된 코칭권이 없습니다.</li>
+        ) : (
+          entitlements.map((entitlement) => (
+            <li key={entitlement.id}>
               <Link
-                key={session.id}
-                href={`/coach/sessions/${session.id}`}
-                className="block rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-emerald-200"
+                href={`/coach/coaching/entitlements/${entitlement.id}`}
+                className="flex flex-wrap items-start justify-between gap-3 px-5 py-4 transition hover:bg-zinc-50"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-zinc-900">
-                      {session.sessionNo}회차 · {session.title}
+                <div>
+                  <p className="font-medium text-zinc-900">{displayName(entitlement.user)}</p>
+                  <p className="mt-1 text-sm text-zinc-500">{entitlement.coachingOffering.title}</p>
+                </div>
+                <div className="text-right text-sm text-zinc-600">
+                  <p>
+                    발행 {entitlement.publishedCount}/{entitlement.totalSessions} ·{" "}
+                    {coachingEntitlementLabels[entitlement.status]}
+                  </p>
+                  {entitlement.pendingReplyCount > 0 ? (
+                    <p className="mt-1 text-xs font-semibold text-amber-700">
+                      미답 {entitlement.pendingReplyCount}
                     </p>
-                    <p className="mt-1 text-sm text-zinc-600">
-                      {session.user.name ?? session.user.email} ·{" "}
-                      {session.entitlement.coachingOffering.title}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    {session.pendingReplyCount > 0 ? (
-                      <p className="text-sm font-semibold text-amber-700">
-                        답변 대기 {session.pendingReplyCount}
-                      </p>
-                    ) : null}
-                    <p className="text-sm text-zinc-500">
-                      {formatDateTime(new Date(session.scheduledAt))}
-                    </p>
-                  </div>
+                  ) : null}
                 </div>
               </Link>
-            ))
-          )}
-        </div>
-      )}
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
+  );
+}
 
-      {tab === "entitlements" && (
-        <div className="space-y-4">
-          <GrantEntitlementForm
-            customers={props.customerOptions}
-            offerings={props.offeringOptions}
-            onGranted={() => router.refresh()}
-          />
+function OfferingsPanel({
+  offerings,
+  courses,
+}: {
+  offerings: OfferingRow[];
+  courses: Array<{ id: string; label: string }>;
+}) {
+  const router = useRouter();
 
-          <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            {props.entitlements.length === 0 ? (
-              <li className="px-5 py-12 text-center text-sm text-zinc-500">부여된 코칭권이 없습니다.</li>
-            ) : (
-              props.entitlements.map((entitlement) => (
-                <li key={entitlement.id} className="px-5 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <Link
-                        href={`/coach/customers/${entitlement.user.id}`}
-                        className="font-medium text-emerald-700 hover:underline"
-                      >
-                        {entitlement.user.name ?? entitlement.user.email}
-                      </Link>
-                      <p className="text-sm text-zinc-500">{entitlement.coachingOffering.title}</p>
-                    </div>
-                    <div className="text-right text-sm text-zinc-600">
-                      <p>
-                        {entitlement.completedSessions}/{entitlement.totalSessions}회 ·{" "}
-                        {entitlement.status}
-                      </p>
-                      {entitlement.validUntil && (
-                        <p className="mt-1 text-xs text-zinc-400">
-                          ~{new Date(entitlement.validUntil).toLocaleDateString("ko-KR")}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))
-            )}
-          </ul>
-        </div>
-      )}
+  return (
+    <div className="space-y-4">
+      <CreateOfferingForm courses={courses} onCreated={() => router.refresh()} />
 
-      {tab === "offerings" && (
-        <div className="space-y-4">
-          <CreateOfferingForm
-            courses={props.courseOptions}
-            onCreated={() => router.refresh()}
-          />
-
-          <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            {props.offerings.length === 0 ? (
-              <li className="px-5 py-12 text-center text-sm text-zinc-500">코칭 상품이 없습니다.</li>
-            ) : (
-              props.offerings.map((offering) => (
-                <li key={offering.id}>
-                  <Link
-                    href={`/coach/coaching/offerings/${offering.id}`}
-                    className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition hover:bg-zinc-50"
-                  >
-                  <div>
-                    <p className="font-medium text-zinc-900">{offering.title}</p>
-                    <p className="mt-1 text-sm text-zinc-500">
-                      {offering.totalSessions}회 · {offering.validDays}일 · /{offering.slug}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                      offering.isActive
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-zinc-100 text-zinc-600"
-                    }`}
-                  >
-                    {offering.isActive ? "활성" : "비활성"}
-                  </span>
-                  </Link>
-                </li>
-              ))
-            )}
-          </ul>
-        </div>
-      )}
+      <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        {offerings.length === 0 ? (
+          <li className="px-5 py-12 text-center text-sm text-zinc-500">코칭 상품이 없습니다.</li>
+        ) : (
+          offerings.map((offering) => (
+            <li key={offering.id}>
+              <Link
+                href={`/coach/coaching/offerings/${offering.id}`}
+                className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition hover:bg-zinc-50"
+              >
+                <div>
+                  <p className="font-medium text-zinc-900">{offering.title}</p>
+                  <p className="mt-1 text-sm text-zinc-500">
+                    {offering.totalSessions}회 · {offering.validDays}일 · /{offering.slug}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                    offering.isActive ? "bg-emerald-100 text-emerald-800" : "bg-zinc-100 text-zinc-600"
+                  }`}
+                >
+                  {offering.isActive ? "활성" : "비활성"}
+                </span>
+              </Link>
+            </li>
+          ))
+        )}
+      </ul>
     </div>
   );
 }

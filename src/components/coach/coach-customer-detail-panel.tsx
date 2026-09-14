@@ -91,7 +91,12 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
           <ul className="divide-y divide-zinc-100">
             {entitlements.map((entitlement) => (
               <li key={entitlement.id} className="px-5 py-4">
-                <p className="font-medium">{entitlement.coachingOffering.title}</p>
+                <Link
+                  href={`/coach/coaching/entitlements/${entitlement.id}`}
+                  className="font-medium text-emerald-700 hover:underline"
+                >
+                  {entitlement.coachingOffering.title}
+                </Link>
                 <p className="mt-1 text-sm text-zinc-500">
                   {entitlement.completedSessions}/{entitlement.totalSessions}회 · {entitlement.status}
                   {entitlement.validUntil ? ` · ~${formatDateTime(entitlement.validUntil)}` : ""}
@@ -113,7 +118,11 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
             {sessions.map((session) => (
               <li key={session.id} className="px-5 py-4">
                 <Link
-                  href={`/coach/sessions/${session.id}`}
+                  href={
+                    (session.conversation?.messages.length ?? 0) > 0
+                      ? `/coach/sessions/${session.id}?tab=qna`
+                      : `/coach/sessions/${session.id}`
+                  }
                   className="font-medium text-emerald-700 hover:underline"
                 >
                   {session.sessionNo}회차 · {session.title}
