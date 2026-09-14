@@ -181,7 +181,7 @@ export async function getHomeNotifications(userId: string): Promise<HomeNotifica
         kind: "comment",
         label: "새 코치 코멘트",
         title: session.title,
-        href: `/coaching/sessions/${session.id}`,
+        href: `/coaching/sessions/${session.id}?panel=qna`,
         occurredAt: event.occurredAt,
         timeLabel: formatPostRelativeTime(event.occurredAt),
       });

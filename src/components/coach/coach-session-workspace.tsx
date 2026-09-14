@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { CoachSessionFeedbackPanel } from "@/components/coach/coach-session-feedback-panel";
+import { CoachSessionLogPanel, type CoachSessionLog } from "@/components/coach/coach-session-log-panel";
 import { CoachSessionQnaPanel } from "@/components/coach/coach-session-qna-panel";
 import {
   coachPublicationLabels,
@@ -33,16 +34,18 @@ type CoachSessionWorkspaceProps = {
   scheduledAt: string;
   publicationStatus: CoachingSessionPublicationStatus;
   pendingReplyCount: number;
-  initialTab: "feedback" | "qna";
+  logCount: number;
+  initialTab: "feedback" | "qna" | "logs";
   summary: string | null;
   bodyMarkdown: string | null;
   bodyMetadata: unknown;
   messages: Message[];
+  logs: CoachSessionLog[];
 };
 
 export function CoachSessionWorkspace(props: CoachSessionWorkspaceProps) {
   const router = useRouter();
-  const [tab, setTab] = useState<"feedback" | "qna">(props.initialTab);
+  const [tab, setTab] = useState<"feedback" | "qna" | "logs">(props.initialTab);
   const [feedbackReady, setFeedbackReady] = useState(props.initialTab === "feedback");
   const [date, setDate] = useState(seoulDateKey(props.scheduledAt));
   const [savingDate, setSavingDate] = useState(false);
@@ -167,6 +170,22 @@ export function CoachSessionWorkspace(props: CoachSessionWorkspaceProps) {
             </span>
           ) : null}
         </button>
+        <button
+          type="button"
+          onClick={() => setTab("logs")}
+          className={`px-4 py-2.5 text-sm font-medium ${
+            tab === "logs"
+              ? "border-b-2 border-emerald-600 text-emerald-800"
+              : "text-zinc-500 hover:text-zinc-800"
+          }`}
+        >
+          한줄 기록
+          {props.logCount > 0 ? (
+            <span className="ml-2 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-600">
+              {props.logCount}
+            </span>
+          ) : null}
+        </button>
       </div>
 
       {feedbackReady ? (
@@ -194,6 +213,10 @@ export function CoachSessionWorkspace(props: CoachSessionWorkspaceProps) {
           published={props.publicationStatus === "PUBLISHED"}
           messages={props.messages}
         />
+      </div>
+
+      <div hidden={tab !== "logs"}>
+        <CoachSessionLogPanel logs={props.logs} />
       </div>
     </div>
   );

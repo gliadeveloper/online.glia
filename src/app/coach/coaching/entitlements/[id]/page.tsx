@@ -44,6 +44,7 @@ export default async function CoachEntitlementPage({ params }: PageProps) {
           scheduledAt: session.scheduledAt.toISOString(),
           publicationStatus: session.publicationStatus,
           pendingReplyCount: session.conversation?.messages.length ?? 0,
+          logCount: session._count.logs,
         }))}
       />
     </div>

@@ -40,7 +40,8 @@ export default async function CoachSessionDetailPage({ params, searchParams }: P
       scheduledAt={session.scheduledAt.toISOString()}
       publicationStatus={session.publicationStatus}
       pendingReplyCount={pendingReplyCount}
-      initialTab={tab === "qna" ? "qna" : "feedback"}
+      logCount={session.logs.length}
+      initialTab={tab === "qna" ? "qna" : tab === "logs" ? "logs" : "feedback"}
       summary={session.summary}
       bodyMarkdown={session.bodyMarkdown}
       bodyMetadata={session.bodyMetadata}
@@ -54,6 +55,11 @@ export default async function CoachSessionDetailPage({ params, searchParams }: P
           createdAt: message.createdAt.toISOString(),
         })) ?? []
       }
+      logs={session.logs.map((log) => ({
+        id: log.id,
+        body: log.body,
+        createdAt: log.createdAt.toISOString(),
+      }))}
     />
   );
 }

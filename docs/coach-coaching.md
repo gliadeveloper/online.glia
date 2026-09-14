@@ -27,6 +27,7 @@ Shop 상품 만들기, LMS 레슨, 라이브, 주문 승인은 이 문서 밖이
 | **코칭 페이지** / 회차 | `CoachingSession` | `/coaching/sessions/[id]` — 코치가 쓰고 발행하는 본문 |
 | **발행일** | `scheduledAt` | 회차 카드 「N월 N일 오픈됩니다」. 코치 보드의 날짜 축 |
 | **실제 발행 시각** | `publishedAt` | 회원에게 안 보임. 코치가 연 결과 |
+| 한줄 기록 | `CoachingSessionLog` | 발행된 페이지. 과제 후 일기. **답변·알림 없음** |
 | Q&A | `CoachingSessionConversation` + `CoachingSessionMessage` | 발행된 페이지 하단 댓글형 대화 |
 
 **코칭 페이지** = 특정 회원 · 특정 코칭권 · N회차에 붙는 문서. 오퍼링 전체가 아니라 **이미 부여된 코칭권의 회차 한 장**이다.
@@ -36,6 +37,7 @@ Shop 상품 만들기, LMS 레슨, 라이브, 주문 승인은 이 문서 밖이
   └─ 코칭권 (회원 A에게 부여된 이용권)
        └─ 코칭 페이지 × N (1회차…N회차, 회원만의 사본)
             ├─ scheduledAt = 이날 연다 (계획)
+            ├─ 한줄 기록 (회원 일기, 코치 열람만)
             └─ Q&A (그 페이지가 발행된 뒤에만)
 ```
 
@@ -131,7 +133,7 @@ Q&A를 가깝게 만들다가 **발행이 느려지면 실패**다. 반대도 �
 |----|------|------|------|
 | `EMPTY` | 껍데기만. 본문 없음 | 회차 목록에만, 비활성 | 써야 하는 페이지 |
 | `DRAFT` | 저장됨, 아직 안 연 상태 | 안 보임 | 이어서 쓰고 발행 |
-| `PUBLISHED` | 회원에게 열림 | 본문 + Q&A | 수정 가능, Q&A 가능 |
+| **PUBLISHED** | 회원에게 열림 | 본문 + 한줄 기록/Q&A 스위치 | 수정 가능, Q&A·기록 열람 |
 
 목록 카피는 상태값 대신 **미작성 / 초안 / 발행됨**을 쓴다.
 
@@ -162,6 +164,17 @@ Q&A를 가깝게 만들다가 **발행이 느려지면 실패**다. 반대도 �
 
 대화는 지금 **회차(페이지) 단위**다. 코치는 코칭권·회원 단위로 묶어서 **보고 싶어 한다.** 저장 단위를 당장 바꿀 필요는 없다. 목록만 코칭권/회원으로 모아도 과업 4는 성립한다.
 
+### 한줄 기록 (`CoachingSessionLog`)
+
+과제 후 회원이 남기는 일기. **Q&A가 아니다.**
+
+| | |
+|-|-|
+| 작성 | 회원만. 발행된 회차. N개 (120자, 회차당 50) |
+| 코치 | 세션 상세 「한줄 기록」 탭에서 읽기만 |
+| 답변 | 없음. 미답 인박스에 올리지 않음 |
+| 알림 | 없음 |
+
 ---
 
 ## 6. 화면 맵
@@ -171,7 +184,7 @@ Q&A를 가깝게 만들다가 **발행이 느려지면 실패**다. 반대도 �
 | 코치 홈 | `/coach` | 밀린 발행 · 오늘 발행 · 미답 카운트 |
 | 코칭 허브 | `/coach/coaching?tab=` | `publish` 날짜 보드 · `qna` 미답 · `entitlements` · `offerings` |
 | 코칭권 보드 | `/coach/coaching/entitlements/[id]` | 회차 순서 + 발행일 일괄 수정 |
-| 세션 상세 | `/coach/sessions/[id]?tab=` | 피드백 워크벤치 · Q&A 탭 · 발행일 단건 수정. 버튼은 날짜로 안 막음 |
+| 세션 상세 | `/coach/sessions/[id]?tab=` | 피드백 · Q&A · **한줄 기록(열람)** · 발행일 단건 수정 |
 
 ---
 
@@ -268,7 +281,7 @@ Q&A를 가깝게 만들다가 **발행이 느려지면 실패**다. 반대도 �
 | 부여 시 회차·`scheduledAt` | `src/lib/coaching-provision.ts` (`validFrom + scheduledOffsetDays`) |
 | 회원 오픈 카피 | `src/lib/coaching.ts` `getSessionDisplayLabel` |
 | 오퍼링 | `src/app/coach/coaching/offerings/[id]/page.tsx` — 오프셋 UI 없음 |
-| 회원 화면 | `/coaching`, `/coaching/[entitlementId]`, `/coaching/sessions/[id]` |
+| 회원 화면 | `/coaching`, `/coaching/[entitlementId]`, `/coaching/sessions/[id]` (본문 · 한줄 기록/Q&A 스위치) |
 
 ---
 

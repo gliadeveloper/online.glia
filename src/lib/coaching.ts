@@ -83,6 +83,10 @@ export const sessionDetailInclude = {
       },
     },
   },
+  logs: {
+    orderBy: { createdAt: "desc" as const },
+    select: { id: true, body: true, createdAt: true },
+  },
 } satisfies Prisma.CoachingSessionInclude;
 
 export async function getCoachingSessionForUser(sessionId: string, userId: string) {

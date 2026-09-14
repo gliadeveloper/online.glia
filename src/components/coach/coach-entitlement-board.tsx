@@ -19,6 +19,7 @@ type BoardSession = {
   scheduledAt: string;
   publicationStatus: CoachingSessionPublicationStatus;
   pendingReplyCount: number;
+  logCount: number;
 };
 
 type CoachEntitlementBoardProps = {
@@ -152,6 +153,14 @@ export function CoachEntitlementBoard({ entitlement, sessions }: CoachEntitlemen
                         className="text-xs font-semibold text-amber-800 hover:underline"
                       >
                         미답 {session.pendingReplyCount}
+                      </Link>
+                    ) : null}
+                    {session.logCount > 0 ? (
+                      <Link
+                        href={`/coach/sessions/${session.id}?tab=logs`}
+                        className="text-xs font-medium text-zinc-500 hover:underline"
+                      >
+                        기록 {session.logCount}
                       </Link>
                     ) : null}
                   </div>

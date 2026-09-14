@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { CoachingCoachProfile } from "@/components/coaching/coaching-coach-profile";
 import { CoachingMarkdown } from "@/components/coaching/coaching-markdown";
-import { CoachingSessionQnaPanel } from "@/components/coaching/coaching-session-qna-panel";
+import { CoachingSessionResponse } from "@/components/coaching/coaching-session-response";
 import { PostMarkdown } from "@/components/community/post-markdown";
 import { getBlockNoteBlocksFromMetadata } from "@/lib/blocknote-content";
 import { getCoachingSessionForUser } from "@/lib/coaching";
@@ -16,15 +16,17 @@ import "@/components/coaching/coaching-stack-glia.css";
 
 type CoachingSessionPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ panel?: string }>;
 };
 
-export default async function CoachingSessionPage({ params }: CoachingSessionPageProps) {
+export default async function CoachingSessionPage({ params, searchParams }: CoachingSessionPageProps) {
   const user = await getCurrentUser();
   if (!user) {
     redirect("/login?next=/coaching");
   }
 
   const { id } = await params;
+  const { panel } = await searchParams;
   const session = await getCoachingSessionForUser(id, user.id);
 
   if (session.publicationStatus !== "PUBLISHED" || !coachingSessionHasBody(session)) {
@@ -34,7 +36,6 @@ export default async function CoachingSessionPage({ params }: CoachingSessionPag
   await markCoachingNotificationsRead(user.id, session.id);
 
   const blocks = getBlockNoteBlocksFromMetadata(session.bodyMetadata);
-  const qnaCount = session.conversation?.messages.length ?? 0;
   const productTitle = session.entitlement.coachingOffering.title;
 
   return (
@@ -72,36 +73,27 @@ export default async function CoachingSessionPage({ params }: CoachingSessionPag
         </div>
       </article>
 
-      <section
-        id="coaching-qna"
-        className="glia-session__section"
-        aria-labelledby="coaching-qna-heading"
-      >
-        <div className="glia-session__section-head">
-          <h2 id="coaching-qna-heading" className="glia-session__section-title">
-            Q&A
-            {qnaCount > 0 && (
-              <span className="glia-session__section-count">{qnaCount.toLocaleString("ko-KR")}</span>
-            )}
-          </h2>
-        </div>
-
-        <CoachingSessionQnaPanel
-          sessionId={session.id}
-          coach={session.coach}
-          messages={
-            session.conversation?.messages.map((message) => ({
-              id: message.id,
-              authorRole: message.authorRole,
-              authorName: message.author.name ?? message.author.email,
-              authorAvatarUrl: message.authorRole === "COACH" ? session.coach.profile?.avatarUrl : null,
-              bodyMarkdown: message.bodyMarkdown,
-              awaitingReply: message.awaitingReply,
-              createdAt: message.createdAt.toISOString(),
-            })) ?? []
-          }
-        />
-      </section>
+      <CoachingSessionResponse
+        sessionId={session.id}
+        coach={session.coach}
+        initialPanel={panel === "qna" ? "qna" : "log"}
+        logs={session.logs.map((log) => ({
+          id: log.id,
+          body: log.body,
+          createdAt: log.createdAt.toISOString(),
+        }))}
+        messages={
+          session.conversation?.messages.map((message) => ({
+            id: message.id,
+            authorRole: message.authorRole,
+            authorName: message.author.name ?? message.author.email,
+            authorAvatarUrl: message.authorRole === "COACH" ? session.coach.profile?.avatarUrl : null,
+            bodyMarkdown: message.bodyMarkdown,
+            awaitingReply: message.awaitingReply,
+            createdAt: message.createdAt.toISOString(),
+          })) ?? []
+        }
+      />
     </div>
   );
 }

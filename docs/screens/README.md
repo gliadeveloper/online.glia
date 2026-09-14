@@ -19,7 +19,7 @@
 | `/learning/[slug]/lessons/[lessonId]` | Stack | [learning-lesson.md](./learning-lesson.md) | 레sson 플레이어 |
 | `/coaching` | Tab | [coaching-list.md](./coaching-list.md) | 코칭 상품 목록 |
 | `/coaching/[entitlementId]` | Stack | [coaching-list.md](./coaching-list.md#coachingentitlementid--회차-목록) | 회차 목록 |
-| `/coaching/sessions/[id]` | Stack | [coaching-session.md](./coaching-session.md) | 회차 콘텐츠·Q&A |
+| `/coaching/sessions/[id]` | Stack | [coaching-session.md](./coaching-session.md) | 회차 콘텐츠·한줄 기록·Q&A |
 | `/checkin` | Stack | [checkin-hub.md](./checkin-hub.md) | 데일리·주간 체크인 |
 | `/shop` | Stack | [shop-list.md](./shop-list.md) | 상품 목록 |
 | `/shop/[slug]` | Stack | [shop-product.md](./shop-product.md) | 상품 상세·구매 CTA |

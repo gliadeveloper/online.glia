@@ -15,7 +15,7 @@
 | 색·타이포·컴포넌트 토큰 | [§4.2 Corporate Trust](#42-corporate-trust) · [§4.2a Auth GLIA](#42a-auth--glia-recovery-wellness) · [visual-direction.md](./visual-direction.md) |
 | Shop / 수강권 / 만료 / 연장 | [§5 Commerce & LMS Access](#5-commerce--lms-access) |
 | 코치 포털 기능 추가 | [§7 Coach Portal](#7-coach-portal) |
-| 코칭권 · 회차 발행 · 코치 Q&A | [coach-coaching.md](./coach-coaching.md) |
+| 코칭권 · 회차 발행 · 코치 Q&A · 한줄 기록 | [coach-coaching.md](./coach-coaching.md) |
 | 라이브·녹화·다시보기 | [§8 Live Lessons](#8-live-lessons) |
 | 에이전트/AI에 「design-system 따라」 | [AGENTS.md](../AGENTS.md) + [visual-direction.md](./visual-direction.md) |
 
@@ -209,7 +209,8 @@
 |------|------|
 | Entitlement | `CoachingOffering.validDays` · `totalSessions` 스냅샷 |
 | Session | offering 템플릿 기준 회차 생성 |
-| Publication | 코치 피드백 `EMPTY` → `DRAFT` → `PUBLISHED`. 회원 본문·Q&A는 `PUBLISHED`만 |
+| Publication | 코치 피드백 `EMPTY` → `DRAFT` → `PUBLISHED`. 회원 본문·한줄 기록·Q&A는 `PUBLISHED`만 |
+| 한줄 기록 | `CoachingSessionLog` — 회원만 작성, 회차당 N개(최대 50). **코치 열람만, 답변·알림 없음.** Q&A와 분리 |
 | 발행일 | `scheduledAt` = 계획(소프트). `publishedAt` = 결과. 코치 보드는 날짜 축. 발행 버튼은 날짜로 잠그지 않음. 상세 [coach-coaching.md](./coach-coaching.md) §2 |
 | Check-in 접근 | 회원이 코치 사용자 ID를 검색해 전체 체크인 기록 접근을 허용·차단 (`CoachCheckInAccess`) |
 
@@ -232,7 +233,7 @@ Coach: `/coach/coaching`, `/coach/sessions/[id]` — **코치 과업 SSOT:** [co
 | 고객 | 수강·코칭권 보유 회원 통합 |
 | 코스 | LMS curriculum · VOD/LIVE 레슨 편집 |
 | 라이브 | 일정·시작·종료·다시보기 변환 |
-| 코칭 | 코칭 페이지 발행·수정 · 발행 현황 · 미답 Q&A · 코칭권·오퍼링. 상세 [coach-coaching.md](./coach-coaching.md) |
+| 코칭 | 코칭 페이지 발행·수정 · 발행 현황 · 미답 Q&A · 한줄 기록 열람 · 코칭권·오퍼링. 상세 [coach-coaching.md](./coach-coaching.md) |
 
 ### 7.2 소유권 스코프
 
@@ -335,7 +336,7 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 
 | 문서 | 내용 |
 |------|------|
-| [coach-coaching.md](./coach-coaching.md) | **코칭권 코치 과업** — 발행·현황·Q&A. 화면 스펙 전 기능 맵 |
+| [coach-coaching.md](./coach-coaching.md) | **코칭권 코치 과업** — 발행·현황·Q&A·한줄 기록. 화면 스펙 전 기능 맵 |
 
 ### 에이전트
 

@@ -307,6 +307,7 @@ model User {
   coachingConversationsAsCoach   CoachingSessionConversation[] @relation("CoachingConversationCoach")
   coachingSessionMessages        CoachingSessionMessage[]
   coachingSessionProgress        CoachingSessionProgress[]
+  coachingSessionLogs            CoachingSessionLog[]
   checkInAccessGrantedToCoaches  CoachCheckInAccess[]          @relation("CoachCheckInAccessUser")
   checkInAccessGrantedByUsers    CoachCheckInAccess[]          @relation("CoachCheckInAccessCoach")
   auditLogs                      AuditLog[]
@@ -1336,6 +1337,7 @@ model CoachingSession {
   publishedBy  User?                        @relation("CoachingSessionPublisher", fields: [publishedById], references: [id], onDelete: SetNull)
   conversation CoachingSessionConversation?
   progress     CoachingSessionProgress?
+  logs         CoachingSessionLog[]
   notification NotificationEvent?           @relation("NotificationCoachingSession")
 
   @@unique([entitlementId, sessionNo])
@@ -1358,6 +1360,21 @@ model CoachingSessionProgress {
 
   @@index([userId])
   @@map("coaching_session_progress")
+}
+
+model CoachingSessionLog {
+  id        String   @id @default(cuid())
+  sessionId String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  session CoachingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([userId])
+  @@map("coaching_session_logs")
 }
 
 model CoachingSessionConversation {

@@ -1,0 +1,2 @@
+export const COACHING_LOG_MAX_LENGTH = 120;
+export const COACHING_LOG_MAX_PER_SESSION = 50;

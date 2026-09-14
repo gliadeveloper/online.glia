@@ -24,6 +24,7 @@ export const coachSessionListInclude = {
       },
     },
   },
+  _count: { select: { logs: true } },
 } as const;
 
 export async function listCoachSessions(coachId: string) {
@@ -40,6 +41,10 @@ export async function getCoachSessionDetail(sessionId: string, coachId: string) 
     include: {
       ...sessionInclude,
       user: { select: { id: true, name: true, email: true } },
+      logs: {
+        orderBy: { createdAt: "desc" as const },
+        select: { id: true, body: true, createdAt: true },
+      },
     },
   });
 
