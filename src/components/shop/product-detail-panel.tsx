@@ -3,6 +3,7 @@ import { ProductCreatorSection } from "@/components/shop/product-creator-section
 import { ProductCurriculumSection } from "@/components/shop/product-curriculum-section";
 import { ProductDetailSidebar } from "@/components/shop/product-detail-sidebar";
 import { ProductHeroGallery } from "@/components/shop/product-hero-gallery";
+import { ProductRefundSection } from "@/components/shop/product-refund-section";
 import { ProductReviewSection } from "@/components/shop/product-review-section";
 import { ProductSectionNav } from "@/components/shop/product-section-nav";
 import { ProductDetailStickyBar } from "@/components/shop/product-purchase-panel";
@@ -72,6 +73,7 @@ export function ProductDetailPanel({
     ...(hasCurriculum ? [{ id: "pdp-curriculum", label: "커리큘럼" }] : []),
     { id: "pdp-reviews", label: "리뷰", count: reviewSummary.reviewCount },
     ...(instructor ? [{ id: "pdp-creator", label: "크리에이터" }] : []),
+    { id: "pdp-refund", label: "환불" },
   ];
 
   return (
@@ -153,6 +155,8 @@ export function ProductDetailPanel({
             />
 
             {instructor ? <ProductCreatorSection instructor={instructor} /> : null}
+
+            <ProductRefundSection />
           </div>
         </div>
       </div>

@@ -1338,6 +1338,133 @@
   cursor: pointer;
 }
 
+/* Refund policy */
+
+.glia-pdp__refund-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+}
+
+.glia-pdp__refund-head .glia-pdp__section-title {
+  margin-bottom: 0;
+}
+
+.glia-pdp__refund-date {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+.glia-pdp__refund {
+  max-width: var(--glia-pdp-read);
+  margin-top: 1.15rem;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--glia-text);
+}
+
+.glia-pdp__refund p {
+  margin: 0 0 1rem;
+}
+
+.glia-pdp__refund h3 {
+  margin: 1.75rem 0 0.85rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.glia-pdp__refund-link {
+  color: var(--glia-blue);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.glia-pdp__refund-rules {
+  margin: 0.25rem 0 0.5rem;
+  color: var(--glia-live);
+}
+
+.glia-pdp__refund-rules p {
+  margin-bottom: 0.45rem;
+  font-weight: 700;
+}
+
+.glia-pdp__refund-rules ol,
+.glia-pdp__refund-form {
+  margin: 0 0 1rem;
+  padding-left: 1.35rem;
+  list-style: decimal;
+}
+
+.glia-pdp__refund-rules li + li,
+.glia-pdp__refund-form li + li {
+  margin-top: 0.45rem;
+}
+
+.glia-pdp__refund-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 1.25rem;
+  border: 1px solid var(--glia-border);
+  background: var(--glia-surface);
+}
+
+.glia-pdp__refund-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.glia-pdp__refund-table th,
+.glia-pdp__refund-table td {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--glia-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.glia-pdp__refund-table thead th {
+  background: var(--glia-surface-secondary);
+  font-weight: 700;
+}
+
+.glia-pdp__refund-table tbody th {
+  width: 11.5rem;
+  background: var(--glia-surface);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.glia-pdp__refund-notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.glia-pdp__refund-notes li {
+  position: relative;
+  margin: 0 0 0.9rem;
+  padding-left: 1.15rem;
+}
+
+.glia-pdp__refund-notes li::before {
+  content: "■";
+  position: absolute;
+  left: 0;
+  font-size: 0.7rem;
+  line-height: 1.75rem;
+}
+
+.glia-pdp__refund-em {
+  color: var(--glia-live);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .glia-pdp .shop-pdp-apply-btn,
   .shop-pdp-apply-btn,
