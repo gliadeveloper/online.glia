@@ -1,9 +1,11 @@
 import {
+  coachingMediaSizeError,
+  maxCoachingMediaBytes,
+} from "@/lib/media/coaching-image-constants";
+import {
   inferLessonMediaContentType,
   LESSON_MEDIA_TYPE_ERROR,
   lessonMediaKind,
-  lessonMediaSizeError,
-  maxLessonMediaBytes,
 } from "@/lib/media/lesson-image-constants";
 
 type UploadCoachingMediaParams = {
@@ -33,8 +35,8 @@ export async function uploadCoachingMedia({
     throw new Error(LESSON_MEDIA_TYPE_ERROR);
   }
 
-  if (file.size > maxLessonMediaBytes(kind)) {
-    throw new Error(lessonMediaSizeError(kind));
+  if (file.size > maxCoachingMediaBytes(kind)) {
+    throw new Error(coachingMediaSizeError(kind));
   }
 
   const formData = new FormData();

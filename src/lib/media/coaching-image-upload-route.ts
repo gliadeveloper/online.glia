@@ -1,11 +1,13 @@
 import { ApiError } from "@/lib/api";
 import {
+  coachingMediaSizeError,
+  MAX_COACHING_MEDIA_BYTES,
+  maxCoachingMediaBytes,
+} from "@/lib/media/coaching-image-constants";
+import {
   inferLessonMediaContentType,
   lessonMediaKind,
-  lessonMediaSizeError,
   LESSON_MEDIA_TYPE_ERROR,
-  MAX_LESSON_MEDIA_BYTES,
-  maxLessonMediaBytes,
 } from "@/lib/media/lesson-image-constants";
 
 export async function parseCoachingImageUploadForm(request: Request) {
@@ -21,8 +23,8 @@ export async function parseCoachingImageUploadForm(request: Request) {
     throw new ApiError("sessionId is required", 400, "VALIDATION_ERROR");
   }
 
-  if (file.size > MAX_LESSON_MEDIA_BYTES) {
-    throw new ApiError(lessonMediaSizeError("video"), 400, "VALIDATION_ERROR");
+  if (file.size > MAX_COACHING_MEDIA_BYTES) {
+    throw new ApiError(coachingMediaSizeError("video"), 400, "VALIDATION_ERROR");
   }
 
   const contentType = inferLessonMediaContentType(file.name, file.type);
@@ -32,8 +34,8 @@ export async function parseCoachingImageUploadForm(request: Request) {
     throw new ApiError(LESSON_MEDIA_TYPE_ERROR, 400, "VALIDATION_ERROR");
   }
 
-  if (file.size > maxLessonMediaBytes(kind)) {
-    throw new ApiError(lessonMediaSizeError(kind), 400, "VALIDATION_ERROR");
+  if (file.size > maxCoachingMediaBytes(kind)) {
+    throw new ApiError(coachingMediaSizeError(kind), 400, "VALIDATION_ERROR");
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
