@@ -1,12 +1,10 @@
 import {
+  COACHING_MEDIA_TYPE_ERROR,
+  coachingMediaKind,
   coachingMediaSizeError,
+  inferCoachingMediaContentType,
   maxCoachingMediaBytes,
 } from "@/lib/media/coaching-image-constants";
-import {
-  inferLessonMediaContentType,
-  LESSON_MEDIA_TYPE_ERROR,
-  lessonMediaKind,
-} from "@/lib/media/lesson-image-constants";
 
 type UploadCoachingMediaParams = {
   file: File;
@@ -28,11 +26,11 @@ export async function uploadCoachingMedia({
   sessionId,
   apiRole,
 }: UploadCoachingMediaParams): Promise<string> {
-  const contentType = inferLessonMediaContentType(file.name, file.type);
-  const kind = lessonMediaKind(contentType);
+  const contentType = inferCoachingMediaContentType(file.name, file.type);
+  const kind = coachingMediaKind(contentType);
 
   if (!kind) {
-    throw new Error(LESSON_MEDIA_TYPE_ERROR);
+    throw new Error(COACHING_MEDIA_TYPE_ERROR);
   }
 
   if (file.size > maxCoachingMediaBytes(kind)) {
