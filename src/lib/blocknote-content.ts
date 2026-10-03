@@ -21,7 +21,23 @@ function asPlayableAudioBlock(block: Block): Block {
   const name = typeof props?.name === "string" ? props.name : "";
   const url = typeof props?.url === "string" ? props.url : "";
   if (!AUDIO_FILE_PATTERN.test(`${name} ${url}`)) return block;
-  return { ...block, type: "audio" };
+  const fileProps = block.props as {
+    backgroundColor?: string;
+    name?: string;
+    url?: string;
+    caption?: string;
+  };
+  return {
+    ...block,
+    type: "audio",
+    props: {
+      backgroundColor: fileProps.backgroundColor ?? "default",
+      name: fileProps.name ?? "",
+      url: fileProps.url ?? "",
+      caption: fileProps.caption ?? "",
+      showPreview: true,
+    },
+  } as Block;
 }
 
 export function getBlockNoteBlocksFromMetadata(metadata: unknown): Block[] | null {
