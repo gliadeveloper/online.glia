@@ -4,7 +4,6 @@ import { ApiError, jsonError, resolveUserId } from "@/lib/api";
 import { parseAvatarMediaObjectKey } from "@/lib/media/avatar-image";
 import { parseCommunityMediaObjectKey } from "@/lib/media/community-media";
 import { assertR2MediaAccess } from "@/lib/media/r2-media-access";
-import { playbackContentType } from "@/lib/media/playback-content-type";
 import { getR2Object, parseHttpByteRange } from "@/lib/media/r2";
 
 export async function GET(request: Request) {
@@ -27,8 +26,6 @@ export async function GET(request: Request) {
 
     const range = parseHttpByteRange(request.headers.get("range"));
     const object = await getR2Object(objectKey, range);
-    const contentType = playbackContentType(objectKey, object.ContentType);
-    const ranged = Boolean(range && object.ContentRange);
     const body = object.Body;
 
     if (!body || typeof body === "string") {
@@ -41,23 +38,21 @@ export async function GET(request: Request) {
         : body;
 
     const headers = new Headers({
-      "Content-Type": contentType,
-      "Content-Disposition": "inline",
+      "Content-Type": object.ContentType ?? "application/octet-stream",
+      "Accept-Ranges": "bytes",
       "Cache-Control": isPublicMedia ? "public, max-age=300" : "private, max-age=300",
     });
-
-    headers.set("Accept-Ranges", "bytes");
 
     if (object.ContentLength != null) {
       headers.set("Content-Length", String(object.ContentLength));
     }
 
-    if (ranged && object.ContentRange) {
+    if (object.ContentRange) {
       headers.set("Content-Range", object.ContentRange);
     }
 
     return new NextResponse(stream as BodyInit, {
-      status: ranged ? 206 : 200,
+      status: object.ContentRange ? 206 : 200,
       headers,
     });
   } catch (error) {

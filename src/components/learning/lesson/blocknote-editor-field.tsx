@@ -9,7 +9,6 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "rea
 
 import { getBlockNoteBlocksFromMetadata } from "@/lib/blocknote-content";
 import { normalizeMarkdownDraft, prepareMarkdownContent } from "@/lib/markdown-content";
-import { enableAudioPlayback } from "./enable-audio-playback";
 import "./lesson-block-editor.css";
 
 export type BlockNoteEditorFieldHandle = {
@@ -27,7 +26,6 @@ export const BlockNoteEditorField = forwardRef<BlockNoteEditorFieldHandle, Block
   function BlockNoteEditorField({ body, metadata, uploadFile, disabled = false }, ref) {
     const initialBlocks = useMemo(() => getBlockNoteBlocksFromMetadata(metadata), [metadata]);
     const loadedFromMarkdownRef = useRef(false);
-    const rootRef = useRef<HTMLDivElement>(null);
 
     const editor = useCreateBlockNote(
       {
@@ -40,17 +38,6 @@ export const BlockNoteEditorField = forwardRef<BlockNoteEditorFieldHandle, Block
     useEffect(() => {
       editor.isEditable = !disabled;
     }, [disabled, editor]);
-
-    useEffect(() => {
-      const root = rootRef.current;
-      if (!root) return;
-
-      const apply = () => enableAudioPlayback(root);
-      apply();
-      const observer = new MutationObserver(apply);
-      observer.observe(root, { childList: true, subtree: true });
-      return () => observer.disconnect();
-    }, [editor]);
 
     useEffect(() => {
       if (initialBlocks?.length) return;
@@ -81,7 +68,7 @@ export const BlockNoteEditorField = forwardRef<BlockNoteEditorFieldHandle, Block
     );
 
     return (
-      <div ref={rootRef} className="lesson-block-editor">
+      <div className="lesson-block-editor">
         <BlockNoteView editor={editor} theme="light" />
       </div>
     );
