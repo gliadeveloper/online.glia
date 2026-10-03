@@ -1,8 +1,8 @@
 const AUDIO_EXT_TO_MIME: Record<string, string> = {
   mp3: "audio/mpeg",
   mpeg: "audio/mpeg",
-  m4a: "video/mp4",
-  mp4a: "video/mp4",
+  m4a: "audio/mp4",
+  mp4a: "audio/mp4",
   aac: "audio/aac",
   wav: "audio/wav",
   wave: "audio/wav",
@@ -11,16 +11,15 @@ const AUDIO_EXT_TO_MIME: Record<string, string> = {
   flac: "audio/flac",
   aif: "audio/aiff",
   aiff: "audio/aiff",
-  caf: "video/mp4",
+  caf: "audio/mp4",
 };
 
 const AUDIO_MIME_ALIASES: Record<string, string> = {
   "audio/mp3": "audio/mpeg",
   "audio/x-mp3": "audio/mpeg",
   "audio/x-mpeg": "audio/mpeg",
-  "audio/mp4": "video/mp4",
-  "audio/m4a": "video/mp4",
-  "audio/x-m4a": "video/mp4",
+  "audio/m4a": "audio/mp4",
+  "audio/x-m4a": "audio/mp4",
   "audio/x-wav": "audio/wav",
   "audio/wave": "audio/wav",
   "audio/x-aac": "audio/aac",
@@ -39,12 +38,15 @@ export function isAudioObjectKey(objectKey: string) {
   return /\/audio\//i.test(objectKey) || audioMimeFromName(objectKey) !== null;
 }
 
-/** Content-Type browsers will actually decode in an audio element. */
+/** Content-Type the official BlockNote audio element can decode. */
 export function playbackContentType(objectKey: string, stored?: string | null) {
+  const fromName = audioMimeFromName(objectKey);
+  if (fromName) return fromName;
+
   const base = (stored ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
   if (base.startsWith("audio/")) return AUDIO_MIME_ALIASES[base] ?? base;
   if (base && base !== "application/octet-stream" && base !== "binary/octet-stream") {
     return base;
   }
-  return audioMimeFromName(objectKey) ?? (base || "application/octet-stream");
+  return base || "application/octet-stream";
 }
