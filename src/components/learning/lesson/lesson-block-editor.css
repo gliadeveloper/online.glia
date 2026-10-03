@@ -55,11 +55,16 @@
 }
 
 .lesson-block-editor audio.bn-audio,
-.lesson-block-note-view audio.bn-audio {
+.lesson-block-note-view audio.bn-audio,
+.lesson-block-editor video.bn-audio,
+.lesson-block-note-view video.bn-audio {
   display: block;
   width: 100%;
-  min-height: 40px;
+  height: 54px;
+  max-height: 54px;
   margin-block: 0.5rem;
+  background: #0f172a;
+  border-radius: 0.75rem;
   pointer-events: auto;
 }
 

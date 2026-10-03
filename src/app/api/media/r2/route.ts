@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     const object = await getR2Object(objectKey, range);
     const contentType = playbackContentType(objectKey, object.ContentType);
     const ranged = Boolean(range && object.ContentRange);
-    const isAudio = contentType.startsWith("audio/") && !ranged;
+    const isAudio = serveFullAudio || (contentType.startsWith("audio/") && !ranged);
     const body = object.Body;
 
     if (!body || typeof body === "string") {

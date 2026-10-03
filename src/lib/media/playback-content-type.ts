@@ -1,8 +1,8 @@
 const AUDIO_EXT_TO_MIME: Record<string, string> = {
   mp3: "audio/mpeg",
   mpeg: "audio/mpeg",
-  m4a: "audio/mp4",
-  mp4a: "audio/mp4",
+  m4a: "video/mp4",
+  mp4a: "video/mp4",
   aac: "audio/aac",
   wav: "audio/wav",
   wave: "audio/wav",
@@ -11,15 +11,16 @@ const AUDIO_EXT_TO_MIME: Record<string, string> = {
   flac: "audio/flac",
   aif: "audio/aiff",
   aiff: "audio/aiff",
-  caf: "audio/x-caf",
+  caf: "video/mp4",
 };
 
 const AUDIO_MIME_ALIASES: Record<string, string> = {
   "audio/mp3": "audio/mpeg",
   "audio/x-mp3": "audio/mpeg",
   "audio/x-mpeg": "audio/mpeg",
-  "audio/m4a": "audio/mp4",
-  "audio/x-m4a": "audio/mp4",
+  "audio/mp4": "video/mp4",
+  "audio/m4a": "video/mp4",
+  "audio/x-m4a": "video/mp4",
   "audio/x-wav": "audio/wav",
   "audio/wave": "audio/wav",
   "audio/x-aac": "audio/aac",
