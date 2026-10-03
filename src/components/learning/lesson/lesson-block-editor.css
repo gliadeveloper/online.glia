@@ -49,11 +49,18 @@
   background: #0f172a;
 }
 
+.lesson-block-editor [data-content-type="audio"],
+.lesson-block-note-view [data-content-type="audio"] {
+  pointer-events: auto;
+}
+
 .lesson-block-editor audio.bn-audio,
 .lesson-block-note-view audio.bn-audio {
   display: block;
   width: 100%;
+  min-height: 40px;
   margin-block: 0.5rem;
+  pointer-events: auto;
 }
 
 .lesson-markdown-editor {

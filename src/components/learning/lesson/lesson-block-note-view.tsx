@@ -7,6 +7,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useEffect, useRef } from "react";
 
+import { enableAudioPlayback } from "./enable-audio-playback";
 import "./lesson-block-editor.css";
 import "./lesson-block-note-view.css";
 
@@ -41,6 +42,7 @@ export function LessonBlockNoteView({ blocks, className }: LessonBlockNoteViewPr
           video.setAttribute("preload", "metadata");
         }
       }
+      enableAudioPlayback(root);
     };
 
     applyPlaybackAttrs();
