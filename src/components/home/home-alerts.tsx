@@ -16,6 +16,7 @@ const PREVIEW_COUNT = 3;
 const iconByKind = {
   live: LiveIcon,
   comment: CommentIcon,
+  question: CommentIcon,
   session: SessionIcon,
 } as const;
 

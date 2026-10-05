@@ -47,6 +47,48 @@ export async function createCoachingCommentNotification(
   });
 }
 
+export async function createLessonQuestionNotification(
+  tx: Db,
+  params: { discussionId: string; userId: string; occurredAt: Date },
+) {
+  const event = await tx.notificationEvent.upsert({
+    where: { discussionId: params.discussionId },
+    update: {},
+    create: {
+      type: "LESSON_QUESTION",
+      discussionId: params.discussionId,
+      occurredAt: params.occurredAt,
+    },
+  });
+
+  await tx.notificationDelivery.upsert({
+    where: { eventId_userId: { eventId: event.id, userId: params.userId } },
+    update: { readAt: null },
+    create: { eventId: event.id, userId: params.userId },
+  });
+}
+
+export async function createLessonQuestionReplyNotification(
+  tx: Db,
+  params: { replyId: string; userId: string; occurredAt: Date },
+) {
+  const event = await tx.notificationEvent.upsert({
+    where: { discussionReplyId: params.replyId },
+    update: {},
+    create: {
+      type: "LESSON_QUESTION_REPLY",
+      discussionReplyId: params.replyId,
+      occurredAt: params.occurredAt,
+    },
+  });
+
+  await tx.notificationDelivery.upsert({
+    where: { eventId_userId: { eventId: event.id, userId: params.userId } },
+    update: { readAt: null },
+    create: { eventId: event.id, userId: params.userId },
+  });
+}
+
 export async function createLiveStartedNotification(
   tx: Db,
   params: { liveSessionId: string; recipientIds: string[]; occurredAt: Date },
@@ -85,6 +127,31 @@ export async function markCoachingNotificationsRead(userId: string, sessionId: s
   });
 }
 
+export async function markLessonQuestionNotificationRead(userId: string, discussionId: string) {
+  await prisma.notificationDelivery.updateMany({
+    where: {
+      userId,
+      readAt: null,
+      event: { type: "LESSON_QUESTION", discussionId },
+    },
+    data: { readAt: new Date() },
+  });
+}
+
+export async function markLessonQuestionReplyNotificationsRead(userId: string, lessonId: string) {
+  await prisma.notificationDelivery.updateMany({
+    where: {
+      userId,
+      readAt: null,
+      event: {
+        type: "LESSON_QUESTION_REPLY",
+        discussionReply: { discussion: { lessonId } },
+      },
+    },
+    data: { readAt: new Date() },
+  });
+}
+
 export async function markLiveNotificationsRead(userId: string, lessonId: string) {
   await prisma.notificationDelivery.updateMany({
     where: {
@@ -96,7 +163,7 @@ export async function markLiveNotificationsRead(userId: string, lessonId: string
   });
 }
 
-export type HomeNotificationKind = "live" | "comment" | "session";
+export type HomeNotificationKind = "live" | "comment" | "session" | "question";
 
 export type HomeNotification = {
   id: string;
@@ -111,6 +178,7 @@ export type HomeNotification = {
 const KIND_PRIORITY: Record<HomeNotificationKind, number> = {
   live: 0,
   comment: 1,
+  question: 1,
   session: 2,
 };
 
@@ -123,6 +191,8 @@ export async function getHomeNotifications(userId: string): Promise<HomeNotifica
         { event: { type: "COACHING_SESSION_PUBLISHED" } },
         { event: { type: "COACHING_COMMENT" } },
         { event: { type: "LIVE_STARTED", liveSession: { status: "LIVE" } } },
+        { event: { type: "LESSON_QUESTION" } },
+        { event: { type: "LESSON_QUESTION_REPLY" } },
       ],
     },
     orderBy: { event: { occurredAt: "desc" } },
@@ -148,6 +218,26 @@ export async function getHomeNotifications(userId: string): Promise<HomeNotifica
               },
             },
           },
+          discussion: {
+            select: {
+              id: true,
+              title: true,
+              lessonId: true,
+              courseId: true,
+            },
+          },
+          discussionReply: {
+            select: {
+              discussion: {
+                select: {
+                  id: true,
+                  title: true,
+                  lessonId: true,
+                  courseId: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -156,6 +246,33 @@ export async function getHomeNotifications(userId: string): Promise<HomeNotifica
   const items: HomeNotification[] = [];
 
   for (const { id, event } of deliveries) {
+    if (event.type === "LESSON_QUESTION" && event.discussion?.lessonId) {
+      items.push({
+        id,
+        kind: "question",
+        label: "새 강의 질문",
+        title: event.discussion.title,
+        href: `/coach/questions?filter=open&question=${event.discussion.id}`,
+        occurredAt: event.occurredAt,
+        timeLabel: formatPostRelativeTime(event.occurredAt),
+      });
+      continue;
+    }
+
+    if (event.type === "LESSON_QUESTION_REPLY" && event.discussionReply?.discussion.lessonId) {
+      const question = event.discussionReply.discussion;
+      items.push({
+        id,
+        kind: "question",
+        label: "내 질문에 새 답변",
+        title: question.title,
+        href: `/learning/${question.courseId}/lessons/${question.lessonId}#qna-${question.id}`,
+        occurredAt: event.occurredAt,
+        timeLabel: formatPostRelativeTime(event.occurredAt),
+      });
+      continue;
+    }
+
     if (event.type === "LIVE_STARTED" && event.liveSession) {
       const lesson = event.liveSession.lesson;
       items.push({

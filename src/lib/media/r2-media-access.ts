@@ -1,10 +1,12 @@
 import { ApiError } from "@/lib/api";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
+import { canAccessEnrollment, materializeEnrollmentExpiry } from "@/lib/enrollment-access";
 import { prisma } from "@/lib/prisma";
 
 import { parseAvatarMediaObjectKey } from "./avatar-image";
 import { parseCommunityMediaObjectKey } from "./community-media";
 import { parseCoachingMediaObjectKey, parseCourseMediaObjectKey } from "./content-metadata";
+import { parseLessonQnaMediaObjectKey } from "./lesson-qna-media";
 
 async function assertCoachingMediaAccess(userId: string, sessionId: string) {
   const session = await prisma.coachingSession.findUnique({
@@ -36,6 +38,42 @@ async function assertCoachingMediaAccess(userId: string, sessionId: string) {
   throw new ApiError("Forbidden", 403, "FORBIDDEN");
 }
 
+async function assertLessonQnaMediaAccess(userId: string, courseId: string) {
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { instructorId: true },
+  });
+  if (!course) {
+    throw new ApiError("Forbidden", 403, "FORBIDDEN");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+  if (!user) {
+    throw new ApiError("Login required", 401, "UNAUTHORIZED");
+  }
+
+  if (user.role === "ADMIN" || course.instructorId === userId) {
+    return { courseId };
+  }
+
+  const enrollment = await prisma.enrollment.findUnique({
+    where: { userId_courseId: { userId, courseId } },
+  });
+  if (!enrollment) {
+    throw new ApiError("Forbidden", 403, "FORBIDDEN");
+  }
+
+  const materialized = await materializeEnrollmentExpiry(enrollment);
+  if (!canAccessEnrollment(materialized)) {
+    throw new ApiError("Forbidden", 403, "FORBIDDEN");
+  }
+
+  return { courseId };
+}
+
 export async function assertR2MediaAccess(userId: string, objectKey: string) {
   if (parseAvatarMediaObjectKey(objectKey) || parseCommunityMediaObjectKey(objectKey)) {
     return { objectKey };
@@ -44,6 +82,11 @@ export async function assertR2MediaAccess(userId: string, objectKey: string) {
   const coaching = parseCoachingMediaObjectKey(objectKey);
   if (coaching) {
     return assertCoachingMediaAccess(userId, coaching.sessionId);
+  }
+
+  const lessonQna = parseLessonQnaMediaObjectKey(objectKey);
+  if (lessonQna) {
+    return assertLessonQnaMediaAccess(userId, lessonQna.courseId);
   }
 
   const parsed = parseCourseMediaObjectKey(objectKey);

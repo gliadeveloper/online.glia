@@ -15,6 +15,7 @@ import {
 import { isLessonMarkdownContent } from "@/lib/lesson-markdown-content";
 import { LessonLivePanel } from "@/components/learning/lesson/lesson-live-panel";
 import { LessonPlayerShell } from "@/components/learning/lesson/lesson-player-shell";
+import { LessonQnaPanel } from "@/components/learning/lesson/lesson-qna-panel";
 import { QuizPlayer } from "@/components/learning/lesson/quiz-player";
 import { EnrollmentExpiredNotice } from "@/components/learning/enrollment-expired-notice";
 import "@/components/learning/lesson-player.css";
@@ -22,7 +23,11 @@ import { ApiError } from "@/lib/api";
 import { getEnrolledCourseDetail } from "@/lib/learning-course-detail";
 import { getLessonPlayerContext } from "@/lib/learning";
 import { getCourseShopStateById } from "@/lib/shop-purchase-state";
-import { markLiveNotificationsRead } from "@/lib/home-notifications";
+import {
+  markLessonQuestionReplyNotificationsRead,
+  markLiveNotificationsRead,
+} from "@/lib/home-notifications";
+import { listLessonQuestions } from "@/lib/lesson-qna";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
@@ -171,6 +176,8 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
   if (lesson.type === "LIVE") {
     await markLiveNotificationsRead(user.id, lesson.id);
   }
+  const questions = await listLessonQuestions(user.id, lesson.id);
+  await markLessonQuestionReplyNotificationsRead(user.id, lesson.id);
   const status = progress?.status ?? "NOT_STARTED";
 
   const player = resolveLessonPlayer(lesson);
@@ -208,6 +215,7 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
         }
         actions={actions}
         body={showBody ? bodyContent : null}
+        qna={<LessonQnaPanel lessonId={lesson.id} initialQuestions={questions} />}
         mobileNav={mobileNav}
       />
     </AppStackPage>

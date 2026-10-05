@@ -240,6 +240,33 @@
   overscroll-behavior: contain;
 }
 
+.lesson-player-content-tabs {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+  padding-inline: var(--glia-gutter);
+  border-bottom: 1px solid var(--glia-border);
+}
+
+@media (min-width: 1024px) {
+  .lesson-player-content-tabs {
+    padding-inline: 0;
+  }
+}
+
+.lesson-player__lecture-empty {
+  margin: 0;
+  padding: 1.25rem var(--glia-gutter) 2rem;
+  font-size: 0.875rem;
+  color: var(--glia-text-secondary);
+}
+
+@media (min-width: 1024px) {
+  .lesson-player__lecture-empty {
+    padding-inline: 0;
+  }
+}
+
 .lesson-player-tabs {
   display: flex;
   gap: 1.25rem;
@@ -872,6 +899,191 @@
   font-weight: 600;
   color: var(--glia-text-secondary);
   text-decoration: none;
+}
+
+.lesson-qna {
+  margin-top: 0;
+  padding: 1.25rem var(--glia-gutter) 2rem;
+  border-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .lesson-qna {
+    padding-inline: 0;
+  }
+}
+
+.lesson-qna__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.lesson-qna__lede,
+.lesson-qna__note,
+.lesson-qna__empty,
+.lesson-qna__meta,
+.lesson-qna__context {
+  color: var(--glia-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.lesson-qna__lede {
+  margin: 0.35rem 0 1rem;
+}
+
+.lesson-qna__form,
+.lesson-qna__body-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lesson-qna__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.lesson-qna__input,
+.lesson-qna__textarea {
+  width: 100%;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  color: var(--glia-text);
+  font: inherit;
+  padding: 0.7rem 0.8rem;
+}
+
+.lesson-qna__textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.lesson-qna__list,
+.lesson-qna__replies {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+.lesson-qna__item,
+.lesson-qna__reply {
+  border-top: 1px solid var(--glia-border);
+  padding: 0.9rem 0;
+}
+
+.lesson-qna__reply--accepted {
+  background: var(--glia-soft-blue);
+  border-radius: var(--glia-radius-md);
+  padding: 0.9rem;
+}
+
+.lesson-qna__row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.lesson-qna__summary {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lesson-qna__question-title {
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.lesson-qna__vote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2.5rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: transparent;
+  color: var(--glia-text-secondary);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.2rem;
+  cursor: pointer;
+}
+
+.lesson-qna__vote--on {
+  color: var(--glia-blue);
+  border-color: var(--glia-blue);
+  background: var(--glia-blue-light);
+}
+
+.lesson-qna__thread {
+  margin: 0.75rem 0 0 3.25rem;
+}
+
+.lesson-qna__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lesson-qna__btn {
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-primary);
+  color: #fff;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.lesson-qna__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lesson-qna__btn--ghost {
+  background: transparent;
+  color: var(--glia-blue);
+}
+
+.lesson-qna__file {
+  align-self: flex-start;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--glia-blue);
+  cursor: pointer;
+}
+
+.lesson-qna__file input {
+  display: none;
+}
+
+.lesson-qna__error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.8125rem;
+}
+
+.lesson-qna__body {
+  margin: 0.35rem 0 0.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

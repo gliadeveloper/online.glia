@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { LessonCurriculumSidebar } from "@/components/learning/lesson/lesson-curriculum-sidebar";
 import type { EnrolledCourseDetail } from "@/lib/learning-course-detail";
 import type { ProgressStatus } from "@/generated/prisma/client";
 
 type LessonPlayerTab = "curriculum" | "materials";
+type LessonContentTab = "lecture" | "qna";
 
 type LessonPlayerShellProps = {
   courseId: string;
@@ -20,6 +21,7 @@ type LessonPlayerShellProps = {
   materials: React.ReactNode;
   actions?: React.ReactNode;
   body?: React.ReactNode;
+  qna?: React.ReactNode;
   mobileNav?: React.ReactNode;
 };
 
@@ -35,10 +37,24 @@ export function LessonPlayerShell({
   materials,
   actions,
   body,
+  qna,
   mobileNav,
 }: LessonPlayerShellProps) {
   const [mobileTab, setMobileTab] = useState<LessonPlayerTab>("curriculum");
   const [sidebarTab, setSidebarTab] = useState<LessonPlayerTab>("curriculum");
+  const [contentTab, setContentTab] = useState<LessonContentTab>("lecture");
+
+  useEffect(() => {
+    function openQnaFromHash() {
+      if (window.location.hash.startsWith("#qna-")) {
+        setContentTab("qna");
+      }
+    }
+
+    openQnaFromHash();
+    window.addEventListener("hashchange", openQnaFromHash);
+    return () => window.removeEventListener("hashchange", openQnaFromHash);
+  }, []);
 
   return (
     <div className="lesson-player glia-lesson">
@@ -57,7 +73,66 @@ export function LessonPlayerShell({
             </div>
           </div>
 
-          {body ? <div className="lesson-player__body">{body}</div> : null}
+          {qna ? (
+            <div className="lesson-player-content-tabs" role="tablist" aria-label="레슨 내용">
+              <button
+                type="button"
+                role="tab"
+                id="lesson-tab-lecture"
+                aria-selected={contentTab === "lecture"}
+                aria-controls="lesson-panel-lecture"
+                className={[
+                  "lesson-player-tabs__btn",
+                  contentTab === "lecture" ? "lesson-player-tabs__btn--active" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => setContentTab("lecture")}
+              >
+                강의
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="lesson-tab-qna"
+                aria-selected={contentTab === "qna"}
+                aria-controls="lesson-panel-qna"
+                className={[
+                  "lesson-player-tabs__btn",
+                  contentTab === "qna" ? "lesson-player-tabs__btn--active" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => setContentTab("qna")}
+              >
+                Q&A
+              </button>
+            </div>
+          ) : null}
+
+          <div
+            id="lesson-panel-lecture"
+            role="tabpanel"
+            aria-labelledby="lesson-tab-lecture"
+            hidden={Boolean(qna) && contentTab !== "lecture"}
+          >
+            {body ? (
+              <div className="lesson-player__body">{body}</div>
+            ) : player ? (
+              <p className="lesson-player__lecture-empty">이 레슨은 위 영상으로 진행합니다.</p>
+            ) : null}
+          </div>
+
+          {qna ? (
+            <div
+              id="lesson-panel-qna"
+              role="tabpanel"
+              aria-labelledby="lesson-tab-qna"
+              hidden={contentTab !== "qna"}
+            >
+              <div className="lesson-player__qna">{qna}</div>
+            </div>
+          ) : null}
 
           {mobileNav ? <div className="lesson-player__mobile-nav lg:hidden">{mobileNav}</div> : null}
 

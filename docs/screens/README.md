@@ -16,7 +16,7 @@
 | `/community/new` | Stack | [community-new.md](./community-new.md) | 글/인증 글 작성 |
 | `/learning` | Tab | [learning-tab.md](./learning-tab.md) | 수강·코칭 허브 |
 | `/learning/[slug]` | Stack | [learning-course.md](./learning-course.md) | 코스 상세·커리큘럼 |
-| `/learning/[slug]/lessons/[lessonId]` | Stack | [learning-lesson.md](./learning-lesson.md) | 레sson 플레이어 |
+| `/learning/[id]/lessons/[lessonId]` | Stack | [learning-lesson.md](./learning-lesson.md) | 레슨 플레이어 · 강의 Q&A |
 | `/coaching` | Tab | [coaching-list.md](./coaching-list.md) | 코칭 상품 목록 |
 | `/coaching/[entitlementId]` | Stack | [coaching-list.md](./coaching-list.md#coachingentitlementid--회차-목록) | 회차 목록 |
 | `/coaching/sessions/[id]` | Stack | [coaching-session.md](./coaching-session.md) | 회차 콘텐츠·한줄 기록·Q&A |
@@ -25,6 +25,8 @@
 | `/shop/[slug]` | Stack | [shop-product.md](./shop-product.md) | 상품 상세·구매 CTA |
 | `/mypage` | Stack | [mypage.md](./mypage.md) | 계정·메뉴 |
 | `/orders` | Stack | [orders.md](./orders.md) | 주문 내역 |
+
+코치 포털 강의 질문: [coach/lesson-questions.md](./coach/lesson-questions.md) (`/coach/questions`).
 
 ### 플로우
 

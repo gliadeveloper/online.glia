@@ -13,7 +13,7 @@
 | customer UI / 바텀탭 화면 추가 | [§4 Customer App](#4-customer-app-app) → [screens/README.md](./screens/README.md) |
 | 특정 URL 구현·수정 | [docs/screens/](./screens/) 해당 md |
 | 색·타이포·컴포넌트 토큰 | [§4.2 Corporate Trust](#42-corporate-trust) · [§4.2a Auth GLIA](#42a-auth--glia-recovery-wellness) · [visual-direction.md](./visual-direction.md) |
-| Shop / 수강권 / 만료 / 연장 | [§5 Commerce & LMS Access](#5-commerce--lms-access) |
+| Shop / 수강권 / 만료 / 연장 / 강의 Q&A | [§5 Commerce & LMS Access](#5-commerce--lms-access) |
 | 코치 포털 기능 추가 | [§7 Coach Portal](#7-coach-portal) |
 | 코칭권 · 회차 발행 · 코치 Q&A · 한줄 기록 | [coach-coaching.md](./coach-coaching.md) |
 | 라이브·녹화·다시보기 | [§8 Live Lessons](#8-live-lessons) |
@@ -195,6 +195,21 @@
 
 **구현:** `src/lib/enrollment-access.ts` · `src/lib/shop-purchase-state.ts` · `src/lib/fulfillment.ts`
 
+### 5.6 강의 Q&A
+
+레슨에 붙는 공개 질문. 코칭 회차 Q&A·커뮤니티 댓글과 별개.
+
+| 정책 | 내용 |
+|------|------|
+| 범위 | 질문 1개 = 레슨 1개. 같은 코스 **유효 수강**(`ACTIVE`·`COMPLETED`, 기간 내)에게 공개 |
+| 작성 | 제목 필수 · 설명 선택 · 설명 안 이미지 최대 3장. 업보트는 질문·답변 |
+| 답변 | 수강생과 코스 강사. 강사만 답변 하나 채택, 질문 닫기. 닫히면 새 답변 없음 |
+| 만료 | 레슨과 동일. 만료·중단 수강은 Q&A를 열지 않음 |
+| 알림 | 새 질문 → 코스 강사. 새 답변 → 질문 작성자 |
+| 강사 | `/coach/questions`. 미답변 = 닫히지 않았고 강사 답변이 없음 |
+
+수강생 화면: [screens/learning-lesson.md](./screens/learning-lesson.md) · 강사: [screens/coach/lesson-questions.md](./screens/coach/lesson-questions.md)
+
 상세: [lms-access-implementation.md](./lms-access-implementation.md)
 
 ### 5.5 보류 (v1 미구현)
@@ -233,6 +248,7 @@ Coach: `/coach/coaching`, `/coach/sessions/[id]` — **코치 과업 SSOT:** [co
 | 고객 | 수강·코칭권 보유 회원 통합 |
 | 코스 | LMS curriculum · VOD/LIVE 레슨 편집 |
 | 라이브 | 일정·시작·종료·다시보기 변환 |
+| 질문 | 본인 코스 강의 Q&A. 미답변 받은편지함. 상세 [screens/coach/lesson-questions.md](./screens/coach/lesson-questions.md) |
 | 코칭 | 코칭 페이지 발행·수정 · 발행 현황 · 미답 Q&A · 한줄 기록 열람 · 코칭권·오퍼링. 상세 [coach-coaching.md](./coach-coaching.md) |
 
 ### 7.2 소유권 스코프

@@ -342,7 +342,8 @@
   background: var(--glia-mint);
 }
 
-.app-trust-root .glia-alert--comment .glia-alert__icon {
+.app-trust-root .glia-alert--comment .glia-alert__icon,
+.app-trust-root .glia-alert--question .glia-alert__icon {
   color: var(--glia-blue-dark);
   background: var(--glia-soft-blue);
 }
@@ -696,6 +697,29 @@
   .app-trust-root .glia-home__feed {
     padding-block: 2.25rem 3rem;
   }
+}
+
+.app-trust-root .glia-home__legal {
+  margin: 0.5rem var(--glia-gutter) 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--glia-border);
+  color: var(--glia-text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.app-trust-root .glia-home__legal p {
+  margin: 0;
+}
+
+.app-trust-root .glia-home__legal a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-trust-root .glia-home__legal a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 @media (prefers-reduced-motion: reduce) {

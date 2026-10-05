@@ -11,6 +11,7 @@ const navItems = [
   { href: "/coach/checkins", label: "체크인", exact: false },
   { href: "/coach/courses", label: "코스", exact: false },
   { href: "/coach/live", label: "라이브", exact: false },
+  { href: "/coach/questions", label: "질문", exact: false },
   { href: "/coach/coaching", label: "코칭", exact: false },
 ];
 
@@ -18,10 +19,17 @@ type CoachShellProps = {
   userName: string;
   userEmail: string;
   pendingQnaCount?: number;
+  pendingLessonQnaCount?: number;
   children: React.ReactNode;
 };
 
-export function CoachShell({ userName, userEmail, pendingQnaCount = 0, children }: CoachShellProps) {
+export function CoachShell({
+  userName,
+  userEmail,
+  pendingQnaCount = 0,
+  pendingLessonQnaCount = 0,
+  children,
+}: CoachShellProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -74,6 +82,15 @@ export function CoachShell({ userName, userEmail, pendingQnaCount = 0, children 
                       }`}
                     >
                       {pendingQnaCount}
+                    </span>
+                  ) : null}
+                  {item.href === "/coach/questions" && pendingLessonQnaCount > 0 ? (
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        active ? "bg-white/20 text-white" : "bg-amber-500/20 text-amber-300"
+                      }`}
+                    >
+                      {pendingLessonQnaCount}
                     </span>
                   ) : null}
                 </Link>
