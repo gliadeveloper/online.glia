@@ -1,6 +1,12 @@
 import { ApiError } from "@/lib/api";
 
 import {
+  COACHING_MEDIA_TYPE_ERROR,
+  coachingMediaKind,
+  coachingMediaSizeError,
+  maxCoachingMediaBytes,
+} from "./coaching-image-constants";
+import {
   ALLOWED_LESSON_IMAGE_TYPES,
   LESSON_MEDIA_TYPE_ERROR,
   lessonMediaKind,
@@ -8,6 +14,7 @@ import {
   maxLessonMediaBytes,
 } from "./lesson-image-constants";
 import {
+  buildCoachingAudioObjectKey,
   buildCoachingImageObjectKey,
   buildCoachingVideoObjectKey,
   buildLessonImageObjectKey,
@@ -112,13 +119,13 @@ export async function uploadCoachingImageBuffer(params: {
   contentType: string;
   buffer: Buffer;
 }) {
-  const kind = lessonMediaKind(params.contentType);
+  const kind = coachingMediaKind(params.contentType);
   if (!kind) {
-    throw new ApiError(LESSON_MEDIA_TYPE_ERROR, 400, "VALIDATION_ERROR");
+    throw new ApiError(COACHING_MEDIA_TYPE_ERROR, 400, "VALIDATION_ERROR");
   }
 
-  if (params.buffer.byteLength > maxLessonMediaBytes(kind)) {
-    throw new ApiError(lessonMediaSizeError(kind), 400, "VALIDATION_ERROR");
+  if (params.buffer.byteLength > maxCoachingMediaBytes(kind)) {
+    throw new ApiError(coachingMediaSizeError(kind), 400, "VALIDATION_ERROR");
   }
 
   requireR2Config();
@@ -126,7 +133,9 @@ export async function uploadCoachingImageBuffer(params: {
   const objectKey =
     kind === "video"
       ? buildCoachingVideoObjectKey(params)
-      : buildCoachingImageObjectKey(params);
+      : kind === "audio"
+        ? buildCoachingAudioObjectKey(params)
+        : buildCoachingImageObjectKey(params);
 
   await putR2Object({
     objectKey,

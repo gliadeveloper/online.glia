@@ -127,7 +127,7 @@ export function SessionActions({
       <div className="space-y-2">
         <label className="text-sm font-medium text-zinc-700">본문</label>
         <p className="text-xs text-zinc-500">
-          `/` 로 영상 블록을 넣거나 파일을 끌어다 놓으세요. 이미지는 10MB, 영상(mp4·webm·mov)은 200MB까지입니다.
+          `/` 로 영상·오디오 블록을 넣거나 파일을 끌어다 놓으세요. 이미지는 10MB, 오디오(mp3·m4a·wav)는 200MB, 영상(mp4·webm·mov)은 500MB까지입니다.
         </p>
         <CoachingSessionBlockEditor
           ref={editorRef}

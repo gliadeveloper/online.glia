@@ -3,7 +3,7 @@ import { parseCoachingImageUploadForm } from "@/lib/media/coaching-image-upload-
 import { uploadCoachingImageBuffer } from "@/lib/media/r2-image-upload";
 import { prisma } from "@/lib/prisma";
 
-export const maxDuration = 300;
+export const maxDuration = 600;
 
 export async function POST(request: Request) {
   try {

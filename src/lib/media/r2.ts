@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { ApiError } from "@/lib/api";
@@ -23,6 +23,9 @@ function createR2Client(config: NonNullable<ReturnType<typeof getR2Config>>) {
       secretAccessKey: config.secretAccessKey,
     },
     forcePathStyle: true,
+    // Default checksum checks reject ranged GetObject bodies.
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
   });
 }
 
@@ -86,14 +89,65 @@ function isRangeNotSatisfiable(error: unknown) {
   );
 }
 
+export type HttpByteRange = { start: number; end: number };
+
+/**
+ * Resolve one `bytes=` range against a known object size.
+ * `null` means there is no usable range (serve the whole object).
+ * `"unsatisfiable"` means the client asked for bytes outside the object.
+ */
+export function resolveHttpByteRange(
+  header: string | null,
+  total: number,
+): HttpByteRange | "unsatisfiable" | null {
+  if (!header || total <= 0) return null;
+  const trimmed = header.trim();
+  const match = trimmed.match(/^bytes=(\d*)-(\d*)$/i);
+  if (!match || trimmed.toLowerCase() === "bytes=-") return null;
+
+  const [, startText, endText] = match;
+  let start: number;
+  let end: number;
+
+  if (startText === "" && endText !== "") {
+    const suffix = Number(endText);
+    if (!Number.isFinite(suffix) || suffix <= 0) return "unsatisfiable";
+    start = Math.max(0, total - suffix);
+    end = total - 1;
+  } else {
+    start = Number(startText);
+    end = endText === "" ? total - 1 : Number(endText);
+  }
+
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+  if (start < 0 || start >= total || end < start) return "unsatisfiable";
+  return { start, end: Math.min(end, total - 1) };
+}
+
 /** HTTP Range like `bytes=0-1023` or `bytes=1024-`. Invalid values are ignored. */
 export function parseHttpByteRange(header: string | null): string | undefined {
   if (!header) return undefined;
   const trimmed = header.trim();
-  if (!/^bytes=\d*-\d*$/.test(trimmed) || trimmed === "bytes=-") {
+  if (!/^bytes=\d*-\d*$/i.test(trimmed) || trimmed.toLowerCase() === "bytes=-") {
     return undefined;
   }
   return trimmed;
+}
+
+export async function headR2Object(objectKey: string) {
+  const config = requireR2Config();
+  const client = createR2Client(config);
+  const result = await client.send(
+    new HeadObjectCommand({
+      Bucket: config.bucket,
+      Key: objectKey,
+    }),
+  );
+
+  return {
+    contentLength: result.ContentLength ?? 0,
+    contentType: result.ContentType,
+  };
 }
 
 export async function getR2Object(objectKey: string, range?: string) {

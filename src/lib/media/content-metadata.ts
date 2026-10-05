@@ -57,6 +57,14 @@ export function buildCoachingVideoObjectKey(params: {
   return `coaching/${params.sessionId}/videos/${Date.now()}-${safeName}`;
 }
 
+export function buildCoachingAudioObjectKey(params: {
+  sessionId: string;
+  fileName: string;
+}) {
+  const safeName = safeMediaFileName(params.fileName);
+  return `coaching/${params.sessionId}/audio/${Date.now()}-${safeName}`;
+}
+
 export function parseCoachingMediaObjectKey(objectKey: string): {
   sessionId: string;
 } | null {
