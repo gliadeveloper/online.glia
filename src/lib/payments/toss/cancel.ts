@@ -1,6 +1,6 @@
 import { readTossError, tossResourceBody } from "@/lib/payments/toss/verify";
 
-const TRANSACTION_KEY = /^[A-Za-z0-9]{8,64}$/;
+const TRANSACTION_KEY = /^[A-Za-z0-9_-]{8,64}$/;
 const RECEIPT_KEY = /^[A-Za-z0-9]{8,100}$/;
 
 export type TossCancelExpectation = {
