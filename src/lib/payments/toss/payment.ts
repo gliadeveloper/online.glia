@@ -454,7 +454,7 @@ export async function cancelTossPayment(params: {
   reason?: string;
 }) {
   const config = loadConfig();
-  const reason = params.reason?.trim() || "구매자가 취소를 원함";
+  let reason = params.reason?.trim() || "구매자가 취소를 원함";
   if (reason.length > 200) {
     throw new ApiError("취소 사유는 200자까지 입력할 수 있습니다.", 400, "CANCEL_REASON_INVALID");
   }
@@ -506,7 +506,7 @@ export async function cancelTossPayment(params: {
     throw new ApiError("취소할 잔액이 없습니다.", 409, "NOTHING_TO_CANCEL");
   }
 
-  const cancelAmount = params.amount ?? balance;
+  let cancelAmount = params.amount ?? balance;
   if (!Number.isSafeInteger(cancelAmount) || cancelAmount < 1 || cancelAmount > balance) {
     throw new ApiError("취소 금액이 잔액보다 큽니다.", 400, "CANCEL_AMOUNT_INVALID");
   }
@@ -519,11 +519,10 @@ export async function cancelTossPayment(params: {
   let refundId: string;
   let idempotencyKey: string;
   if (pending?.idempotencyKey) {
-    if (pending.amount !== cancelAmount || (pending.reason ?? "") !== reason) {
-      throw new ApiError("진행 중인 취소가 있습니다.", 409, "CANCEL_IN_PROGRESS");
-    }
     refundId = pending.id;
     idempotencyKey = pending.idempotencyKey;
+    cancelAmount = pending.amount;
+    reason = pending.reason?.trim() || reason;
     const expiresAt = pending.createdAt.getTime() + 15 * 24 * 60 * 60 * 1000;
     if (Date.now() >= expiresAt) {
       idempotencyKey = randomUUID();
