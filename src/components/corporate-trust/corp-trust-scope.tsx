@@ -1,12 +1,13 @@
-import { Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./tokens.css";
 import "./app-trust-tokens.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
+const plusJakarta = localFont({
+  src: "../../fonts/plus-jakarta-sans-latin.woff2",
   variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: "400 800",
+  display: "swap",
 });
 
 type CorpTrustScopeProps = {
