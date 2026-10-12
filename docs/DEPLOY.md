@@ -23,7 +23,7 @@ gh repo create gliadeveloper/online.glia --public --source=. --remote=origin --p
 | `SESSION_SECRET` | 32자 이상 랜덤 문자열 (프로덕션 필수) |
 | `DATABASE_URL` | Prisma Postgres 연결 시 **자동 주입** (아래 3단계) |
 
-선택: `KAKAO_*`, `R2_*`(BlockNote 이미지 등) — [.env.example](../.env.example) 참고.
+선택: `KAKAO_*`, `R2_*`(BlockNote 이미지 등) — [deploy/env.production.example](../deploy/env.production.example) 의 키 목록. 로컬은 `.env.local`이 같은 키를 덮어쓴다.
 
 ## 3. Prisma Postgres (무료) 연결
 

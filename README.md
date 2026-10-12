@@ -6,8 +6,7 @@ Next.js + Prisma 7 + PostgreSQL (Prisma Postgres on Vercel).
 
 ```bash
 npm install
-cp .env.example .env
-# DATABASE_URL — Prisma Postgres 또는 로컬 Postgres (Vercel 연동 시: vercel env pull)
+# 서버 값은 .env, 로컬 값은 .env.local (next dev · prisma 가 .env 를 덮어씀)
 npm run dev
 ```
 
