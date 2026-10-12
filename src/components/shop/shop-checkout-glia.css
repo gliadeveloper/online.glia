@@ -1,0 +1,185 @@
+/*
+ * Checkout — GLIA payment screen before the Toss window.
+ * Scope: `.glia-checkout` on /shop/[id]/checkout
+ */
+
+.app-trust-root:has(.glia-checkout) .app-shell,
+.app-trust-root:has(.glia-checkout) .app-shell__main--trust {
+  background: var(--glia-bg);
+}
+
+.app-trust-root:has(.glia-checkout) .app-shell__main--trust {
+  max-width: none;
+  padding: 0;
+}
+
+.corp-trust .shop-checkout-page.app-stack-page:has(.glia-checkout) {
+  gap: 0;
+  margin: 0;
+  width: 100%;
+  padding: 0 0 3rem;
+}
+
+.glia-checkout {
+  min-height: 100%;
+  padding: 1.15rem 0 2.75rem;
+  background: var(--glia-bg);
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+  letter-spacing: -0.01em;
+}
+
+.glia-checkout a:focus-visible,
+.glia-checkout button:focus-visible,
+.glia-checkout input:focus-visible,
+.glia-checkout select:focus-visible {
+  outline: 2px solid var(--glia-blue);
+  outline-offset: 3px;
+}
+
+.glia-checkout__sheet {
+  display: grid;
+  gap: 1.25rem;
+  width: min(100%, 28rem);
+  margin: 0 auto;
+  padding: 0 var(--glia-gutter);
+}
+
+.glia-checkout__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--glia-blue);
+}
+
+.glia-checkout__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.glia-checkout__back {
+  color: var(--glia-text-secondary);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+.glia-checkout__summary,
+.glia-checkout__coupon,
+.glia-checkout__pay {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--glia-border);
+}
+
+.glia-checkout__product {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.glia-checkout__price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  color: var(--glia-text-secondary);
+  font-size: 0.875rem;
+}
+
+.glia-checkout__price-row strong {
+  color: var(--glia-text);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.glia-checkout__label {
+  color: var(--glia-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.glia-checkout__coupon-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.glia-checkout__input {
+  min-width: 0;
+  flex: 1;
+  min-height: 2.75rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: #fff;
+  color: var(--glia-text);
+  font: inherit;
+  padding: 0 0.75rem;
+}
+
+.glia-checkout__apply {
+  flex: none;
+  min-height: 2.75rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: #fff;
+  color: var(--glia-text);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.glia-checkout__apply:disabled {
+  color: var(--glia-text-secondary);
+  cursor: default;
+}
+
+.glia-checkout__coupon-message,
+.glia-checkout__notice {
+  margin: 0;
+  color: var(--glia-error);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.glia-checkout__widget {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.glia-checkout__widget-slot {
+  min-width: 0;
+}
+
+.glia-checkout .shop-pdp-apply-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-gradient-primary);
+  color: #fff;
+  font-family: var(--glia-font);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--glia-shadow-button);
+  text-decoration: none;
+}
+
+.glia-checkout .shop-pdp-apply-btn:disabled {
+  background: var(--glia-surface-secondary);
+  color: var(--glia-text-secondary);
+  box-shadow: none;
+  cursor: default;
+}

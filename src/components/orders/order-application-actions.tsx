@@ -6,6 +6,7 @@ import { useState } from "react";
 type OrderApplicationActionsProps = {
   orderId: string;
   status: string;
+  checkout?: string;
   apiBase: "/api/coach/orders" | "/api/admin/orders";
   compact?: boolean;
 };
@@ -13,6 +14,7 @@ type OrderApplicationActionsProps = {
 export function OrderApplicationActions({
   orderId,
   status,
+  checkout,
   apiBase,
   compact = false,
 }: OrderApplicationActionsProps) {
@@ -21,7 +23,7 @@ export function OrderApplicationActions({
   const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (status !== "PENDING") {
+  if (status !== "PENDING" || checkout === "TOSS") {
     return null;
   }
 

@@ -87,6 +87,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
           select: {
             userId: true,
             status: true,
+            checkout: true,
             createdAt: true,
             user: { select: { id: true, name: true, email: true } },
           },
@@ -140,7 +141,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
   for (const order of applicants) {
     const existing = map.get(order.userId) ?? emptyCustomerRow(order.user);
 
-    if (order.status === "PENDING") {
+    if (order.status === "PENDING" && order.checkout === "APPLICATION") {
       existing.pendingOrderCount += 1;
     }
 

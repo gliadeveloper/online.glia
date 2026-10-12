@@ -1,15 +1,17 @@
 import Link from "next/link";
 
+import { OrderActions } from "@/app/admin/orders/[id]/order-actions";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
-import { OrderApplicationActions } from "@/components/orders/order-application-actions";
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import { productKindLabels } from "@/lib/customer-labels";
 import type { CoachOrderDetail } from "@/lib/coach-orders";
+import { tossCancelOffer } from "@/lib/order-refund";
 
 type CoachOrderDetailPanelProps = CoachOrderDetail;
 
 export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDetailPanelProps) {
   const coachLines = order.lines.filter((line) => coachProductIds.includes(line.productId));
+  const tossCancel = tossCancelOffer(order);
 
   return (
     <div className="space-y-6">
@@ -93,20 +95,56 @@ export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDeta
           </div>
           <ul className="divide-y divide-zinc-100">
             {order.payments.map((payment) => (
-              <li key={payment.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 text-sm">
-                <span>
-                  {payment.provider} · {payment.status}
-                </span>
-                <span className="font-medium">{formatKrw(payment.amount)}</span>
+              <li key={payment.id} className="px-5 py-4 text-sm">
+                <div className="flex justify-between gap-3">
+                  <span>
+                    {payment.provider}
+                    {payment.environment ? ` · ${payment.environment}` : ""} · {payment.providerRef}
+                  </span>
+                  <span>
+                    {formatKrw(payment.amount)} · {payment.status}
+                  </span>
+                </div>
+                {payment.cardAmount != null ? (
+                  <p className="mt-1 text-xs text-zinc-500">
+                    카드 {formatKrw(payment.cardAmount)} · 계좌·머니 {formatKrw(payment.chargeAmount ?? 0)} · 쿠폰·할인{" "}
+                    {formatKrw(payment.discountAmount ?? 0)}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>
         </section>
       )}
 
-      <OrderApplicationActions
+      {order.refunds.length > 0 && (
+        <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          <div className="border-b border-zinc-100 px-5 py-4">
+            <h2 className="font-semibold">환불 내역</h2>
+          </div>
+          <ul className="divide-y divide-zinc-100">
+            {order.refunds.map((refund) => (
+              <li key={refund.id} className="px-5 py-4 text-sm">
+                <p className="font-medium">{formatKrw(refund.amount)}</p>
+                <p className="text-zinc-500">
+                  {refund.reason ?? "—"} · {refund.status}
+                  {refund.cancelStatus ? ` · ${refund.cancelStatus}` : ""}
+                </p>
+                {refund.transactionKey ? (
+                  <p className="font-mono text-xs text-zinc-400">{refund.transactionKey}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <OrderActions
         orderId={order.id}
         status={order.status}
+        checkout={order.checkout}
+        total={order.total}
+        tossCancel={tossCancel}
         apiBase="/api/coach/orders"
       />
     </div>

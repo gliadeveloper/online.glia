@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { OrderActions } from "@/app/admin/orders/[id]/order-actions";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, formatKrw, requireAdmin } from "@/lib/admin";
+import { tossCancelOffer } from "@/lib/order-refund";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -56,6 +57,8 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   if (!order) {
     notFound();
   }
+
+  const tossCancel = tossCancelOffer(order);
 
   return (
     <div className="space-y-6">
@@ -119,13 +122,22 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         </div>
         <ul className="divide-y divide-zinc-100">
           {order.payments.map((payment) => (
-            <li key={payment.id} className="flex justify-between px-5 py-4 text-sm">
-              <span>
-                {payment.provider} · {payment.providerRef}
-              </span>
-              <span>
-                {formatKrw(payment.amount)} · {payment.status}
-              </span>
+            <li key={payment.id} className="px-5 py-4 text-sm">
+              <div className="flex justify-between">
+                <span>
+                  {payment.provider}
+                  {payment.environment ? ` · ${payment.environment}` : ""} · {payment.providerRef}
+                </span>
+                <span>
+                  {formatKrw(payment.amount)} · {payment.status}
+                </span>
+              </div>
+              {payment.cardAmount != null ? (
+                <p className="mt-1 text-xs text-zinc-500">
+                  카드 {formatKrw(payment.cardAmount)} · 계좌·머니 {formatKrw(payment.chargeAmount ?? 0)} · 쿠폰·할인{" "}
+                  {formatKrw(payment.discountAmount ?? 0)}
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -156,14 +168,27 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             {order.refunds.map((refund) => (
               <li key={refund.id} className="px-5 py-4 text-sm">
                 <p className="font-medium">{formatKrw(refund.amount)}</p>
-                <p className="text-zinc-500">{refund.reason ?? "—"} · {refund.status}</p>
+                <p className="text-zinc-500">
+                  {refund.reason ?? "—"} · {refund.status}
+                  {refund.cancelStatus ? ` · ${refund.cancelStatus}` : ""}
+                </p>
+                {refund.transactionKey ? (
+                  <p className="font-mono text-xs text-zinc-400">{refund.transactionKey}</p>
+                ) : null}
               </li>
             ))}
           </ul>
         </section>
       )}
 
-      <OrderActions orderId={order.id} status={order.status} total={order.total} />
+      <OrderActions
+        orderId={order.id}
+        status={order.status}
+        checkout={order.checkout}
+        total={order.total}
+        tossCancel={tossCancel}
+        apiBase="/api/admin/orders"
+      />
     </div>
   );
 }

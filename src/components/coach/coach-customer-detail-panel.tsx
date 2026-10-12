@@ -9,8 +9,12 @@ type CoachCustomerDetail = Awaited<ReturnType<typeof getCoachCustomerDetail>>;
 
 export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDetail }) {
   const { user, enrollments, entitlements, sessions, orders } = detail;
-  const pendingOrders = orders.filter((order) => order.status === "PENDING");
-  const otherOrders = orders.filter((order) => order.status !== "PENDING");
+  const pendingOrders = orders.filter(
+    (order) => order.status === "PENDING" && order.checkout === "APPLICATION",
+  );
+  const otherOrders = orders.filter(
+    (order) => order.status !== "PENDING" || order.checkout !== "APPLICATION",
+  );
 
   return (
     <div className="space-y-6">
@@ -51,6 +55,7 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
                 <OrderApplicationActions
                   orderId={order.id}
                   status={order.status}
+                  checkout={order.checkout}
                   apiBase="/api/coach/orders"
                   compact
                 />

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { BookOpen, HeartPulse } from "lucide-react";
 
 import { ProductApplyButton } from "@/components/shop/product-apply-button";
+import { ProductPayLink } from "@/components/shop/product-pay-link";
 import { formatKrw } from "@/lib/customer-labels";
+import type { WidgetCheckoutOptions } from "@/lib/payments/toss/widget";
 import type { CatalogProduct } from "@/lib/shop-products";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
 
@@ -17,6 +19,7 @@ type ProductDetailSidebarProps = {
   reviewCount: number;
   instructorName?: string;
   eyebrow: string;
+  checkout: WidgetCheckoutOptions;
 };
 
 type BundlePart = {
@@ -96,6 +99,7 @@ export function ProductDetailSidebar({
   reviewCount,
   instructorName,
   eyebrow,
+  checkout,
 }: ProductDetailSidebarProps) {
   const owned = shopState.kind === "owned";
   const initial = instructorName?.slice(0, 1) ?? eyebrow.slice(0, 1);
@@ -177,6 +181,10 @@ export function ProductDetailSidebar({
             <Link href={shopState.learnHref} className="shop-pdp-apply-btn">
               학습하기
             </Link>
+          ) : checkout.state === "ready" ? (
+            <ProductPayLink productId={product.id} isLoggedIn={isLoggedIn} />
+          ) : checkout.state === "unavailable" ? (
+            <p className="shop-pdp-apply-error">{checkout.message}</p>
           ) : (
             <ProductApplyButton
               productId={product.id}

@@ -369,6 +369,7 @@ export async function findPendingOrderForProduct(userId: string, productId: stri
   return prisma.order.findFirst({
     where: {
       userId,
+      checkout: "APPLICATION",
       status: "PENDING",
       lines: { some: { productId } },
     },
@@ -470,6 +471,10 @@ export async function approveProductApplication(params: { orderId: string; actor
 
   if (!order) {
     throw new ApiError("Order not found", 404, "ORDER_NOT_FOUND");
+  }
+
+  if (order.checkout !== "APPLICATION") {
+    throw new ApiError("신청 주문만 승인할 수 있습니다.", 409, "NOT_AN_APPLICATION");
   }
 
   if (order.status !== "PENDING") {
@@ -579,6 +584,95 @@ export async function rejectProductApplication(params: {
     where: { id: order.id },
     include: orderInclude,
   });
+}
+
+/** Marks a verified live Toss payment as paid and grants access. Test payments never call this. */
+export async function grantTossOrder(params: { orderId: string; actorId: string; now: Date }) {
+  const order = await prisma.order.findUnique({
+    where: { id: params.orderId },
+    include: {
+      lines: {
+        include: {
+          product: { include: checkoutProductInclude },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new ApiError("Order not found", 404, "ORDER_NOT_FOUND");
+  }
+
+  if (order.checkout !== "TOSS") {
+    throw new ApiError("결제 주문이 아닙니다.", 409, "ORDER_CHECKOUT_MISMATCH");
+  }
+
+  if (order.status === "PAID") {
+    return { granted: true as const };
+  }
+
+  if (order.status !== "PENDING") {
+    throw new ApiError(`Cannot complete order with status ${order.status}`, 409, "INVALID_STATUS");
+  }
+
+  const orderLine = order.lines[0];
+  const product = orderLine?.product;
+  if (!orderLine || !product) {
+    throw new ApiError("Order line missing", 409, "ORDER_LINE_MISSING");
+  }
+
+  const checkoutAssessment = await assessProductCheckout(order.userId, product, params.now);
+  if (!checkoutAssessment.canCheckout) {
+    throw new ApiError(
+      checkoutAssessment.blockMessage ?? "Cannot grant this order",
+      409,
+      checkoutAssessment.blockCode ?? "ALREADY_OWNED",
+    );
+  }
+
+  const courseActionByItemId = new Map(
+    checkoutAssessment.courseItems.map((item) => [item.productItemId, item.action]),
+  );
+  const coachingActionByItemId = new Map(
+    checkoutAssessment.coachingItems.map((item) => [item.productItemId, item.action]),
+  );
+
+  await prisma.$transaction(async (tx) => {
+    const marked = await tx.order.updateMany({
+      where: { id: order.id, status: "PENDING", checkout: "TOSS" },
+      data: { status: "PAID", paidAt: params.now },
+    });
+
+    if (marked.count !== 1) {
+      const current = await tx.order.findUnique({ where: { id: order.id }, select: { status: true } });
+      if (current?.status === "PAID") return;
+      throw new ApiError("주문을 완료할 수 없습니다.", 409, "INVALID_STATUS");
+    }
+
+    await runOrderFulfillment(tx, {
+      actorId: params.actorId,
+      orderId: order.id,
+      userId: order.userId,
+      orderLineId: orderLine.id,
+      product,
+      courseActionByItemId,
+      coachingActionByItemId,
+      now: params.now,
+    });
+
+    await writeAuditLog(
+      {
+        actorId: params.actorId,
+        entityType: "Order",
+        entityId: order.id,
+        action: "TOSS_PAYMENT_GRANTED",
+        metadata: { productId: product.id },
+      },
+      tx,
+    );
+  });
+
+  return { granted: true as const };
 }
 
 export async function checkout(params: {
@@ -763,6 +857,10 @@ export async function processRefund(params: {
 
   if (!order) {
     throw new ApiError("Order not found", 404, "ORDER_NOT_FOUND");
+  }
+
+  if (order.checkout === "TOSS") {
+    throw new ApiError("토스 결제는 결제 취소 API로만 환불할 수 있습니다.", 409, "TOSS_CANCEL_REQUIRED");
   }
 
   if (order.status === "REFUNDED") {

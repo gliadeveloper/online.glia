@@ -158,6 +158,16 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum OrderCheckout {
+  APPLICATION
+  TOSS
+}
+
+enum PaymentEnvironment {
+  TEST
+  LIVE
+}
+
 enum PaymentStatus {
   PENDING
   SUCCEEDED
@@ -1225,6 +1235,8 @@ model Order {
   total          Int
   currency       String      @default("KRW")
   idempotencyKey String?     @unique
+  /// APPLICATION is a coach approval. TOSS is a payment whose order id and total were saved before the payment request.
+  checkout       OrderCheckout @default(APPLICATION)
   paidAt         DateTime?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -1236,6 +1248,7 @@ model Order {
   refunds      Refund[]
 
   @@index([userId, status])
+  @@index([userId, checkout, status])
   @@map("orders")
 }
 
@@ -1262,6 +1275,21 @@ model Payment {
   providerRef String        @unique
   amount      Int
   status      PaymentStatus @default(PENDING)
+  /// Set for Toss only. Test approvals are not settlement and do not grant access.
+  environment PaymentEnvironment?
+  /// Easy-pay provider name when a confirm response includes one. Widget checkout does not set this in advance.
+  easyPay     String?
+  /// Payment.method from a DONE confirm response. Card numbers are not stored.
+  method      String?
+  receiptUrl  String?
+  /// card.amount. Zero when the buyer did not use a card.
+  cardAmount     Int?
+  /// easyPay.amount. Linked account or cash balance.
+  chargeAmount   Int?
+  /// easyPay.discountAmount. Coupons, provider points, and instant discounts share this field.
+  discountAmount Int?
+  /// Payment.secret from confirm. Matches PAYMENT_STATUS_CHANGED data.secret.
+  webhookSecret String?
   paidAt      DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -1272,14 +1300,43 @@ model Payment {
   @@map("payments")
 }
 
+/// One Toss webhook POST. Identical retries share bodyHash and do not change orders.
+model TossWebhookEvent {
+  id         String   @id @default(cuid())
+  /// Top-level eventType when it is a short token. The event body is not interpreted.
+  eventType  String?
+  /// True when eventType is one of the published webhook event names.
+  recognized Boolean  @default(false)
+  bodyHash   String   @unique
+  /// tosspayments-webhook-transmission-id. Payment events are checked with Payment.secret, not this header.
+  transmissionId   String?
+  retriedCount     Int?
+  transmissionTime String?
+  payload    Json
+  receivedAt DateTime @default(now())
+
+  @@index([eventType, receivedAt])
+  @@map("toss_webhook_events")
+}
+
 model Refund {
-  id         String       @id @default(cuid())
-  orderId    String
-  amount     Int
-  reason     String?
-  status     RefundStatus @default(PENDING)
-  refundedAt DateTime?
-  createdAt  DateTime     @default(now())
+  id                    String       @id @default(cuid())
+  orderId               String
+  amount                Int
+  reason                String?
+  status                RefundStatus @default(PENDING)
+  refundedAt            DateTime?
+  /// Toss cancel transactionKey. One key per cancel in Payment.cancels.
+  transactionKey        String?      @unique
+  /// Idempotency-Key sent with the cancel request. Retries reuse it.
+  idempotencyKey        String?      @unique
+  /// Payment.cancels[].cancelStatus. Recorded only when it is DONE.
+  cancelStatus          String?
+  /// Payment.cancels[].refundableAmount after this cancel.
+  refundableAmount      Int?
+  easyPayDiscountAmount Int?
+  receiptKey            String?
+  createdAt             DateTime     @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 

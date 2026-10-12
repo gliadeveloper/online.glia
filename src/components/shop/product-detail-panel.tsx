@@ -9,6 +9,7 @@ import { ProductSectionNav } from "@/components/shop/product-section-nav";
 import { ProductDetailStickyBar } from "@/components/shop/product-purchase-panel";
 import { formatKrw } from "@/lib/customer-labels";
 import { getProductPrice } from "@/lib/fulfillment";
+import { listWidgetCheckoutOptions } from "@/lib/payments/toss/options";
 import { getProductHeroImages } from "@/lib/shop-product-hero";
 import type { CatalogProduct } from "@/lib/shop-products";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
@@ -55,6 +56,7 @@ export function ProductDetailPanel({
   hasExistingReview,
 }: ProductDetailPanelProps) {
   const price = getProductPrice(product);
+  const checkout = listWidgetCheckoutOptions();
   const hasDiscount = product.salePrice != null && product.salePrice < product.listPrice;
   const discountRate = hasDiscount
     ? Math.round(((product.listPrice - product.salePrice!) / product.listPrice) * 100)
@@ -109,6 +111,7 @@ export function ProductDetailPanel({
           reviewCount={reviewSummary.reviewCount}
           instructorName={instructorName ?? undefined}
           eyebrow={programEyebrow}
+          checkout={checkout}
         />
 
         <div className="glia-pdp__main">
@@ -166,6 +169,7 @@ export function ProductDetailPanel({
         shopState={shopState}
         isLoggedIn={isLoggedIn}
         priceLabel={formatKrw(price)}
+        checkout={checkout}
       />
     </article>
   );

@@ -43,6 +43,9 @@ const coachOrderDetailInclude = {
   payments: {
     orderBy: { createdAt: "desc" as const },
   },
+  refunds: {
+    orderBy: { createdAt: "desc" as const },
+  },
   fulfillments: {
     orderBy: { createdAt: "desc" as const },
     select: { id: true, status: true, fulfilledAt: true },

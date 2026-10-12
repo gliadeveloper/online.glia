@@ -17,6 +17,20 @@ function originFromRedirectUri() {
   }
 }
 
+/**
+ * Origin Toss should send the buyer back to.
+ * Local `next dev` keeps `APP_URL` on the public site, but the pending order exists only on this process.
+ */
+export function getTossReturnOrigin(request: Request): string {
+  const host = request.headers.get("host")?.split(",")[0]?.trim() ?? "";
+  const hostname = host.split(":")[0]?.toLowerCase() ?? "";
+  if (INTERNAL_HOSTS.has(hostname)) {
+    const proto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || "http";
+    return normalizeOrigin(`${proto}://${host}`);
+  }
+  return getRequestOrigin(request);
+}
+
 /** Public site origin for redirects behind reverse proxy (Caddy/nginx). */
 export function getRequestOrigin(request: Request): string {
   const configured = process.env.APP_URL?.trim();

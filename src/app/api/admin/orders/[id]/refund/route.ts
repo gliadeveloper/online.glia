@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
-import { processRefund } from "@/lib/fulfillment";
+import { assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { refundOrder } from "@/lib/order-refund";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -17,14 +17,14 @@ export async function POST(request: Request, context: RouteContext) {
     const userId = await resolveUserId(request, body);
     await assertAdmin(userId);
 
-    const order = await processRefund({
+    const result = await refundOrder({
       orderId: id,
       actorId: userId,
       amount: body.amount,
       reason: body.reason?.trim(),
     });
 
-    return NextResponse.json(order);
+    return NextResponse.json(result);
   } catch (error) {
     return jsonError(error);
   }

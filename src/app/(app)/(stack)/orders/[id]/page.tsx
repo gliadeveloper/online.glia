@@ -5,6 +5,7 @@ import { AppStackPage } from "@/components/app";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
 import { formatKrw } from "@/lib/customer-labels";
 import { getUserOrder } from "@/lib/orders";
+import { tossFailureMessage } from "@/lib/payments/toss/verify";
 import { StackNavTitle } from "@/lib/stack-nav-context";
 import { getCurrentUser } from "@/lib/session";
 
@@ -12,7 +13,7 @@ import "@/components/orders/orders-glia.css";
 
 type OrderDetailPageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ purchased?: string }>;
+  searchParams: Promise<{ purchased?: string; payment?: string; code?: string }>;
 };
 
 function itemKindLabel(kind: string) {
@@ -27,7 +28,7 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
   }
 
   const { id } = await params;
-  const { purchased } = await searchParams;
+  const { purchased, payment, code } = await searchParams;
 
   const order = await getUserOrder(user.id, id);
   if (!order) {
@@ -37,6 +38,12 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
   const product = order.lines[0]?.product;
   const hasCourse = product?.items.some((item) => item.courseId);
   const hasCoaching = product?.items.some((item) => item.coachingOfferingId);
+  const tossTestRecorded = order.payments.some(
+    (item) => item.provider === "toss" && item.status === "SUCCEEDED" && item.environment === "TEST",
+  );
+  const statusLabel = order.checkout === "TOSS" && order.status === "PENDING"
+    ? tossTestRecorded ? "테스트 결제" : "결제 대기"
+    : undefined;
 
   return (
     <AppStackPage className="orders-page">
@@ -52,7 +59,16 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
         {purchased === "1" && order.status === "PAID" ? (
           <p className="glia-orders__notice">승인이 완료되었습니다. 아래에서 수강·코칭을 시작하세요.</p>
         ) : null}
-        {order.status === "PENDING" ? (
+        {payment === "failed" ? (
+          <p className="glia-orders__notice">{tossFailureMessage(code)}</p>
+        ) : null}
+        {payment === "test" || tossTestRecorded ? (
+          <p className="glia-orders__notice">테스트 결제가 기록되었습니다. 실제 출금이 없으므로 수강권은 지급되지 않습니다.</p>
+        ) : null}
+        {order.status === "PENDING" && order.checkout === "TOSS" && payment !== "failed" && !tossTestRecorded ? (
+          <p className="glia-orders__notice">결제가 아직 승인되지 않았습니다.</p>
+        ) : null}
+        {order.status === "PENDING" && order.checkout === "APPLICATION" ? (
           <p className="glia-orders__notice">코치 승인 대기 중입니다. 승인 후 내 학습에서 수강을 시작할 수 있어요.</p>
         ) : null}
         {order.status === "CANCELLED" ? (
@@ -67,7 +83,7 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
                 {order.createdAt.toLocaleString("ko-KR")} · #{order.id.slice(0, 8)}
               </p>
             </div>
-            <OrderStatusPill status={order.status} variant="glia" />
+            <OrderStatusPill status={order.status} label={statusLabel} variant="glia" />
           </div>
 
           <p className="glia-orders__detail-price">{formatKrw(order.total)}</p>

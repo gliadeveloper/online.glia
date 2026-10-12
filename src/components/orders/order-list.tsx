@@ -25,6 +25,7 @@ export function OrderList({ orders }: OrderListProps) {
     <ul className="glia-orders__list">
       {orders.map((order) => {
         const titles = order.lines.map((line) => line.product.title).join(", ");
+        const statusLabel = order.checkout === "TOSS" && order.status === "PENDING" ? "결제 대기" : undefined;
 
         return (
           <li key={order.id}>
@@ -35,7 +36,7 @@ export function OrderList({ orders }: OrderListProps) {
               </div>
               <div className="glia-orders__side">
                 <p className="glia-orders__price">{formatKrw(order.total)}</p>
-                <OrderStatusPill status={order.status} variant="glia" />
+                <OrderStatusPill status={order.status} label={statusLabel} variant="glia" />
               </div>
             </Link>
           </li>
