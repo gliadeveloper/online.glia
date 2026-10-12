@@ -9,6 +9,7 @@ import { tossSdkErrorMessage } from "@/lib/payments/toss/verify";
 type ProductWidgetCheckoutProps = {
   productId: string;
   clientKey: string;
+  variantKey: string;
   customerKey: string;
   amount: number;
 };
@@ -16,7 +17,7 @@ type ProductWidgetCheckoutProps = {
 const METHOD_SELECTOR = "#toss-payment-method";
 const AGREEMENT_SELECTOR = "#toss-agreement";
 
-export function ProductWidgetCheckout({ productId, clientKey, customerKey, amount }: ProductWidgetCheckoutProps) {
+export function ProductWidgetCheckout({ productId, clientKey, variantKey, customerKey, amount }: ProductWidgetCheckoutProps) {
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +46,7 @@ export function ProductWidgetCheckout({ productId, clientKey, customerKey, amoun
       await widgets.setAmount({ currency: "KRW", value: amount });
       if (cancelled) return;
       const [methods, agreement] = await Promise.all([
-        widgets.renderPaymentMethods({ selector: METHOD_SELECTOR, variantKey: "DEFAULT" }),
+        widgets.renderPaymentMethods({ selector: METHOD_SELECTOR, variantKey }),
         widgets.renderAgreement({ selector: AGREEMENT_SELECTOR, variantKey: "AGREEMENT" }),
       ]);
       rendered.push(methods, agreement);
@@ -68,7 +69,7 @@ export function ProductWidgetCheckout({ productId, clientKey, customerKey, amoun
         void widget.destroy().catch(() => undefined);
       }
     };
-  }, [amount, clientKey, customerKey]);
+  }, [amount, clientKey, customerKey, variantKey]);
 
   async function handlePay() {
     const widgets = widgetsRef.current;

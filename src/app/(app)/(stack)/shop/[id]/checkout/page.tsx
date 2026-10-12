@@ -80,6 +80,7 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
                     <ProductWidgetCheckout
                       productId={product.id}
                       clientKey={checkout.clientKey}
+                      variantKey={checkout.variantKey}
                       customerKey={customerKey}
                       amount={price}
                     />

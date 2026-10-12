@@ -11,6 +11,7 @@ export type TossPaymentsConfig = {
   keyKind: TossKeyKind;
   clientKey: string;
   secretKey: string;
+  variantKey: string;
   apiOrigin: typeof TOSS_API_ORIGIN;
 };
 
@@ -24,6 +25,7 @@ export class TossPaymentsConfigError extends Error {
   }
 }
 
+const VARIANT_KEY = /^[A-Za-z][A-Za-z0-9]{0,19}$/;
 const WIDGET_CLIENT = /^(test|live)_gck_([A-Za-z0-9_]+)$/;
 const API_CLIENT = /^(test|live)_ck_([A-Za-z0-9_]+)$/;
 const WIDGET_SECRET = /^(test|live)_gsk_([A-Za-z0-9_]+)$/;
@@ -56,6 +58,7 @@ export function parseTossPaymentsEnv(env: NodeJS.ProcessEnv): TossPaymentsConfig
   const environment = read(env, "TOSS_PAYMENTS_ENV");
   const clientKey = read(env, "TOSS_PAYMENTS_CLIENT_KEY");
   const secretKey = read(env, "TOSS_PAYMENTS_SECRET_KEY");
+  const variantKey = read(env, "TOSS_PAYMENTS_VARIANT_KEY") || "DEFAULT";
 
   if (!environment && !clientKey && !secretKey) {
     return null;
@@ -79,12 +82,16 @@ export function parseTossPaymentsEnv(env: NodeJS.ProcessEnv): TossPaymentsConfig
   if (client.keyKind !== secret.keyKind) {
     throw new TossPaymentsConfigError("클라이언트 키와 시크릿 키는 같은 연동 방식이어야 합니다.");
   }
+  if (!VARIANT_KEY.test(variantKey)) {
+    throw new TossPaymentsConfigError("결제 UI 베리언트 키는 영문과 숫자 20자 이하여야 합니다.");
+  }
 
   return {
     environment,
     keyKind: client.keyKind,
     clientKey,
     secretKey,
+    variantKey,
     apiOrigin: TOSS_API_ORIGIN,
   };
 }

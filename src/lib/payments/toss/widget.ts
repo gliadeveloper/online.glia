@@ -1,7 +1,7 @@
 export type WidgetCheckoutOptions =
   | { state: "off" }
   | { state: "unavailable"; message: string }
-  | { state: "ready"; clientKey: string };
+  | { state: "ready"; clientKey: string; variantKey: string };
 
 /** Fields the checkout sends to `widgets.requestPayment` after the server stores the order. */
 export type TossWidgetPaymentRequest = {
