@@ -8,8 +8,8 @@ export async function writeAuditLog(params: {
   entityId: string;
   action: string;
   metadata?: Prisma.InputJsonValue;
-}) {
-  return prisma.auditLog.create({
+}, db: Pick<Prisma.TransactionClient, "auditLog"> = prisma) {
+  return db.auditLog.create({
     data: {
       actorId: params.actorId ?? null,
       entityType: params.entityType,

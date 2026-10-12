@@ -17,6 +17,7 @@
 | 코치 포털 기능 추가 | [§7 Coach Portal](#7-coach-portal) |
 | 코칭권 · 회차 발행 · 코치 Q&A · 한줄 기록 | [coach-coaching.md](./coach-coaching.md) |
 | 라이브·녹화·다시보기 | [§8 Live Lessons](#8-live-lessons) |
+| 코스·코칭 미디어 보관 | [media-library-decision.md](./media-library-decision.md) |
 | 에이전트/AI에 「design-system 따라」 | [AGENTS.md](../AGENTS.md) + [visual-direction.md](./visual-direction.md) |
 
 **원칙:** 정책이 바뀌면 **이 문서의 요약 + 해당 상세 문서**를 함께 갱신한다.
@@ -319,8 +320,8 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 | 항목 | 정책 |
 |------|------|
 | Next.js | **Training data와 다른 breaking API** — `node_modules/next/dist/docs/` 참고 ([AGENTS.md](../AGENTS.md)) |
-| DB | Prisma + SQLite (dev) |
-| 미디어 | YouTube (VOD) · Zoom (live) · R2 (레슨·코칭 BlockNote·커뮤니티 Markdown 이미지·영상) |
+| DB | Prisma + PostgreSQL (`prisma/schema.prisma` 기준) |
+| 미디어 | YouTube (VOD) · Zoom (live) · R2. 코스·코칭 BlockNote 보관 정책은 [media-library-decision.md](./media-library-decision.md) |
 | 커밋 | 사용자 요청 시에만 |
 | Customer UI 작업 | App Tone v1 문서 세트 준수 |
 
@@ -353,6 +354,25 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 | 문서 | 내용 |
 |------|------|
 | [coach-coaching.md](./coach-coaching.md) | **코칭권 코치 과업** — 발행·현황·Q&A·한줄 기록. 화면 스펙 전 기능 맵 |
+
+### 코스·코칭 미디어 보관
+
+| 문서 | 내용 |
+|------|------|
+| [media-library-decision.md](./media-library-decision.md) | **결정** — 현재 문제, 확대 위험, 보관함 정책 |
+| [media-r2-folder-structure.md](./media-r2-folder-structure.md) | **개발 정책 1** — 보관·공개 계약, 최종/임시 경로, 휴지통, 지연 정리 |
+| [media-asset-database-design.md](./media-asset-database-design.md) | **개발 정책 2** — 상태 전이, 다섯 테이블, 장애 복구, SQL·배포 검증 |
+| [media-audit-runbook.md](./media-audit-runbook.md) | **실행 안내** — 기존 DB·R2 읽기 전용 대조, 결과 해석·재실행 |
+
+미디어 정책은 2026-10-07 생명주기 기준으로 정리하고 2026-10-09 구현을 재점검했다. 사용 중인 콘텐츠·권한·검증 상태는 즉시 보호하고, 임시 파일과 삭제 후 잔여 객체는 기록을 남겨 반복 정리한다. 과거 저장 계획의 백업 우선 단계는 현재 구현 기준이 아니다. 다섯 Prisma 모델·SQL migration과 본문-사용처 동기화, 편집 충돌 검사, 대상 API 세션 인증, 읽기 전용 대조, 새 업로드의 실제 디코딩 검증, 공통/개인 보관함 조회와 등록 자산 재생 권한, 편집기 선택·업로드와 서버 본문 정규화, 휴지통 이동·복원과 상태 충돌 검사, 격리 정리/삭제 worker와 UTC 연결 설정을 코드에 추가했다. 운영 DB 배포·자동 삭제는 아직 활성화하지 않았다. 진행 범위와 재실행 방법은 개발 정책 2의 12–19절과 [정리 worker 실행 지침](./media-cleanup-runbook.md)을 따른다.
+
+[운영 서버·DB·R2 전환 계획](./production-db-r2-migration-plan.md)은 원본 DB 복제 검증과 운영 반영 관문을 정리한다. 현재 선택은 **기존 서버·운영 DB·R2 유지 후 추가 migration과 검증된 등록만 적용**하는 방식이다. 로컬 리허설 DB를 운영에 덮어쓰지 않는다. 서버 배포와 보관함 공개·자동 삭제를 분리한다. [2026-10-09 실행 기록](./production-migration-rehearsal-2026-10-09.md)에는 PostgreSQL 16.15 복원·migration 데이터 보존, R2 152개 객체 대조와 기존 endpoint의 추가 prefix, 커뮤니티 누락 2개를 정리했다. 운영 R2 공개 설정·CORS 확인은 남아 있으며 운영 쓰기·배포·설정 변경은 하지 않았다.
+
+후속으로 [기존 R2 경로 호환](./media-asset-database-design.md#20-기존-r2-논리물리-경로-호환--2026-10-09)을 구현했다. 계정 endpoint와 명시적 legacy prefix를 분리하고 등록 자산의 실제 key는 그대로 사용한다. 로컬 복원본의 실제 참조 96개가 이전 대조와 같은 위치로 해석됐다. 이 코드는 아직 운영에 배포하지 않았다.
+
+[실제 R2 검사·등록 준비 지침](./media-r2-live-and-backfill-runbook.md)은 개발용 PNG·MP4·MP3·M4A의 Chrome 업로드/재생, 오프라인 backfill 명세, 별도 로컬 복제 DB의 실제 등록 리허설을 다룬다. 명세 자체에는 적용 기능이 없고, 로컬 도구는 원본 전체 검증·본문 잠금·사용처/감사 원자적 등록·기존 접근 보존을 별도로 확인한다. 미확인 소유자는 UNCLASSIFIED와 리허설 hold로 보존한다. 운영 DB 반영과 R2 쓰기는 이 도구에서 제공하지 않는다. 검토 대상은 59개·예상 사용처 66행이며 미참조·범위 밖은 유지하고 누락 2개는 보류한다.
+
+2026-10-10 후속 대조에서 원본 59개·사용처 66행의 로컬 등록, 3,750건 권한/주소 검사, 기존 업무 데이터 보존·재실행 전체 재사용을 확인했다. 배포는 **기존 서버 업데이트**로 확정했으며 운영 DB·R2는 아직 변경하지 않았다. 운영 Compose 수정 사항을 보존하고 [기존 서버 업데이트 준비](./production-existing-server-update-runbook.md)의 관문을 통과한 뒤 앱을 교체한다.
 
 ### 에이전트
 

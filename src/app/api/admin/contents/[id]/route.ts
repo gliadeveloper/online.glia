@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { assertAdmin, jsonError, requireSessionUserId } from "@/lib/api";
 import { deleteContent, updateContent } from "@/lib/curriculum-admin";
 import type { ContentType } from "@/generated/prisma/client";
 
@@ -10,15 +10,15 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { id: contentId } = await context.params;
     const body = (await request.json()) as {
-      userId?: string;
+      expectedBodyVersion?: string;
       title?: string;
       url?: string;
       body?: string;
       type?: ContentType;
-      metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
+      metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
     };
 
-    const userId = await resolveUserId(request, body);
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     const content = await updateContent({
@@ -29,6 +29,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       body: body.body,
       type: body.type,
       metadata: body.metadata,
+      expectedBodyVersion: body.expectedBodyVersion,
     });
 
     return NextResponse.json(content);
@@ -37,13 +38,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   try {
     const { id: contentId } = await context.params;
-    const url = new URL(request.url);
-    const userId = await resolveUserId(request, {
-      userId: url.searchParams.get("userId") ?? undefined,
-    });
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     await deleteContent({ actorId: userId, contentId });

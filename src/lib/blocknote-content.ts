@@ -6,7 +6,7 @@ import { parseContentMetadata } from "@/lib/media/content-metadata";
 const BLOCKNOTE_VERSION = 1 as const;
 
 export type BlockNoteStoredMetadata = {
-  version: typeof BLOCKNOTE_VERSION;
+  version: 1 | 2;
   blocks: Block[];
 };
 
@@ -34,13 +34,14 @@ export function getBlockNoteBlocksFromMetadata(metadata: unknown): Block[] | nul
 export function buildContentMetadataWithBlockNote(
   existingMetadata: unknown,
   blocks: Block[],
+  version: 1 | 2 = BLOCKNOTE_VERSION,
 ): Prisma.InputJsonValue {
   const base = parseContentMetadata(existingMetadata as Prisma.JsonValue | null | undefined) ?? {};
 
   return {
     ...base,
     blocknote: {
-      version: BLOCKNOTE_VERSION,
+      version,
       blocks: blocks as unknown as Prisma.InputJsonValue,
     },
   } as Prisma.InputJsonValue;

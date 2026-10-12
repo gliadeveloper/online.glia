@@ -9,4 +9,22 @@ deploy/env.production.example
 .dev.db
 /prisma/dev.db
 coverage
+.media-editor-test
+.media-audit
+.migration-rehearsal
+backups
+*.dump
+*.dump.enc
+*.private.json
+*.private.log
+scripts/fixtures/media-editor
 .DS_Store
+
+# Local agent, hosting and cloud configuration are not build inputs.
+.agents
+.codex
+.cursor
+.claude
+.windsurf
+.vercel
+.aws

@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertAdmin, jsonError, requireSessionUserId } from "@/lib/api";
 import { createLessonImageUpload } from "@/lib/media/r2-image-upload";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
-      userId?: string;
       courseId?: string;
       lessonId?: string;
       fileName?: string;
       contentType?: string;
     };
 
-    const userId = await resolveUserId(request, body);
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     if (!body.courseId || !body.lessonId || !body.fileName?.trim() || !body.contentType?.trim()) {

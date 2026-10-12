@@ -2,18 +2,15 @@ import { NextResponse } from "next/server";
 
 import type { Prisma } from "@/generated/prisma/client";
 
-import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertAdmin, jsonError, requireSessionUserId } from "@/lib/api";
 import { adminUpdateCoachingSession } from "@/lib/coaching-admin";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const url = new URL(request.url);
-    const userId = await resolveUserId(request, {
-      userId: url.searchParams.get("userId") ?? undefined,
-    });
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     const { sessionInclude } = await import("@/lib/coaching-admin");
@@ -38,7 +35,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
     const body = (await request.json()) as {
-      userId?: string;
+      expectedBodyVersion?: string;
       title?: string;
       summary?: string | null;
       scheduledAt?: string;
@@ -48,7 +45,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       progressStatus?: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
     };
 
-    const userId = await resolveUserId(request, body);
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     const session = await adminUpdateCoachingSession({
@@ -59,6 +56,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : undefined,
       bodyMarkdown: body.bodyMarkdown,
       bodyMetadata: body.bodyMetadata,
+      expectedBodyVersion: body.expectedBodyVersion,
       publicationStatus: body.publicationStatus,
       progressStatus: body.progressStatus,
     });

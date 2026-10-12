@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { assertCoach, jsonError, resolveUserId } from "@/lib/api";
+import { assertCoach, jsonError, requireSessionUserId } from "@/lib/api";
 import { assertCoachOwnsContent } from "@/lib/coach-courses";
 import { deleteContent, updateContent } from "@/lib/curriculum-admin";
 import type { ContentType, Prisma } from "@/generated/prisma/client";
@@ -11,14 +11,15 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { id: contentId } = await context.params;
     const body = (await request.json()) as {
+      expectedBodyVersion?: string;
       title?: string;
       url?: string;
       body?: string;
       type?: ContentType;
-      metadata?: Prisma.InputJsonValue;
+      metadata?: Prisma.InputJsonValue | null;
     };
 
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsContent(userId, contentId);
 
@@ -30,6 +31,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       body: body.body,
       type: body.type,
       metadata: body.metadata,
+      expectedBodyVersion: body.expectedBodyVersion,
     });
 
     return NextResponse.json(content);
@@ -38,10 +40,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   try {
     const { id: contentId } = await context.params;
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsContent(userId, contentId);
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, assertCoach, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertCoach, jsonError, requireSessionUserId } from "@/lib/api";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { createContent } from "@/lib/curriculum-admin";
 import type { ContentType, Prisma } from "@/generated/prisma/client";
@@ -15,10 +15,10 @@ export async function POST(request: Request, context: RouteContext) {
       title?: string;
       url?: string;
       body?: string;
-      metadata?: Prisma.InputJsonValue;
+      metadata?: Prisma.InputJsonValue | null;
     };
 
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsLesson(userId, lessonId);
 

@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 
-import type { BlockNoteEditorFieldHandle } from "@/components/learning/lesson/blocknote-editor-field";
 import { uploadCoachingImage } from "@/lib/media/coaching-image-upload-client";
+import type { BlockNoteEditorFieldHandle } from "@/components/learning/lesson/blocknote-editor-field";
 
 import "@/components/learning/lesson/lesson-block-editor.css";
 
@@ -31,21 +31,20 @@ type CoachingSessionBlockEditorProps = {
   bodyMetadata: unknown;
   apiRole: "admin" | "coach";
   disabled?: boolean;
+  onUploadBusyChange?: (busy: boolean) => void;
+  onReadyChange?: (ready: boolean) => void;
 };
 
 export const CoachingSessionBlockEditor = forwardRef<
   CoachingSessionBlockEditorHandle,
   CoachingSessionBlockEditorProps
 >(function CoachingSessionBlockEditor(
-  { sessionId, body, bodyMetadata, apiRole, disabled = false },
+  { sessionId, body, bodyMetadata, apiRole, disabled = false, onUploadBusyChange, onReadyChange },
   ref,
 ) {
   const editorRef = useRef<BlockNoteEditorFieldHandle>(null);
 
-  const uploadFile = useCallback(
-    async (file: File) => uploadCoachingImage({ file, sessionId, apiRole }),
-    [apiRole, sessionId],
-  );
+  const uploadFile = useCallback((file: File) => uploadCoachingImage({ file, sessionId, apiRole }), [apiRole, sessionId]);
 
   useImperativeHandle(ref, () => ({
     exportForSave: async () => {
@@ -62,7 +61,10 @@ export const CoachingSessionBlockEditor = forwardRef<
       key={`coaching-session-${sessionId}`}
       body={body}
       metadata={bodyMetadata}
+      mediaLibraryRole={apiRole}
       uploadFile={uploadFile}
+      onUploadBusyChange={onUploadBusyChange}
+      onReadyChange={onReadyChange}
       disabled={disabled}
     />
   );

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, assertCoach, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertCoach, jsonError, requireSessionUserId } from "@/lib/api";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { createLessonImageUpload } from "@/lib/media/r2-image-upload";
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       contentType?: string;
     };
 
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
 
     if (!body.courseId || !body.lessonId || !body.fileName?.trim() || !body.contentType?.trim()) {
@@ -24,7 +24,8 @@ export async function POST(request: Request) {
       );
     }
 
-    await assertCoachOwnsLesson(userId, body.lessonId);
+    const lesson = await assertCoachOwnsLesson(userId, body.lessonId);
+    if (lesson.module.courseId !== body.courseId) throw new ApiError("Lesson not found", 404, "LESSON_NOT_FOUND");
 
     const presigned = await createLessonImageUpload({
       courseId: body.courseId,

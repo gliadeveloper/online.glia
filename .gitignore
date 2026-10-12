@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/.media-audit/
+/.media-editor-test/
+/scripts/fixtures/media-editor/.next/
 
 # next.js
 /.next/

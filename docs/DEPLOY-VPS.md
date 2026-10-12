@@ -4,6 +4,12 @@
 
 > Vercel 배포는 [DEPLOY.md](./DEPLOY.md) 를 따르세요. 이 문서는 **자체 VPS** 전용입니다.
 
+> **기존 운영 서버 이전:** [DB·R2 전환 계획](./production-db-r2-migration-plan.md)을 먼저 따르세요. 아래 신규 설치의 전체 기동 명령을 DB 복원 전에 실행하지 않습니다. 새 DB에 전체 덤프 복원 → migration 이력/제약 확인 → 필요한 migration → 앱 순서이며, 테스트로 변경한 DB를 운영에 반영하지 않습니다. R2 유지 시 기존 파일은 다시 업로드하지 않습니다.
+
+> **현재 운영 실측:** [2026-10-09 복원·대조 기록](./production-migration-rehearsal-2026-10-09.md)에서 PostgreSQL 16.15 복원과 기존 데이터 보존을 확인했습니다. 운영 R2는 endpoint의 추가 경로 때문에 논리 key와 실제 key가 다릅니다. 아래 endpoint 예시로 값만 교체하지 말고 기존 소비자의 경로 매핑을 함께 검증하세요. 운영 배포는 아직 수행하지 않았습니다.
+
+> **R2 호환 코드 배포:** 새 코드는 계정 endpoint만 허용합니다. 확인된 기존 운영 버킷은 `R2_LEGACY_KEY_PREFIX=online-glia/`를 함께 설정해야 하며, 기존 이미지에 endpoint 변경만 먼저 적용하지 않습니다. 등록 자산의 실제 key와 신규 `media/` key에는 prefix를 붙이지 않습니다. 롤백도 이미지와 설정을 함께 되돌립니다. [상세 절차](./production-migration-rehearsal-2026-10-09.md#7-후속-구현-r2-주소-호환)
+
 ## 아키텍처
 
 ```
@@ -14,6 +20,8 @@
 
 - DB는 Docker 내부 네트워크만 노출 (`5432` 외부 개방 금지)
 - 앱은 `127.0.0.1:3000` 에만 바인딩 → nginx가 리버스 프록시
+
+미디어 보관함 업로드 완료는 `ffprobe`와 `ffmpeg`로 내용을 검증한다. Docker runner에 `ffmpeg` 패키지를 포함했다. 로컬/별도 실행 환경에서는 두 실행 파일을 PATH에 제공하거나 `MEDIA_FFPROBE_PATH`, `MEDIA_FFMPEG_PATH`를 절대 경로로 지정한다. 없으면 완료 API는 503을 반환하고 파일을 READY로 만들지 않는다. 현재 새 업로드에는 운영 버킷 차단이 있으며, 운영 전 설정 분리·검증 worker 격리·자원 제한·동시 실행 제한과 컨테이너의 매체별 재생 검사를 완료해야 한다. 정리 worker도 격리용이고 운영 자동 삭제는 비활성이다. 상세 범위는 [미디어 개발 정책 2의 19절](./media-asset-database-design.md#19-격리-환경-정리-worker와-utc-시각-계약--2026-10-09)을 따른다.
 
 ## 0. 사전 준비
 

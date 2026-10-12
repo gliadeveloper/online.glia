@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertAdmin, jsonError, requireSessionUserId } from "@/lib/api";
 import { parseLessonImageUploadForm } from "@/lib/media/lesson-image-upload-route";
 import { uploadLessonImageBuffer } from "@/lib/media/r2-image-upload";
 import { prisma } from "@/lib/prisma";
@@ -9,7 +9,7 @@ export const maxDuration = 300;
 
 export async function POST(request: Request) {
   try {
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     const payload = await parseLessonImageUploadForm(request);

@@ -15,15 +15,19 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 # next build imports Prisma modules; runtime URL comes from compose env_file
 ENV DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public"
-RUN npm run build:docker
+# Webpack's separate compiler process releases memory before type checking.
+# Keep all type checks enabled on the 4GiB build host; this limit is build-only.
+RUN NODE_OPTIONS="--max-old-space-size=1536" npm run build:docker -- --webpack
 
 # One-shot: docker compose run --rm migrate
-FROM base AS migrator
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/src/generated/prisma ./src/generated/prisma
+FROM deps AS migrator
+# Migrations need the CLI and SQL, not a Next build or generated application client.
+# npm ci intentionally skipped install scripts. Bundle the migration engine now
+# so the release job does not need an engine download after writes are frozen.
+RUN node node_modules/@prisma/engines/scripts/postinstall.js \
+  && test -n "$(find node_modules/@prisma/engines -maxdepth 1 -name 'schema-engine-*' -type f -print -quit)"
+COPY prisma ./prisma
+COPY prisma.config.ts ./prisma.config.ts
 CMD ["npx", "prisma", "migrate", "deploy"]
 
 # One-shot: docker compose --profile seed run --rm seed
@@ -35,6 +39,8 @@ RUN npx prisma generate
 CMD ["npx", "tsx", "prisma/seed.ts"]
 
 FROM base AS runner
+# Upload completion verifies complete media bytes before publishing them.
+RUN apk add --no-cache ffmpeg
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000

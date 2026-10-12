@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertAdmin, jsonError, requireSessionUserId } from "@/lib/api";
 import { createContent } from "@/lib/curriculum-admin";
 import type { ContentType } from "@/generated/prisma/client";
 
@@ -10,15 +10,14 @@ export async function POST(request: Request, context: RouteContext) {
   try {
     const { id: lessonId } = await context.params;
     const body = (await request.json()) as {
-      userId?: string;
       type?: ContentType;
       title?: string;
       url?: string;
       body?: string;
-      metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
+      metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
     };
 
-    const userId = await resolveUserId(request, body);
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     if (!body.type) {

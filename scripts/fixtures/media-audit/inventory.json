@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "bucket": "demo-bucket",
+  "startedAt": "2026-10-07T00:00:00.000Z",
+  "finishedAt": "2026-10-07T00:00:00.000Z",
+  "complete": true,
+  "prefix": "",
+  "objects": [
+    {
+      "key": "courses/demo-course/lessons/demo-lesson/images/shared.png",
+      "size": "100"
+    },
+    {
+      "key": "media/personal/demo-coach/stored/original.mp3",
+      "size": "200"
+    },
+    {
+      "key": "coaching/removed-session/audio/unclassified.mp3",
+      "size": "300"
+    },
+    {
+      "key": "community/demo-user/image.png",
+      "size": "400"
+    }
+  ]
+}

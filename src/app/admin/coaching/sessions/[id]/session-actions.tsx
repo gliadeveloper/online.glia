@@ -7,6 +7,7 @@ import {
   CoachingSessionBlockEditor,
   type CoachingSessionBlockEditorHandle,
 } from "@/components/coaching/coaching-session-block-editor";
+import { mediaBodyVersion } from "@/lib/media/body-version";
 import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 
 type SessionActionsProps = {
@@ -31,8 +32,11 @@ export function SessionActions({
   progressStatus: initialProgressStatus,
 }: SessionActionsProps) {
   const router = useRouter();
+  const savedBody = useRef({ body: initialBody, metadata: initialBodyMetadata });
   const editorRef = useRef<CoachingSessionBlockEditorHandle>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [editorReady, setEditorReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState(initialTitle);
   const [summary, setSummary] = useState(initialSummary ?? "");
@@ -42,54 +46,46 @@ export function SessionActions({
 
   async function exportBody() {
     if (!editorRef.current) {
-      return { bodyMarkdown: initialBody, bodyMetadata: initialBodyMetadata };
+      throw new Error("편집기를 불러오는 중입니다.");
     }
 
     const { body, blocks } = await editorRef.current.exportForSave();
     return {
       bodyMarkdown: body || null,
-      bodyMetadata: buildContentMetadataWithBlockNote(initialBodyMetadata, blocks),
+      bodyMetadata: buildContentMetadataWithBlockNote(savedBody.current.metadata, blocks, 2),
     };
   }
 
-  async function save(patch: Record<string, unknown>) {
+  async function save(extra: Record<string, unknown>) {
+    if (!editorReady || loading || uploadBusy) return;
     setLoading(true);
     setError(null);
 
     try {
+      const body = await exportBody();
+      const patch = { title, summary: summary || null, scheduledAt: new Date(scheduledAt).toISOString(),
+        bodyMarkdown: body.bodyMarkdown, bodyMetadata: body.bodyMetadata, publicationStatus, progressStatus, ...extra };
       const response = await fetch(`/api/admin/coaching/sessions/${sessionId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patch),
+        body: JSON.stringify({ ...patch, expectedBodyVersion: await mediaBodyVersion(savedBody.current) }),
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; bodyMarkdown: string | null; bodyMetadata: unknown };
       if (!response.ok) {
         setError(data.error ?? "저장에 실패했습니다.");
         return;
       }
 
+      savedBody.current = { body: data.bodyMarkdown, metadata: data.bodyMetadata };
       router.refresh();
-    } catch {
-      setError("네트워크 오류가 발생했습니다.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "네트워크 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSave(extra: Record<string, unknown> = {}) {
-    const body = await exportBody();
-    await save({
-      title,
-      summary: summary || null,
-      scheduledAt: new Date(scheduledAt).toISOString(),
-      bodyMarkdown: body.bodyMarkdown,
-      bodyMetadata: body.bodyMetadata,
-      publicationStatus,
-      progressStatus,
-      ...extra,
-    });
-  }
 
   return (
     <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
@@ -127,7 +123,7 @@ export function SessionActions({
       <div className="space-y-2">
         <label className="text-sm font-medium text-zinc-700">본문</label>
         <p className="text-xs text-zinc-500">
-          `/` 로 영상·오디오 블록을 넣거나 파일을 끌어다 놓으세요. 이미지는 10MB, 오디오(mp3·m4a·wav)는 200MB, 영상(mp4·webm·mov)은 500MB까지입니다.
+          이미지·영상·오디오 블록을 본문에 추가할 수 있습니다.
         </p>
         <CoachingSessionBlockEditor
           ref={editorRef}
@@ -136,6 +132,8 @@ export function SessionActions({
           bodyMetadata={initialBodyMetadata}
           apiRole="admin"
           disabled={loading}
+          onUploadBusyChange={setUploadBusy}
+          onReadyChange={setEditorReady}
         />
       </div>
 
@@ -169,16 +167,16 @@ export function SessionActions({
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          disabled={loading}
-          onClick={() => handleSave()}
+          disabled={loading || uploadBusy || !editorReady}
+          onClick={() => save({})}
           className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
           {loading ? "저장 중..." : "저장"}
         </button>
         <button
           type="button"
-          disabled={loading}
-          onClick={() => handleSave({ publicationStatus: "PUBLISHED" })}
+          disabled={loading || uploadBusy || !editorReady}
+          onClick={() => save({ publicationStatus: "PUBLISHED" })}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
           발행하기

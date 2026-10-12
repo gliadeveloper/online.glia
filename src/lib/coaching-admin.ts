@@ -1,10 +1,12 @@
+import { normalizeBlockNoteWrite } from "@/lib/media/normalize-blocknote";
 import { ApiError, addDays } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import { provisionCoachingSessions, syncOfferingSessionTemplates } from "@/lib/coaching-provision";
-import type { Prisma } from "@/generated/prisma/client";
+import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { assertBodyVersion, assertMediaEditor, syncMediaUsages, withMediaTransaction } from "@/lib/media/usage-sync";
 
 export const coachingOfferingInclude = {
   coach: { select: { id: true, name: true, email: true } },
@@ -158,52 +160,51 @@ export async function adminUpdateCoachingSession(params: {
   title?: string;
   summary?: string | null;
   scheduledAt?: Date;
+  expectedBodyVersion?: string;
   bodyMarkdown?: string | null;
   bodyMetadata?: Prisma.InputJsonValue | null;
   publicationStatus?: "DRAFT" | "PUBLISHED" | "EMPTY";
   progressStatus?: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
-}) {
-  const session = await prisma.coachingSession.findUnique({
-    where: { id: params.sessionId },
-    include: { entitlement: true },
-  });
+}, db: PrismaClient = prisma) {
+  return withMediaTransaction(db, async (tx) => {
+    await tx.$queryRaw`SELECT id FROM coaching_sessions WHERE id = ${params.sessionId} FOR UPDATE`;
+    const session = await tx.coachingSession.findUnique({
+      where: { id: params.sessionId },
+      include: { entitlement: true },
+    });
 
-  if (!session) {
-    throw new ApiError("Coaching session not found", 404, "SESSION_NOT_FOUND");
-  }
-
-  const bodyMarkdown =
-    params.bodyMarkdown === undefined
-      ? undefined
-      : params.bodyMarkdown === null
-        ? null
-        : params.bodyMarkdown.trim();
-
-  const bodyMetadata =
-    params.bodyMetadata === undefined
-      ? undefined
-      : params.bodyMetadata === null
-        ? PrismaRuntime.JsonNull
-        : params.bodyMetadata;
-
-  let publicationStatus = params.publicationStatus;
-  if (publicationStatus === "PUBLISHED") {
-    const nextSession = {
-      bodyMarkdown: bodyMarkdown ?? session.bodyMarkdown,
-      bodyMetadata:
-        params.bodyMetadata === undefined ? session.bodyMetadata : params.bodyMetadata,
-    };
-    if (!coachingSessionHasBody(nextSession)) {
-      throw new ApiError("bodyMarkdown is required to publish", 400, "VALIDATION_ERROR");
+    if (!session) {
+      throw new ApiError("Coaching session not found", 404, "SESSION_NOT_FOUND");
     }
-  }
 
-  const now = new Date();
-  const publishing =
-    publicationStatus === "PUBLISHED" && session.publicationStatus !== "PUBLISHED";
+    const actor = await assertMediaEditor(tx, params.actorId);
+    if (actor.role !== "ADMIN") throw new ApiError("Admin access required", 403, "FORBIDDEN");
+    const before = { body: session.bodyMarkdown, metadata: session.bodyMetadata };
+    if (params.bodyMarkdown !== undefined || params.bodyMetadata !== undefined) {
+      await assertBodyVersion(before, params.expectedBodyVersion);
+    }
 
-  const updated = await prisma.$transaction(async (tx) => {
-    const next = await tx.coachingSession.update({
+    const normalized = await normalizeBlockNoteWrite({ body: params.bodyMarkdown, metadata: params.bodyMetadata }, session.bodyMetadata);
+    const bodyMarkdown = normalized.body === undefined ? undefined : normalized.body?.trim() || null;
+    const bodyMetadata = normalized.metadata === null ? PrismaRuntime.JsonNull : normalized.metadata;
+
+    const publicationStatus = params.publicationStatus;
+    if (publicationStatus === "PUBLISHED") {
+      const nextSession = {
+        bodyMarkdown: bodyMarkdown === undefined ? session.bodyMarkdown : bodyMarkdown,
+        bodyMetadata:
+          normalized.metadata === undefined ? session.bodyMetadata : normalized.metadata,
+      };
+      if (!coachingSessionHasBody(nextSession)) {
+        throw new ApiError("bodyMarkdown is required to publish", 400, "VALIDATION_ERROR");
+      }
+    }
+
+    const now = new Date();
+    const publishing =
+      publicationStatus === "PUBLISHED" && session.publicationStatus !== "PUBLISHED";
+
+    const updated = await tx.coachingSession.update({
       where: { id: session.id },
       data: {
         title: params.title?.trim(),
@@ -224,6 +225,7 @@ export async function adminUpdateCoachingSession(params: {
       },
       include: sessionInclude,
     });
+    await syncMediaUsages(tx, { actorId: params.actorId, target: { coachingSessionId: session.id }, before, after: { body: updated.bodyMarkdown, metadata: updated.bodyMetadata } });
 
     if (params.progressStatus === "COMPLETED" && session.progressStatus !== "COMPLETED") {
       await tx.coachingSessionProgress.update({
@@ -248,21 +250,20 @@ export async function adminUpdateCoachingSession(params: {
       });
     }
 
-    return next;
-  });
 
-  await writeAuditLog({
-    actorId: params.actorId,
-    entityType: "CoachingSession",
-    entityId: session.id,
-    action: publishing ? "SESSION_PUBLISHED" : "SESSION_UPDATED",
-    metadata: {
-      publicationStatus: updated.publicationStatus,
-      sessionNo: updated.sessionNo,
-    },
-  });
+    await writeAuditLog({
+      actorId: params.actorId,
+      entityType: "CoachingSession",
+      entityId: session.id,
+      action: publishing ? "SESSION_PUBLISHED" : "SESSION_UPDATED",
+      metadata: {
+        publicationStatus: updated.publicationStatus,
+        sessionNo: updated.sessionNo,
+      },
+    }, tx);
 
-  return updated;
+    return updated;
+  });
 }
 
 export async function adminGrantCoachingEntitlementWithSessions(params: {

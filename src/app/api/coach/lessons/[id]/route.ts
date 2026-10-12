@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { assertCoach, jsonError, resolveUserId } from "@/lib/api";
+import { assertCoach, jsonError, requireSessionUserId } from "@/lib/api";
 import { getLessonDetail } from "@/lib/assessment-admin";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { deleteLesson, updateLesson } from "@/lib/curriculum-admin";
@@ -8,10 +8,10 @@ import type { LessonType } from "@/generated/prisma/client";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsLesson(userId, id);
 
@@ -34,7 +34,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       order?: number;
     };
 
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsLesson(userId, id);
 
@@ -55,10 +55,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsLesson(userId, id);
 

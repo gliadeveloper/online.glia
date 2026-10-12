@@ -7,6 +7,7 @@ import {
   CoachingSessionBlockEditor,
   type CoachingSessionBlockEditorHandle,
 } from "@/components/coaching/coaching-session-block-editor";
+import { mediaBodyVersion } from "@/lib/media/body-version";
 import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 
 type CoachSessionFeedbackPanelProps = {
@@ -25,26 +26,29 @@ export function CoachSessionFeedbackPanel({
   publicationStatus: initialStatus,
 }: CoachSessionFeedbackPanelProps) {
   const router = useRouter();
+  const savedBody = useRef({ body: initialBody, metadata: initialBodyMetadata });
   const editorRef = useRef<CoachingSessionBlockEditorHandle>(null);
   const [summary, setSummary] = useState(initialSummary ?? "");
   const [loading, setLoading] = useState(false);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [editorReady, setEditorReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function save(publicationStatus: "DRAFT" | "PUBLISHED") {
+    if (!editorReady || !editorRef.current || loading || uploadBusy) return;
     setLoading(true);
     setError(null);
 
     try {
-      const exported = editorRef.current
-        ? await editorRef.current.exportForSave()
-        : { body: initialBody ?? "", blocks: [] };
+      const exported = await editorRef.current.exportForSave();
       const bodyMarkdown = exported.body.trim() || null;
-      const bodyMetadata = buildContentMetadataWithBlockNote(initialBodyMetadata, exported.blocks);
+      const bodyMetadata = buildContentMetadataWithBlockNote(savedBody.current.metadata, exported.blocks, 2);
 
       const response = await fetch(`/api/coach/sessions/${sessionId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          expectedBodyVersion: await mediaBodyVersion(savedBody.current),
           summary: summary.trim() || null,
           bodyMarkdown,
           bodyMetadata,
@@ -52,15 +56,16 @@ export function CoachSessionFeedbackPanel({
         }),
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; bodyMarkdown: string | null; bodyMetadata: unknown };
       if (!response.ok) {
         setError(data.error ?? "저장에 실패했습니다.");
         return;
       }
 
+      savedBody.current = { body: data.bodyMarkdown, metadata: data.bodyMetadata };
       router.refresh();
-    } catch {
-      setError("네트워크 오류가 발생했습니다.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "네트워크 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -80,7 +85,7 @@ export function CoachSessionFeedbackPanel({
       <div className="space-y-1">
         <label className="text-sm font-medium text-zinc-700">피드백 본문</label>
         <p className="text-xs text-zinc-500">
-          `/` 로 영상·오디오 블록을 넣거나 파일을 끌어다 놓으세요. 이미지는 10MB, 오디오(mp3·m4a·wav)는 200MB, 영상(mp4·webm·mov)은 500MB까지입니다.
+          이미지·영상·오디오 블록을 본문에 추가할 수 있습니다.
         </p>
         <CoachingSessionBlockEditor
           ref={editorRef}
@@ -89,13 +94,15 @@ export function CoachSessionFeedbackPanel({
           bodyMetadata={initialBodyMetadata}
           apiRole="coach"
           disabled={loading}
+          onUploadBusyChange={setUploadBusy}
+          onReadyChange={setEditorReady}
         />
       </div>
 
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          disabled={loading}
+          disabled={loading || uploadBusy || !editorReady}
           onClick={() => save("DRAFT")}
           className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
@@ -103,7 +110,7 @@ export function CoachSessionFeedbackPanel({
         </button>
         <button
           type="button"
-          disabled={loading}
+          disabled={loading || uploadBusy || !editorReady}
           onClick={() => save("PUBLISHED")}
           className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >

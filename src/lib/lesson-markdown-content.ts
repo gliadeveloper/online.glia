@@ -4,6 +4,7 @@ type LessonContentRow = {
   id: string;
   type: string;
   body: string | null;
+  url?: string | null;
   title?: string | null;
   metadata?: unknown;
 };

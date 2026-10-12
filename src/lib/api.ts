@@ -41,6 +41,14 @@ export async function resolveUserId(request: Request, body?: { userId?: string }
   return userId;
 }
 
+/** Media editing identities must come from a verified session, never request IDs. */
+export async function requireSessionUserId() {
+  const { getSessionUserId } = await import("@/lib/session");
+  const userId = await getSessionUserId();
+  if (!userId) throw new ApiError("Login required", 401, "UNAUTHORIZED");
+  return userId;
+}
+
 export function addDays(date: Date, days: number) {
   const result = new Date(date);
   result.setDate(result.getDate() + days);

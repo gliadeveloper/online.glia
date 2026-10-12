@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, assertCoach, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertCoach, jsonError, requireSessionUserId } from "@/lib/api";
 import { parseCoachScheduledAt } from "@/lib/coach-coaching-board";
 import { coachUpdateSession, getCoachSessionDetail } from "@/lib/coaching-coach";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
 
     const session = await getCoachSessionDetail(id, userId);
@@ -23,6 +23,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
     const body = (await request.json()) as {
+      expectedBodyVersion?: string;
       summary?: string | null;
       bodyMarkdown?: string | null;
       bodyMetadata?: import("@/generated/prisma/client").Prisma.InputJsonValue | null;
@@ -30,7 +31,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       scheduledAt?: string;
     };
 
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
 
     let scheduledAt: Date | undefined;
@@ -48,6 +49,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       summary: body.summary,
       bodyMarkdown: body.bodyMarkdown,
       bodyMetadata: body.bodyMetadata,
+      expectedBodyVersion: body.expectedBodyVersion,
       publicationStatus: body.publicationStatus,
       scheduledAt,
     });

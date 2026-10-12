@@ -1,8 +1,11 @@
-import type { ContentType, LessonType } from "@/generated/prisma/client";
+import type { ContentType, LessonType, PrismaClient } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
+import { normalizeBlockNoteWrite } from "@/lib/media/normalize-blocknote";
+import { assertBodyVersion, assertMediaEditor, lockContentForMedia, lockLessonForMedia, removeMediaUsages, syncMediaUsages, withMediaTransaction } from "@/lib/media/usage-sync";
 
 export const curriculumInclude = {
   modules: {
@@ -39,7 +42,7 @@ export async function createModule(params: {
     _max: { order: true },
   });
 
-  const module = await prisma.module.create({
+  const courseModule = await prisma.module.create({
     data: {
       courseId: params.courseId,
       title: params.title.trim(),
@@ -51,12 +54,12 @@ export async function createModule(params: {
   await writeAuditLog({
     actorId: params.actorId,
     entityType: "Module",
-    entityId: module.id,
+    entityId: courseModule.id,
     action: "MODULE_CREATED",
     metadata: { courseId: params.courseId },
   });
 
-  return module;
+  return courseModule;
 }
 
 export async function updateModule(params: {
@@ -66,7 +69,7 @@ export async function updateModule(params: {
   description?: string;
   order?: number;
 }) {
-  const module = await prisma.module.update({
+  const courseModule = await prisma.module.update({
     where: { id: params.moduleId },
     data: {
       title: params.title?.trim(),
@@ -78,24 +81,28 @@ export async function updateModule(params: {
   await writeAuditLog({
     actorId: params.actorId,
     entityType: "Module",
-    entityId: module.id,
+    entityId: courseModule.id,
     action: "MODULE_UPDATED",
   });
 
-  return module;
+  return courseModule;
 }
 
-export async function deleteModule(params: { actorId: string; moduleId: string }) {
-  const module = await prisma.module.delete({ where: { id: params.moduleId } });
-
-  await writeAuditLog({
-    actorId: params.actorId,
-    entityType: "Module",
-    entityId: module.id,
-    action: "MODULE_DELETED",
+export async function deleteModule(params: { actorId: string; moduleId: string }, db: PrismaClient = prisma) {
+  return withMediaTransaction(db, async (tx) => {
+    await tx.$queryRaw`SELECT id FROM modules WHERE id = ${params.moduleId} FOR UPDATE`;
+    const courseModule = await tx.module.findUnique({ where: { id: params.moduleId }, include: { course: { select: { instructorId: true } } } });
+    if (!courseModule) throw new ApiError("Module not found", 404, "MODULE_NOT_FOUND");
+    await assertMediaEditor(tx, params.actorId, courseModule.course.instructorId);
+    await tx.$queryRaw`SELECT id FROM lessons WHERE "moduleId" = ${courseModule.id} ORDER BY id FOR UPDATE`;
+    const contents = await tx.$queryRaw<{ id: string }[]>`
+      SELECT c.id FROM contents c JOIN lessons l ON l.id = c."lessonId"
+      WHERE l."moduleId" = ${courseModule.id} ORDER BY c.id FOR UPDATE OF c`;
+    await removeMediaUsages(tx, contents.map(c => ({ contentId: c.id })), params.actorId);
+    const deleted = await tx.module.delete({ where: { id: courseModule.id } });
+    await writeAuditLog({ actorId: params.actorId, entityType: "Module", entityId: courseModule.id, action: "MODULE_DELETED" }, tx);
+    return deleted;
   });
-
-  return module;
 }
 
 export async function createLesson(params: {
@@ -167,17 +174,15 @@ export async function updateLesson(params: {
   return lesson;
 }
 
-export async function deleteLesson(params: { actorId: string; lessonId: string }) {
-  const lesson = await prisma.lesson.delete({ where: { id: params.lessonId } });
-
-  await writeAuditLog({
-    actorId: params.actorId,
-    entityType: "Lesson",
-    entityId: lesson.id,
-    action: "LESSON_DELETED",
+export async function deleteLesson(params: { actorId: string; lessonId: string }, db: PrismaClient = prisma) {
+  return withMediaTransaction(db, async (tx) => {
+    const lesson = await lockLessonForMedia(tx, params.lessonId, params.actorId, true);
+    const contents = await tx.$queryRaw<{ id: string }[]>`SELECT id FROM contents WHERE "lessonId" = ${lesson.id} ORDER BY id FOR UPDATE`;
+    await removeMediaUsages(tx, contents.map(c => ({ contentId: c.id })), params.actorId);
+    const deleted = await tx.lesson.delete({ where: { id: lesson.id } });
+    await writeAuditLog({ actorId: params.actorId, entityType: "Lesson", entityId: lesson.id, action: "LESSON_DELETED" }, tx);
+    return deleted;
   });
-
-  return lesson;
 }
 
 export async function createContent(params: {
@@ -187,34 +192,22 @@ export async function createContent(params: {
   title?: string;
   url?: string;
   body?: string;
-  metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
-}) {
-  const maxOrder = await prisma.content.aggregate({
-    where: { lessonId: params.lessonId },
-    _max: { order: true },
-  });
-
-  const content = await prisma.content.create({
-    data: {
-      lessonId: params.lessonId,
-      type: params.type,
-      title: params.title?.trim(),
-      url: params.url?.trim(),
-      body: params.body?.trim(),
-      metadata: params.metadata,
+  metadata?: Prisma.InputJsonValue | null;
+}, db: PrismaClient = prisma) {
+  return withMediaTransaction(db, async (tx) => {
+    await lockLessonForMedia(tx, params.lessonId, params.actorId, true);
+    const normalized = await normalizeBlockNoteWrite({ body: params.body, metadata: params.metadata });
+    const maxOrder = await tx.content.aggregate({ where: { lessonId: params.lessonId }, _max: { order: true } });
+    const content = await tx.content.create({ data: {
+      lessonId: params.lessonId, type: params.type, title: params.title?.trim(),
+      url: params.url?.trim(), body: normalized.body?.trim(),
+      metadata: normalized.metadata === null ? Prisma.JsonNull : normalized.metadata,
       order: (maxOrder._max.order ?? 0) + 1,
-    },
+    } });
+    await syncMediaUsages(tx, { actorId: params.actorId, target: { contentId: content.id }, before: {}, after: content });
+    await writeAuditLog({ actorId: params.actorId, entityType: "Content", entityId: content.id, action: "CONTENT_CREATED", metadata: { lessonId: params.lessonId } }, tx);
+    return content;
   });
-
-  await writeAuditLog({
-    actorId: params.actorId,
-    entityType: "Content",
-    entityId: content.id,
-    action: "CONTENT_CREATED",
-    metadata: { lessonId: params.lessonId },
-  });
-
-  return content;
 }
 
 export async function updateContent(params: {
@@ -224,40 +217,33 @@ export async function updateContent(params: {
   url?: string;
   body?: string;
   type?: ContentType;
-  metadata?: import("@/generated/prisma/client").Prisma.InputJsonValue;
-}) {
-  const content = await prisma.content.update({
-    where: { id: params.contentId },
-    data: {
-      title: params.title?.trim(),
-      url: params.url?.trim(),
-      body: params.body?.trim(),
-      type: params.type,
-      metadata: params.metadata,
-    },
+  metadata?: Prisma.InputJsonValue | null;
+  expectedBodyVersion?: string;
+}, db: PrismaClient = prisma) {
+  return withMediaTransaction(db, async (tx) => {
+    const existing = await lockContentForMedia(tx, params.contentId, params.actorId);
+    if (params.body !== undefined || params.metadata !== undefined || params.url !== undefined || params.type !== undefined) {
+      await assertBodyVersion(existing, params.expectedBodyVersion);
+    }
+    const normalized = await normalizeBlockNoteWrite({ body: params.body, metadata: params.metadata }, existing.metadata);
+    const content = await tx.content.update({ where: { id: existing.id }, data: {
+      title: params.title?.trim(), url: params.url?.trim(), body: normalized.body?.trim(), type: params.type,
+      metadata: normalized.metadata === null ? Prisma.JsonNull : normalized.metadata,
+    } });
+    await syncMediaUsages(tx, { actorId: params.actorId, target: { contentId: content.id }, before: existing, after: content });
+    await writeAuditLog({ actorId: params.actorId, entityType: "Content", entityId: content.id, action: "CONTENT_UPDATED" }, tx);
+    return content;
   });
-
-  await writeAuditLog({
-    actorId: params.actorId,
-    entityType: "Content",
-    entityId: content.id,
-    action: "CONTENT_UPDATED",
-  });
-
-  return content;
 }
 
-export async function deleteContent(params: { actorId: string; contentId: string }) {
-  const content = await prisma.content.delete({ where: { id: params.contentId } });
-
-  await writeAuditLog({
-    actorId: params.actorId,
-    entityType: "Content",
-    entityId: content.id,
-    action: "CONTENT_DELETED",
+export async function deleteContent(params: { actorId: string; contentId: string }, db: PrismaClient = prisma) {
+  return withMediaTransaction(db, async (tx) => {
+    const content = await lockContentForMedia(tx, params.contentId, params.actorId);
+    await removeMediaUsages(tx, [{ contentId: content.id }], params.actorId);
+    const deleted = await tx.content.delete({ where: { id: content.id } });
+    await writeAuditLog({ actorId: params.actorId, entityType: "Content", entityId: content.id, action: "CONTENT_DELETED" }, tx);
+    return deleted;
   });
-
-  return content;
 }
 
 export async function getCourseCurriculum(courseId: string) {

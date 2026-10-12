@@ -1,4 +1,4 @@
-import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
+import { ApiError, assertAdmin, jsonError, requireSessionUserId } from "@/lib/api";
 import { parseCoachingImageUploadForm } from "@/lib/media/coaching-image-upload-route";
 import { uploadCoachingImageBuffer } from "@/lib/media/r2-image-upload";
 import { prisma } from "@/lib/prisma";
@@ -7,7 +7,7 @@ export const maxDuration = 600;
 
 export async function POST(request: Request) {
   try {
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertAdmin(userId);
 
     const payload = await parseCoachingImageUploadForm(request);

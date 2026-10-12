@@ -317,6 +317,10 @@ model User {
   auditLogs                      AuditLog[]
   createdForms                   Form[]                        @relation("FormCreator")
   formSubmissions                FormSubmission[]
+  ownedMediaAssets               MediaAsset[]                  @relation("MediaAssetOwner")
+  createdMediaAssets             MediaAsset[]                  @relation("MediaAssetCreator")
+  requestedMediaUploads          MediaUpload[]                 @relation("MediaUploadRequester")
+  requestedMediaDeletions        MediaDeletionJob[]            @relation("MediaDeletionRequester")
 
   @@index([status])
   @@index([lastLoginAt])
@@ -616,7 +620,8 @@ model Content {
   metadata Json?
   order    Int         @default(0)
 
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lesson      Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  mediaUsages MediaUsage[]
 
   @@index([lessonId, order])
   @@map("contents")
@@ -1382,6 +1387,7 @@ model CoachingSession {
   progress     CoachingSessionProgress?
   logs         CoachingSessionLog[]
   notification NotificationEvent?           @relation("NotificationCoachingSession")
+  mediaUsages  MediaUsage[]
 
   @@unique([entitlementId, sessionNo])
   @@index([userId, sessionNo])
@@ -1527,6 +1533,160 @@ model IdempotencyKey {
 
   @@index([scope, expiresAt])
   @@map("idempotency_keys")
+}
+
+// ─── Media library ────────────────────────────────────────────────────────────
+// State columns intentionally use text + database CHECK constraints.
+// Partial indexes and deferred cross-table constraints are maintained in the
+// media_asset_foundation SQL migration; db push alone cannot install them.
+// See docs/media-asset-database-design.md for transaction and locking rules.
+
+model MediaAsset {
+  id             String    @id @default(cuid())
+  /// SHARED | PERSONAL | UNCLASSIFIED (legacy only).
+  scope          String
+  ownerUserId    String?   @map("owner_user_id")
+  createdById    String?   @map("created_by_id")
+  /// IMAGE | VIDEO | AUDIO.
+  kind           String
+  originalName   String    @map("original_name")
+  /// CANONICAL | LEGACY. Immutable after insertion.
+  layout         String
+  /// ACTIVE | TRASHED.
+  libraryStatus  String    @default("ACTIVE") @map("library_status")
+  /// PENDING | READY | ABANDONED | DELETING | DELETED.
+  storageStatus  String    @default("PENDING") @map("storage_status")
+  retentionHold  String?   @map("retention_hold")
+  trashedAt      DateTime? @map("trashed_at") @db.Timestamptz(6)
+  trashExpiresAt DateTime? @map("trash_expires_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner       User?             @relation("MediaAssetOwner", fields: [ownerUserId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  createdBy   User?             @relation("MediaAssetCreator", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  files       MediaFile[]
+  usages      MediaUsage[]
+  deletionJob MediaDeletionJob?
+
+  @@index([ownerUserId, libraryStatus, storageStatus, createdAt(sort: Desc)], map: "media_assets_library_idx")
+  @@index([scope, libraryStatus, storageStatus, kind, createdAt(sort: Desc)], map: "media_assets_shared_idx")
+  // SQL: media_assets_trash_idx (eligible, classified, unheld trash only).
+  @@map("media_assets")
+}
+
+model MediaFile {
+  id                    String    @id @default(cuid())
+  assetId               String    @map("asset_id")
+  /// ORIGINAL | THUMBNAIL | PLAYBACK.
+  role                  String
+  bucket                String
+  objectKey             String    @map("object_key")
+  urlKey                String    @unique @map("url_key")
+  /// PENDING | READY | RETIRED | DELETED.
+  status                String    @default("PENDING")
+  isCurrent             Boolean   @default(false) @map("is_current")
+  mimeType              String?   @map("mime_type")
+  byteSize              BigInt?   @map("byte_size")
+  sha256                String?
+  etag                  String?
+  width                 Int?
+  height                Int?
+  durationMs            BigInt?   @map("duration_ms")
+  metadataCheckedAt     DateTime? @map("metadata_checked_at") @db.Timestamptz(6)
+  verifiedAt            DateTime? @map("verified_at") @db.Timestamptz(6)
+  cleanupRequestedAt    DateTime? @map("cleanup_requested_at") @db.Timestamptz(6)
+  nextSweepAt           DateTime? @map("next_sweep_at") @db.Timestamptz(6)
+  /// An observation, never proof that a future late write cannot arrive.
+  lastAbsenceObservedAt DateTime? @map("last_absence_observed_at") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  asset  MediaAsset   @relation(fields: [assetId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  upload MediaUpload?
+
+  @@unique([bucket, objectKey])
+  @@index([assetId], map: "media_files_asset_idx")
+  // SQL: media_files_original_uidx, media_files_current_uidx, media_files_sweep_idx.
+  @@map("media_files")
+}
+
+model MediaUsage {
+  id                String   @id @default(cuid())
+  assetId           String   @map("asset_id")
+  contentId         String?  @map("content_id")
+  coachingSessionId String?  @map("coaching_session_id")
+  occurrenceCount   Int      @map("occurrence_count")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  asset           MediaAsset       @relation(fields: [assetId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  content         Content?         @relation(fields: [contentId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  coachingSession CoachingSession? @relation(fields: [coachingSessionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  // Exactly one target and one usage per asset/target are enforced by SQL.
+  @@index([contentId], map: "media_usages_content_idx")
+  @@index([coachingSessionId], map: "media_usages_coaching_idx")
+  @@index([assetId], map: "media_usages_asset_idx")
+  @@map("media_usages")
+}
+
+/// One preparation job per original or derived file. Terminal rows retain cleanup work.
+model MediaUpload {
+  id                  String    @id @default(cuid())
+  fileId              String    @unique @map("file_id")
+  requestedById       String?   @map("requested_by_id")
+  /// CLIENT | DERIVATION.
+  sourceKind          String    @map("source_kind")
+  recipe              Json?
+  stagingObjectKey    String    @unique @map("staging_object_key")
+  expectedMimeType    String    @map("expected_mime_type")
+  expectedByteSize    BigInt?   @map("expected_byte_size")
+  uploadExpiresAt     DateTime  @map("upload_expires_at") @db.Timestamptz(6)
+  deadlineAt          DateTime  @map("deadline_at") @db.Timestamptz(6)
+  /// ISSUED | VALIDATING | PROMOTING | COMPLETED | ABANDONED.
+  phase               String    @default("ISSUED")
+  sourceEtag          String?   @map("source_etag")
+  validatedAt         DateTime? @map("validated_at") @db.Timestamptz(6)
+  leaseToken          String?   @map("lease_token")
+  leaseExpiresAt      DateTime? @map("lease_expires_at") @db.Timestamptz(6)
+  nextAttemptAt       DateTime  @default(now()) @map("next_attempt_at") @db.Timestamptz(6)
+  attemptCount        Int       @default(0) @map("attempt_count")
+  lastError           String?   @map("last_error")
+  completedAt         DateTime? @map("completed_at") @db.Timestamptz(6)
+  abandonedAt         DateTime? @map("abandoned_at") @db.Timestamptz(6)
+  stagingCleanupDueAt DateTime? @map("staging_cleanup_due_at") @db.Timestamptz(6)
+  stagingLastAbsentAt DateTime? @map("staging_last_absent_at") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  file        MediaFile @relation(fields: [fileId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  requestedBy User?     @relation("MediaUploadRequester", fields: [requestedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  // SQL: media_uploads_due_idx, media_uploads_lease_idx, media_uploads_staging_idx.
+  @@map("media_uploads")
+}
+
+model MediaDeletionJob {
+  id             String    @id @default(cuid())
+  assetId        String    @unique @map("asset_id")
+  /// SCHEDULED | RUNNING | RETRY | CANCELLED | SUCCEEDED.
+  status         String    @default("SCHEDULED")
+  requestedById  String?   @map("requested_by_id")
+  nextAttemptAt  DateTime  @map("next_attempt_at") @db.Timestamptz(6)
+  leaseToken     String?   @map("lease_token")
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamptz(6)
+  attemptCount   Int       @default(0) @map("attempt_count")
+  lastError      String?   @map("last_error")
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  asset       MediaAsset @relation(fields: [assetId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  requestedBy User?      @relation("MediaDeletionRequester", fields: [requestedById], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([status, nextAttemptAt], map: "media_deletion_jobs_due_idx")
+  // SQL: media_deletion_jobs_lease_idx (RUNNING only).
+  @@map("media_deletion_jobs")
 }
 
 // ─── Forms: Daily Check-in & Surveys ───────────────────────────────────────────

@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
+import { mediaBodyVersion } from "@/lib/media/body-version";
 import { LessonMarkdownEditor } from "@/components/learning/lesson/lesson-markdown-editor";
 import { lessonSupportsMarkdownEditor } from "@/lib/lesson-markdown-content";
 import { getLessonYoutubeUrl, isYoutubeUrl } from "@/lib/media/youtube";
@@ -49,6 +50,7 @@ export function CoachLessonEditor({
   const router = useRouter();
   const zoomContent = findZoomContent(contents);
   const videoContent = findVideoContent(contents);
+  const savedContent = useRef({ video: videoContent, zoom: zoomContent });
   const [zoomUrl, setZoomUrl] = useState(zoomContent?.url?.trim() ?? "");
   const [youtubeUrl, setYoutubeUrl] = useState(getLessonYoutubeUrl(contents) ?? videoContent?.url?.trim() ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +73,7 @@ export function CoachLessonEditor({
     setError(null);
 
     try {
-      const existing = findVideoContent(contents);
+      const existing = savedContent.current.video;
       const url = existing
         ? `/api/coach/contents/${existing.id}`
         : `/api/coach/lessons/${lessonId}/contents`;
@@ -81,6 +83,7 @@ export function CoachLessonEditor({
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          expectedBodyVersion: existing ? await mediaBodyVersion(existing) : undefined,
           type: "VIDEO",
           title: "YouTube",
           url: trimmedUrl,
@@ -88,12 +91,13 @@ export function CoachLessonEditor({
         }),
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as ContentRow & { error?: string };
       if (!response.ok) {
         setError(data.error ?? "YouTube URL 저장에 실패했습니다.");
         return;
       }
 
+      savedContent.current.video = data;
       router.refresh();
     } catch {
       setError("네트워크 오류");
@@ -119,7 +123,7 @@ export function CoachLessonEditor({
     setError(null);
 
     try {
-      const existing = findZoomContent(contents);
+      const existing = savedContent.current.zoom;
       const url = existing
         ? `/api/coach/contents/${existing.id}`
         : `/api/coach/lessons/${lessonId}/contents`;
@@ -129,18 +133,20 @@ export function CoachLessonEditor({
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          expectedBodyVersion: existing ? await mediaBodyVersion(existing) : undefined,
           type: "LINK",
           title: "Zoom",
           url: trimmedZoom,
         }),
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as ContentRow & { error?: string };
       if (!response.ok) {
         setError(data.error ?? "Zoom 링크 저장에 실패했습니다.");
         return;
       }
 
+      savedContent.current.zoom = data;
       router.refresh();
     } catch {
       setError("네트워크 오류");

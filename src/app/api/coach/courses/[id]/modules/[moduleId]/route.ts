@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { assertCoach, jsonError, resolveUserId } from "@/lib/api";
+import { assertCoach, jsonError, requireSessionUserId } from "@/lib/api";
 import { assertCoachOwnsModule } from "@/lib/coach-courses";
 import { deleteModule, updateModule } from "@/lib/curriculum-admin";
 
@@ -15,11 +15,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       order?: number;
     };
 
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsModule(userId, moduleId);
 
-    const module = await updateModule({
+    const courseModule = await updateModule({
       actorId: userId,
       moduleId,
       title: body.title,
@@ -27,16 +27,16 @@ export async function PATCH(request: Request, context: RouteContext) {
       order: body.order,
     });
 
-    return NextResponse.json(module);
+    return NextResponse.json(courseModule);
   } catch (error) {
     return jsonError(error);
   }
 }
 
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   try {
     const { moduleId } = await context.params;
-    const userId = await resolveUserId(request);
+    const userId = await requireSessionUserId();
     await assertCoach(userId);
     await assertCoachOwnsModule(userId, moduleId);
 

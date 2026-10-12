@@ -3,18 +3,20 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { ApiError } from "@/lib/api";
 
-import { getR2Config } from "./r2-config";
+import { assertR2Endpoint, getR2Config } from "./r2-config";
+import { assertR2ObjectKey, legacyR2ObjectKey } from "./r2-key";
 
 /** Stable URL stored in markdown/blocks — public CDN or authenticated proxy. */
 export function buildR2MediaUrl(objectKey: string) {
   const config = getR2Config();
-  if (config?.publicBaseUrl) {
+  if (config?.publicBaseUrl && !config.legacyKeyPrefix) {
     return `${config.publicBaseUrl.replace(/\/$/, "")}/${objectKey}`;
   }
   return `/api/media/r2?key=${encodeURIComponent(objectKey)}`;
 }
 
-function createR2Client(config: NonNullable<ReturnType<typeof getR2Config>>) {
+export function createR2Client(config: NonNullable<ReturnType<typeof getR2Config>>) {
+  assertR2Endpoint(config.endpoint);
   return new S3Client({
     region: config.region,
     endpoint: config.endpoint,
@@ -47,7 +49,7 @@ export async function createR2UploadPresignedUrl(params: {
 
   const command = new PutObjectCommand({
     Bucket: config.bucket,
-    Key: params.objectKey,
+    Key: legacyR2ObjectKey(params.objectKey, config.legacyKeyPrefix),
     ContentType: params.contentType,
   });
 
@@ -70,7 +72,7 @@ export async function putR2Object(params: {
   await client.send(
     new PutObjectCommand({
       Bucket: config.bucket,
-      Key: params.objectKey,
+      Key: legacyR2ObjectKey(params.objectKey, config.legacyKeyPrefix),
       ContentType: params.contentType,
       Body: params.body,
     }),
@@ -134,7 +136,9 @@ export function parseHttpByteRange(header: string | null): string | undefined {
   return trimmed;
 }
 
-export async function headR2Object(objectKey: string) {
+/** Already resolved DB/storage key: never apply the legacy URL prefix here. */
+export async function headR2StoredObject(objectKey: string) {
+  assertR2ObjectKey(objectKey);
   const config = requireR2Config();
   const client = createR2Client(config);
   const result = await client.send(
@@ -150,7 +154,15 @@ export async function headR2Object(objectKey: string) {
   };
 }
 
-export async function getR2Object(objectKey: string, range?: string) {
+/** Existing callers such as lesson materials hold a logical legacy key. */
+export async function getR2Object(urlKey: string, range?: string) {
+  const config = requireR2Config();
+  return getR2StoredObject(legacyR2ObjectKey(urlKey, config.legacyKeyPrefix), range);
+}
+
+/** Already authorized physical key; no prefix or lookup fallback. */
+export async function getR2StoredObject(objectKey: string, range?: string) {
+  assertR2ObjectKey(objectKey);
   const config = requireR2Config();
   const client = createR2Client(config);
 
@@ -184,7 +196,7 @@ export async function deleteR2Object(objectKey: string) {
   await client.send(
     new DeleteObjectCommand({
       Bucket: config.bucket,
-      Key: objectKey,
+      Key: legacyR2ObjectKey(objectKey, config.legacyKeyPrefix),
     }),
   );
 }

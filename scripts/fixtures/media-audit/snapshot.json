@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "startedAt": "2026-10-07T00:00:00.000Z",
+  "finishedAt": "2026-10-07T00:00:00.000Z",
+  "databaseSnapshot": "SYNTHETIC_EXAMPLE",
+  "configHash": "279835efdba134219fa0cd7152d23d6e1e2798a990c79eaaaa85609e5e3a65d5",
+  "mediaSchema": "PRESENT",
+  "sources": [
+    {
+      "source": "contents:demo-content",
+      "target": {
+        "contentId": "demo-content"
+      },
+      "editorCandidateIds": [
+        "demo-coach"
+      ],
+      "groups": [
+        [
+          {
+            "key": "courses/demo-course/lessons/demo-lesson/images/shared.png"
+          }
+        ],
+        [
+          {
+            "key": "courses/demo-course/lessons/demo-lesson/images/shared.png"
+          }
+        ],
+        []
+      ],
+      "possibleKeys": []
+    },
+    {
+      "source": "products:demo-product:description",
+      "editorCandidateIds": [],
+      "groups": [
+        [],
+        [
+          {
+            "key": "courses/demo-course/lessons/demo-lesson/images/shared.png"
+          }
+        ],
+        []
+      ],
+      "possibleKeys": []
+    }
+  ],
+  "assets": [
+    {
+      "id": "demo-shared",
+      "scope": "SHARED",
+      "ownerUserId": null,
+      "layout": "LEGACY",
+      "libraryStatus": "ACTIVE",
+      "storageStatus": "READY",
+      "retentionHold": false
+    },
+    {
+      "id": "demo-stored",
+      "scope": "PERSONAL",
+      "ownerUserId": "demo-coach",
+      "layout": "CANONICAL",
+      "libraryStatus": "ACTIVE",
+      "storageStatus": "READY",
+      "retentionHold": false
+    }
+  ],
+  "files": [
+    {
+      "id": "demo-shared-file",
+      "assetId": "demo-shared",
+      "bucket": "demo-bucket",
+      "objectKey": "courses/demo-course/lessons/demo-lesson/images/shared.png",
+      "urlKey": "courses/demo-course/lessons/demo-lesson/images/shared.png",
+      "status": "READY",
+      "role": "ORIGINAL",
+      "byteSize": "100",
+      "verified": true
+    },
+    {
+      "id": "demo-stored-file",
+      "assetId": "demo-stored",
+      "bucket": "demo-bucket",
+      "objectKey": "media/personal/demo-coach/stored/original.mp3",
+      "urlKey": "media/personal/demo-coach/stored/original.mp3",
+      "status": "READY",
+      "role": "ORIGINAL",
+      "byteSize": "200",
+      "verified": true
+    }
+  ],
+  "usages": [],
+  "contexts": {
+    "lessons": [
+      {
+        "id": "demo-lesson",
+        "courseId": "demo-course",
+        "editorId": "demo-coach"
+      }
+    ],
+    "sessions": []
+  },
+  "coverage": {
+    "scanned": [],
+    "excludedTables": [],
+    "unknownColumns": []
+  },
+  "issues": []
+}

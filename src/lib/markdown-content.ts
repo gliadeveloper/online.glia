@@ -36,7 +36,7 @@ function autolinkRelativePaths(text: string): string {
 
 /** `[](url)` → `[url](url)` — md-editor link toolbar creates empty labels for URLs. */
 export function fixEmptyMarkdownLinks(text: string): string {
-  return text.replace(/\[\]\(([^)\s]+)\)/g, (_, url: string) => `[${url}](${url})`);
+  return text.replace(/(?<!!)\[\]\(([^)\s]+)\)/g, (_, url: string) => `[${url}](${url})`);
 }
 
 /** GFM bold/italic break when `** text**` — normalize legacy lossy exports. */
@@ -48,7 +48,7 @@ function fixBrokenEmphasisMarkdown(text: string): string {
 
 /** `[url](url)` → plain `url` — GFM autolink + preview behave more reliably than redundant links. */
 function collapseRedundantMarkdownLinks(text: string): string {
-  return text.replace(/\[([^\]]+)\]\(\1\)/g, "$1");
+  return text.replace(/(?<!!)\[([^\]]+)\]\(\1\)/g, "$1");
 }
 
 /** Same-origin app URLs → relative paths (env-agnostic drafts). */

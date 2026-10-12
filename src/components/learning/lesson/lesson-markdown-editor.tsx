@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import type { BlockNoteEditorFieldHandle } from "@/components/learning/lesson/blocknote-editor-field";
+import { uploadLessonImage } from "@/lib/media/lesson-image-upload-client";
+import { mediaBodyVersion } from "@/lib/media/body-version";
 import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 import { getLessonMarkdownContent } from "@/lib/lesson-markdown-content";
-import { uploadLessonImage } from "@/lib/media/lesson-image-upload-client";
 
 import "./lesson-block-editor.css";
 
@@ -30,6 +31,7 @@ type ContentRow = {
   id: string;
   type: string;
   body: string | null;
+  url?: string | null;
   title?: string | null;
   metadata?: unknown;
 };
@@ -49,31 +51,31 @@ export function LessonMarkdownEditor({
 }: LessonMarkdownEditorProps) {
   const router = useRouter();
   const existing = getLessonMarkdownContent(contents);
+  const savedContent = useRef(existing);
   const editorRef = useRef<BlockNoteEditorFieldHandle>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [editorReady, setEditorReady] = useState(false);
 
-  const uploadFile = useCallback(
-    async (file: File) => uploadLessonImage({ file, courseId, lessonId, apiRole }),
-    [apiRole, courseId, lessonId],
-  );
+  const uploadFile = useCallback((file: File) => uploadLessonImage({ file, courseId, lessonId, apiRole }), [apiRole, courseId, lessonId]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!editorRef.current) return;
+    if (!editorRef.current || !editorReady || busy || uploadBusy) return;
 
     setBusy(true);
     setError(null);
 
     const base = apiRole === "admin" ? "/api/admin" : "/api/coach";
-    const url = existing
-      ? `${base}/contents/${existing.id}`
+    const url = savedContent.current
+      ? `${base}/contents/${savedContent.current.id}`
       : `${base}/lessons/${lessonId}/contents`;
-    const method = existing ? "PATCH" : "POST";
+    const method = savedContent.current ? "PATCH" : "POST";
 
     try {
       const { body, blocks } = await editorRef.current.exportForSave();
-      const metadata = buildContentMetadataWithBlockNote(existing?.metadata, blocks);
+      const metadata = buildContentMetadataWithBlockNote(savedContent.current?.metadata, blocks, 2);
 
       const response = await fetch(url, {
         method,
@@ -83,18 +85,20 @@ export function LessonMarkdownEditor({
           title: "본문",
           body,
           metadata,
+          expectedBodyVersion: savedContent.current ? await mediaBodyVersion(savedContent.current) : undefined,
         }),
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as ContentRow & { error?: string };
       if (!response.ok) {
         setError(data.error ?? "저장에 실패했습니다.");
         return;
       }
 
+      savedContent.current = data;
       router.refresh();
-    } catch {
-      setError("네트워크 오류");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "네트워크 오류");
     } finally {
       setBusy(false);
     }
@@ -107,7 +111,7 @@ export function LessonMarkdownEditor({
           <h2 className="font-semibold text-zinc-900">블록 에디터</h2>
           <p className="mt-1 text-sm text-zinc-500">
             Notion처럼 블록 단위로 작성합니다. `/` 로 제목·목록·영상 등을 추가할 수 있습니다.
-            이미지는 10MB, 영상(mp4·webm·mov)은 200MB까지입니다. 10분 안팎은 H.264 mp4로 보내는 것이 안전합니다.
+            이미지·영상·오디오 블록을 본문에 추가할 수 있습니다.
           </p>
         </div>
 
@@ -119,10 +123,13 @@ export function LessonMarkdownEditor({
 
         <BlockNoteEditorField
           ref={editorRef}
-          key={existing?.id ?? `new-${lessonId}`}
+          key={`lesson-${lessonId}`}
           body={existing?.body ?? null}
           metadata={existing?.metadata ?? null}
+          mediaLibraryRole={apiRole}
           uploadFile={uploadFile}
+          onUploadBusyChange={setUploadBusy}
+          onReadyChange={setEditorReady}
           disabled={busy}
         />
 
@@ -133,7 +140,7 @@ export function LessonMarkdownEditor({
 
       <button
         type="submit"
-        disabled={busy}
+        disabled={busy || uploadBusy || !editorReady}
         className="w-fit rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
       >
         {busy ? "저장 중…" : "저장"}
