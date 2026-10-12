@@ -61,6 +61,8 @@ export function tossFailureMessage(code: string | undefined) {
       return "결제에 실패했습니다.";
     case "REJECT_CARD_COMPANY":
       return "카드 정보를 확인해 주세요.";
+    case "REJECT_CARD_PAYMENT":
+      return "카드 한도가 넘었거나 잔액이 부족해 결제되지 않았습니다.";
     case "NOT_FOUND_PAYMENT_SESSION":
       return "결제 시간이 지나 승인이 만료되었습니다. 다시 결제해 주세요.";
     case "AMOUNT_MISMATCH":
