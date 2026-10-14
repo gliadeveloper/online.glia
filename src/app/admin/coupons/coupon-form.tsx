@@ -21,6 +21,8 @@ export type CouponFormValues = {
   issueLimit: string;
   productIds: string[];
   isActive: boolean;
+  isPublic: boolean;
+  code: string;
 };
 
 type CouponFormProps = {
@@ -62,6 +64,8 @@ export function CouponForm({
       issueLimit: "",
       productIds: [],
       isActive: true,
+      isPublic: true,
+      code: "",
     },
   );
   const [error, setError] = useState<string | null>(null);
@@ -286,6 +290,38 @@ export function CouponForm({
           ))}
         </div>
       </fieldset>
+
+      <label className="block space-y-2 text-sm">
+        <span className="font-medium">받는 방법</span>
+        <select
+          value={values.isPublic ? "public" : "code"}
+          onChange={(event) => patch({ isPublic: event.target.value === "public" })}
+          className={fieldClass}
+        >
+          <option value="public">상품 상세에 공개</option>
+          <option value="code">쿠폰 번호로만 받기</option>
+        </select>
+        <span className="text-xs text-zinc-500">
+          {values.isPublic
+            ? "상품 상세에 나옵니다. 번호를 적으면 결제 화면에서도 그 번호로 받을 수 있습니다."
+            : "상품 상세에는 나오지 않습니다. 결제 화면에서 번호로만 받습니다."}
+        </span>
+      </label>
+
+      <label className="block space-y-2 text-sm">
+        <span className="font-medium">쿠폰 번호</span>
+        <input
+          value={values.code}
+          placeholder={values.isPublic ? "선택, 영문과 숫자 4~20자" : "영문과 숫자 4~20자"}
+          autoCapitalize="characters"
+          spellCheck={false}
+          onChange={(event) => patch({ code: event.target.value.toUpperCase() })}
+          className={fieldClass}
+        />
+        <span className="text-xs text-zinc-500">
+          회원가입 전 고객에게 이 번호를 알려 주면, 로그인 후 결제 화면에서 입력해 할인 쿠폰을 받습니다.
+        </span>
+      </label>
 
       <label className="block space-y-2 text-sm">
         <span className="font-medium">발급 수량</span>

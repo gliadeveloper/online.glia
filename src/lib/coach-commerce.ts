@@ -15,6 +15,8 @@ type ProductItemInput = {
   courseId?: string;
   coachingOfferingId?: string;
   sortOrder?: number;
+  accessDuration?: "LIFETIME" | "FIXED_DAYS";
+  accessDays?: number | null;
 };
 
 export { productInclude, productKindLabels, getProductDisplayPrice } from "@/lib/products";

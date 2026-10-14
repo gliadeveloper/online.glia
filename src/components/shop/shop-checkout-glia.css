@@ -112,6 +112,62 @@
   padding-top: 1.25rem;
 }
 
+.glia-checkout__coupon-code {
+  display: flex;
+  align-items: end;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.glia-checkout__coupon-code label {
+  display: grid;
+  flex: 1;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--glia-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.glia-checkout__coupon-code input {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: #fff;
+  color: var(--glia-text);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.glia-checkout__coupon-code button {
+  height: 2.75rem;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-blue);
+  color: #fff;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.glia-checkout__coupon-code button:disabled {
+  opacity: 0.5;
+}
+
+.glia-checkout__coupon-note {
+  margin: 0 0 0.75rem;
+  color: var(--glia-blue);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .glia-checkout__coupon-empty {
   margin: 0;
   color: var(--glia-text-secondary);

@@ -36,6 +36,8 @@ export async function POST(request: Request) {
         courseId?: string;
         coachingOfferingId?: string;
         sortOrder?: number;
+        accessDuration?: "LIFETIME" | "FIXED_DAYS";
+        accessDays?: number | null;
       }>;
     };
 

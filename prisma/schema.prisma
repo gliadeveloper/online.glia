@@ -1298,6 +1298,10 @@ model ShopCoupon {
   issueLimit        Int?
   issuedCount       Int                    @default(0)
   isActive          Boolean                @default(true)
+  /// False coupons stay off the product page and are claimed by code at checkout.
+  isPublic          Boolean                @default(true)
+  /// Shared code. Null when the coupon is only downloaded from the product page.
+  code              String?                @unique
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
 

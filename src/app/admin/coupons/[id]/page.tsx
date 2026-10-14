@@ -39,6 +39,8 @@ export default async function EditCouponPage({ params }: Props) {
     issueLimit: coupon.issueLimit?.toString() ?? "",
     productIds: coupon.products.map((item) => item.productId),
     isActive: coupon.isActive,
+    isPublic: coupon.isPublic,
+    code: coupon.code ?? "",
   };
 
   return (

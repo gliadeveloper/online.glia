@@ -33,6 +33,70 @@ type Option = { id: string; label: string };
 
 const thumbnailAccept = "image/jpeg,image/png,image/webp,image/gif,image/avif";
 
+type CourseAccessDuration = "LIFETIME" | "FIXED_DAYS";
+
+function CourseAccessFields({
+  duration,
+  days,
+  onDuration,
+  onDays,
+}: {
+  duration: CourseAccessDuration;
+  days: string;
+  onDuration: (value: CourseAccessDuration) => void;
+  onDays: (value: string) => void;
+}) {
+  return (
+    <fieldset className="space-y-3 text-sm">
+      <legend className="font-medium">수강 기간</legend>
+      <div className="flex flex-wrap gap-4">
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="course-access"
+            checked={duration === "LIFETIME"}
+            onChange={() => onDuration("LIFETIME")}
+          />
+          평생 수강
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="course-access"
+            checked={duration === "FIXED_DAYS"}
+            onChange={() => onDuration("FIXED_DAYS")}
+          />
+          기간 지정
+        </label>
+      </div>
+      {duration === "FIXED_DAYS" ? (
+        <label className="block space-y-2">
+          <span className="text-zinc-600">구매일부터 수강 일수</span>
+          <input
+            type="number"
+            min={1}
+            max={3650}
+            required
+            value={days}
+            onChange={(event) => onDays(event.target.value)}
+            className="w-full rounded-xl border border-zinc-200 px-4 py-3"
+          />
+        </label>
+      ) : (
+        <p className="text-xs text-zinc-500">구매한 강의는 기간 제한 없이 수강합니다.</p>
+      )}
+      <p className="text-xs text-zinc-500">이미 결제한 수강은 결제 당시 기간 그대로입니다. 여기서 바꾼 기간은 이후 구매부터 적용됩니다.</p>
+    </fieldset>
+  );
+}
+
+function courseAccessPayload(duration: CourseAccessDuration, days: string) {
+  return {
+    accessDuration: duration,
+    accessDays: duration === "FIXED_DAYS" ? Number(days) : null,
+  };
+}
+
 function ProductThumbnailField({
   currentUrl,
   file,
@@ -171,6 +235,8 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
   const [salePrice, setSalePrice] = useState("");
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
   const [offeringId, setOfferingId] = useState(offerings[0]?.id ?? "");
+  const [accessDuration, setAccessDuration] = useState<CourseAccessDuration>("LIFETIME");
+  const [accessDays, setAccessDays] = useState("90");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -180,13 +246,14 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
     setError(null);
     setSubmitting(true);
 
+    const courseAccess = courseAccessPayload(accessDuration, accessDays);
     const items =
       kind === "COURSE_ONLY"
-        ? [{ kind: "COURSE_ACCESS" as const, courseId }]
+        ? [{ kind: "COURSE_ACCESS" as const, courseId, ...courseAccess }]
         : kind === "COACHING_ONLY"
           ? [{ kind: "COACHING_ACCESS" as const, coachingOfferingId: offeringId }]
           : [
-              { kind: "COURSE_ACCESS" as const, courseId, sortOrder: 1 },
+              { kind: "COURSE_ACCESS" as const, courseId, sortOrder: 1, ...courseAccess },
               { kind: "COACHING_ACCESS" as const, coachingOfferingId: offeringId, sortOrder: 2 },
             ];
 
@@ -297,14 +364,22 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
       </div>
 
       {(kind === "COURSE_ONLY" || kind === "BUNDLE") && (
-        <label className="block space-y-2 text-sm">
-          <span className="font-medium">연결 코스</span>
-          <select value={courseId} onChange={(e) => setCourseId(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3">
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>{course.label}</option>
-            ))}
-          </select>
-        </label>
+        <>
+          <label className="block space-y-2 text-sm">
+            <span className="font-medium">연결 코스</span>
+            <select value={courseId} onChange={(e) => setCourseId(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3">
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>{course.label}</option>
+              ))}
+            </select>
+          </label>
+          <CourseAccessFields
+            duration={accessDuration}
+            days={accessDays}
+            onDuration={setAccessDuration}
+            onDays={setAccessDays}
+          />
+        </>
       )}
 
       {(kind === "COACHING_ONLY" || kind === "BUNDLE") && (
@@ -341,6 +416,8 @@ type CoachProductEditPanelProps = {
     kind: string;
     courseId: string | null;
     coachingOfferingId: string | null;
+    accessDuration: CourseAccessDuration;
+    accessDays: number | null;
   }>;
   courses: Option[];
   offerings: Option[];
@@ -369,6 +446,13 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
       props.offerings[0]?.id ??
       "",
   );
+  const originalCourse = props.items.find((item) => item.kind === "COURSE_ACCESS");
+  const [accessDuration, setAccessDuration] = useState<CourseAccessDuration>(
+    originalCourse?.accessDuration === "FIXED_DAYS" ? "FIXED_DAYS" : "LIFETIME",
+  );
+  const [accessDays, setAccessDays] = useState(
+    originalCourse?.accessDays != null ? String(originalCourse.accessDays) : "90",
+  );
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -377,13 +461,14 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
     setBusy(true);
     setError(null);
 
+    const courseAccess = courseAccessPayload(accessDuration, accessDays);
     const nextItems =
       props.kind === "COURSE_ONLY"
-        ? [{ kind: "COURSE_ACCESS" as const, courseId }]
+        ? [{ kind: "COURSE_ACCESS" as const, courseId, ...courseAccess }]
         : props.kind === "COACHING_ONLY"
           ? [{ kind: "COACHING_ACCESS" as const, coachingOfferingId: offeringId }]
           : [
-              { kind: "COURSE_ACCESS" as const, courseId, sortOrder: 1 },
+              { kind: "COURSE_ACCESS" as const, courseId, sortOrder: 1, ...courseAccess },
               { kind: "COACHING_ACCESS" as const, coachingOfferingId: offeringId, sortOrder: 2 },
             ];
 
@@ -408,11 +493,16 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
         thumbnailUrl = null;
       }
 
-      const originalCourseId =
-        props.items.find((item) => item.kind === "COURSE_ACCESS")?.courseId ?? "";
+      const originalCourseId = originalCourse?.courseId ?? "";
       const originalOfferingId =
         props.items.find((item) => item.kind === "COACHING_ACCESS")?.coachingOfferingId ?? "";
+      const savedDuration = originalCourse?.accessDuration === "FIXED_DAYS" ? "FIXED_DAYS" : "LIFETIME";
+      const accessChanged =
+        props.kind !== "COACHING_ONLY" &&
+        (accessDuration !== savedDuration ||
+          (accessDuration === "FIXED_DAYS" && Number(accessDays) !== originalCourse?.accessDays));
       const itemsChanged =
+        accessChanged ||
         (props.kind !== "COACHING_ONLY" && courseId !== originalCourseId) ||
         (props.kind !== "COURSE_ONLY" && offeringId !== originalOfferingId);
 
@@ -525,14 +615,22 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
         </label>
 
         {(props.kind === "COURSE_ONLY" || props.kind === "BUNDLE") && (
-          <label className="block space-y-2 text-sm">
-            <span className="font-medium">연결 코스</span>
-            <select value={courseId} onChange={(e) => setCourseId(e.target.value)} className="w-full rounded-xl border border-zinc-200 px-4 py-3">
-              {props.courses.map((course) => (
-                <option key={course.id} value={course.id}>{course.label}</option>
-              ))}
-            </select>
-          </label>
+          <>
+            <label className="block space-y-2 text-sm">
+              <span className="font-medium">연결 코스</span>
+              <select value={courseId} onChange={(e) => setCourseId(e.target.value)} className="w-full rounded-xl border border-zinc-200 px-4 py-3">
+                {props.courses.map((course) => (
+                  <option key={course.id} value={course.id}>{course.label}</option>
+                ))}
+              </select>
+            </label>
+            <CourseAccessFields
+              duration={accessDuration}
+              days={accessDays}
+              onDuration={setAccessDuration}
+              onDays={setAccessDays}
+            />
+          </>
         )}
 
         {(props.kind === "COACHING_ONLY" || props.kind === "BUNDLE") && (

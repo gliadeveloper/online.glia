@@ -14,6 +14,8 @@ export async function PATCH(request: Request, context: RouteContext) {
         courseId?: string;
         coachingOfferingId?: string;
         sortOrder?: number;
+        accessDuration?: "LIFETIME" | "FIXED_DAYS";
+        accessDays?: number | null;
       }>;
     };
 

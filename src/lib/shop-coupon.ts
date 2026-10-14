@@ -9,6 +9,7 @@ import {
   couponDiscountWon,
   formatCouponBenefit,
   formatCouponCondition,
+  normalizeCouponCode,
   type CouponDiscountRule,
 } from "@/lib/shop-coupon-math";
 import { formatKstDate } from "@/lib/shop-coupon-time";
@@ -119,6 +120,7 @@ export async function getShopCouponOffer(
     const inWindow = coupon.isActive && coupon.issueStartsAt <= now && coupon.issueEndsAt > now;
     const exhausted = coupon.issueLimit != null && coupon.issuedCount >= coupon.issueLimit;
     if (!owned && (!inWindow || exhausted)) continue;
+    if (!coupon.isPublic && !owned) continue;
 
     const quoteSource = owned ? issue : coupon;
     const discountWon = couponDiscountWon(ruleOf(quoteSource), price);
@@ -131,7 +133,7 @@ export async function getShopCouponOffer(
       discountWon,
       downloadState: owned ? "owned" : userId ? "ready" : "login",
     };
-    cards.push(card);
+    if (coupon.isPublic) cards.push(card);
 
     if (
       userId &&
@@ -161,11 +163,15 @@ async function issueOne(
   productId: string,
   couponId: string,
   now: Date,
+  access: "download" | "code",
 ) {
   const coupon = await tx.shopCoupon.findFirst({
     where: { id: couponId, isActive: true, products: { some: { productId } } },
   });
   if (!coupon) throw new ApiError("받을 수 있는 쿠폰이 없습니다.", 404, "COUPON_NOT_FOUND");
+  if (access === "download" && !coupon.isPublic) {
+    throw new ApiError("상품 상세에서 받을 수 없는 쿠폰입니다.", 400, "COUPON_PRIVATE");
+  }
   if (coupon.issueStartsAt > now || coupon.issueEndsAt <= now) {
     throw new ApiError("쿠폰 발급 기간이 아닙니다.", 400, "COUPON_ISSUE_CLOSED");
   }
@@ -213,13 +219,71 @@ export async function downloadShopCoupons(userId: string, productId: string, cou
   let message: string | null = null;
   for (const couponId of uniqueIds) {
     try {
-      await prisma.$transaction((tx) => issueOne(tx, userId, productId, couponId, now));
+      await prisma.$transaction((tx) => issueOne(tx, userId, productId, couponId, now, "download"));
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") continue;
       if (error instanceof ApiError && message == null) message = error.message;
     }
   }
   return message;
+}
+
+export async function redeemShopCouponCode(userId: string, productId: string, rawCode: string, price: number) {
+  const code = normalizeCouponCode(rawCode);
+  if (!/^[A-Z0-9]{4,20}$/.test(code)) {
+    throw new ApiError("쿠폰 번호를 확인해 주세요.", 400, "COUPON_CODE_INVALID");
+  }
+
+  const coupon = await prisma.shopCoupon.findUnique({
+    where: { code },
+    include: { products: { select: { productId: true } } },
+  });
+  if (!coupon || !coupon.isActive) {
+    throw new ApiError("쿠폰 번호를 확인해 주세요.", 400, "COUPON_CODE_INVALID");
+  }
+  if (!coupon.products.some((item) => item.productId === productId)) {
+    throw new ApiError("이 상품에는 쓸 수 없는 쿠폰 번호입니다.", 400, "COUPON_PRODUCT_MISMATCH");
+  }
+
+  const now = new Date();
+  const existing = await prisma.shopCouponIssue.findUnique({
+    where: { couponId_userId: { couponId: coupon.id, userId } },
+  });
+  if (existing?.status === "USED" || (existing != null && existing.expiresAt <= now)) {
+    throw new ApiError("이미 사용했거나 기간이 지난 쿠폰입니다.", 400, "COUPON_UNUSABLE");
+  }
+  if (!existing) {
+    try {
+      await prisma.$transaction((tx) => issueOne(tx, userId, productId, coupon.id, now, "code"));
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")) throw error;
+    }
+  }
+
+  const issue =
+    existing ??
+    (await prisma.shopCouponIssue.findUnique({
+      where: { couponId_userId: { couponId: coupon.id, userId } },
+    }));
+  if (!issue || issue.status === "USED" || issue.expiresAt <= now) {
+    throw new ApiError("쿠폰을 받지 못했습니다.", 400, "COUPON_ISSUE_FAILED");
+  }
+  if (issue.validStartsAt > now) {
+    throw new ApiError("아직 사용할 수 없는 쿠폰입니다.", 400, "COUPON_NOT_YET");
+  }
+
+  const discountWon = couponDiscountWon(ruleOf(issue), price);
+  if (discountWon < 1) throw new ApiError("이 금액에는 쿠폰을 쓸 수 없습니다.", 400, "COUPON_MIN_AMOUNT");
+
+  const option: CheckoutCouponOption = {
+    issueId: issue.id,
+    name: coupon.name,
+    benefitLabel: formatCouponBenefit(ruleOf(issue)),
+    conditionLabel: formatCouponCondition(issue.minOrderAmount),
+    periodLabel: periodLabel(coupon, issue),
+    discountWon,
+  };
+  return { alreadyOwned: existing != null, option };
 }
 
 type CouponLock =

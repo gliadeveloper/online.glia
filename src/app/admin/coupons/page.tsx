@@ -29,7 +29,7 @@ export default async function AdminCouponsPage() {
         <div>
           <p className="text-sm font-medium text-violet-600">Commerce</p>
           <h1 className="text-3xl font-semibold tracking-tight">쿠폰</h1>
-          <p className="mt-1 text-zinc-600">상품 상세에서 다운로드하고, 결제 때 적용합니다.</p>
+          <p className="mt-1 text-zinc-600">상품 상세에서 받거나, 결제 화면에서 쿠폰 번호로 받습니다.</p>
         </div>
         <Link href="/admin/coupons/new" className="rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white">
           새 쿠폰
@@ -64,7 +64,12 @@ export default async function AdminCouponsPage() {
                     <Link href={`/admin/coupons/${coupon.id}`} className="font-medium text-zinc-900 hover:text-violet-700">
                       {coupon.name}
                     </Link>
-                    <p className="text-xs text-zinc-500">{formatCouponCondition(coupon.minOrderAmount)}</p>
+                    <p className="text-xs text-zinc-500">
+                      {coupon.isPublic ? "상품 상세 공개" : "번호로만 받기"}
+                      {coupon.code ? ` · ${coupon.code}` : ""}
+                      {" · "}
+                      {formatCouponCondition(coupon.minOrderAmount)}
+                    </p>
                   </td>
                   <td className="px-5 py-4">{formatCouponBenefit(coupon)}</td>
                   <td className="px-5 py-4 text-zinc-600">

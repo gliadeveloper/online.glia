@@ -1,10 +1,11 @@
 import "server-only";
 
-import type { Prisma, ShopCouponDiscountType, ShopCouponValidityKind } from "@/generated/prisma/client";
+import { Prisma, type ShopCouponDiscountType, type ShopCouponValidityKind } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
+import { normalizeCouponCode } from "@/lib/shop-coupon-math";
 import { parseKstDateTimeLocal } from "@/lib/shop-coupon-time";
 
 export type ShopCouponWriteInput = {
@@ -23,6 +24,8 @@ export type ShopCouponWriteInput = {
   issueLimit: number | null;
   productIds: string[];
   isActive: boolean;
+  isPublic: boolean;
+  code: string | null;
 };
 
 function readInt(value: unknown) {
@@ -98,6 +101,9 @@ export function parseShopCouponWrite(body: Record<string, unknown>): ShopCouponW
     throw new ApiError("쿠폰을 쓸 상품을 선택해 주세요.", 400, "COUPON_PRODUCTS_REQUIRED");
   }
 
+  const isPublic = body.isPublic !== false;
+  const code = readCouponCode(body.code, isPublic);
+
   return {
     name,
     discountType,
@@ -114,7 +120,28 @@ export function parseShopCouponWrite(body: Record<string, unknown>): ShopCouponW
     issueLimit,
     productIds,
     isActive: body.isActive !== false,
+    isPublic,
+    code,
   };
+}
+
+function readCouponCode(value: unknown, isPublic: boolean) {
+  const code = normalizeCouponCode(typeof value === "string" ? value : "");
+  if (!code) {
+    if (!isPublic) throw new ApiError("비공개 쿠폰은 쿠폰 번호가 필요합니다.", 400, "COUPON_CODE_REQUIRED");
+    return null;
+  }
+  if (!/^[A-Z0-9]{4,20}$/.test(code)) {
+    throw new ApiError("쿠폰 번호는 영문과 숫자 4~20자로 적어 주세요.", 400, "COUPON_CODE_INVALID");
+  }
+  return code;
+}
+
+function rethrowCouponWrite(error: unknown): never {
+  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    throw new ApiError("이미 쓰는 쿠폰 번호입니다.", 409, "COUPON_CODE_TAKEN");
+  }
+  throw error;
 }
 
 async function assertProducts(productIds: string[]) {
@@ -143,13 +170,15 @@ function couponData(input: ShopCouponWriteInput): Prisma.ShopCouponCreateInput {
     validDays: input.validDays,
     issueLimit: input.issueLimit,
     isActive: input.isActive,
+    isPublic: input.isPublic,
+    code: input.code,
     products: { create: input.productIds.map((productId) => ({ productId })) },
   };
 }
 
 export async function createShopCoupon(actorId: string, input: ShopCouponWriteInput) {
   await assertProducts(input.productIds);
-  const coupon = await prisma.shopCoupon.create({ data: couponData(input) });
+  const coupon = await prisma.shopCoupon.create({ data: couponData(input) }).catch(rethrowCouponWrite);
   await writeAuditLog({
     actorId,
     entityType: "ShopCoupon",
@@ -187,10 +216,12 @@ export async function updateShopCoupon(actorId: string, couponId: string, input:
         validDays: input.validDays,
         issueLimit: input.issueLimit,
         isActive: input.isActive,
+        isPublic: input.isPublic,
+        code: input.code,
         products: { create: input.productIds.map((productId) => ({ productId })) },
       },
     });
-  });
+  }).catch(rethrowCouponWrite);
 
   await writeAuditLog({
     actorId,

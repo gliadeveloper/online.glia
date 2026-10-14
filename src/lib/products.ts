@@ -40,7 +40,51 @@ type ProductItemInput = {
   courseId?: string;
   coachingOfferingId?: string;
   sortOrder?: number;
+  accessDuration?: "LIFETIME" | "FIXED_DAYS";
+  accessDays?: number | null;
 };
+
+function courseAccessFields(
+  item: ProductItemInput,
+  previous?: { accessDuration: "LIFETIME" | "FIXED_DAYS"; accessDays: number | null },
+) {
+  if (item.kind !== "COURSE_ACCESS") {
+    return { accessDuration: "LIFETIME" as const, accessDays: null };
+  }
+
+  const accessDuration = item.accessDuration ?? previous?.accessDuration ?? "LIFETIME";
+  if (accessDuration === "FIXED_DAYS") {
+    const accessDays = item.accessDays ?? previous?.accessDays ?? null;
+    if (accessDays == null || !Number.isSafeInteger(accessDays) || accessDays < 1 || accessDays > 3650) {
+      throw new ApiError("수강 일수는 1–3650일로 입력해 주세요.", 400, "ACCESS_DAYS_INVALID");
+    }
+    return { accessDuration: "FIXED_DAYS" as const, accessDays };
+  }
+
+  return { accessDuration: "LIFETIME" as const, accessDays: null };
+}
+
+function productItemLinkKey(item: {
+  kind: ProductItemKind;
+  courseId?: string | null;
+  coachingOfferingId?: string | null;
+}) {
+  return `${item.kind}:${item.courseId ?? ""}:${item.coachingOfferingId ?? ""}`;
+}
+
+function sameProductItemLinks(
+  existing: Array<{ id: string; kind: ProductItemKind; courseId: string | null; coachingOfferingId: string | null }>,
+  next: ProductItemInput[],
+) {
+  if (existing.length !== next.length) return false;
+  const used = new Set<string>();
+  return next.every((item) => {
+    const match = existing.find((row) => !used.has(row.id) && productItemLinkKey(row) === productItemLinkKey(item));
+    if (!match) return false;
+    used.add(match.id);
+    return true;
+  });
+}
 
 export async function createProduct(params: {
   actorId: string;
@@ -77,6 +121,7 @@ export async function createProduct(params: {
           courseId: item.courseId,
           coachingOfferingId: item.coachingOfferingId,
           sortOrder: item.sortOrder ?? index + 1,
+          ...courseAccessFields(item),
         })),
       },
     },
@@ -161,23 +206,55 @@ export async function updateProductItems(params: {
 
   validateProductItems(existing.kind, params.items);
 
-  const product = await prisma.$transaction(async (tx) => {
-    await tx.productItem.deleteMany({ where: { productId: params.productId } });
-    await tx.productItem.createMany({
-      data: params.items.map((item, index) => ({
-        productId: params.productId,
-        kind: item.kind,
-        courseId: item.courseId,
-        coachingOfferingId: item.coachingOfferingId,
-        sortOrder: item.sortOrder ?? index + 1,
-      })),
-    });
+  const product = await prisma
+    .$transaction(async (tx) => {
+      const sameLinks = sameProductItemLinks(existing.items, params.items);
+      if (sameLinks) {
+        const used = new Set<string>();
+        for (const [index, item] of params.items.entries()) {
+          const current = existing.items.find(
+            (row) => !used.has(row.id) && productItemLinkKey(row) === productItemLinkKey(item),
+          );
+          if (!current) continue;
+          used.add(current.id);
+          const access = courseAccessFields(item, current);
+          await tx.productItem.update({
+            where: { id: current.id },
+            data: {
+              sortOrder: item.sortOrder ?? index + 1,
+              accessDuration: access.accessDuration,
+              accessDays: access.accessDays,
+            },
+          });
+        }
+      } else {
+        await tx.productItem.deleteMany({ where: { productId: params.productId } });
+        await tx.productItem.createMany({
+          data: params.items.map((item, index) => {
+            const previous = existing.items.find((row) => productItemLinkKey(row) === productItemLinkKey(item));
+            return {
+              productId: params.productId,
+              kind: item.kind,
+              courseId: item.courseId,
+              coachingOfferingId: item.coachingOfferingId,
+              sortOrder: item.sortOrder ?? index + 1,
+              ...courseAccessFields(item, previous),
+            };
+          }),
+        });
+      }
 
-    return tx.product.findUniqueOrThrow({
-      where: { id: params.productId },
-      include: productInclude,
+      return tx.product.findUniqueOrThrow({
+        where: { id: params.productId },
+        include: productInclude,
+      });
+    })
+    .catch((error: unknown) => {
+      if (error instanceof PrismaRuntime.PrismaClientKnownRequestError && error.code === "P2003") {
+        throw new ApiError("이미 구매한 상품의 연결 강의는 바꿀 수 없습니다.", 409, "PRODUCT_ITEMS_IN_USE");
+      }
+      throw error;
     });
-  });
 
   await writeAuditLog({
     actorId: params.actorId,

@@ -2,6 +2,11 @@ import { formatKrw } from "@/lib/customer-labels";
 
 export const MIN_PAYABLE_KRW = 100;
 
+/** Letters and digits only, uppercased. Spaces and hyphens are ignored. */
+export function normalizeCouponCode(value: string) {
+  return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
 export type CouponDiscountRule = {
   discountType: "FIXED" | "PERCENT";
   discountAmount: number | null;

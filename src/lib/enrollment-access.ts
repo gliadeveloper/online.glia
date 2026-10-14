@@ -39,6 +39,7 @@ type CourseDefaultSource = {
   defaultAccessDays: number | null;
 };
 
+/** Product line wins. Course defaults apply only to grants that have no product item. */
 export function resolveCourseAccessPolicyFromProductItem(
   item: ProductItemAccessSource,
 ): CourseAccessPolicy {
@@ -47,10 +48,6 @@ export function resolveCourseAccessPolicyFromProductItem(
       throw new Error("PRODUCT_ITEM_ACCESS_DAYS_REQUIRED");
     }
     return { accessDuration: "FIXED_DAYS", accessDays: item.accessDays };
-  }
-
-  if (item.course) {
-    return resolveCourseAccessPolicyFromCourse(item.course);
   }
 
   return { accessDuration: "LIFETIME", accessDays: null };

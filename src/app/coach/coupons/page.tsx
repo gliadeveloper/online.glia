@@ -24,7 +24,7 @@ export default async function CoachCouponsPage() {
         <div>
           <p className="text-sm font-medium text-emerald-600">Commerce</p>
           <h1 className="text-3xl font-semibold tracking-tight">쿠폰</h1>
-          <p className="mt-1 text-zinc-600">본인 상품에만 연결된 쿠폰을 관리합니다.</p>
+          <p className="mt-1 text-zinc-600">본인 상품 쿠폰을 상세에 공개하거나, 번호로만 받게 할 수 있습니다.</p>
         </div>
         <Link
           href="/coach/coupons/new"
@@ -62,7 +62,12 @@ export default async function CoachCouponsPage() {
                     <Link href={`/coach/coupons/${coupon.id}`} className="font-medium text-zinc-900 hover:text-emerald-700">
                       {coupon.name}
                     </Link>
-                    <p className="text-xs text-zinc-500">{formatCouponCondition(coupon.minOrderAmount)}</p>
+                    <p className="text-xs text-zinc-500">
+                      {coupon.isPublic ? "상품 상세 공개" : "번호로만 받기"}
+                      {coupon.code ? ` · ${coupon.code}` : ""}
+                      {" · "}
+                      {formatCouponCondition(coupon.minOrderAmount)}
+                    </p>
                   </td>
                   <td className="px-5 py-4">{formatCouponBenefit(coupon)}</td>
                   <td className="px-5 py-4 text-zinc-600">
