@@ -106,7 +106,9 @@ function guestCheckin(): HomeCheckin {
 function mapProductCard(product: CatalogProduct): HomeProductCard {
   const displayPrice = getProductDisplayPrice(product);
   const thumbnailUrl =
-    product.items.find((item) => item.course?.thumbnailUrl)?.course?.thumbnailUrl ?? null;
+    product.thumbnailUrl?.trim() ||
+    product.items.find((item) => item.course?.thumbnailUrl)?.course?.thumbnailUrl ||
+    null;
 
   return {
     id: product.id,

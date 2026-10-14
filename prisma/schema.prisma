@@ -1202,6 +1202,8 @@ model Product {
   descriptionMetadata Json?
   /// PDP 준비물. Empty hides the section.
   supplies       String[]    @default([])
+  /// Shop cover. Public catalog image under products/, not a media-library asset.
+  thumbnailUrl   String?
   kind           ProductKind
   listPrice      Int
   salePrice      Int?

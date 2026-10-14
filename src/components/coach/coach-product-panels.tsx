@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ProductDescriptionEditor,
@@ -10,6 +10,7 @@ import {
 } from "@/components/shop/product-description-editor";
 import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
 import { getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
+import { uploadProductDescriptionImage } from "@/lib/media/product-image-upload-client";
 import { parseProductSupplies, suppliesToText } from "@/lib/product-supplies";
 import type { ProductKind } from "@/generated/prisma/client";
 
@@ -17,6 +18,7 @@ type ProductRow = {
   id: string;
   title: string;
   kind: ProductKind;
+  thumbnailUrl: string | null;
   listPrice: number;
   salePrice: number | null;
   isActive: boolean;
@@ -28,6 +30,66 @@ type ProductRow = {
 };
 
 type Option = { id: string; label: string };
+
+const thumbnailAccept = "image/jpeg,image/png,image/webp,image/gif,image/avif";
+
+function ProductThumbnailField({
+  currentUrl,
+  file,
+  onFile,
+  onClear,
+  disabled,
+}: {
+  currentUrl: string | null;
+  file: File | null;
+  onFile: (file: File | null) => void;
+  onClear: () => void;
+  disabled?: boolean;
+}) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const shown = previewUrl ?? currentUrl;
+
+  return (
+    <div className="space-y-2 text-sm">
+      <span className="font-medium">썸네일</span>
+      <p className="text-xs text-zinc-500">샵 목록과 상품 상세 맨 위에 보이는 이미지입니다. jpeg, png, webp, gif, avif. 10MB 이하.</p>
+      {shown ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={shown} alt="" className="h-28 w-40 rounded-xl object-cover" />
+      ) : (
+        <div className="flex h-28 w-40 items-center justify-center rounded-xl bg-zinc-100 text-xs text-zinc-400">이미지 없음</div>
+      )}
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="cursor-pointer rounded-xl border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700">
+          이미지 선택
+          <input
+            type="file"
+            accept={thumbnailAccept}
+            disabled={disabled}
+            className="sr-only"
+            onChange={(event) => onFile(event.target.files?.[0] ?? null)}
+          />
+        </label>
+        {shown ? (
+          <button type="button" disabled={disabled} onClick={onClear} className="text-sm text-zinc-500 underline">
+            썸네일 지우기
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 export function CoachProductList({ products }: { products: ProductRow[] }) {
   if (products.length === 0) {
@@ -52,7 +114,16 @@ export function CoachProductList({ products }: { products: ProductRow[] }) {
             href={`/coach/products/${product.id}`}
             className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition hover:bg-zinc-50"
           >
-            <div>
+            <div className="flex min-w-0 items-center gap-3">
+              {product.thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={product.thumbnailUrl} alt="" className="h-12 w-16 shrink-0 rounded-lg object-cover" />
+              ) : (
+                <span className="flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-[10px] font-medium text-zinc-400">
+                  없음
+                </span>
+              )}
+              <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium text-zinc-900">{product.title}</p>
                 <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600">
@@ -73,6 +144,7 @@ export function CoachProductList({ products }: { products: ProductRow[] }) {
                   .filter(Boolean)
                   .join(" · ")}
               </p>
+              </div>
             </div>
             <p className="text-sm font-semibold text-zinc-900">
               {getProductDisplayPrice(product).toLocaleString("ko-KR")}원
@@ -99,6 +171,7 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
   const [salePrice, setSalePrice] = useState("");
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
   const [offeringId, setOfferingId] = useState(offerings[0]?.id ?? "");
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -139,6 +212,30 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
         return;
       }
 
+      if (thumbnailFile) {
+        try {
+          const thumbnailUrl = await uploadProductDescriptionImage({
+            file: thumbnailFile,
+            productId: data.id,
+            apiRole: "coach",
+          });
+          const thumbnailResponse = await fetch(`/api/coach/products/${data.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ thumbnailUrl }),
+          });
+          if (!thumbnailResponse.ok) {
+            router.push(`/coach/products/${data.id}?thumbnail=failed`);
+            router.refresh();
+            return;
+          }
+        } catch {
+          router.push(`/coach/products/${data.id}?thumbnail=failed`);
+          router.refresh();
+          return;
+        }
+      }
+
       router.push(`/coach/products/${data.id}`);
       router.refresh();
     } catch {
@@ -169,6 +266,14 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
         <span className="font-medium">제목</span>
         <input value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
       </label>
+
+      <ProductThumbnailField
+        currentUrl={null}
+        file={thumbnailFile}
+        disabled={submitting}
+        onFile={setThumbnailFile}
+        onClear={() => setThumbnailFile(null)}
+      />
 
       <label className="block space-y-2 text-sm">
         <span className="font-medium">소개 (마크다운)</span>
@@ -229,6 +334,8 @@ type CoachProductEditPanelProps = {
   supplies: string[];
   listPrice: number;
   salePrice: number | null;
+  thumbnailUrl: string | null;
+  thumbnailError?: boolean;
   isActive: boolean;
   items: Array<{
     kind: string;
@@ -247,6 +354,13 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
   const [listPrice, setListPrice] = useState(String(props.listPrice));
   const [salePrice, setSalePrice] = useState(props.salePrice != null ? String(props.salePrice) : "");
   const [isActive, setIsActive] = useState(props.isActive);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailRemoved, setThumbnailRemoved] = useState(false);
+  const [savedThumbnailUrl, setSavedThumbnailUrl] = useState(props.thumbnailUrl);
+
+  useEffect(() => {
+    setSavedThumbnailUrl(props.thumbnailUrl);
+  }, [props.thumbnailUrl]);
   const [courseId, setCourseId] = useState(
     props.items.find((item) => item.kind === "COURSE_ACCESS")?.courseId ?? props.courses[0]?.id ?? "",
   );
@@ -283,38 +397,61 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
         exported.blocks,
       );
 
-      const [metaRes, itemsRes] = await Promise.all([
-        fetch(`/api/coach/products/${props.productId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title,
-            description,
-            descriptionMetadata,
-            supplies: parseProductSupplies(supplies),
-            listPrice: Number(listPrice),
-            salePrice: salePrice ? Number(salePrice) : null,
-            isActive,
-          }),
+      let thumbnailUrl: string | null | undefined;
+      if (thumbnailFile) {
+        thumbnailUrl = await uploadProductDescriptionImage({
+          file: thumbnailFile,
+          productId: props.productId,
+          apiRole: "coach",
+        });
+      } else if (thumbnailRemoved) {
+        thumbnailUrl = null;
+      }
+
+      const originalCourseId =
+        props.items.find((item) => item.kind === "COURSE_ACCESS")?.courseId ?? "";
+      const originalOfferingId =
+        props.items.find((item) => item.kind === "COACHING_ACCESS")?.coachingOfferingId ?? "";
+      const itemsChanged =
+        (props.kind !== "COACHING_ONLY" && courseId !== originalCourseId) ||
+        (props.kind !== "COURSE_ONLY" && offeringId !== originalOfferingId);
+
+      const metaRes = await fetch(`/api/coach/products/${props.productId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
+          descriptionMetadata,
+          supplies: parseProductSupplies(supplies),
+          listPrice: Number(listPrice),
+          salePrice: salePrice ? Number(salePrice) : null,
+          thumbnailUrl,
+          isActive,
         }),
-        fetch(`/api/coach/products/${props.productId}/items`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: nextItems }),
-        }),
-      ]);
+      });
+      const itemsRes = itemsChanged
+        ? await fetch(`/api/coach/products/${props.productId}/items`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: nextItems }),
+          })
+        : null;
 
       const metaData = (await metaRes.json()) as { error?: string };
-      const itemsData = (await itemsRes.json()) as { error?: string };
+      const itemsData = itemsRes ? ((await itemsRes.json()) as { error?: string }) : null;
 
-      if (!metaRes.ok || !itemsRes.ok) {
-        setError(metaData.error ?? itemsData.error ?? "저장에 실패했습니다.");
+      if (!metaRes.ok || (itemsRes && !itemsRes.ok)) {
+        setError(metaData.error ?? itemsData?.error ?? "저장에 실패했습니다.");
         return;
       }
 
+      if (thumbnailUrl !== undefined) setSavedThumbnailUrl(thumbnailUrl);
+      setThumbnailFile(null);
+      setThumbnailRemoved(false);
       router.refresh();
-    } catch {
-      setError("네트워크 오류");
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "네트워크 오류");
     } finally {
       setBusy(false);
     }
@@ -328,12 +465,31 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
       </div>
 
       <form onSubmit={saveAll} className="space-y-5 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        {props.thumbnailError ? (
+          <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            상품은 만들어졌지만 썸네일을 올리지 못했습니다. 여기서 다시 선택해 저장해 주세요.
+          </p>
+        ) : null}
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
         <label className="block space-y-2 text-sm">
           <span className="font-medium">제목</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
         </label>
+
+        <ProductThumbnailField
+          currentUrl={thumbnailRemoved ? null : savedThumbnailUrl}
+          file={thumbnailFile}
+          disabled={busy}
+          onFile={(file) => {
+            setThumbnailFile(file);
+            if (file) setThumbnailRemoved(false);
+          }}
+          onClear={() => {
+            setThumbnailFile(null);
+            setThumbnailRemoved(true);
+          }}
+        />
 
         <div className="block space-y-2 text-sm">
           <span className="font-medium">소개</span>

@@ -21,17 +21,19 @@ function extractMarkdownImages(description: string | null | undefined) {
     });
 }
 
-/** Course thumbnail + intro markdown images only. No stock filler. */
+/** Product thumbnail, then course thumbnail and intro images. No stock filler. */
 export function getProductHeroImages(product: CatalogProduct): ProductHeroImage[] {
+  const own = product.thumbnailUrl?.trim();
   const fromCourses = product.items
     .map((item) => item.course?.thumbnailUrl?.trim())
     .filter((src): src is string => Boolean(src))
     .map((src) => ({ src, alt: product.title }));
+  const preferred = own ? [{ src: own, alt: product.title }, ...fromCourses] : fromCourses;
 
   const collected: ProductHeroImage[] = [];
   const seen = new Set<string>();
 
-  for (const image of [...fromCourses, ...extractMarkdownImages(product.description)]) {
+  for (const image of [...preferred, ...extractMarkdownImages(product.description)]) {
     if (seen.has(image.src)) continue;
     seen.add(image.src);
     collected.push(image);

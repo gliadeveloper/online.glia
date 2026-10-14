@@ -34,6 +34,27 @@ export function buildProductImageMediaUrl(objectKey: string) {
   return `/api/media/r2?key=${encodeURIComponent(objectKey)}`;
 }
 
+/** Accepts only a catalog image already stored for this product. Empty clears the thumbnail. */
+export function assertProductThumbnailUrl(productId: string, thumbnailUrl: string | null) {
+  const trimmed = thumbnailUrl?.trim() ?? "";
+  if (!trimmed) return null;
+
+  let key: string | null = null;
+  try {
+    const url = new URL(trimmed, "http://local");
+    if (url.pathname !== "/api/media/r2") key = null;
+    else key = url.searchParams.get("key");
+  } catch {
+    key = null;
+  }
+
+  const parsed = key ? parseProductImageObjectKey(key) : null;
+  if (!parsed || parsed.productId !== productId) {
+    throw new ApiError("썸네일 이미지를 확인해 주세요.", 400, "VALIDATION_ERROR");
+  }
+  return buildProductImageMediaUrl(key!);
+}
+
 export function assertProductImageUpload(params: { fileName: string; contentType: string; byteLength: number }) {
   if (params.byteLength > MAX_LESSON_IMAGE_BYTES) {
     throw new ApiError(PRODUCT_IMAGE_SIZE_ERROR, 400, "VALIDATION_ERROR");

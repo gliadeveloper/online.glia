@@ -35,6 +35,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       supplies?: unknown;
       listPrice?: number;
       salePrice?: number | null;
+      thumbnailUrl?: string | null;
       isActive?: boolean;
     };
 
@@ -50,6 +51,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       supplies: parseProductSupplies(body.supplies),
       listPrice: body.listPrice,
       salePrice: body.salePrice,
+      thumbnailUrl: "thumbnailUrl" in body ? (body.thumbnailUrl ?? null) : undefined,
       isActive: body.isActive,
     });
 

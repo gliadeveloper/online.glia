@@ -103,6 +103,7 @@ export async function updateProduct(params: {
   supplies?: string[];
   listPrice?: number;
   salePrice?: number | null;
+  thumbnailUrl?: string | null;
   isActive?: boolean;
 }) {
   const existing = await prisma.product.findUnique({ where: { id: params.productId } });
@@ -126,6 +127,7 @@ export async function updateProduct(params: {
       supplies: params.supplies,
       listPrice: params.listPrice,
       salePrice: params.salePrice,
+      thumbnailUrl: params.thumbnailUrl,
       isActive: params.isActive,
       publishedAt:
         params.isActive === true && !existing.publishedAt ? new Date() : existing.publishedAt,

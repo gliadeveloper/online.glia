@@ -5,11 +5,15 @@ import { CoachProductEditPanel } from "@/components/coach/coach-product-panels";
 import { requireCoach } from "@/lib/coach";
 import { assertCoachOwnsProduct, getCoachProductCatalog } from "@/lib/coach-commerce";
 
-type PageProps = { params: Promise<{ id: string }> };
+type PageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ thumbnail?: string }>;
+};
 
-export default async function CoachProductDetailPage({ params }: PageProps) {
+export default async function CoachProductDetailPage({ params, searchParams }: PageProps) {
   const user = await requireCoach();
   const { id } = await params;
+  const query = await searchParams;
 
   let product;
   try {
@@ -39,6 +43,8 @@ export default async function CoachProductDetailPage({ params }: PageProps) {
         supplies={product.supplies ?? []}
         listPrice={product.listPrice}
         salePrice={product.salePrice}
+        thumbnailUrl={product.thumbnailUrl}
+        thumbnailError={query.thumbnail === "failed"}
         isActive={product.isActive}
         items={product.items}
         courses={catalog.courses}

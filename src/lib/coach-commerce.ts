@@ -1,6 +1,7 @@
 import type { Prisma, ProductItemKind, ProductKind } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
+import { assertProductThumbnailUrl } from "@/lib/media/product-image";
 import {
   createProduct,
   productInclude,
@@ -165,9 +166,15 @@ export async function updateCoachProduct(params: {
   supplies?: string[];
   listPrice?: number;
   salePrice?: number | null;
+  thumbnailUrl?: string | null;
   isActive?: boolean;
 }) {
   await assertCoachOwnsProduct(params.coachId, params.productId);
+
+  const thumbnailUrl =
+    params.thumbnailUrl === undefined
+      ? undefined
+      : assertProductThumbnailUrl(params.productId, params.thumbnailUrl);
 
   return updateProduct({
     actorId: params.coachId,
@@ -178,6 +185,7 @@ export async function updateCoachProduct(params: {
     supplies: params.supplies,
     listPrice: params.listPrice,
     salePrice: params.salePrice,
+    thumbnailUrl,
     isActive: params.isActive,
   });
 }
