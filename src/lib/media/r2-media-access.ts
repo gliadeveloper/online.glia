@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 import { parseAvatarMediaObjectKey } from "./avatar-image";
 import { parseCommunityMediaObjectKey } from "./community-media";
+import { parseProductImageObjectKey } from "./product-image";
 import { parseCoachingMediaObjectKey, parseCourseMediaObjectKey } from "./content-metadata";
 import { parseLessonQnaMediaObjectKey } from "./lesson-qna-media";
 
@@ -75,7 +76,11 @@ async function assertLessonQnaMediaAccess(userId: string, courseId: string) {
 }
 
 export async function assertR2MediaAccess(userId: string, objectKey: string) {
-  if (parseAvatarMediaObjectKey(objectKey) || parseCommunityMediaObjectKey(objectKey)) {
+  if (
+    parseAvatarMediaObjectKey(objectKey) ||
+    parseCommunityMediaObjectKey(objectKey) ||
+    parseProductImageObjectKey(objectKey)
+  ) {
     return { objectKey };
   }
 

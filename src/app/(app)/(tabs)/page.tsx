@@ -2,7 +2,7 @@ import { HomeAlerts } from "@/components/home/home-alerts";
 import { HomeCheckin } from "@/components/home/home-checkin";
 import { HomeContinue } from "@/components/home/home-continue";
 import { HomeDiscover } from "@/components/home/home-discover";
-import { HomeLegal } from "@/components/home/home-legal";
+import { SiteLegalFooter } from "@/components/site/site-legal-footer";
 import { HomeShortcuts } from "@/components/home/home-shortcuts";
 import { getHomePageData } from "@/lib/home";
 import { getCurrentUser } from "@/lib/session";
@@ -23,7 +23,7 @@ export default async function HomePage() {
         <HomeContinue course={home.continueCourse} coaching={home.lastCoaching} />
         <HomeDiscover products={home.products} priority={home.discoverPriority} />
       </div>
-      <HomeLegal />
+      <SiteLegalFooter />
     </div>
   );
 }

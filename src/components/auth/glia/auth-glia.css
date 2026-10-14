@@ -306,6 +306,20 @@
   border-bottom: 0;
 }
 
+.glia-auth__check-doc {
+  margin-left: auto;
+  color: var(--glia-blue);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.glia-auth__check-doc:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .glia-auth__check input[type="checkbox"] {
   flex-shrink: 0;
   width: 1.125rem;

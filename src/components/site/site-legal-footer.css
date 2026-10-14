@@ -1,0 +1,90 @@
+.glia-site-legal {
+  margin: 2rem var(--glia-gutter) 0;
+  padding: 1.15rem 0 0.35rem;
+  border-top: 1px solid var(--glia-border);
+  color: var(--glia-text-secondary);
+  font-family: var(--glia-font);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.glia-site-legal p {
+  margin: 0;
+}
+
+.glia-site-legal a {
+  color: inherit;
+  text-underline-offset: 0.15em;
+}
+
+.glia-site-legal a:hover {
+  text-decoration: underline;
+}
+
+.glia-site-legal__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.glia-site-legal__nav a {
+  color: var(--glia-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.glia-legal-page {
+  padding: 0.5rem 0 2.5rem;
+  color: var(--glia-text);
+  font-family: var(--glia-font);
+}
+
+.glia-legal-page__intro {
+  margin: 0 var(--glia-gutter) 1.25rem;
+}
+
+.glia-legal-page__intro h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.glia-legal-page__intro p {
+  margin: 0.35rem 0 0;
+  color: var(--glia-text-secondary);
+  font-size: 0.8125rem;
+}
+
+.glia-legal-page .glia-pdp__refund {
+  margin: 0 var(--glia-gutter);
+}
+
+.glia-legal-doc {
+  margin: 0 var(--glia-gutter);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.glia-legal-doc h2 {
+  margin: 1.75rem 0 0.45rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.glia-legal-doc p,
+.glia-legal-doc li {
+  margin: 0.35rem 0;
+}
+
+.glia-legal-doc ol,
+.glia-legal-doc ul {
+  margin: 0.35rem 0 0.75rem;
+  padding-left: 1.2rem;
+}
+
+.glia-legal-doc a {
+  color: var(--glia-blue);
+}

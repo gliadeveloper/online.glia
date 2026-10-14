@@ -87,6 +87,11 @@ export default async function OrderDetailPage({ params, searchParams }: OrderDet
           </div>
 
           <p className="glia-orders__detail-price">{formatKrw(order.total)}</p>
+          {order.discount > 0 ? (
+            <p className="glia-orders__meta">
+              {order.couponIssue?.coupon.name ?? "쿠폰"} 할인 {formatKrw(order.discount)}
+            </p>
+          ) : null}
 
           {product ? (
             <>

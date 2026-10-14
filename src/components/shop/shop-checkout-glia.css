@@ -105,40 +105,55 @@
   font-weight: 600;
 }
 
-.glia-checkout__coupon-row {
-  display: flex;
+.glia-checkout__coupon {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--glia-border);
+  padding-top: 1.25rem;
+}
+
+.glia-checkout__coupon-empty {
+  margin: 0;
+  color: var(--glia-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.glia-checkout__coupon-empty a {
+  color: var(--glia-blue);
+  font-weight: 700;
+}
+
+.glia-checkout__coupon-options {
+  display: grid;
   gap: 0.5rem;
 }
 
-.glia-checkout__input {
-  min-width: 0;
-  flex: 1;
-  min-height: 2.75rem;
+.glia-checkout__coupon-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.75rem 0.8rem;
   border: 1px solid var(--glia-border);
   border-radius: var(--glia-radius-md);
   background: #fff;
-  color: var(--glia-text);
-  font: inherit;
-  padding: 0 0.75rem;
-}
-
-.glia-checkout__apply {
-  flex: none;
-  min-height: 2.75rem;
-  padding: 0 0.9rem;
-  border: 1px solid var(--glia-border);
-  border-radius: var(--glia-radius-md);
-  background: #fff;
-  color: var(--glia-text);
-  font: inherit;
   font-size: 0.875rem;
-  font-weight: 700;
-  cursor: pointer;
 }
 
-.glia-checkout__apply:disabled {
+.glia-checkout__coupon-option strong {
+  display: block;
+  font-weight: 700;
+}
+
+.glia-checkout__coupon-option small {
+  display: block;
+  margin-top: 0.15rem;
   color: var(--glia-text-secondary);
-  cursor: default;
+  font-size: 0.75rem;
+}
+
+.glia-checkout__coupon-option input {
+  margin-top: 0.2rem;
 }
 
 .glia-checkout__coupon-message,

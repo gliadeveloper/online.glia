@@ -7,6 +7,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { getProductPrice, grantTossOrder, revokeFulfillment } from "@/lib/fulfillment";
+import { consumeReservedCoupon, lockCouponForOrder, releaseReservedCoupon } from "@/lib/shop-coupon";
 import { interpretTossCancelResponse } from "@/lib/payments/toss/cancel";
 import { tossPaymentsFetch } from "@/lib/payments/toss/client";
 import type { TossWidgetPaymentRequest } from "@/lib/payments/toss/widget";
@@ -29,7 +30,6 @@ import { assessProductCheckout } from "@/lib/shop-purchase-state";
 
 const CHARGE_MESSAGES = {
   AMOUNT_MISMATCH: "결제 금액이 주문 금액과 다릅니다.",
-  DISCOUNT_UNSUPPORTED: "할인 금액은 서버에 확정된 주문만 승인할 수 있습니다.",
   CURRENCY_UNSUPPORTED: "지원하지 않는 통화입니다.",
 } as const;
 
@@ -92,6 +92,7 @@ const productInclude = {
 export async function prepareTossPayment(params: {
   userId: string;
   productId: string;
+  couponIssueId?: string;
   idempotencyKey?: string;
   origin: string;
 }) {
@@ -127,10 +128,11 @@ export async function prepareTossPayment(params: {
     );
   }
 
-  const amount = getProductPrice(product);
-  if (!Number.isSafeInteger(amount) || amount < 0) {
+  const price = getProductPrice(product);
+  if (!Number.isSafeInteger(price) || price < 0) {
     throw new ApiError("결제 금액이 올바르지 않습니다.", 409, "AMOUNT_MISMATCH");
   }
+  const couponIssueId = params.couponIssueId?.trim() || null;
 
   const checkout = {
     orderName,
@@ -141,7 +143,10 @@ export async function prepareTossPayment(params: {
   };
 
   if (params.idempotencyKey) {
-    const existing = await reusableOrder(params.idempotencyKey, params.userId, params.productId, amount);
+    const existing = await reusableOrder(params.idempotencyKey, params.userId, params.productId, {
+      subtotal: price,
+      couponIssueId,
+    });
     if (existing) {
       return requestFor({ ...checkout, orderId: existing.id, amount: existing.total });
     }
@@ -149,21 +154,40 @@ export async function prepareTossPayment(params: {
 
   try {
     const order = await prisma.$transaction(async (tx) => {
+      const now = new Date();
+      const locked = couponIssueId
+        ? await lockCouponForOrder(tx, {
+            userId: params.userId,
+            productId: product.id,
+            couponIssueId,
+            price,
+            now,
+          })
+        : null;
+      if (locked?.kind === "reuse") {
+        const reused = await tx.order.findUnique({ where: { id: locked.orderId } });
+        if (!reused) throw new ApiError("쿠폰을 사용하지 못했습니다.", 409, "COUPON_BUSY");
+        return reused;
+      }
+
+      const discount = locked?.discount ?? 0;
+      const total = locked?.total ?? price;
       const created = await tx.order.create({
         data: {
           userId: params.userId,
           status: "PENDING",
           checkout: "TOSS",
-          subtotal: amount,
-          discount: 0,
-          total: amount,
+          subtotal: price,
+          discount,
+          total,
           currency: "KRW",
           idempotencyKey: params.idempotencyKey,
+          couponIssueId: locked ? couponIssueId : null,
           lines: {
             create: {
               productId: product.id,
-              unitPrice: amount,
-              lineTotal: amount,
+              unitPrice: price,
+              lineTotal: price,
             },
           },
         },
@@ -174,7 +198,7 @@ export async function prepareTossPayment(params: {
           orderId: created.id,
           provider: TOSS_PROVIDER,
           providerRef: preparedTossProviderRef(created.id),
-          amount,
+          amount: total,
           status: "PENDING",
           environment: config.environment === "test" ? "TEST" : "LIVE",
         },
@@ -185,10 +209,38 @@ export async function prepareTossPayment(params: {
 
     return requestFor({ ...checkout, orderId: order.id, amount: order.total });
   } catch (error) {
-    if (params.idempotencyKey && isUniqueConflict(error)) {
-      const existing = await reusableOrder(params.idempotencyKey, params.userId, params.productId, amount);
-      if (existing) {
-        return requestFor({ ...checkout, orderId: existing.id, amount: existing.total });
+    if (isUniqueConflict(error)) {
+      if (params.idempotencyKey) {
+        const existing = await reusableOrder(params.idempotencyKey, params.userId, params.productId, {
+          subtotal: price,
+          couponIssueId,
+        });
+        if (existing) {
+          return requestFor({ ...checkout, orderId: existing.id, amount: existing.total });
+        }
+      }
+      if (couponIssueId) {
+        const existing = await prisma.order.findFirst({
+          where: {
+            couponIssueId,
+            userId: params.userId,
+            status: "PENDING",
+            checkout: "TOSS",
+            subtotal: price,
+          },
+          include: { lines: { select: { productId: true } }, payments: true },
+        });
+        const payment = existing?.payments.find((item) => item.provider === TOSS_PROVIDER);
+        if (
+          existing &&
+          existing.lines.length === 1 &&
+          existing.lines[0]?.productId === product.id &&
+          payment?.status === "PENDING" &&
+          payment.providerRef === preparedTossProviderRef(existing.id) &&
+          payment.amount === existing.total
+        ) {
+          return requestFor({ ...checkout, orderId: existing.id, amount: existing.total });
+        }
       }
       throw new ApiError("이미 사용된 주문 키입니다.", 409, "IDEMPOTENCY_CONFLICT");
     }
@@ -196,7 +248,12 @@ export async function prepareTossPayment(params: {
   }
 }
 
-async function reusableOrder(idempotencyKey: string, userId: string, productId: string, amount: number) {
+async function reusableOrder(
+  idempotencyKey: string,
+  userId: string,
+  productId: string,
+  expected: { subtotal: number; couponIssueId: string | null },
+) {
   const existing = await prisma.order.findUnique({
     where: { idempotencyKey },
     include: { lines: { select: { productId: true } }, payments: true },
@@ -207,14 +264,15 @@ async function reusableOrder(idempotencyKey: string, userId: string, productId: 
     existing.userId === userId &&
     existing.checkout === "TOSS" &&
     existing.status === "PENDING" &&
-    existing.discount === 0 &&
     existing.currency === "KRW" &&
-    existing.total === amount &&
+    existing.subtotal === expected.subtotal &&
+    existing.subtotal - existing.discount === existing.total &&
+    (existing.couponIssueId ?? null) === expected.couponIssueId &&
     existing.lines.length === 1 &&
     existing.lines[0]?.productId === productId &&
     payment?.status === "PENDING" &&
     payment.providerRef === preparedTossProviderRef(existing.id) &&
-    payment.amount === amount &&
+    payment.amount === existing.total &&
     payment.easyPay == null;
   if (!sameSnapshot) {
     throw new ApiError("이미 사용된 주문 키입니다.", 409, "IDEMPOTENCY_CONFLICT");
@@ -251,6 +309,7 @@ export async function confirmTossPayment(params: { userId: string; success: Toss
   }
 
   if (payment.status === "SUCCEEDED" && payment.providerRef === success.paymentKey) {
+    await consumeReservedCoupon(order.couponIssueId);
     return finishConfirmedOrder(order, storedEnvironment);
   }
 
@@ -285,13 +344,16 @@ export async function confirmTossPayment(params: { userId: string; success: Toss
       idempotencyKey: `unsupported-${payment.id}`,
     });
     if (released) {
-      await prisma.payment.updateMany({
-        where: { id: payment.id, status: "PENDING" },
-        data: { status: "FAILED", providerRef: success.paymentKey, method: interpreted.method },
-      });
-      await prisma.order.updateMany({
-        where: { id: order.id, status: "PENDING", checkout: "TOSS" },
-        data: { status: "CANCELLED" },
+      await prisma.$transaction(async (tx) => {
+        await releaseReservedCoupon(order.id, tx);
+        await tx.payment.updateMany({
+          where: { id: payment.id, status: "PENDING" },
+          data: { status: "FAILED", providerRef: success.paymentKey, method: interpreted.method },
+        });
+        await tx.order.updateMany({
+          where: { id: order.id, status: "PENDING", checkout: "TOSS" },
+          data: { status: "CANCELLED" },
+        });
       });
     }
     throw new ApiError(
@@ -361,6 +423,7 @@ export async function confirmTossPayment(params: { userId: string; success: Toss
     });
   }
 
+  await consumeReservedCoupon(order.couponIssueId);
   return finishConfirmedOrder(order, storedEnvironment);
 }
 
@@ -780,14 +843,15 @@ export async function closeUnconfirmedTossPayment(orderId: string) {
   const payment = order.payments.find((item) => item.provider === TOSS_PROVIDER && item.status === "PENDING");
   if (!payment || payment.providerRef !== prepared) return;
 
-  await prisma.$transaction([
-    prisma.payment.updateMany({
+  await prisma.$transaction(async (tx) => {
+    await releaseReservedCoupon(order.id, tx);
+    await tx.payment.updateMany({
       where: { id: payment.id, status: "PENDING", providerRef: prepared },
       data: { status: "FAILED" },
-    }),
-    prisma.order.updateMany({
+    });
+    await tx.order.updateMany({
       where: { id: order.id, status: "PENDING", checkout: "TOSS" },
       data: { status: "CANCELLED" },
-    }),
-  ]);
+    });
+  });
 }

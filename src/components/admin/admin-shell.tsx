@@ -31,7 +31,10 @@ const navSections = [
   },
   {
     label: "Commerce",
-    items: [{ href: "/admin/orders", label: "주문" }],
+    items: [
+      { href: "/admin/orders", label: "주문" },
+      { href: "/admin/coupons", label: "쿠폰" },
+    ],
   },
   {
     label: "System",

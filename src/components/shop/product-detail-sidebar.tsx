@@ -2,10 +2,12 @@ import Link from "next/link";
 import { BookOpen, HeartPulse } from "lucide-react";
 
 import { ProductApplyButton } from "@/components/shop/product-apply-button";
+import { ProductCouponSheet } from "@/components/shop/product-coupon-sheet";
 import { ProductPayLink } from "@/components/shop/product-pay-link";
 import { formatKrw } from "@/lib/customer-labels";
 import type { WidgetCheckoutOptions } from "@/lib/payments/toss/widget";
 import type { CatalogProduct } from "@/lib/shop-products";
+import type { ProductCouponCard } from "@/lib/shop-coupon";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
 
 type ProductDetailSidebarProps = {
@@ -20,6 +22,7 @@ type ProductDetailSidebarProps = {
   instructorName?: string;
   eyebrow: string;
   checkout: WidgetCheckoutOptions;
+  coupons: ProductCouponCard[];
 };
 
 type BundlePart = {
@@ -100,6 +103,7 @@ export function ProductDetailSidebar({
   instructorName,
   eyebrow,
   checkout,
+  coupons,
 }: ProductDetailSidebarProps) {
   const owned = shopState.kind === "owned";
   const initial = instructorName?.slice(0, 1) ?? eyebrow.slice(0, 1);
@@ -158,19 +162,20 @@ export function ProductDetailSidebar({
           <div className="glia-pdp__total">
             {bundle.length > 1 ? (
               <p className="glia-pdp__total-note">강의와 코칭을 이 금액으로 함께 결제합니다</p>
-            ) : (
-              <p className="glia-pdp__total-note">이 구성으로 결제합니다</p>
-            )}
-            {discountRate && listPrice ? (
-              <p className="glia-pdp__buy-original">
-                <span className="glia-pdp__price-rate">{discountRate}%</span>
-                <span className="glia-pdp__price-list">{formatKrw(listPrice)}</span>
-              </p>
             ) : null}
             <div className="glia-pdp__total-row">
               <span>결제 금액</span>
-              <strong className="glia-pdp__price-sale">{formatKrw(price)}</strong>
+              <div className="glia-pdp__total-price">
+                {discountRate ? <span className="glia-pdp__price-rate">{discountRate}%</span> : null}
+                <strong className="glia-pdp__price-sale">{formatKrw(price)}</strong>
+              </div>
             </div>
+            {discountRate && listPrice ? (
+              <p className="glia-pdp__buy-original">
+                <span className="glia-pdp__price-list">{formatKrw(listPrice)}</span>
+              </p>
+            ) : null}
+            <ProductCouponSheet productId={product.id} isLoggedIn={isLoggedIn} coupons={coupons} />
           </div>
         ) : (
           <p className="glia-pdp__buy-owned">수강 중 · 바로 학습 가능</p>

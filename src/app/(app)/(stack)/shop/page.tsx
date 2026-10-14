@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { SiteLegalFooter } from "@/components/site/site-legal-footer";
 import { ProductListCard } from "@/components/shop/product-list-card";
 import { ShopStackPage } from "@/components/shop/shop-stack-page";
 import { ShopListHeader } from "@/components/shop/shop-list-header";
@@ -61,6 +62,7 @@ export default async function ShopPage() {
             신청 내역은 <Link href="/orders">주문 내역</Link>에서 확인할 수 있습니다.
           </p>
         ) : null}
+        <SiteLegalFooter />
       </div>
     </ShopStackPage>
   );

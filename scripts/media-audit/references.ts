@@ -64,7 +64,7 @@ export async function inspectSource(
     if (++visits > 20000 || depth > 64) throw new Error("SCAN_LIMIT");
     if (typeof value === "string") {
       if (value.length > 2_000_000) throw new Error("SCAN_LIMIT");
-      if (/^(?:courses|coaching|media|avatars|community|lesson-qna)\/[^\s]+$/.test(value)) possibleKeys.add(value);
+      if (/^(?:courses|coaching|media|avatars|community|lesson-qna|products)\/[^\s]+$/.test(value)) possibleKeys.add(value);
       // Conservative: raw text/code/srcset/custom metadata may contain a reference.
       // These are never promoted into confirmed MediaUsage counts.
       for (const match of value.matchAll(/(?:https?:\/\/|\/api\/media\/r2\?)[^\s<>"'`()\[\]]+/g)) {

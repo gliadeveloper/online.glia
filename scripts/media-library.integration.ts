@@ -149,7 +149,7 @@ export async function runMediaLibraryIntegration(db: PrismaClient, check: Check)
   await check("media resolver: verified legacy prefix preserves old URLs and their access rules", async () => {
     const prefixed = (key: string, actor: () => Promise<string>) => resolveMediaLocation(db, new URL(`https://app.example.invalid${libraryMediaUrl(key)}`), actor, "library-test", "old-bucket/");
     const anonymous = async () => { throw new ApiError("Login required", 401, "UNAUTHORIZED"); };
-    for (const key of ["avatars/u/image.png", "community/u/videos/video.mp4"]) {
+    for (const key of ["avatars/u/image.png", "community/u/videos/video.mp4", "products/p/images/cover.png"]) {
       assert.deepEqual(await prefixed(key, anonymous), { objectKey: "old-bucket/" + key, isPublic: true });
     }
     const key = `courses/${courseId}/lessons/${lesson.id}/images/existing.png`;

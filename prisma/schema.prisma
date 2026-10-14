@@ -163,6 +163,22 @@ enum OrderCheckout {
   TOSS
 }
 
+enum ShopCouponDiscountType {
+  FIXED
+  PERCENT
+}
+
+enum ShopCouponValidityKind {
+  RANGE
+  DAYS_FROM_ISSUE
+}
+
+enum ShopCouponIssueStatus {
+  ISSUED
+  RESERVED
+  USED
+}
+
 enum PaymentEnvironment {
   TEST
   LIVE
@@ -312,6 +328,7 @@ model User {
   lessonBookmarks                LessonBookmark[]
   lessonNotes                    LessonNote[]
   orders                         Order[]
+  shopCouponIssues               ShopCouponIssue[]
   coachedOfferings               CoachingOffering[]            @relation("CoachingOfferingCoach")
   coachingEntitlements           CoachingEntitlement[]
   coachingSessionsAsCoach        CoachingSession[]             @relation("CoachingSessionCoach")
@@ -1198,6 +1215,7 @@ model Product {
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   items        ProductItem[]
   orderLines   OrderLine[]
+  couponProducts ShopCouponProduct[]
 
   @@index([kind, isActive])
   @@map("products")
@@ -1246,10 +1264,83 @@ model Order {
   payments     Payment[]
   fulfillments Fulfillment[]
   refunds      Refund[]
+  /// Set while a downloaded coupon is reserved or consumed by this order.
+  couponIssueId String?          @unique
+  couponIssue   ShopCouponIssue? @relation(fields: [couponIssueId], references: [id], onDelete: Restrict)
 
   @@index([userId, status])
   @@index([userId, checkout, status])
   @@map("orders")
+}
+
+/// Downloadable product coupon. Issue window controls the product page. Use window starts when a member downloads it.
+model ShopCoupon {
+  id                String                 @id @default(cuid())
+  name              String
+  discountType      ShopCouponDiscountType
+  /// Won off when FIXED.
+  discountAmount    Int?
+  /// 1–100 when PERCENT.
+  discountPercent   Int?
+  /// Cap for PERCENT. Null means no cap.
+  maxDiscountAmount Int?
+  minOrderAmount    Int                    @default(0)
+  issueStartsAt     DateTime
+  issueEndsAt       DateTime
+  validityKind      ShopCouponValidityKind
+  validStartsAt     DateTime?
+  validEndsAt       DateTime?
+  /// Days after download when validityKind is DAYS_FROM_ISSUE.
+  validDays         Int?
+  /// Null means unlimited downloads.
+  issueLimit        Int?
+  issuedCount       Int                    @default(0)
+  isActive          Boolean                @default(true)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  products ShopCouponProduct[]
+  issues   ShopCouponIssue[]
+
+  @@index([isActive, issueStartsAt, issueEndsAt])
+  @@map("shop_coupons")
+}
+
+model ShopCouponProduct {
+  couponId  String
+  productId String
+
+  coupon  ShopCoupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  product Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([couponId, productId])
+  @@index([productId])
+  @@map("shop_coupon_products")
+}
+
+/// One download per member. Discount fields are copied at download so later edits do not change a coupon already received.
+model ShopCouponIssue {
+  id                String                 @id @default(cuid())
+  couponId          String
+  userId            String
+  status            ShopCouponIssueStatus  @default(ISSUED)
+  discountType      ShopCouponDiscountType
+  discountAmount    Int?
+  discountPercent   Int?
+  maxDiscountAmount Int?
+  minOrderAmount    Int
+  validStartsAt     DateTime
+  expiresAt         DateTime
+  issuedAt          DateTime               @default(now())
+  usedAt            DateTime?
+
+  coupon ShopCoupon @relation(fields: [couponId], references: [id], onDelete: Restrict)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  order  Order?
+
+  @@unique([couponId, userId])
+  @@index([userId, status])
+  @@map("shop_coupon_issues")
 }
 
 model OrderLine {

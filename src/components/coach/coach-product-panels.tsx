@@ -340,6 +340,7 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
           <ProductDescriptionEditor
             ref={editorRef}
             productId={props.productId}
+            apiRole="coach"
             description={props.description}
             descriptionMetadata={props.descriptionMetadata}
             disabled={busy}

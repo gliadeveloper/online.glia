@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { ProductCheckoutCoupon } from "@/components/shop/product-checkout-coupon";
-import { ProductWidgetCheckout } from "@/components/shop/product-widget-checkout";
+import { SiteLegalFooter } from "@/components/site/site-legal-footer";
+import { ProductCheckoutPay } from "@/components/shop/product-checkout-pay";
 import { ShopStackPage } from "@/components/shop/shop-stack-page";
-import { formatKrw } from "@/lib/customer-labels";
 import { getProductPrice } from "@/lib/fulfillment";
 import { listWidgetCheckoutOptions } from "@/lib/payments/toss/options";
 import { tossCustomerKey } from "@/lib/payments/toss/verify";
+import { getShopCouponOffer } from "@/lib/shop-coupon";
 import { getProductById } from "@/lib/shop-products";
 import { getProductShopState } from "@/lib/shop-purchase-state";
 import { StackNavTitle } from "@/lib/stack-nav-context";
@@ -37,6 +37,7 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
   const checkout = listWidgetCheckoutOptions();
   const customerKey = tossCustomerKey(user.id);
   const price = getProductPrice(product);
+  const couponOffer = await getShopCouponOffer(product.id, user.id, price);
 
   return (
     <ShopStackPage className="shop-checkout-page">
@@ -52,12 +53,8 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
             상품으로 돌아가기
           </Link>
 
-          <section className="glia-checkout__summary" aria-label="결제 금액">
+          <section className="glia-checkout__summary" aria-label="주문 상품">
             <h2 className="glia-checkout__product">{product.title}</h2>
-            <p className="glia-checkout__price-row">
-              <span>결제 금액</span>
-              <strong>{formatKrw(price)}</strong>
-            </p>
           </section>
 
           {shopState.kind === "pending" ? (
@@ -75,16 +72,16 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
             <>
               {customerKey ? (
                 <>
-                  <ProductCheckoutCoupon />
-                  <div className="glia-checkout__pay">
-                    <ProductWidgetCheckout
-                      productId={product.id}
-                      clientKey={checkout.clientKey}
-                      variantKey={checkout.variantKey}
-                      customerKey={customerKey}
-                      amount={price}
-                    />
-                  </div>
+                  <ProductCheckoutPay
+                    productId={product.id}
+                    productHref={`/shop/${product.id}`}
+                    basePrice={price}
+                    coupons={couponOffer.checkoutOptions}
+                    canDownloadMore={couponOffer.cards.some((coupon) => coupon.downloadState === "ready")}
+                    clientKey={checkout.clientKey}
+                    variantKey={checkout.variantKey}
+                    customerKey={customerKey}
+                  />
                 </>
               ) : (
                 <p className="glia-checkout__notice">결제 고객 정보를 만들지 못했습니다.</p>
@@ -93,6 +90,7 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
           )}
         </div>
       </div>
+      <SiteLegalFooter />
     </ShopStackPage>
   );
 }

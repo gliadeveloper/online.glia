@@ -14,6 +14,7 @@ export type TossSuccessParams = {
 };
 
 export type StoredCharge = {
+  subtotal: number;
   total: number;
   discount: number;
   currency: string;
@@ -141,12 +142,15 @@ export function parseTossSuccessQuery(params: URLSearchParams): TossSuccessParam
 
 /**
  * The amount used for approval is the amount saved before the payment request.
- * Client query values are accepted only when they match that snapshot.
+ * A downloaded coupon is part of that snapshot: total = subtotal - discount.
  */
 export function chargeMismatch(stored: StoredCharge, returnedAmount: number) {
   if (stored.currency !== "KRW") return "CURRENCY_UNSUPPORTED" as const;
-  if (stored.discount !== 0) return "DISCOUNT_UNSUPPORTED" as const;
+  if (!Number.isSafeInteger(stored.subtotal) || stored.subtotal < 0) return "AMOUNT_MISMATCH" as const;
+  if (!Number.isSafeInteger(stored.discount) || stored.discount < 0) return "AMOUNT_MISMATCH" as const;
   if (!Number.isSafeInteger(stored.total) || stored.total < 0) return "AMOUNT_MISMATCH" as const;
+  if (stored.discount > stored.subtotal) return "AMOUNT_MISMATCH" as const;
+  if (stored.subtotal - stored.discount !== stored.total) return "AMOUNT_MISMATCH" as const;
   if (returnedAmount !== stored.total) return "AMOUNT_MISMATCH" as const;
   return null;
 }

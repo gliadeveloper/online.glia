@@ -1,9 +1,9 @@
 import { ApiError } from "@/lib/api";
 import { assertLegacyKeyPrefix } from "./r2-config";
 
-/** Namespaces whose stored URLs predate the media library. Never includes media/. */
+/** Namespaces stored outside the media library. Never includes media/. */
 export function isLegacyR2Key(key: string) {
-  return /^(?:avatars|community|lesson-qna|courses|coaching)\//.test(key);
+  return /^(?:avatars|community|lesson-qna|courses|coaching|products)\//.test(key);
 }
 
 export function assertR2ObjectKey(key: string) {

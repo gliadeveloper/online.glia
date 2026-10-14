@@ -205,6 +205,7 @@ export function ProductEditPanel({
                   <ProductDescriptionEditor
                     ref={editorRef}
                     productId={productId}
+                    apiRole="admin"
                     description={initialDescription}
                     descriptionMetadata={initialDescriptionMetadata}
                     disabled={busy}

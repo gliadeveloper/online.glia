@@ -12,6 +12,7 @@ import {
   getViewerReviewForCourses,
 } from "@/lib/course-reviews";
 import { getProductPrice } from "@/lib/fulfillment";
+import { getShopCouponOffer } from "@/lib/shop-coupon";
 import { getProductById } from "@/lib/shop-products";
 import { getProductHeroImages } from "@/lib/shop-product-hero";
 import { getProductShopState, defaultPurchaseShopState } from "@/lib/shop-purchase-state";
@@ -63,12 +64,14 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     checkoutLabel: "신청하기",
   };
 
-  const [reviewSummary, reviews, viewerReview, canReview, shopStateResult] = await Promise.all([
+  const price = getProductPrice(product);
+  const [reviewSummary, reviews, viewerReview, canReview, shopStateResult, couponOffer] = await Promise.all([
     getProductReviewSummary(courseIds),
     getProductReviews(courseIds, 8),
     user ? getViewerReviewForCourses(user.id, courseIds) : Promise.resolve(null),
     user ? canUserReviewProduct(user.id, courseIds) : Promise.resolve(false),
     user ? getProductShopState(user.id, product) : Promise.resolve({ shopState: guestShopState }),
+    getShopCouponOffer(product.id, user?.id ?? null, price),
   ]);
 
   const { shopState } = shopStateResult;
@@ -106,6 +109,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         reviews={reviews}
         canReview={canReview}
         hasExistingReview={!!viewerReview}
+        coupons={couponOffer.cards}
       />
     </ShopStackPage>
   );

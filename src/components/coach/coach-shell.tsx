@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 const navItems = [
   { href: "/coach", label: "홈", exact: true },
   { href: "/coach/products", label: "상품", exact: false },
+  { href: "/coach/coupons", label: "쿠폰", exact: false },
   { href: "/coach/orders", label: "주문", exact: false },
   { href: "/coach/customers", label: "고객", exact: false },
   { href: "/coach/checkins", label: "체크인", exact: false },

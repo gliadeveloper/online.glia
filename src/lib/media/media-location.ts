@@ -3,6 +3,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { ApiError } from "@/lib/api";
 import { parseAvatarMediaObjectKey } from "./avatar-image";
 import { parseCommunityMediaObjectKey } from "./community-media";
+import { parseProductImageObjectKey } from "./product-image";
 import { authorizeRegisteredMedia } from "./library";
 import { assertR2MediaAccess } from "./r2-media-access";
 import { isLegacyR2Key, legacyR2ObjectKey } from "./r2-key";
@@ -40,7 +41,9 @@ export async function resolveMediaLocation(db: PrismaClient, url: URL, actor: ()
     return { objectKey: file.objectKey, isPublic: false, mimeType: file.mimeType ?? undefined };
   }
   if (key.startsWith("media/") || target) throw new ApiError("파일을 찾지 못했습니다.", 404, "MEDIA_NOT_FOUND");
-  const isPublic = Boolean(parseAvatarMediaObjectKey(key) || parseCommunityMediaObjectKey(key));
+  const isPublic = Boolean(
+    parseAvatarMediaObjectKey(key) || parseCommunityMediaObjectKey(key) || parseProductImageObjectKey(key),
+  );
   if (!isPublic) await assertR2MediaAccess(await actor(), key);
   if (!legacyObjectKey) throw new ApiError("파일을 찾지 못했습니다.", 404, "MEDIA_NOT_FOUND");
   return { objectKey: legacyObjectKey, isPublic };

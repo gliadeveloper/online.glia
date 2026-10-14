@@ -3,6 +3,7 @@ import { ProductCreatorSection } from "@/components/shop/product-creator-section
 import { ProductCurriculumSection } from "@/components/shop/product-curriculum-section";
 import { ProductDetailSidebar } from "@/components/shop/product-detail-sidebar";
 import { ProductHeroGallery } from "@/components/shop/product-hero-gallery";
+import { SiteLegalFooter } from "@/components/site/site-legal-footer";
 import { ProductRefundSection } from "@/components/shop/product-refund-section";
 import { ProductReviewSection } from "@/components/shop/product-review-section";
 import { ProductSectionNav } from "@/components/shop/product-section-nav";
@@ -12,6 +13,7 @@ import { getProductPrice } from "@/lib/fulfillment";
 import { listWidgetCheckoutOptions } from "@/lib/payments/toss/options";
 import { getProductHeroImages } from "@/lib/shop-product-hero";
 import type { CatalogProduct } from "@/lib/shop-products";
+import type { ProductCouponCard } from "@/lib/shop-coupon";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
 
 import "./shop-pdp-glia.css";
@@ -33,6 +35,7 @@ type ProductDetailPanelProps = {
   }>;
   canReview: boolean;
   hasExistingReview: boolean;
+  coupons: ProductCouponCard[];
 };
 
 function getCourses(product: CatalogProduct): CatalogCourse[] {
@@ -54,6 +57,7 @@ export function ProductDetailPanel({
   reviews,
   canReview,
   hasExistingReview,
+  coupons,
 }: ProductDetailPanelProps) {
   const price = getProductPrice(product);
   const checkout = listWidgetCheckoutOptions();
@@ -112,6 +116,7 @@ export function ProductDetailPanel({
           instructorName={instructorName ?? undefined}
           eyebrow={programEyebrow}
           checkout={checkout}
+          coupons={coupons}
         />
 
         <div className="glia-pdp__main">
@@ -163,6 +168,7 @@ export function ProductDetailPanel({
           </div>
         </div>
       </div>
+      <SiteLegalFooter />
 
       <ProductDetailStickyBar
         product={product}

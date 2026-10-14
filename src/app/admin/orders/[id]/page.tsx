@@ -45,6 +45,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         },
       },
       payments: true,
+      couponIssue: { select: { coupon: { select: { name: true } } } },
       fulfillments: {
         include: {
           grants: true,
@@ -82,6 +83,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs text-zinc-500">결제 금액</p>
           <p className="mt-2 text-xl font-semibold">{formatKrw(order.total)}</p>
+          {order.discount > 0 ? (
+            <p className="mt-1 text-xs text-zinc-500">
+              {order.couponIssue?.coupon.name ?? "쿠폰"} −{formatKrw(order.discount)}
+            </p>
+          ) : null}
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs text-zinc-500">주문 일시</p>

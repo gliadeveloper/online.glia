@@ -8,6 +8,7 @@ import { tossSdkErrorMessage } from "@/lib/payments/toss/verify";
 
 type ProductWidgetCheckoutProps = {
   productId: string;
+  couponIssueId: string | null;
   clientKey: string;
   variantKey: string;
   customerKey: string;
@@ -17,13 +18,22 @@ type ProductWidgetCheckoutProps = {
 const METHOD_SELECTOR = "#toss-payment-method";
 const AGREEMENT_SELECTOR = "#toss-agreement";
 
-export function ProductWidgetCheckout({ productId, clientKey, variantKey, customerKey, amount }: ProductWidgetCheckoutProps) {
+export function ProductWidgetCheckout({
+  productId,
+  couponIssueId,
+  clientKey,
+  variantKey,
+  customerKey,
+  amount,
+}: ProductWidgetCheckoutProps) {
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const widgetsRef = useRef<TossPaymentsWidgets | null>(null);
+  const amountRef = useRef(amount);
   const redirectingRef = useRef(false);
   const activeRef = useRef(true);
+  amountRef.current = amount;
 
   useEffect(() => {
     const onPageHide = () => {
@@ -43,7 +53,7 @@ export function ProductWidgetCheckout({ productId, clientKey, variantKey, custom
       const tossPayments = await loadTossPayments(clientKey);
       const widgets = tossPayments.widgets({ customerKey });
       if (cancelled) return;
-      await widgets.setAmount({ currency: "KRW", value: amount });
+      await widgets.setAmount({ currency: "KRW", value: amountRef.current });
       if (cancelled) return;
       const [methods, agreement] = await Promise.all([
         widgets.renderPaymentMethods({ selector: METHOD_SELECTOR, variantKey }),
@@ -69,7 +79,24 @@ export function ProductWidgetCheckout({ productId, clientKey, variantKey, custom
         void widget.destroy().catch(() => undefined);
       }
     };
-  }, [amount, clientKey, customerKey, variantKey]);
+  }, [clientKey, customerKey, variantKey]);
+
+  useEffect(() => {
+    const widgets = widgetsRef.current;
+    if (!ready || !widgets) return;
+    let cancelled = false;
+    void widgets
+      .setAmount({ currency: "KRW", value: amount })
+      .then(() => {
+        if (!cancelled) setError(null);
+      })
+      .catch((caught) => {
+        if (!cancelled) setError(tossSdkErrorMessage(caught));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [amount, ready]);
 
   async function handlePay() {
     const widgets = widgetsRef.current;
@@ -88,7 +115,7 @@ export function ProductWidgetCheckout({ productId, clientKey, variantKey, custom
       const response = await fetch("/api/payments/toss/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ productId, couponIssueId }),
       });
       const data = (await response.json()) as TossWidgetPaymentRequest & { error?: string };
       if (!response.ok) {

@@ -8,6 +8,7 @@ import { Suspense, useMemo, useState } from "react";
 import { KakaoLoginButton } from "@/components/auth/login/kakao-login-button";
 import { SignupStep, SignupSuspenseFallback } from "@/components/auth/signup/signup-step";
 import { resolvePostLoginPath } from "@/lib/auth-redirect";
+import { siteBusiness } from "@/lib/site-business";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import { AVATAR_PRESETS } from "@/lib/signup/constants";
 import { validateNickname, validateUserId } from "@/lib/signup/validation";
@@ -126,7 +127,7 @@ function DuplicateContent() {
       <footer className="glia-auth__footer">
         <p>
           도움이 필요하신가요?{" "}
-          <a href="mailto:support@glia.kr" className="glia-auth__link">
+          <a href={`mailto:${siteBusiness.supportEmail}`} className="glia-auth__link">
             문의하기
           </a>
         </p>
@@ -264,6 +265,13 @@ function TermsContent() {
               <span className="glia-auth__badge glia-auth__badge--required">필수</span>
               이용 약관
             </span>
+            <Link
+              href="/legal/terms"
+              className="glia-auth__check-doc"
+              onMouseDown={(event) => event.preventDefault()}
+            >
+              전문
+            </Link>
           </label>
           <label className="glia-auth__check">
             <input
@@ -275,6 +283,13 @@ function TermsContent() {
               <span className="glia-auth__badge glia-auth__badge--required">필수</span>
               개인정보 수집 및 이용 동의
             </span>
+            <Link
+              href="/legal/privacy"
+              className="glia-auth__check-doc"
+              onMouseDown={(event) => event.preventDefault()}
+            >
+              전문
+            </Link>
           </label>
           <label className="glia-auth__check">
             <input

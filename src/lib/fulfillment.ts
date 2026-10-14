@@ -58,6 +58,7 @@ const orderInclude = {
     },
   },
   payments: true,
+  couponIssue: { select: { coupon: { select: { name: true } } } },
   fulfillments: {
     include: {
       grants: {

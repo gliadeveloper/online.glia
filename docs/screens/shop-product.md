@@ -46,6 +46,7 @@
 | 2 | 설명 | description | ✅ |
 | 3 | kind badge | COURSE / COACHING / BUNDLE | ✅ |
 | 4 | 가격 | listPrice, salePrice | ✅ |
+| 5 | 쿠폰 받기 | 이 상품에 발급 중인 다운로드 쿠폰. 없으면 행 숨김 | ✅ |
 
 ---
 
@@ -53,14 +54,14 @@
 
 | | |
 |-|-|
-| **역할** | 구매 전 환불 기준 고지 |
-| **노출** | always · 섹션 메뉴 마지막 **환불** |
+| **역할** | 구매 전 환불 기준을 공통 정책으로 안내 |
+| **노출** | always · 섹션 메뉴 마지막 **환불** · 홈·상품·결제 푸터 |
 
 | # | UI 요소 | 데이터·규칙 | v1 |
 |---|---------|---------------|-----|
 | 1 | 섹션 메뉴 | `pdp-refund` · 라벨 환불 | ✅ |
-| 2 | 본문 | 8주 클래스 주차 환불표 · 준수사항 · 신청 절차 | ✅ |
-| 3 | 신청 | `support@glia.kr` | ✅ |
+| 2 | 상세 안내 | `/legal/refund` 링크. 전문은 그 페이지 | ✅ |
+| 3 | 푸터 | 이용약관·개인정보 처리방침·환불 · 상호·대표자·사업자등록번호·주소·유선번호·이메일·호스팅(가비아) · 사업자정보 확인 | ✅ |
 
 ---
 
@@ -144,9 +145,9 @@
 | | |
 |-|-|
 | **Page** | `src/app/(app)/(stack)/shop/[slug]/page.tsx` |
-| **Components** | `product-detail-panel`, `purchase-preview-panel` |
+| **Components** | `product-detail-panel`, `product-coupon-sheet`, `purchase-preview-panel` |
 | **Lib** | `src/lib/shop-purchase-state.ts` |
-| **API** | `/api/checkout`, `/api/products/[slug]` |
+| **API** | `/api/checkout`, `/api/products/[slug]`, `/api/shop/products/[id]/coupons/download` |
 
 ---
 
@@ -154,5 +155,4 @@
 
 | 항목 | 메모 |
 |------|------|
-| 쿠폰 | v2 |
 | 연장 전용 SKU 가격 | v2 |
