@@ -6,6 +6,7 @@ import {
   materializeEnrollmentExpiry,
   resolveEnrollmentProgressStatus,
 } from "@/lib/enrollment-access";
+import { productThumbnailsForEnrollments } from "@/lib/learning-enrollments";
 import { prisma } from "@/lib/prisma";
 
 export const lessonPlayerInclude = {
@@ -280,6 +281,10 @@ export async function getContinueLearning(userId: string) {
     },
   });
 
+  const productCovers = await productThumbnailsForEnrollments(
+    enrollments.map((enrollment) => enrollment.id),
+  );
+
   for (const enrollment of enrollments) {
     const materialized = await materializeEnrollmentExpiry(enrollment);
     if (!canAccessEnrollment(materialized)) {
@@ -311,7 +316,7 @@ export async function getContinueLearning(userId: string) {
     return {
       courseId: enrollment.courseId,
       courseTitle: enrollment.course.title,
-      thumbnailUrl: enrollment.course.thumbnailUrl,
+      thumbnailUrl: productCovers.get(enrollment.id) ?? enrollment.course.thumbnailUrl,
       progressPercent: enrollment.progressPercent,
       lesson: nextLesson,
     };

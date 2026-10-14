@@ -36,12 +36,14 @@ export function EnrollmentCourseCard({ enrollment }: EnrollmentCourseCardProps) 
   const isLifetime = enrollment.accessDuration === "LIFETIME";
   const statusVariant = isExpired ? "expired" : isCompleted ? "completed" : "active";
 
+  const coverUrl = enrollment.productThumbnailUrl || enrollment.course.thumbnailUrl;
+
   const cardInner = (
     <>
       <div className="glia-course__media">
-        {enrollment.course.thumbnailUrl ? (
+        {coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={enrollment.course.thumbnailUrl} alt="" />
+          <img src={coverUrl} alt="" />
         ) : (
           <span className="glia-course__media-fallback">
             <BookOpen size={28} aria-hidden="true" />

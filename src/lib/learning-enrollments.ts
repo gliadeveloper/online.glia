@@ -5,6 +5,29 @@ import {
   findLifetimeRestoreProductId,
 } from "@/lib/shop-purchase-state";
 
+/** Latest purchased product cover for each enrollment. Empty when that product has no thumbnail. */
+export async function productThumbnailsForEnrollments(enrollmentIds: string[]) {
+  const covers = new Map<string, string>();
+  if (enrollmentIds.length === 0) return covers;
+
+  const grants = await prisma.entitlementGrant.findMany({
+    where: { enrollmentId: { in: enrollmentIds } },
+    orderBy: { createdAt: "desc" },
+    select: {
+      enrollmentId: true,
+      productItem: { select: { product: { select: { thumbnailUrl: true } } } },
+    },
+  });
+
+  for (const grant of grants) {
+    if (!grant.enrollmentId || covers.has(grant.enrollmentId)) continue;
+    const thumbnailUrl = grant.productItem.product.thumbnailUrl?.trim();
+    if (thumbnailUrl) covers.set(grant.enrollmentId, thumbnailUrl);
+  }
+
+  return covers;
+}
+
 export async function getUserEnrollments(userId: string) {
   const enrollments = await prisma.enrollment.findMany({
     where: {
@@ -58,8 +81,13 @@ export async function getUserEnrollments(userId: string) {
     }),
   );
 
+  const productCovers = await productThumbnailsForEnrollments(
+    materialized.map((enrollment) => enrollment.id),
+  );
+
   return materialized.map((enrollment, index) => ({
     ...enrollment,
+    productThumbnailUrl: productCovers.get(enrollment.id) ?? null,
     extendHref: renewLinks[index]!.extendHref,
     restoreHref: renewLinks[index]!.restoreHref,
   }));
