@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
+import { orderStatusText } from "@/lib/customer-labels";
 import type { getCoachCustomerDetail } from "@/lib/coach-customers";
 import { OrderApplicationActions } from "@/components/orders/order-application-actions";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
@@ -49,7 +50,7 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{formatKrw(order.total)}</p>
-                    <OrderStatusPill status={order.status} />
+                    <OrderStatusPill status={order.status} label={orderStatusText(order.status, order.checkout)} />
                   </div>
                 </div>
                 <OrderApplicationActions

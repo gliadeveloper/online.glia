@@ -3,7 +3,7 @@ import Link from "next/link";
 import { OrderActions } from "@/app/admin/orders/[id]/order-actions";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
-import { productKindLabels } from "@/lib/customer-labels";
+import { orderStatusText, productKindLabels } from "@/lib/customer-labels";
 import type { CoachOrderDetail } from "@/lib/coach-orders";
 import { tossCancelOffer } from "@/lib/order-refund";
 
@@ -15,6 +15,15 @@ export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDeta
 
   return (
     <div className="space-y-6">
+      <OrderActions
+        orderId={order.id}
+        status={order.status}
+        checkout={order.checkout}
+        total={order.total}
+        tossCancel={tossCancel}
+        apiBase="/api/coach/orders"
+      />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "주문 금액", value: formatKrw(order.total) },
@@ -26,7 +35,7 @@ export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDeta
             <p className="text-xs text-zinc-500">{item.label}</p>
             {item.label === "상태" ? (
               <div className="mt-2">
-                <OrderStatusPill status={order.status} />
+                <OrderStatusPill status={order.status} label={orderStatusText(order.status, order.checkout)} />
               </div>
             ) : (
               <p className="mt-2 font-semibold text-zinc-900">{item.value}</p>
@@ -139,14 +148,6 @@ export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDeta
         </section>
       )}
 
-      <OrderActions
-        orderId={order.id}
-        status={order.status}
-        checkout={order.checkout}
-        total={order.total}
-        tossCancel={tossCancel}
-        apiBase="/api/coach/orders"
-      />
     </div>
   );
 }

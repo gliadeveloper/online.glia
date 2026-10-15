@@ -51,6 +51,11 @@ export const orderStatusLabels: Record<OrderStatus, string> = {
   CANCELLED: "거절됨",
 };
 
+export function orderStatusText(status: OrderStatus, checkout?: string | null) {
+  if (status === "PENDING" && checkout === "TOSS") return "결제 대기";
+  return orderStatusLabels[status];
+}
+
 export const productKindLabels: Record<ProductKind, string> = {
   COURSE_ONLY: "VOD 단품",
   COACHING_ONLY: "코칭 단품",

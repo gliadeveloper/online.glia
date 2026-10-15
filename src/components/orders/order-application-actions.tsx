@@ -78,7 +78,7 @@ export function OrderApplicationActions({
           type="button"
           onClick={() => handleAction("approve")}
           disabled={loading !== null}
-          className="rounded-xl bg-(--glia-blue) px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {loading === "approve" ? "승인 중…" : "승인하기"}
         </button>

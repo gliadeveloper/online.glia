@@ -1,9 +1,10 @@
 import Link from "next/link";
 
+import { OrderApplicationActions } from "@/components/orders/order-application-actions";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import type { CoachOrderRow } from "@/lib/coach-orders";
-import { productKindLabels } from "@/lib/customer-labels";
+import { orderStatusText, productKindLabels } from "@/lib/customer-labels";
 
 type CoachOrderListProps = {
   orders: CoachOrderRow[];
@@ -11,6 +12,10 @@ type CoachOrderListProps = {
 };
 
 export function CoachOrderList({ orders, coachProductIds }: CoachOrderListProps) {
+  const pendingApplications = orders.filter(
+    (order) => order.status === "PENDING" && order.checkout === "APPLICATION",
+  );
+
   if (orders.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-14 text-center">
@@ -21,6 +26,41 @@ export function CoachOrderList({ orders, coachProductIds }: CoachOrderListProps)
   }
 
   return (
+    <div className="space-y-6">
+      {pendingApplications.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-zinc-900">승인 대기 {pendingApplications.length}건</h2>
+          <ul className="space-y-3">
+            {pendingApplications.map((order) => {
+              const coachLines = order.lines.filter((line) => coachProductIds.includes(line.productId));
+              return (
+                <li key={order.id} className="rounded-2xl border border-amber-200 bg-white p-5 shadow-sm">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-zinc-900">
+                        {coachLines.map((line) => line.product.title).join(", ") || "상품"}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-500">
+                        {order.user.name ?? "이름 없음"} · {order.user.email}
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-400">{formatDateTime(order.createdAt)}</p>
+                    </div>
+                    <p className="font-semibold">{formatKrw(order.total)}</p>
+                  </div>
+                  <OrderApplicationActions
+                    orderId={order.id}
+                    status={order.status}
+                    checkout={order.checkout}
+                    apiBase="/api/coach/orders"
+                    compact
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <table className="min-w-full text-sm">
         <thead className="bg-zinc-50 text-left text-zinc-500">
@@ -67,7 +107,7 @@ export function CoachOrderList({ orders, coachProductIds }: CoachOrderListProps)
                 </td>
                 <td className="px-5 py-4 font-medium">{formatKrw(order.total)}</td>
                 <td className="px-5 py-4">
-                  <OrderStatusPill status={order.status} />
+                  <OrderStatusPill status={order.status} label={orderStatusText(order.status, order.checkout)} />
                 </td>
                 <td className="px-5 py-4 text-zinc-500">{formatDateTime(order.createdAt)}</td>
               </tr>
@@ -75,6 +115,7 @@ export function CoachOrderList({ orders, coachProductIds }: CoachOrderListProps)
           })}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }
