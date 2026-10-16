@@ -8,6 +8,12 @@ import {
   updateProduct,
   updateProductItems,
 } from "@/lib/products";
+import {
+  assignProductGroup,
+  listCoachProductGroups,
+  parseProductGroupAssignment,
+  type ProductGroupAssignment,
+} from "@/lib/product-groups";
 import { prisma } from "@/lib/prisma";
 
 type ProductItemInput = {
@@ -65,6 +71,7 @@ const coachProductListInclude = {
     },
   },
   organization: { select: { id: true, name: true, slug: true } },
+  groupMember: { include: { group: { select: { id: true, title: true } } } },
   _count: { select: { orderLines: true } },
 } as const;
 
@@ -89,6 +96,7 @@ export async function assertCoachOwnsProduct(coachId: string, productId: string)
           },
         },
       },
+      groupMember: { include: { group: { select: { id: true, title: true } } } },
     },
   });
 
@@ -131,6 +139,11 @@ export async function listCoachProducts(coachId: string) {
   return products.filter((product) => productBelongsToCoach(product, coachId));
 }
 
+async function coachOwnedProductIds(coachId: string) {
+  const products = await listCoachProducts(coachId);
+  return products.map((product) => product.id);
+}
+
 export async function createCoachProduct(params: {
   coachId: string;
   title: string;
@@ -142,10 +155,11 @@ export async function createCoachProduct(params: {
   salePrice?: number;
   items: ProductItemInput[];
   activate?: boolean;
+  group?: ProductGroupAssignment;
 }) {
   await validateCoachProductItems(params.coachId, params.items);
 
-  return createProduct({
+  const product = await createProduct({
     actorId: params.coachId,
     title: params.title,
     description: params.description,
@@ -157,6 +171,24 @@ export async function createCoachProduct(params: {
     items: params.items,
     activate: params.activate,
   });
+
+  if (!params.group || params.group.mode === "none") {
+    return product;
+  }
+
+  try {
+    const ownedProductIds = await coachOwnedProductIds(params.coachId);
+    await assignProductGroup({
+      productId: product.id,
+      ownedProductIds,
+      assignment: params.group,
+    });
+  } catch (error) {
+    await prisma.product.delete({ where: { id: product.id } }).catch(() => undefined);
+    throw error;
+  }
+
+  return assertCoachOwnsProduct(params.coachId, product.id);
 }
 
 export async function updateCoachProduct(params: {
@@ -170,6 +202,7 @@ export async function updateCoachProduct(params: {
   salePrice?: number | null;
   thumbnailUrl?: string | null;
   isActive?: boolean;
+  group?: ProductGroupAssignment;
 }) {
   await assertCoachOwnsProduct(params.coachId, params.productId);
 
@@ -178,7 +211,7 @@ export async function updateCoachProduct(params: {
       ? undefined
       : assertProductThumbnailUrl(params.productId, params.thumbnailUrl);
 
-  return updateProduct({
+  const product = await updateProduct({
     actorId: params.coachId,
     productId: params.productId,
     title: params.title,
@@ -190,6 +223,17 @@ export async function updateCoachProduct(params: {
     thumbnailUrl,
     isActive: params.isActive,
   });
+
+  if (params.group) {
+    const ownedProductIds = await coachOwnedProductIds(params.coachId);
+    await assignProductGroup({
+      productId: params.productId,
+      ownedProductIds,
+      assignment: params.group,
+    });
+  }
+
+  return product;
 }
 
 export async function updateCoachProductItems(params: {
@@ -221,6 +265,8 @@ export async function getCoachProductCatalog(coachId: string) {
     }),
   ]);
 
+  const ownedProductIds = await coachOwnedProductIds(coachId);
+
   return {
     courses: courses.map((course) => ({
       id: course.id,
@@ -230,5 +276,8 @@ export async function getCoachProductCatalog(coachId: string) {
       id: offering.id,
       label: offering.title,
     })),
+    groups: await listCoachProductGroups(ownedProductIds),
   };
 }
+
+export { parseProductGroupAssignment };

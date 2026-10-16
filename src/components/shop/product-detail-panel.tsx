@@ -7,11 +7,13 @@ import { SiteLegalFooter } from "@/components/site/site-legal-footer";
 import { ProductRefundSection } from "@/components/shop/product-refund-section";
 import { ProductReviewSection } from "@/components/shop/product-review-section";
 import { ProductSectionNav } from "@/components/shop/product-section-nav";
+import { ProductOptionPicker } from "@/components/shop/product-option-picker";
 import { ProductDetailStickyBar } from "@/components/shop/product-purchase-panel";
 import { formatKrw } from "@/lib/customer-labels";
 import { getProductPrice } from "@/lib/fulfillment";
 import { listWidgetCheckoutOptions } from "@/lib/payments/toss/options";
 import { getProductHeroImages } from "@/lib/shop-product-hero";
+import type { ShopProductOption } from "@/lib/product-groups";
 import type { CatalogProduct } from "@/lib/shop-products";
 import type { ProductCouponCard } from "@/lib/shop-coupon";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
@@ -36,6 +38,8 @@ type ProductDetailPanelProps = {
   canReview: boolean;
   hasExistingReview: boolean;
   coupons: ProductCouponCard[];
+  pageTitle?: string;
+  options?: ShopProductOption[];
 };
 
 function getCourses(product: CatalogProduct): CatalogCourse[] {
@@ -58,8 +62,12 @@ export function ProductDetailPanel({
   canReview,
   hasExistingReview,
   coupons,
+  pageTitle,
+  options = [],
 }: ProductDetailPanelProps) {
   const price = getProductPrice(product);
+  const title = pageTitle ?? product.title;
+  const selectedOption = options.find((option) => option.productId === product.id);
   const checkout = listWidgetCheckoutOptions();
   const hasDiscount = product.salePrice != null && product.salePrice < product.listPrice;
   const discountRate = hasDiscount
@@ -85,13 +93,16 @@ export function ProductDetailPanel({
   return (
     <article className="glia-pdp">
       <header className="glia-pdp__hero">
-        <ProductHeroGallery images={heroImages} title={product.title} eyebrow={programEyebrow} />
+        <ProductHeroGallery images={heroImages} title={title} eyebrow={programEyebrow} />
       </header>
 
       <div className="glia-pdp__layout">
         <div className="glia-pdp__identity">
           <p className="glia-pdp__eyebrow">{programEyebrow}</p>
-          <h1 className="glia-pdp__title">{product.title}</h1>
+          <h1 className="glia-pdp__title">{title}</h1>
+          {options.length > 1 ? (
+            <ProductOptionPicker options={options} selectedId={product.id} />
+          ) : null}
           <p className="glia-pdp__byline">
             {instructorName ? <strong>{instructorName}</strong> : null}
             {reviewSummary.reviewCount > 0 ? (
@@ -117,6 +128,8 @@ export function ProductDetailPanel({
           eyebrow={programEyebrow}
           checkout={checkout}
           coupons={coupons}
+          options={options}
+          pageTitle={title}
         />
 
         <div className="glia-pdp__main">
@@ -176,6 +189,7 @@ export function ProductDetailPanel({
         isLoggedIn={isLoggedIn}
         priceLabel={formatKrw(price)}
         checkout={checkout}
+        optionLabel={selectedOption?.label}
       />
     </article>
   );

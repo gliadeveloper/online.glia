@@ -33,7 +33,7 @@ export default async function CoachNewProductPage() {
           </div>
         </div>
       ) : (
-        <CoachCreateProductForm courses={catalog.courses} offerings={catalog.offerings} />
+        <CoachCreateProductForm courses={catalog.courses} offerings={catalog.offerings} groups={catalog.groups} />
       )}
     </div>
   );

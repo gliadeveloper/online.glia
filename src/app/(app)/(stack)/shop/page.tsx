@@ -5,7 +5,8 @@ import { SiteLegalFooter } from "@/components/site/site-legal-footer";
 import { ProductListCard } from "@/components/shop/product-list-card";
 import { ShopStackPage } from "@/components/shop/shop-stack-page";
 import { ShopListHeader } from "@/components/shop/shop-list-header";
-import { getActiveProducts } from "@/lib/shop-products";
+import { getShopListings } from "@/lib/product-groups";
+import { productDescriptionExcerpt } from "@/lib/shop-product-copy";
 import { getCatalogProductShopStates, defaultPurchaseShopState } from "@/lib/shop-purchase-state";
 import { buildPageMetadata, shopOgImages } from "@/lib/site-metadata";
 import { StackNavTitle } from "@/lib/stack-nav-context";
@@ -22,7 +23,8 @@ import "@/components/shop/shop-list-glia.css";
 
 export default async function ShopPage() {
   const user = await getCurrentUser();
-  const products = await getActiveProducts();
+  const listings = await getShopListings();
+  const products = listings.map((listing) => (listing.kind === "product" ? listing.product : listing.coverProduct));
   const shopStates = user
     ? await getCatalogProductShopStates(user.id, products)
     : new Map();
@@ -32,9 +34,9 @@ export default async function ShopPage() {
       <StackNavTitle title="상품" />
 
       <div className="glia-shop">
-        <ShopListHeader productCount={products.length} />
+        <ShopListHeader productCount={listings.length} />
 
-        {products.length === 0 ? (
+        {listings.length === 0 ? (
           <div className="glia-shop__empty">
             <p className="glia-shop__empty-title">아직 열린 프로그램이 없습니다</p>
             <p className="glia-shop__empty-hint">코치가 상품을 등록하면 이곳에서 신청할 수 있어요.</p>
@@ -45,14 +47,30 @@ export default async function ShopPage() {
               판매 중인 상품
             </h2>
             <ul className="glia-shop__list">
-              {products.map((product) => (
-                <li key={product.id}>
-                  <ProductListCard
-                    product={product}
-                    shopState={shopStates.get(product.id) ?? defaultPurchaseShopState}
-                  />
-                </li>
-              ))}
+              {listings.map((listing) =>
+                listing.kind === "product" ? (
+                  <li key={listing.product.id}>
+                    <ProductListCard
+                      product={listing.product}
+                      shopState={shopStates.get(listing.product.id) ?? defaultPurchaseShopState}
+                    />
+                  </li>
+                ) : (
+                  <li key={listing.id}>
+                    <ProductListCard
+                      product={listing.coverProduct}
+                      shopState={defaultPurchaseShopState}
+                      title={listing.title}
+                      href={listing.href}
+                      priceText={listing.priceLabel}
+                      kindLabel="옵션"
+                      excerptText={productDescriptionExcerpt(listing.description, 150)}
+                      includes={listing.optionLabels}
+                      thumbnailUrl={listing.thumbnailUrl}
+                    />
+                  </li>
+                ),
+              )}
             </ul>
           </section>
         )}

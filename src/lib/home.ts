@@ -10,7 +10,8 @@ import {
 import { getContinueLearning } from "@/lib/learning";
 import { displayAuthorName } from "@/lib/post-display";
 import { prisma } from "@/lib/prisma";
-import { getActiveProducts, type CatalogProduct } from "@/lib/shop-products";
+import { getShopListings, type ShopListing } from "@/lib/product-groups";
+import type { CatalogProduct } from "@/lib/shop-products";
 import { formatKrw, getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
 
 const HOME_PRODUCT_LIMIT = 3;
@@ -103,6 +104,22 @@ function guestCheckin(): HomeCheckin {
   };
 }
 
+function mapListingCard(listing: ShopListing): HomeProductCard {
+  if (listing.kind === "group") {
+    return {
+      id: listing.id,
+      href: listing.href,
+      title: listing.title,
+      kindLabel: "옵션",
+      priceLabel: listing.priceLabel,
+      listPriceLabel: null,
+      thumbnailUrl: listing.thumbnailUrl,
+    };
+  }
+
+  return mapProductCard(listing.product);
+}
+
 function mapProductCard(product: CatalogProduct): HomeProductCard {
   const displayPrice = getProductDisplayPrice(product);
   const thumbnailUrl =
@@ -177,7 +194,7 @@ async function getLastCoachingForHome(userId: string): Promise<HomeContinueCoach
 
 export async function getHomePageData(user: HomeUser | null): Promise<HomePageData> {
   if (!user) {
-    const products = await getActiveProducts(HOME_PRODUCT_LIMIT);
+    const products = await getShopListings(HOME_PRODUCT_LIMIT);
 
     return {
       isLoggedIn: false,
@@ -186,7 +203,7 @@ export async function getHomePageData(user: HomeUser | null): Promise<HomePageDa
       shortcuts: [],
       continueCourse: null,
       lastCoaching: null,
-      products: products.map(mapProductCard),
+      products: products.map(mapListingCard),
       discoverPriority: "start",
     };
   }
@@ -197,7 +214,7 @@ export async function getHomePageData(user: HomeUser | null): Promise<HomePageDa
       getHomeNotifications(user.id),
       getContinueLearning(user.id),
       getLastCoachingForHome(user.id),
-      getActiveProducts(HOME_PRODUCT_LIMIT),
+      getShopListings(HOME_PRODUCT_LIMIT),
       prisma.enrollment.count({ where: { userId: user.id, status: "ACTIVE" } }),
       prisma.coachingEntitlement.count({ where: { userId: user.id, status: "ACTIVE" } }),
     ]);
@@ -247,7 +264,7 @@ export async function getHomePageData(user: HomeUser | null): Promise<HomePageDa
     ],
     continueCourse,
     lastCoaching,
-    products: products.map(mapProductCard),
+    products: products.map(mapListingCard),
     discoverPriority: hasOwnedContent ? "recommend" : "start",
   };
 }

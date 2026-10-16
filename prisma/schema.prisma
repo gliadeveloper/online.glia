@@ -1218,9 +1218,45 @@ model Product {
   items        ProductItem[]
   orderLines   OrderLine[]
   couponProducts ShopCouponProduct[]
+  groupMember    ProductGroupMember?
 
   @@index([kind, isActive])
   @@map("products")
+}
+
+/// Shop listing that presents several products as options. Orders still point at Product.
+model ProductGroup {
+  id                  String    @id @default(uuid())
+  title               String
+  description         String?
+  /// BlockNote JSON, same shape as Product.descriptionMetadata.
+  descriptionMetadata Json?
+  thumbnailUrl        String?
+  isActive            Boolean   @default(true)
+  publishedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  members ProductGroupMember[]
+
+  @@index([isActive, publishedAt])
+  @@map("product_groups")
+}
+
+/// One product belongs to at most one group. label is the option name on the shop page.
+model ProductGroupMember {
+  id        String @id @default(cuid())
+  groupId   String
+  productId String @unique
+  label     String
+  sortOrder Int    @default(0)
+
+  group   ProductGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, label])
+  @@index([groupId, sortOrder])
+  @@map("product_group_members")
 }
 
 model ProductItem {

@@ -13,6 +13,7 @@ import {
 } from "@/lib/course-reviews";
 import { getProductPrice } from "@/lib/fulfillment";
 import { getShopCouponOffer } from "@/lib/shop-coupon";
+import { getActiveProductGroup } from "@/lib/product-groups";
 import { getProductById } from "@/lib/shop-products";
 import { getProductHeroImages } from "@/lib/shop-product-hero";
 import { getProductShopState, defaultPurchaseShopState } from "@/lib/shop-purchase-state";
@@ -34,8 +35,9 @@ export async function generateMetadata({ params }: ProductDetailPageProps): Prom
   const { id } = await params;
   const product = await getProductById(id);
   if (!product) notFound();
+  const group = await getActiveProductGroup(product.id);
 
-  const title = product.title;
+  const title = group?.title ?? product.title;
   const description = excerptForOg(product.description) ?? `${title} — GLIA 온라인 프로그램`;
   const hero = getProductHeroImages(product)[0];
   const url = `/shop/${product.id}`;
@@ -56,6 +58,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   if (!product) {
     notFound();
   }
+  const group = await getActiveProductGroup(product.id);
+  const pageTitle = group?.title ?? product.title;
 
   const courseIds = getProductCourseIds(product.items);
   const guestShopState = {
@@ -76,9 +80,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const { shopState } = shopStateResult;
 
-  const description = excerptForOg(product.description) ?? `${product.title} — GLIA 온라인 프로그램`;
+  const description = excerptForOg(group?.description ?? product.description) ?? `${pageTitle} — GLIA 온라인 프로그램`;
   const hero = getProductHeroImages(product)[0];
-  const ogImage = toOgImage(hero?.src, hero?.alt || product.title);
+  const ogImage = toOgImage(hero?.src, hero?.alt || pageTitle);
 
   return (
     <ShopStackPage className="shop-pdp-page">
@@ -86,7 +90,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         data={{
           "@context": "https://schema.org",
           "@type": "Product",
-          name: product.title,
+          name: pageTitle,
           description,
           image: absoluteUrl(ogImage.url),
           brand: { "@type": "Brand", name: SITE_NAME },
@@ -99,10 +103,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           },
         }}
       />
-      <StackNavTitle title={product.title} />
+      <StackNavTitle title={pageTitle} />
 
       <ProductDetailPanel
         product={product}
+        pageTitle={pageTitle}
+        options={group?.options}
         shopState={shopState}
         isLoggedIn={!!user}
         reviewSummary={reviewSummary}

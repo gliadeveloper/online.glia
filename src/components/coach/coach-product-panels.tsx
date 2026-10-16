@@ -27,9 +27,110 @@ type ProductRow = {
     course: { title: string } | null;
     coachingOffering: { title: string } | null;
   }>;
+  groupMember: { label: string; group: { id: string; title: string } } | null;
 };
 
 type Option = { id: string; label: string };
+type GroupOption = { id: string; title: string };
+type GroupMode = "none" | "new" | "existing";
+
+function groupPayload(mode: GroupMode, groupTitle: string, groupId: string, optionLabel: string) {
+  if (mode === "none") return { mode: "none" as const };
+  if (mode === "new") return { mode: "new" as const, title: groupTitle, label: optionLabel };
+  return { mode: "existing" as const, groupId, label: optionLabel };
+}
+
+function ProductGroupFields({
+  mode,
+  groupTitle,
+  groupId,
+  optionLabel,
+  groups,
+  onMode,
+  onGroupTitle,
+  onGroupId,
+  onOptionLabel,
+}: {
+  mode: GroupMode;
+  groupTitle: string;
+  groupId: string;
+  optionLabel: string;
+  groups: GroupOption[];
+  onMode: (mode: GroupMode) => void;
+  onGroupTitle: (value: string) => void;
+  onGroupId: (value: string) => void;
+  onOptionLabel: (value: string) => void;
+}) {
+  return (
+    <fieldset className="space-y-3 text-sm">
+      <legend className="font-medium">샵 옵션 그룹</legend>
+      <p className="text-xs text-zinc-500">
+        같은 그룹의 상품은 샵에서 하나로 보이고, 고객이 옵션을 고릅니다. 결제하면 고른 상품의 코스와 코칭권만 열립니다.
+      </p>
+      <div className="flex flex-wrap gap-4">
+        <label className="flex items-center gap-2">
+          <input type="radio" name="product-group" checked={mode === "none"} onChange={() => onMode("none")} />
+          이 상품만 판매
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="radio" name="product-group" checked={mode === "new"} onChange={() => onMode("new")} />
+          새 그룹
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="product-group"
+            checked={mode === "existing"}
+            disabled={groups.length === 0}
+            onChange={() => onMode("existing")}
+          />
+          있는 그룹에 넣기
+        </label>
+      </div>
+      {mode === "new" ? (
+        <label className="block space-y-2">
+          <span className="text-zinc-600">그룹 제목</span>
+          <input
+            value={groupTitle}
+            onChange={(event) => onGroupTitle(event.target.value)}
+            required
+            placeholder="30일 생활습관"
+            className="w-full rounded-xl border border-zinc-200 px-4 py-3"
+          />
+        </label>
+      ) : null}
+      {mode === "existing" ? (
+        <label className="block space-y-2">
+          <span className="text-zinc-600">그룹</span>
+          <select
+            value={groupId}
+            onChange={(event) => onGroupId(event.target.value)}
+            required
+            className="w-full rounded-xl border border-zinc-200 px-4 py-3"
+          >
+            {groups.map((group) => (
+              <option key={group.id} value={group.id}>
+                {group.title}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      {mode !== "none" ? (
+        <label className="block space-y-2">
+          <span className="text-zinc-600">옵션 이름</span>
+          <input
+            value={optionLabel}
+            onChange={(event) => onOptionLabel(event.target.value)}
+            required
+            placeholder="오전반"
+            className="w-full rounded-xl border border-zinc-200 px-4 py-3"
+          />
+        </label>
+      ) : null}
+    </fieldset>
+  );
+}
 
 const thumbnailAccept = "image/jpeg,image/png,image/webp,image/gif,image/avif";
 
@@ -208,6 +309,11 @@ export function CoachProductList({ products }: { products: ProductRow[] }) {
                   .filter(Boolean)
                   .join(" · ")}
               </p>
+              {product.groupMember ? (
+                <p className="mt-1 text-xs text-emerald-700">
+                  {product.groupMember.group.title} · {product.groupMember.label}
+                </p>
+              ) : null}
               </div>
             </div>
             <p className="text-sm font-semibold text-zinc-900">
@@ -223,9 +329,10 @@ export function CoachProductList({ products }: { products: ProductRow[] }) {
 type CoachCreateProductFormProps = {
   courses: Option[];
   offerings: Option[];
+  groups: GroupOption[];
 };
 
-export function CoachCreateProductForm({ courses, offerings }: CoachCreateProductFormProps) {
+export function CoachCreateProductForm({ courses, offerings, groups }: CoachCreateProductFormProps) {
   const router = useRouter();
   const [kind, setKind] = useState<ProductKind>("COURSE_ONLY");
   const [title, setTitle] = useState("");
@@ -237,6 +344,10 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
   const [offeringId, setOfferingId] = useState(offerings[0]?.id ?? "");
   const [accessDuration, setAccessDuration] = useState<CourseAccessDuration>("LIFETIME");
   const [accessDays, setAccessDays] = useState("90");
+  const [groupMode, setGroupMode] = useState<GroupMode>("none");
+  const [groupTitle, setGroupTitle] = useState("");
+  const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
+  const [optionLabel, setOptionLabel] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -270,6 +381,7 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
           salePrice: salePrice ? Number(salePrice) : undefined,
           activate: true,
           items,
+          group: groupPayload(groupMode, groupTitle, groupId, optionLabel),
         }),
       });
 
@@ -393,6 +505,18 @@ export function CoachCreateProductForm({ courses, offerings }: CoachCreateProduc
         </label>
       )}
 
+      <ProductGroupFields
+        mode={groupMode}
+        groupTitle={groupTitle}
+        groupId={groupId}
+        optionLabel={optionLabel}
+        groups={groups}
+        onMode={setGroupMode}
+        onGroupTitle={setGroupTitle}
+        onGroupId={setGroupId}
+        onOptionLabel={setOptionLabel}
+      />
+
       <button type="submit" disabled={submitting} className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
         {submitting ? "생성 중…" : "상품 생성"}
       </button>
@@ -421,6 +545,8 @@ type CoachProductEditPanelProps = {
   }>;
   courses: Option[];
   offerings: Option[];
+  groups: GroupOption[];
+  groupMember: { label: string; group: { id: string; title: string } } | null;
 };
 
 export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
@@ -453,6 +579,10 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
   const [accessDays, setAccessDays] = useState(
     originalCourse?.accessDays != null ? String(originalCourse.accessDays) : "90",
   );
+  const [groupMode, setGroupMode] = useState<GroupMode>(props.groupMember ? "existing" : "none");
+  const [groupTitle, setGroupTitle] = useState("");
+  const [groupId, setGroupId] = useState(props.groupMember?.group.id ?? props.groups[0]?.id ?? "");
+  const [optionLabel, setOptionLabel] = useState(props.groupMember?.label ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -518,6 +648,7 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
           salePrice: salePrice ? Number(salePrice) : null,
           thumbnailUrl,
           isActive,
+          group: groupPayload(groupMode, groupTitle, groupId, optionLabel),
         }),
       });
       const itemsRes = itemsChanged
@@ -643,6 +774,18 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
             </select>
           </label>
         )}
+
+        <ProductGroupFields
+          mode={groupMode}
+          groupTitle={groupTitle}
+          groupId={groupId}
+          optionLabel={optionLabel}
+          groups={props.groups}
+          onMode={setGroupMode}
+          onGroupTitle={setGroupTitle}
+          onGroupId={setGroupId}
+          onOptionLabel={setOptionLabel}
+        />
 
         <button type="submit" disabled={busy} className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
           저장

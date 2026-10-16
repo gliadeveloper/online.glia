@@ -2,10 +2,12 @@ import Link from "next/link";
 import { BookOpen, HeartPulse } from "lucide-react";
 
 import { ProductApplyButton } from "@/components/shop/product-apply-button";
+import { ProductOptionPicker } from "@/components/shop/product-option-picker";
 import { ProductCouponSheet } from "@/components/shop/product-coupon-sheet";
 import { ProductPayLink } from "@/components/shop/product-pay-link";
 import { formatKrw } from "@/lib/customer-labels";
 import type { WidgetCheckoutOptions } from "@/lib/payments/toss/widget";
+import type { ShopProductOption } from "@/lib/product-groups";
 import type { CatalogProduct } from "@/lib/shop-products";
 import type { ProductCouponCard } from "@/lib/shop-coupon";
 import type { ProductShopState } from "@/lib/shop-purchase-state";
@@ -23,6 +25,8 @@ type ProductDetailSidebarProps = {
   eyebrow: string;
   checkout: WidgetCheckoutOptions;
   coupons: ProductCouponCard[];
+  options?: ShopProductOption[];
+  pageTitle?: string;
 };
 
 type BundlePart = {
@@ -104,6 +108,8 @@ export function ProductDetailSidebar({
   eyebrow,
   checkout,
   coupons,
+  options = [],
+  pageTitle,
 }: ProductDetailSidebarProps) {
   const owned = shopState.kind === "owned";
   const initial = instructorName?.slice(0, 1) ?? eyebrow.slice(0, 1);
@@ -124,8 +130,12 @@ export function ProductDetailSidebar({
         )}
 
         <p className="glia-pdp__buy-title" aria-hidden="true">
-          {product.title}
+          {pageTitle ?? product.title}
         </p>
+
+        {options.length > 1 ? (
+          <ProductOptionPicker options={options} selectedId={product.id} className="glia-pdp__options--rail" />
+        ) : null}
 
         <StarSummary rating={averageRating} count={reviewCount} />
 

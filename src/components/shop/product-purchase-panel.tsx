@@ -16,6 +16,7 @@ type ProductDetailStickyBarProps = {
   isLoggedIn: boolean;
   priceLabel: string;
   checkout: WidgetCheckoutOptions;
+  optionLabel?: string;
 };
 
 export function ProductDetailStickyBar({
@@ -24,6 +25,7 @@ export function ProductDetailStickyBar({
   isLoggedIn,
   priceLabel,
   checkout,
+  optionLabel,
 }: ProductDetailStickyBarProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -43,6 +45,7 @@ export function ProductDetailStickyBar({
     ) : (
       <div className="shop-pdp-sticky-bar">
         <div className="shop-pdp-sticky-bar__inner">
+          {optionLabel ? <p className="shop-pdp-sticky-bar__option">{optionLabel} · {priceLabel}</p> : null}
           {checkout.state === "ready" ? (
             <ProductPayLink productId={product.id} isLoggedIn={isLoggedIn} className="shop-pdp-sticky-bar__cta" />
           ) : checkout.state === "unavailable" ? (

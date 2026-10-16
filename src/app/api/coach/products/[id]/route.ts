@@ -4,6 +4,7 @@ import { ApiError, assertCoach, jsonError, resolveUserId } from "@/lib/api";
 import {
   assertCoachOwnsProduct,
   getCoachProductCatalog,
+  parseProductGroupAssignment,
   updateCoachProduct,
 } from "@/lib/coach-commerce";
 import { parseProductSupplies } from "@/lib/products";
@@ -37,6 +38,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       salePrice?: number | null;
       thumbnailUrl?: string | null;
       isActive?: boolean;
+      group?: unknown;
     };
 
     const userId = await resolveUserId(request);
@@ -53,6 +55,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       salePrice: body.salePrice,
       thumbnailUrl: "thumbnailUrl" in body ? (body.thumbnailUrl ?? null) : undefined,
       isActive: body.isActive,
+      group: "group" in body ? parseProductGroupAssignment(body.group) : undefined,
     });
 
     return NextResponse.json(product);

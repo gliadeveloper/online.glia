@@ -11,6 +11,13 @@ import type { ProductShopState } from "@/lib/shop-purchase-state";
 type ProductListCardProps = {
   product: CatalogProduct;
   shopState: ProductShopState;
+  title?: string;
+  href?: string;
+  priceText?: string;
+  kindLabel?: string;
+  excerptText?: string | null;
+  includes?: string[];
+  thumbnailUrl?: string | null;
 };
 
 function programKindLabel(kind: CatalogProduct["kind"]) {
@@ -43,18 +50,29 @@ function instructorName(product: CatalogProduct) {
   return instructor?.name ?? instructor?.email.split("@")[0] ?? null;
 }
 
-export function ProductListCard({ product, shopState }: ProductListCardProps) {
+export function ProductListCard({
+  product,
+  shopState,
+  title,
+  href,
+  priceText,
+  kindLabel,
+  excerptText,
+  includes,
+  thumbnailUrl,
+}: ProductListCardProps) {
   const price = getProductPrice(product);
-  const cover = getProductHeroImages(product)[0];
-  const excerpt = productDescriptionExcerpt(product.description, 150);
-  const highlights = getProductHighlights(product).slice(0, 3);
+  const cover = thumbnailUrl ? { src: thumbnailUrl, alt: title ?? product.title } : getProductHeroImages(product)[0];
+  const excerpt = excerptText === undefined ? productDescriptionExcerpt(product.description, 150) : excerptText;
+  const highlights = includes ?? getProductHighlights(product).slice(0, 3);
   const status = listStatus(shopState);
   const creator = instructorName(product);
   const priceLabel =
-    shopState.kind === "owned" ? "수강 중" : shopState.kind === "pending" ? "승인 대기" : formatKrw(price);
+    priceText ??
+    (shopState.kind === "owned" ? "수강 중" : shopState.kind === "pending" ? "승인 대기" : formatKrw(price));
 
   return (
-    <Link href={`/shop/${product.id}`} className="glia-shop-item">
+    <Link href={href ?? `/shop/${product.id}`} className="glia-shop-item">
       <div className="glia-shop-item__visual">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -69,13 +87,13 @@ export function ProductListCard({ product, shopState }: ProductListCardProps) {
 
       <div className="glia-shop-item__copy">
         <div className="glia-shop-item__meta">
-          <p className="glia-shop-item__kind">{programKindLabel(product.kind)}</p>
+          <p className="glia-shop-item__kind">{kindLabel ?? programKindLabel(product.kind)}</p>
           {status ? (
             <span className={`glia-shop-item__status glia-shop-item__status--${status.tone}`}>{status.label}</span>
           ) : null}
         </div>
 
-        <h2 className="glia-shop-item__title">{product.title}</h2>
+        <h2 className="glia-shop-item__title">{title ?? product.title}</h2>
         {creator ? <p className="glia-shop-item__byline">{creator}</p> : null}
         {excerpt ? <p className="glia-shop-item__desc">{excerpt}</p> : null}
 

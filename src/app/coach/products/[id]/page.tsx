@@ -49,6 +49,8 @@ export default async function CoachProductDetailPage({ params, searchParams }: P
         items={product.items}
         courses={catalog.courses}
         offerings={catalog.offerings}
+        groups={catalog.groups}
+        groupMember={product.groupMember}
       />
     </div>
   );

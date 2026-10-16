@@ -4,6 +4,7 @@ import { ApiError, assertCoach, jsonError, resolveUserId } from "@/lib/api";
 import {
   createCoachProduct,
   listCoachProducts,
+  parseProductGroupAssignment,
 } from "@/lib/coach-commerce";
 import { parseProductSupplies } from "@/lib/products";
 import type { ProductKind } from "@/generated/prisma/client";
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
         accessDuration?: "LIFETIME" | "FIXED_DAYS";
         accessDays?: number | null;
       }>;
+      group?: unknown;
     };
 
     const userId = await resolveUserId(request);
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
       salePrice: body.salePrice,
       items: body.items,
       activate: body.activate ?? true,
+      group: parseProductGroupAssignment(body.group),
     });
 
     return NextResponse.json(product, { status: 201 });
