@@ -213,9 +213,13 @@
 
 상세: [lms-access-implementation.md](./lms-access-implementation.md)
 
-### 5.5 보류 (v1 미구현)
+### 5.5 쿠폰 결제
 
-쿠폰, 연장 전용 SKU 가격, 업그레이드 차액, Admin ProductItem 기간 UI, drip/일시정지
+쿠폰은 발급 당시 할인·최소 주문 금액 조건을 적용한다. 전액 할인으로 결제액이 0원이면 토스를 호출하지 않고 `FREE` 주문을 완료한다. 주문·쿠폰 사용·권한 지급은 같은 트랜잭션으로 처리한다. 1–99원이 남는 할인은 적용하지 않는다. 상세: [구현 정책](./lms-access-implementation.md#전액-할인-쿠폰-주문).
+
+### 5.7 보류 (v1 미구현)
+
+연장 전용 SKU 가격, 업그레이드 차액, Admin ProductItem 기간 UI, drip/일시정지
 
 ---
 

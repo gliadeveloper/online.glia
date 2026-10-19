@@ -172,6 +172,9 @@ export async function prepareTossPayment(params: {
 
       const discount = locked?.discount ?? 0;
       const total = locked?.total ?? price;
+      if (total < 100) {
+        throw new ApiError("0원 주문은 주문 완료 버튼을 이용해 주세요.", 400, "TOSS_AMOUNT_TOO_LOW");
+      }
       const created = await tx.order.create({
         data: {
           userId: params.userId,

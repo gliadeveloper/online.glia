@@ -35,7 +35,7 @@ export function couponDiscountWon(rule: CouponDiscountRule, price: number) {
 
   if (!Number.isSafeInteger(discount) || discount < 1) return 0;
   discount = Math.min(discount, price);
-  if (price - discount < MIN_PAYABLE_KRW) return 0;
+  if (price - discount > 0 && price - discount < MIN_PAYABLE_KRW) return 0;
   return discount;
 }
 

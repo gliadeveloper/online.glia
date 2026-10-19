@@ -1,0 +1,1 @@
+ALTER TYPE "OrderCheckout" ADD VALUE 'FREE';

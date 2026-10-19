@@ -39,6 +39,8 @@ export function ProductCheckoutPay({
   const [codeError, setCodeError] = useState<string | null>(null);
   const [codeMessage, setCodeMessage] = useState<string | null>(null);
   const [redeeming, setRedeeming] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const options = [...coupons];
   for (const coupon of received) {
     if (!options.some((item) => item.issueId === coupon.issueId)) options.push(coupon);
@@ -46,6 +48,30 @@ export function ProductCheckoutPay({
   const selected = options.find((coupon) => coupon.issueId === issueId) ?? null;
   const discount = selected?.discountWon ?? 0;
   const payable = basePrice - discount;
+
+  async function completeFreeOrder() {
+    if (completing || !selected) return;
+    setCompleting(true);
+    setOrderError(null);
+    try {
+      const response = await fetch("/api/checkout/free", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, couponIssueId: selected.issueId }),
+      });
+      const data = await response.json() as { orderId?: string; error?: string };
+      if (!response.ok || !data.orderId) {
+        setOrderError(data.error ?? "주문을 완료하지 못했습니다.");
+        return;
+      }
+      router.push(`/orders/${data.orderId}`);
+      router.refresh();
+    } catch {
+      setOrderError("주문을 완료하지 못했습니다. 다시 시도해 주세요.");
+    } finally {
+      setCompleting(false);
+    }
+  }
 
   async function redeemCode(event: React.FormEvent) {
     event.preventDefault();
@@ -105,7 +131,7 @@ export function ProductCheckoutPay({
         </p>
       </section>
 
-      <fieldset className="glia-checkout__coupon">
+      <fieldset className="glia-checkout__coupon" disabled={completing}>
         <legend className="glia-checkout__label">쿠폰</legend>
         <form className="glia-checkout__coupon-code" onSubmit={redeemCode}>
           <label>
@@ -170,14 +196,22 @@ export function ProductCheckoutPay({
       </fieldset>
 
       <div className="glia-checkout__pay">
-        <ProductWidgetCheckout
+        {payable === 0 && selected ? (
+          <>
+            <p className="glia-checkout__notice">전액 할인되어 추가 결제 없이 주문을 완료합니다.</p>
+            <button type="button" className="shop-pdp-apply-btn" onClick={completeFreeOrder} disabled={completing || redeeming}>
+              {completing ? "주문 완료 중…" : "0원으로 주문 완료"}
+            </button>
+            {orderError ? <p className="glia-checkout__notice" role="alert">{orderError}</p> : null}
+          </>
+        ) : <ProductWidgetCheckout
           productId={productId}
           couponIssueId={selected?.issueId ?? null}
           clientKey={clientKey}
           variantKey={variantKey}
           customerKey={customerKey}
           amount={payable}
-        />
+        />}
       </div>
     </>
   );

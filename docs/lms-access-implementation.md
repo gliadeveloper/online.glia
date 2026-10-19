@@ -2,7 +2,7 @@
 
 > **문서 목적:** 2026-07 기준, 수강 기간(Access) · Shop CTA · Fulfillment 정책 중 **결정·적용된 사항**을 한곳에 정리한다.  
 > **관련 문서:** [lms-access-entitlements.md](./lms-access-entitlements.md) (DB/도메인 설계 원본) · [policies.md](./policies.md) (정책 허브)  
-> **범위 밖:** 케이스별 할인 SKU, 쿠폰, Admin ProductItem UI, 차액 결제
+> **범위 밖:** 케이스별 할인 SKU, Admin ProductItem UI, 차액 결제
 
 ---
 
@@ -19,7 +19,7 @@
 | Shop UI 상태 (`extend` / `restore` / `upgrade` / `partial` / `owned` / `purchase`) | ✅ |
 | 내 학습 / 만료 안내 / 레슨 게이트 | ✅ |
 | QA 시드 페르소나 | ✅ |
-| 케이스별 할인·쿠폰·연장 전용 SKU | ❌ 미구현 |
+| 케이스별 할인·연장 전용 SKU | ❌ 미구현 |
 
 ---
 
@@ -179,7 +179,7 @@ Learning 만료 화면·내 학습 카드에 **두 링크** 노출 (restore가 e
 ### 6.5 가격 정책 (현재)
 
 - 상품별 `listPrice` / `salePrice`만 적용.  
-- **케이스별 할인·쿠폰·연장 전용 SKU 가격 분리는 미구현.**
+- **케이스별 할인·연장 전용 SKU 가격 분리는 미구현.**
 
 향후 LMS 관행대로 진행 시:
 
@@ -259,3 +259,14 @@ Learning 만료 화면·내 학습 카드에 **두 링크** 노출 (restore가 e
      ↓
 [Shop UI]  extend(90일) | restore(평생) | upgrade | partial | owned
 ```
+
+
+## 전액 할인 쿠폰 주문
+
+- 쿠폰 발급분의 `minOrderAmount`는 할인 전 상품 판매가와 비교한다. 기존 발급분은 관리자 수정과 별도로 발급 시점 조건을 유지한다.
+- 전액 할인 시 `/api/checkout/free`가 로그인 회원·상품·쿠폰 소유권·사용 기간·주문 가능 여부와 서버 가격을 검증한다. 클라이언트 금액은 받지 않는다.
+- `Order.checkout = FREE`, `status = PAID`, `total = 0`으로 기록한다. 외부 결제 내역은 생성하지 않는다.
+- 주문 생성, 쿠폰 `USED`, 기존 fulfillment를 통한 강의/코칭권 지급 및 감사 기록은 단일 트랜잭션으로 완료하거나 함께 롤백한다.
+- 완료된 동일 쿠폰·회원·상품 요청은 기존 주문 ID를 반환한다. 동시 요청은 쿠폰 예약과 주문의 고유 쿠폰 연결로 중복 사용을 방지한다.
+- 결제액이 1–99원 남으면 쿠폰을 거절한다. 양수 결제는 기존 토스 경로를 사용하며 0원 결제는 토스 준비 API에서도 거절한다.
+- 배포 전 `20261019000000_free_coupon_checkout` migration을 적용해야 한다.

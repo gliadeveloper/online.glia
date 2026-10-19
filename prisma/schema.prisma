@@ -160,6 +160,7 @@ enum OrderStatus {
 
 enum OrderCheckout {
   APPLICATION
+  FREE
   TOSS
 }
 
@@ -1291,7 +1292,7 @@ model Order {
   total          Int
   currency       String      @default("KRW")
   idempotencyKey String?     @unique
-  /// APPLICATION is a coach approval. TOSS is a payment whose order id and total were saved before the payment request.
+  /// APPLICATION is a coach approval. FREE completes a fully discounted coupon order without a payment. TOSS saves the order before requesting payment.
   checkout       OrderCheckout @default(APPLICATION)
   paidAt         DateTime?
   createdAt      DateTime    @default(now())

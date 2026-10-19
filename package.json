@@ -14,6 +14,8 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "test:free-coupon:db": "node --conditions=react-server --import tsx scripts/test-free-coupon-db.mjs",
+    "test:free-coupon": "node --conditions=react-server --import tsx scripts/test-free-coupon.mjs",
     "test:media-db": "node --conditions=react-server --import tsx scripts/test-media-db.mjs",
     "test:media-editor": "playwright test --config scripts/media-editor.playwright.ts",
     "media:audit": "node --conditions=react-server --import tsx scripts/media-audit.ts",
