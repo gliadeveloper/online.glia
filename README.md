@@ -1,6 +1,6 @@
 # Online Glia
 
-Next.js + Prisma 7 + PostgreSQL (Prisma Postgres on Vercel).
+Next.js + Prisma 7 + PostgreSQL.
 
 ## 로컬 개발
 
@@ -14,7 +14,6 @@ npm run dev
 
 | 환경 | 문서 |
 |------|------|
-| **Vercel + Prisma Postgres** | [docs/DEPLOY.md](./docs/DEPLOY.md) |
 | **iwinv VPS (Docker + PostgreSQL)** | [docs/DEPLOY-VPS.md](./docs/DEPLOY-VPS.md) |
 
 ## 주요 스크립트

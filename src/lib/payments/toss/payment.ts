@@ -7,7 +7,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { getProductPrice, grantTossOrder, revokeFulfillment } from "@/lib/fulfillment";
-import { consumeReservedCoupon, lockCouponForOrder, releaseReservedCoupon } from "@/lib/shop-coupon";
+import { consumeReservedCoupon, lockCouponForOrder, releaseReservedCoupon, restoreRefundedCoupon } from "@/lib/shop-coupon";
 import { interpretTossCancelResponse } from "@/lib/payments/toss/cancel";
 import { tossPaymentsFetch } from "@/lib/payments/toss/client";
 import type { TossWidgetPaymentRequest } from "@/lib/payments/toss/widget";
@@ -675,6 +675,7 @@ export async function cancelTossPayment(params: {
         data: { status: nextStatus },
       });
       if (cancel.balanceAmount === 0) {
+        await restoreRefundedCoupon(tx, order.id);
         await tx.payment.updateMany({
           where: { id: payment.id, status: "SUCCEEDED" },
           data: { status: "REFUNDED" },
@@ -819,6 +820,7 @@ export async function applyVerifiedTossCancel(event: {
     if (orderUpdated.count !== 1) {
       throw new Error("주문 상태가 바뀌어 웹훅 취소를 저장하지 못했습니다.");
     }
+    await restoreRefundedCoupon(tx, order.id);
     return true;
   });
   if (!recorded || payment.environment !== "LIVE") return;

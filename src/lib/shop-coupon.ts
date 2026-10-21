@@ -319,7 +319,7 @@ export async function lockCouponForOrder(
   const total = params.price - discount;
 
   const holder = await tx.order.findFirst({
-    where: { couponIssueId: issue.id },
+    where: { couponIssueId: issue.id, status: { in: ["PENDING", "PAID", "PARTIALLY_REFUNDED"] } },
     include: { lines: { select: { productId: true } }, payments: true },
   });
   if (holder) {
@@ -360,6 +360,19 @@ export async function consumeReservedCoupon(couponIssueId: string | null) {
   await prisma.shopCouponIssue.updateMany({
     where: { id: couponIssueId, status: "RESERVED" },
     data: { status: "USED", usedAt: new Date() },
+  });
+}
+
+/** Restore a coupon only when its order has been fully refunded. */
+export async function restoreRefundedCoupon(tx: Prisma.TransactionClient, orderId: string) {
+  const order = await tx.order.findUnique({
+    where: { id: orderId },
+    select: { couponIssueId: true, status: true },
+  });
+  if (!order?.couponIssueId || order.status !== "REFUNDED") return;
+  await tx.shopCouponIssue.updateMany({
+    where: { id: order.couponIssueId, status: "USED" },
+    data: { status: "ISSUED", usedAt: null },
   });
 }
 

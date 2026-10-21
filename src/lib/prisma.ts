@@ -10,7 +10,7 @@ function getConnectionString() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL is required (PostgreSQL — use Prisma Postgres on Vercel or local Postgres).",
+      "DATABASE_URL is required (PostgreSQL).",
     );
   }
   return connectionString;

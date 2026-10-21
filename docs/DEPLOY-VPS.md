@@ -2,8 +2,6 @@
 
 `gna_2.4_n` (vCPU 2 · RAM 4GB · NVMe 50GB) 한 대에 **PostgreSQL + Next.js** 를 올리는 초기 운영 가이드입니다.
 
-> Vercel 배포는 [DEPLOY.md](./DEPLOY.md) 를 따르세요. 이 문서는 **자체 VPS** 전용입니다.
-
 > **기존 운영 서버 이전:** [DB·R2 전환 계획](./production-db-r2-migration-plan.md)을 먼저 따르세요. 아래 신규 설치의 전체 기동 명령을 DB 복원 전에 실행하지 않습니다. 새 DB에 전체 덤프 복원 → migration 이력/제약 확인 → 필요한 migration → 앱 순서이며, 테스트로 변경한 DB를 운영에 반영하지 않습니다. R2 유지 시 기존 파일은 다시 업로드하지 않습니다.
 
 > **현재 운영 실측:** [2026-10-09 복원·대조 기록](./production-migration-rehearsal-2026-10-09.md)에서 PostgreSQL 16.15 복원과 기존 데이터 보존을 확인했습니다. 운영 R2는 endpoint의 추가 경로 때문에 논리 key와 실제 key가 다릅니다. 아래 endpoint 예시로 값만 교체하지 말고 기존 소비자의 경로 매핑을 함께 검증하세요. 운영 배포는 아직 수행하지 않았습니다.
@@ -221,7 +219,3 @@ docker compose -f docker-compose.prod.yml exec db \
 | 502 Bad Gateway | `docker compose ps` — app running? `curl localhost:3000` |
 | 카카오 redirect mismatch | Kakao 콘솔 URI ↔ `KAKAO_REDIRECT_URI` 완전 일치 |
 | R2 이미지 503 | `R2_*` env 누락 — BlockNote 이미지 업로드 불가 |
-
-## 12. Vercel과 병행?
-
-초기 VPS 운영 후 Vercel로 옮길 수 있습니다. DB만 VPS PostgreSQL → Prisma Postgres 등으로 덤프/복원하면 됩니다. 반대로 VPS 단독 운영 시 Vercel Storage는 불필요합니다.

@@ -13,7 +13,7 @@ import {
   type CourseGrantAction,
 } from "@/lib/enrollment-access";
 import { prisma } from "@/lib/prisma";
-import { lockCouponForOrder } from "@/lib/shop-coupon";
+import { lockCouponForOrder, restoreRefundedCoupon } from "@/lib/shop-coupon";
 import { assessProductCheckout, type CoachingGrantAction } from "@/lib/shop-purchase-state";
 
 type TransactionClient = Prisma.TransactionClient;
@@ -939,6 +939,10 @@ export async function processRefund(params: {
   }
 
   const refundAmount = params.amount ?? order.total;
+  const previouslyRefunded = order.refunds
+    .filter((refund) => refund.status === "COMPLETED")
+    .reduce((sum, refund) => sum + refund.amount, 0);
+  const isFullRefund = previouslyRefunded + refundAmount >= order.total;
   const now = new Date();
 
   const result = await prisma.$transaction(async (tx) => {
@@ -952,12 +956,11 @@ export async function processRefund(params: {
       },
     });
 
-    const isFullRefund = refundAmount >= order.total;
-
     await tx.order.update({
       where: { id: order.id },
       data: { status: isFullRefund ? "REFUNDED" : "PARTIALLY_REFUNDED" },
     });
+    if (isFullRefund) await restoreRefundedCoupon(tx, order.id);
 
     for (const payment of order.payments) {
       if (payment.status === "SUCCEEDED") {
@@ -971,7 +974,7 @@ export async function processRefund(params: {
     return refund;
   });
 
-  if (refundAmount >= order.total) {
+  if (isFullRefund) {
     await revokeFulfillment({
       orderId: params.orderId,
       actorId: params.actorId,

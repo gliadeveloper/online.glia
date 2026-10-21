@@ -1304,11 +1304,12 @@ model Order {
   fulfillments Fulfillment[]
   refunds      Refund[]
   /// Set while a downloaded coupon is reserved or consumed by this order.
-  couponIssueId String?          @unique
+  couponIssueId String?
   couponIssue   ShopCouponIssue? @relation(fields: [couponIssueId], references: [id], onDelete: Restrict)
 
   @@index([userId, status])
   @@index([userId, checkout, status])
+  @@index([couponIssueId])
   @@map("orders")
 }
 
@@ -1379,7 +1380,7 @@ model ShopCouponIssue {
 
   coupon ShopCoupon @relation(fields: [couponId], references: [id], onDelete: Restrict)
   user   User       @relation(fields: [userId], references: [id], onDelete: Restrict)
-  order  Order?
+  orders Order[]
 
   @@unique([couponId, userId])
   @@index([userId, status])
