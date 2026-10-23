@@ -13,7 +13,7 @@ type PostCommentComposerProps = {
   formId?: string;
   variant?: "default" | "dock" | "inline";
   user?: {
-    name: string | null;
+    nickname: string | null;
     email: string;
     profile?: { avatarUrl?: string | null } | null;
   };

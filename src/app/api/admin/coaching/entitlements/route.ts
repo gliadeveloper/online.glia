@@ -19,9 +19,9 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
       take: Number(url.searchParams.get("limit") ?? 100),
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         coachingOffering: {
-          select: { id: true, title: true, slug: true, coach: { select: { id: true, name: true, email: true } } },
+          select: { id: true, title: true, slug: true, coach: { select: { id: true, nickname: true, email: true } } },
         },
         _count: { select: { sessions: true } },
       },

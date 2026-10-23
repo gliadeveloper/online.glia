@@ -28,7 +28,7 @@ export async function GET(request: Request, context: RouteContext) {
       orderBy: { checkInDate: "desc" },
       take: limit,
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         answers: {
           include: {
             question: { select: { id: true, prompt: true, order: true, type: true } },

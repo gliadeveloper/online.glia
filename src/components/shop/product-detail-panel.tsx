@@ -32,7 +32,7 @@ type ProductDetailPanelProps = {
     rating: number;
     comment: string | null;
     createdAt: Date;
-    user: { name: string | null; email: string };
+    user: { nickname: string | null; email: string };
     course: { title: string };
   }>;
   canReview: boolean;
@@ -76,7 +76,7 @@ export function ProductDetailPanel({
   const courses = getCourses(product);
   const instructor = getPrimaryInstructor(product);
   const supplies = (product.supplies ?? []).filter((item) => item.trim());
-  const instructorName = instructor?.name ?? instructor?.email.split("@")[0] ?? null;
+  const instructorName = instructor?.nickname ?? instructor?.email.split("@")[0] ?? null;
   const heroImages = getProductHeroImages(product);
   const programEyebrow =
     product.kind === "BUNDLE" ? "프로그램" : product.kind === "COACHING_ONLY" ? "코칭" : "VOD";

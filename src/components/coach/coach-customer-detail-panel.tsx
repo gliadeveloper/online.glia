@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import { orderStatusText } from "@/lib/customer-labels";
 import type { getCoachCustomerDetail } from "@/lib/coach-customers";
+import { formatPhoneNumber, opsMemberName } from "@/lib/member-contact";
 import { OrderApplicationActions } from "@/components/orders/order-application-actions";
 import { OrderStatusPill } from "@/components/orders/order-status-pill";
 
@@ -20,8 +21,11 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <p className="text-2xl font-semibold text-zinc-900">{user.name ?? "이름 없음"}</p>
+        <p className="text-2xl font-semibold text-zinc-900">{opsMemberName(user)}</p>
         <p className="mt-1 text-sm text-zinc-500">{user.email}</p>
+        {user.phoneNumber ? (
+          <p className="mt-1 text-sm text-zinc-500">{formatPhoneNumber(user.phoneNumber)}</p>
+        ) : null}
         <p className="mt-2 text-xs text-zinc-400">가입 {formatDateTime(user.createdAt)}</p>
       </section>
 

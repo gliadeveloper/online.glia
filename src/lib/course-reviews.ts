@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 const authorSelect = {
   id: true,
-  name: true,
+  nickname: true,
   email: true,
 } as const;
 

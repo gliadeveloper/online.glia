@@ -5,12 +5,13 @@ import { sessionInclude } from "@/lib/coaching-admin";
 import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
+import { memberOpsSelect } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 import { assertBodyVersion, assertMediaEditor, syncMediaUsages, withMediaTransaction } from "@/lib/media/usage-sync";
 import { createCoachingPublishedNotification } from "@/lib/home-notifications";
 
 export const coachSessionListInclude = {
-  user: { select: { id: true, name: true, email: true } },
+  user: { select: memberOpsSelect },
   entitlement: {
     select: {
       id: true,
@@ -42,7 +43,7 @@ export async function getCoachSessionDetail(sessionId: string, coachId: string) 
     where: { id: sessionId },
     include: {
       ...sessionInclude,
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: memberOpsSelect },
       logs: {
         orderBy: { createdAt: "desc" as const },
         select: { id: true, body: true, createdAt: true },
@@ -74,7 +75,7 @@ export async function getCoachEntitlementBoard(entitlementId: string, coachId: s
   const entitlement = await prisma.coachingEntitlement.findUnique({
     where: { id: entitlementId },
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: memberOpsSelect },
       coachingOffering: { select: { id: true, title: true, slug: true } },
       sessions: {
         orderBy: { sessionNo: "asc" },

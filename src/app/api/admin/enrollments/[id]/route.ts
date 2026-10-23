@@ -18,7 +18,7 @@ export async function GET(request: Request, context: RouteContext) {
     const enrollment = await prisma.enrollment.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         course: { select: { id: true, title: true } },
         progress: {
           include: {

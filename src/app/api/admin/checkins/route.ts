@@ -25,7 +25,7 @@ export async function GET(request: Request) {
       orderBy: { updatedAt: "desc" },
       take: limit,
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         form: {
           select: {
             id: true,

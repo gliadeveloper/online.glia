@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, formatKrw, requireAdmin } from "@/lib/admin";
+import { formatPhoneNumber, memberOpsSelect, opsMemberName } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminOrdersPage() {
@@ -11,7 +12,7 @@ export default async function AdminOrdersPage() {
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: memberOpsSelect },
       lines: {
         include: {
           product: { select: { title: true } },
@@ -63,8 +64,11 @@ export default async function AdminOrdersPage() {
                   </Link>
                 </td>
                 <td className="px-5 py-4">
-                  <p className="font-medium">{order.user.name ?? "—"}</p>
-                  <p className="text-xs text-zinc-500">{order.user.email}</p>
+                  <p className="font-medium">{opsMemberName(order.user)}</p>
+                  <p className="text-xs text-zinc-500">
+                    {order.user.email}
+                    {order.user.phoneNumber ? ` · ${formatPhoneNumber(order.user.phoneNumber)}` : ""}
+                  </p>
                 </td>
                 <td className="px-5 py-4 text-zinc-600">
                   {order.lines.map((line) => line.product.title).join(", ")}

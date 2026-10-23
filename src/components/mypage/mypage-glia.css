@@ -163,6 +163,45 @@
   text-decoration: underline;
 }
 
+.glia-mypage__banner {
+  margin: 0 var(--glia-gutter) 1rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-blue-light);
+}
+
+.glia-mypage__banner p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--glia-text);
+}
+
+.glia-mypage__banner a {
+  font-weight: 700;
+  color: var(--glia-blue);
+  text-decoration: none;
+}
+
+.glia-mypage__section-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.glia-mypage__section-lede {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--glia-text-secondary);
+}
+
+.glia-mypage__contact {
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--glia-border);
+}
+
 /* ── Menu ─────────────────────────────────────────────────────────────── */
 
 .glia-mypage__menu {
@@ -431,7 +470,8 @@
   .glia-mypage__row,
   .glia-mypage__account,
   .glia-mypage__form,
-  .glia-mypage__note {
+  .glia-mypage__note,
+  .glia-mypage__banner {
     padding-inline: var(--glia-gutter-lg);
   }
 }

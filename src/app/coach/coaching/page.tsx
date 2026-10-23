@@ -33,7 +33,7 @@ export default async function CoachCoachingPage({ searchParams }: PageProps) {
 
   const customerOptions = customers.map((customer) => ({
     id: customer.userId,
-    label: `${customer.name ?? customer.email} (${customer.email})`,
+    label: `${customer.nickname ?? customer.email} (${customer.email})`,
   }));
 
   const offeringOptions = offerings.map((offering) => ({

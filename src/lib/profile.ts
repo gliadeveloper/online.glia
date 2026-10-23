@@ -53,7 +53,7 @@ export async function updateMyProfile(userId: string, input: ProfileUpdateInput)
     if (name !== undefined) {
       await tx.user.update({
         where: { id: userId },
-        data: { name },
+        data: { nickname: name },
       });
     }
 
@@ -76,8 +76,10 @@ export async function updateMyProfile(userId: string, input: ProfileUpdateInput)
       where: { id: userId },
       select: {
         id: true,
-        name: true,
+        nickname: true,
         email: true,
+        name: true,
+        phoneNumber: true,
         profile: {
           select: {
             headline: true,
@@ -94,9 +96,11 @@ export async function getMyProfileForEdit(userId: string) {
   return prisma.user.findUnique({
     where: { id: userId },
     select: {
-      name: true,
+      nickname: true,
       email: true,
       emailKind: true,
+      name: true,
+      phoneNumber: true,
       profile: {
         select: {
           headline: true,

@@ -37,8 +37,8 @@ export default async function CoachCheckInMemberPage({ params, searchParams }: P
             // Avatar URLs are user-provided and may be hosted on arbitrary domains.
             // eslint-disable-next-line @next/next/no-img-element
             <img src={member.profile.avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover" />
-          ) : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-lg font-semibold text-emerald-700">{(member.name ?? member.userId).slice(0, 1)}</div>}
-          <div><h1 className="text-2xl font-semibold tracking-tight">{member.name ?? "이름 없음"}</h1><p className="text-sm text-zinc-500">@{member.userId} · 체크인 열람 허용됨</p></div>
+          ) : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-lg font-semibold text-emerald-700">{(member.nickname ?? member.userId).slice(0, 1)}</div>}
+          <div><h1 className="text-2xl font-semibold tracking-tight">{member.nickname ?? "이름 없음"}</h1><p className="text-sm text-zinc-500">@{member.userId} · 체크인 열람 허용됨</p></div>
         </div>
       </div>
 

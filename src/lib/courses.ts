@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 export { courseLevelLabels, courseStatusLabels };
 
 export const courseInclude = {
-  instructor: { select: { id: true, name: true, email: true } },
+  instructor: { select: { id: true, nickname: true, email: true } },
   organization: { select: { id: true, name: true, slug: true } },
   _count: {
     select: {

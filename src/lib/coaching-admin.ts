@@ -5,11 +5,12 @@ import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import { provisionCoachingSessions, syncOfferingSessionTemplates } from "@/lib/coaching-provision";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
+import { memberOpsSelect } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 import { assertBodyVersion, assertMediaEditor, syncMediaUsages, withMediaTransaction } from "@/lib/media/usage-sync";
 
 export const coachingOfferingInclude = {
-  coach: { select: { id: true, name: true, email: true } },
+  coach: { select: { id: true, nickname: true, email: true } },
   course: { select: { id: true, title: true } },
   sessionTemplates: { orderBy: { sessionNo: "asc" as const } },
   _count: {
@@ -130,9 +131,9 @@ export async function updateCoachingOffering(params: {
 }
 
 export const sessionInclude = {
-  user: { select: { id: true, name: true, email: true } },
-  coach: { select: { id: true, name: true, email: true } },
-  publishedBy: { select: { id: true, name: true, email: true } },
+  user: { select: memberOpsSelect },
+  coach: { select: { id: true, nickname: true, email: true } },
+  publishedBy: { select: { id: true, nickname: true, email: true } },
   entitlement: {
     select: {
       id: true,
@@ -147,7 +148,7 @@ export const sessionInclude = {
       messages: {
         orderBy: { createdAt: "asc" as const },
         include: {
-          author: { select: { id: true, name: true, email: true } },
+          author: { select: { id: true, nickname: true, email: true } },
         },
       },
     },
@@ -311,13 +312,13 @@ export async function adminGrantCoachingEntitlementWithSessions(params: {
     return tx.coachingEntitlement.findUniqueOrThrow({
       where: { id: created.id },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: memberOpsSelect },
         coachingOffering: {
           select: {
             id: true,
             title: true,
             slug: true,
-            coach: { select: { name: true, email: true } },
+            coach: { select: { nickname: true, email: true } },
           },
         },
         sessions: { orderBy: { sessionNo: "asc" } },

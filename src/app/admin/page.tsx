@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium text-zinc-900">
-                        {submission.user.name ?? submission.user.email}
+                        {submission.user.nickname ?? submission.user.email}
                       </p>
                       <p className="mt-0.5 text-sm text-zinc-500">{submission.form.title}</p>
                     </div>
@@ -124,7 +124,7 @@ export default async function AdminDashboardPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-medium text-zinc-900">
-                        {order.user.name ?? order.user.email}
+                        {order.user.nickname ?? order.user.email}
                       </p>
                       <p className="mt-0.5 text-sm text-zinc-500">
                         {order.lines.map((line) => line.product.title).join(", ")}
@@ -164,7 +164,7 @@ export default async function AdminDashboardPage() {
                 <tr key={log.id}>
                   <td className="px-5 py-3 text-zinc-500">{formatDateTime(log.createdAt)}</td>
                   <td className="px-5 py-3">
-                    {log.actor?.name ?? log.actor?.email ?? "시스템"}
+                    {log.actor?.nickname ?? log.actor?.email ?? "시스템"}
                   </td>
                   <td className="px-5 py-3 font-medium">{log.action}</td>
                   <td className="px-5 py-3 text-zinc-500">

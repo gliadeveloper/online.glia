@@ -85,7 +85,7 @@ export function CoachSessionWorkspace(props: CoachSessionWorkspaceProps) {
           href={`/coach/coaching/entitlements/${props.entitlementId}`}
           className="text-zinc-500 hover:text-zinc-800"
         >
-          {displayName({ name: props.studentName, email: props.studentEmail })} 코칭권
+          {displayName({ nickname: props.studentName, email: props.studentEmail })} 코칭권
         </Link>
       </div>
 

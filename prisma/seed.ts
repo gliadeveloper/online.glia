@@ -32,7 +32,7 @@ async function main() {
       email: "admin@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
-      name: "Admin",
+      nickname: "Admin",
       role: "ADMIN",
       profile: {
         create: {
@@ -51,7 +51,7 @@ async function main() {
       email: "coach@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
-      name: "Coach Kim",
+      nickname: "Coach Kim",
       role: "COACH",
       profile: {
         create: {
@@ -70,7 +70,7 @@ async function main() {
       email: "demo@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
-      name: "Demo User",
+      nickname: "Demo User",
       role: "USER",
       profile: {
         create: {
@@ -88,7 +88,7 @@ async function main() {
       email: "customer@localhost",
       ...verifiedEmailUserFields(),
       password: "demo-password",
-      name: "New Customer",
+      nickname: "New Customer",
       role: "USER",
       profile: {
         create: {
@@ -701,7 +701,7 @@ async function seedAccessQaPersonas(params: {
         email,
         ...verifiedEmailUserFields(),
         password: qaPassword,
-        name,
+        nickname: name,
         role: "USER",
         profile: { create: { headline: "Access QA persona" } },
       },

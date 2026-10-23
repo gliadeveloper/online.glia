@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
       take: Number(url.searchParams.get("limit") ?? 50),
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         lines: {
           include: {
             product: { select: { id: true, title: true } },

@@ -14,6 +14,7 @@ import {
 } from "@/lib/enrollment-access";
 import { prisma } from "@/lib/prisma";
 import { lockCouponForOrder, restoreRefundedCoupon } from "@/lib/shop-coupon";
+import { assertMemberContactComplete } from "@/lib/member-contact";
 import { assessProductCheckout, type CoachingGrantAction } from "@/lib/shop-purchase-state";
 
 type TransactionClient = Prisma.TransactionClient;
@@ -407,6 +408,8 @@ export async function submitProductApplication(params: {
     throw new Error("USER_NOT_FOUND");
   }
 
+  await assertMemberContactComplete(params.userId);
+
   const now = new Date();
   const checkoutAssessment = await assessProductCheckout(params.userId, product, now);
 
@@ -698,6 +701,7 @@ export async function checkoutFreeCoupon(params: {
 
   const product = await loadActiveProductById(params.productId);
   if (!product) throw new ApiError("상품을 찾을 수 없습니다.", 404, "PRODUCT_NOT_FOUND");
+  await assertMemberContactComplete(params.userId);
   const now = new Date();
   const assessment = await assessProductCheckout(params.userId, product, now);
   if (!assessment.canCheckout) {
@@ -768,6 +772,8 @@ export async function checkout(params: {
   if (!user) {
     throw new Error("USER_NOT_FOUND");
   }
+
+  await assertMemberContactComplete(params.userId);
 
   const now = new Date();
   const checkoutAssessment = await assessProductCheckout(params.userId, product, now);
@@ -1032,7 +1038,7 @@ export async function adminGrantCourseAccess(params: {
         where: { id: existing.id },
         data: accessData,
         include: {
-          user: { select: { id: true, name: true, email: true } },
+          user: { select: { id: true, nickname: true, email: true } },
           course: { select: { id: true, title: true } },
         },
       })
@@ -1043,7 +1049,7 @@ export async function adminGrantCourseAccess(params: {
           ...accessData,
         },
         include: {
-          user: { select: { id: true, name: true, email: true } },
+          user: { select: { id: true, nickname: true, email: true } },
           course: { select: { id: true, title: true } },
         },
       });
@@ -1110,9 +1116,9 @@ export async function adminGrantCoachingEntitlement(params: {
     return tx.coachingEntitlement.findUniqueOrThrow({
       where: { id: created.id },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         coachingOffering: {
-          select: { id: true, title: true, slug: true, coach: { select: { name: true, email: true } } },
+          select: { id: true, title: true, slug: true, coach: { select: { nickname: true, email: true } } },
         },
         sessions: { orderBy: { sessionNo: "asc" } },
       },

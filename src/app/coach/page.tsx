@@ -140,7 +140,7 @@ export default async function CoachDashboardPage() {
                         {session.sessionNo}회차 · {session.title}
                       </p>
                       <p className="mt-1 text-sm text-zinc-600">
-                        {session.user.name ?? session.user.email} ·{" "}
+                        {session.user.nickname ?? session.user.email} ·{" "}
                         {session.entitlement.coachingOffering.title}
                       </p>
                     </div>

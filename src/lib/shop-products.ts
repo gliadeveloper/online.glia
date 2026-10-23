@@ -13,7 +13,7 @@ const courseCatalogSelect = {
   instructor: {
     select: {
       id: true,
-      name: true,
+      nickname: true,
       email: true,
       profile: { select: { headline: true, bio: true } },
     },

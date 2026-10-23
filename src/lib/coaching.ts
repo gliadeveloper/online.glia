@@ -47,7 +47,7 @@ export function getSessionDisplayLabel(session: {
 }
 
 export const sessionListInclude = {
-  coach: { select: { id: true, name: true, email: true } },
+  coach: { select: { id: true, nickname: true, email: true } },
   progress: true,
   conversation: {
     select: {
@@ -78,7 +78,7 @@ export const sessionDetailInclude = {
       messages: {
         orderBy: { createdAt: "asc" as const },
         include: {
-          author: { select: { id: true, name: true, email: true } },
+          author: { select: { id: true, nickname: true, email: true } },
         },
       },
     },
@@ -203,7 +203,7 @@ export async function sendCoachingMessage(params: {
         awaitingReply: authorRole === "STUDENT",
       },
       include: {
-        author: { select: { id: true, name: true, email: true } },
+        author: { select: { id: true, nickname: true, email: true } },
       },
     });
 

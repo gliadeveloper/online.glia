@@ -25,7 +25,7 @@ export default async function AdminFormDetailPage({ params }: AdminFormDetailPag
     where: { id },
     include: {
       ...formDetailInclude,
-      createdBy: { select: { name: true, email: true } },
+      createdBy: { select: { nickname: true, email: true } },
       _count: { select: { submissions: true } },
     },
   });
@@ -39,7 +39,7 @@ export default async function AdminFormDetailPage({ params }: AdminFormDetailPag
     orderBy: { checkInDate: "desc" },
     take: 20,
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, nickname: true, email: true } },
       answers: {
         include: {
           question: { select: { prompt: true, order: true } },
@@ -90,7 +90,7 @@ export default async function AdminFormDetailPage({ params }: AdminFormDetailPag
         <div className="border-b border-zinc-100 px-5 py-4">
           <h2 className="font-semibold">질문 구성</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            생성자 {form.createdBy.name ?? form.createdBy.email}
+            생성자 {form.createdBy.nickname ?? form.createdBy.email}
           </p>
         </div>
         <ol className="divide-y divide-zinc-100">
@@ -135,7 +135,7 @@ export default async function AdminFormDetailPage({ params }: AdminFormDetailPag
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">
-                      {submission.user.name ?? submission.user.email}
+                      {submission.user.nickname ?? submission.user.email}
                     </p>
                     <p className="mt-0.5 text-xs text-zinc-500">
                       {submission.checkInDate} · {formatDateTime(submission.updatedAt)}

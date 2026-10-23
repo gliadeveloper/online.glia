@@ -7,6 +7,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
 import { getProductPrice, grantTossOrder, revokeFulfillment } from "@/lib/fulfillment";
+import { assertMemberContactComplete, isPlaceholderEmail, opsMemberName } from "@/lib/member-contact";
 import { consumeReservedCoupon, lockCouponForOrder, releaseReservedCoupon, restoreRefundedCoupon } from "@/lib/shop-coupon";
 import { interpretTossCancelResponse } from "@/lib/payments/toss/cancel";
 import { tossPaymentsFetch } from "@/lib/payments/toss/client";
@@ -109,14 +110,15 @@ export async function prepareTossPayment(params: {
 
   const user = await prisma.user.findUnique({
     where: { id: params.userId },
-    select: { id: true, email: true, name: true },
+    select: { id: true, email: true, emailKind: true, name: true, nickname: true, phoneNumber: true },
   });
   if (!user) throw new ApiError("User not found", 404, "USER_NOT_FOUND");
+  await assertMemberContactComplete(params.userId);
   const customerKey = tossCustomerKey(user.id);
   if (!customerKey) throw new ApiError("구매자 키를 만들지 못했습니다.", 500, "CUSTOMER_KEY_INVALID");
   const orderName = tossOrderName(product.title);
-  const customerEmail = user.email.trim() || null;
-  const customerName = user.name?.trim() || null;
+  const customerEmail = isPlaceholderEmail(user.email, user.emailKind) ? null : user.email.trim() || null;
+  const customerName = opsMemberName(user);
 
   const now = new Date();
   const assessment = await assessProductCheckout(params.userId, product, now);

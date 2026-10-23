@@ -13,13 +13,13 @@ export default async function AdminEnrollmentsPage() {
       orderBy: { enrolledAt: "desc" },
       take: 100,
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         course: { select: { id: true, title: true } },
       },
     }),
     prisma.user.findMany({
       where: { role: "USER" },
-      select: { id: true, name: true, email: true },
+      select: { id: true, nickname: true, email: true },
       orderBy: { email: "asc" },
     }),
     prisma.course.findMany({
@@ -36,7 +36,7 @@ export default async function AdminEnrollmentsPage() {
       </div>
 
       <GrantEnrollmentPanel
-        users={users.map((u) => ({ id: u.id, label: u.name ?? u.email }))}
+        users={users.map((u) => ({ id: u.id, label: u.nickname ?? u.email }))}
         courses={courses.map((c) => ({ id: c.id, label: c.title }))}
       />
 
@@ -56,7 +56,7 @@ export default async function AdminEnrollmentsPage() {
               <tr key={e.id} className="hover:bg-zinc-50/80">
                 <td className="px-5 py-4">
                   <Link href={`/admin/users/${e.user.id}`} className="font-medium hover:text-violet-700">
-                    {e.user.name ?? e.user.email}
+                    {e.user.nickname ?? e.user.email}
                   </Link>
                 </td>
                 <td className="px-5 py-4">{e.course.title}</td>

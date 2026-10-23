@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { MemberContactForm } from "@/components/account/member-contact-form";
 import { SiteLegalFooter } from "@/components/site/site-legal-footer";
 import { ProductCheckoutPay } from "@/components/shop/product-checkout-pay";
 import { ShopStackPage } from "@/components/shop/shop-stack-page";
 import { getProductPrice } from "@/lib/fulfillment";
+import { getMemberContact } from "@/lib/member-contact";
 import { listWidgetCheckoutOptions } from "@/lib/payments/toss/options";
 import { tossCustomerKey } from "@/lib/payments/toss/verify";
 import { getShopCouponOffer } from "@/lib/shop-coupon";
@@ -38,6 +40,7 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
   const customerKey = tossCustomerKey(user.id);
   const price = getProductPrice(product);
   const couponOffer = await getShopCouponOffer(product.id, user.id, price);
+  const contact = await getMemberContact(user.id);
 
   return (
     <ShopStackPage className="shop-checkout-page">
@@ -68,6 +71,19 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
             <p className="glia-checkout__notice">
               결제를 시작할 수 없습니다. <Link href={`/shop/${product.id}`}>상품 화면</Link>에서 신청해 주세요.
             </p>
+          ) : !contact?.complete ? (
+            <MemberContactForm
+              initial={contact ?? {
+                name: "",
+                phoneNumber: "",
+                email: "",
+                emailKind: "PLACEHOLDER",
+                needsEmail: true,
+                complete: false,
+              }}
+              variant="checkout"
+              submitLabel="연락처 저장 후 결제"
+            />
           ) : (
             <>
               {customerKey ? (

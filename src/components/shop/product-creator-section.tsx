@@ -4,8 +4,8 @@ type ProductCreatorSectionProps = {
   instructor: NonNullable<CatalogProduct["items"][number]["course"]>["instructor"];
 };
 
-function displayName(user: { name: string | null; email: string }) {
-  return user.name ?? user.email.split("@")[0] ?? "크리에이터";
+function displayName(user: { nickname: string | null; email: string }) {
+  return user.nickname ?? user.email.split("@")[0] ?? "크리에이터";
 }
 
 export function ProductCreatorSection({ instructor }: ProductCreatorSectionProps) {

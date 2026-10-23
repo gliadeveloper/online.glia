@@ -5,6 +5,7 @@ import { OrderStatusPill } from "@/components/orders/order-status-pill";
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import type { CoachOrderRow } from "@/lib/coach-orders";
 import { orderStatusText, productKindLabels } from "@/lib/customer-labels";
+import { formatPhoneNumber, opsMemberName } from "@/lib/member-contact";
 
 type CoachOrderListProps = {
   orders: CoachOrderRow[];
@@ -41,7 +42,7 @@ export function CoachOrderList({ orders, coachProductIds }: CoachOrderListProps)
                         {coachLines.map((line) => line.product.title).join(", ") || "상품"}
                       </p>
                       <p className="mt-1 text-sm text-zinc-500">
-                        {order.user.name ?? "이름 없음"} · {order.user.email}
+                        {opsMemberName(order.user)} · {order.user.email}
                       </p>
                       <p className="mt-1 text-xs text-zinc-400">{formatDateTime(order.createdAt)}</p>
                     </div>
@@ -91,8 +92,11 @@ export function CoachOrderList({ orders, coachProductIds }: CoachOrderListProps)
                 </td>
                 <td className="px-5 py-4">
                   <Link href={`/coach/customers/${order.user.id}`} className="hover:underline">
-                    <p className="font-medium">{order.user.name ?? "—"}</p>
-                    <p className="text-xs text-zinc-500">{order.user.email}</p>
+                    <p className="font-medium">{opsMemberName(order.user)}</p>
+                    <p className="text-xs text-zinc-500">
+                      {order.user.email}
+                      {order.user.phoneNumber ? ` · ${formatPhoneNumber(order.user.phoneNumber)}` : ""}
+                    </p>
                   </Link>
                 </td>
                 <td className="px-5 py-4 text-zinc-600">

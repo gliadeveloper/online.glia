@@ -54,10 +54,10 @@ export default async function AdminCoachingSessionsPage() {
                     </Link>
                   </td>
                   <td className="px-5 py-4">
-                    {session.user.name ?? session.user.email}
+                    {session.user.nickname ?? session.user.email}
                   </td>
                   <td className="px-5 py-4">
-                    {session.coach.name ?? session.coach.email}
+                    {session.coach.nickname ?? session.coach.email}
                   </td>
                   <td className="px-5 py-4">
                     {session.sessionNo}회 · {session.title}

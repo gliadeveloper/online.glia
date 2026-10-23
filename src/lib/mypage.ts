@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getCheckInOverview } from "@/lib/forms";
+import { isContactComplete, isPlaceholderEmail } from "@/lib/member-contact";
 import { profileAvatarSrc } from "@/lib/profile-avatar";
 
 export async function getMyPageData(userId: string) {
@@ -11,6 +12,8 @@ export async function getMyPageData(userId: string) {
         email: true,
         emailKind: true,
         name: true,
+        phoneNumber: true,
+        nickname: true,
         role: true,
         password: true,
         lastLoginAt: true,
@@ -46,17 +49,15 @@ export async function getMyPageData(userId: string) {
   const daily = checkIns.find((item) => item.form.purpose === "DAILY_CHECKIN");
   const weekly = checkIns.find((item) => item.form.purpose === "WEEKLY_CHECKIN");
 
-  const displayEmail =
-    user.emailKind === "PLACEHOLDER" || user.email.endsWith("@oauth.local")
-      ? null
-      : user.email;
+  const displayEmail = isPlaceholderEmail(user.email, user.emailKind) ? null : user.email;
 
   const kakaoIdentity = user.identities.find((item) => item.provider === "KAKAO");
 
   return {
     user,
     displayEmail,
-    displayName: user.name ?? kakaoIdentity?.providerDisplayName ?? "회원",
+    displayName: user.nickname ?? kakaoIdentity?.providerDisplayName ?? "회원",
+    contactComplete: isContactComplete(user),
     avatarUrl: profileAvatarSrc(user.profile?.avatarUrl) || null,
     headline: user.profile?.headline ?? null,
     bio: user.profile?.bio ?? null,

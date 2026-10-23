@@ -34,7 +34,7 @@ export default async function CoachSessionDetailPage({ params, searchParams }: P
       entitlementId={session.entitlement.id}
       sessionNo={session.sessionNo}
       title={session.title}
-      studentName={session.user.name ?? session.user.email}
+      studentName={session.user.nickname ?? session.user.email}
       studentEmail={session.user.email}
       offeringTitle={session.entitlement.coachingOffering.title}
       scheduledAt={session.scheduledAt.toISOString()}
@@ -49,7 +49,7 @@ export default async function CoachSessionDetailPage({ params, searchParams }: P
         session.conversation?.messages.map((message) => ({
           id: message.id,
           authorRole: message.authorRole,
-          authorName: message.author.name ?? message.author.email,
+          authorName: message.author.nickname ?? message.author.email,
           bodyMarkdown: message.bodyMarkdown,
           awaitingReply: message.awaitingReply,
           createdAt: message.createdAt.toISOString(),

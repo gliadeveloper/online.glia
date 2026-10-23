@@ -46,6 +46,10 @@ export function PurchaseProductButton({
           setError("이미 보유 중인 수강권입니다. 내 학습에서 확인해 주세요.");
           return;
         }
+        if (code === "CONTACT_REQUIRED") {
+          router.push(`/mypage/edit?next=${encodeURIComponent(`/shop/${productId}`)}#contact`);
+          return;
+        }
         setError(data.error ?? "구매에 실패했습니다.");
         return;
       }

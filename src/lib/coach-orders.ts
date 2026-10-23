@@ -1,9 +1,10 @@
 import { ApiError } from "@/lib/api";
 import { listCoachProducts } from "@/lib/coach-commerce";
+import { memberOpsSelect } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 
 const coachOrderInclude = {
-  user: { select: { id: true, name: true, email: true } },
+  user: { select: memberOpsSelect },
   lines: {
     include: {
       product: { select: { id: true, title: true, kind: true } },
@@ -16,7 +17,7 @@ const coachOrderInclude = {
 } as const;
 
 const coachOrderDetailInclude = {
-  user: { select: { id: true, name: true, email: true } },
+  user: { select: memberOpsSelect },
   lines: {
     include: {
       product: {

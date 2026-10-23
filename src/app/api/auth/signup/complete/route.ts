@@ -10,6 +10,7 @@ import {
 } from "@/lib/signup/constants";
 import { assertRateLimit, getClientIp, RateLimitError } from "@/lib/signup/rate-limit";
 import {
+  allocatePublicUserId,
   completeEmailSignup,
   completeKakaoOnboarding,
   getSignupDraftById,
@@ -39,10 +40,15 @@ export async function POST(request: Request) {
       throw new ApiError(nicknameResult.message, 400, "VALIDATION_ERROR");
     }
 
-    const publicUserId = body.userId?.trim().toLowerCase() ?? "";
-    const userIdResult = validateUserId(publicUserId);
-    if (!userIdResult.ok) {
-      throw new ApiError(userIdResult.message, 400, "VALIDATION_ERROR");
+    const requestedUserId = body.userId?.trim().toLowerCase() ?? "";
+    let publicUserId = requestedUserId;
+    if (publicUserId) {
+      const userIdResult = validateUserId(publicUserId);
+      if (!userIdResult.ok) {
+        throw new ApiError(userIdResult.message, 400, "VALIDATION_ERROR");
+      }
+    } else {
+      publicUserId = await allocatePublicUserId();
     }
 
     if (!body.avatarPresetId) {
@@ -129,6 +135,8 @@ export async function PATCH(request: Request) {
     const sessionUser = await getCurrentUser();
 
     if (body.step === "terms") {
+      const now = new Date();
+      const marketingConsent = Boolean(body.marketingConsent);
       if (draftId) {
         const draft = await getSignupDraftById(draftId);
         if (!draft?.emailVerifiedAt) {
@@ -136,13 +144,17 @@ export async function PATCH(request: Request) {
         }
         await prisma.signupDraft.update({
           where: { id: draftId },
-          data: { termsAcceptedAt: new Date() },
+          data: {
+            termsAcceptedAt: now,
+            marketingConsent,
+            marketingAcceptedAt: marketingConsent ? now : null,
+          },
         });
-        return NextResponse.json({ ok: true });
+        return NextResponse.json({ ok: true, marketingConsent });
       }
 
       if (sessionUser) {
-        return NextResponse.json({ ok: true, mode: "kakao" });
+        return NextResponse.json({ ok: true, mode: "kakao", marketingConsent });
       }
 
       throw new ApiError("회원가입 세션이 만료되었습니다.", 401, "DRAFT_EXPIRED");

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { editableAvatarUrl } from "@/lib/profile-avatar";
 import {
+  generatePublicUserIdCandidate,
   generateVerificationCode,
   hashPassword,
   hashVerificationCode,
@@ -16,7 +17,7 @@ export async function findExistingAccountSummary(email: string) {
     select: {
       id: true,
       email: true,
-      name: true,
+      nickname: true,
       createdAt: true,
       status: true,
     },
@@ -86,6 +87,21 @@ export async function markSignupDraftEmailVerified(draftId: string) {
   });
 }
 
+export async function allocatePublicUserId() {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const candidate = generatePublicUserIdCandidate();
+    const [user, draft] = await Promise.all([
+      prisma.user.findUnique({ where: { userId: candidate }, select: { id: true } }),
+      prisma.signupDraft.findFirst({ where: { userId: candidate }, select: { id: true } }),
+    ]);
+    if (!user && !draft) {
+      return candidate;
+    }
+  }
+
+  throw new Error("USER_ID_ALLOCATION_FAILED");
+}
+
 export async function completeEmailSignup(draftId: string) {
   const draft = await getSignupDraftById(draftId);
   if (!draft?.emailVerifiedAt || !draft.termsAcceptedAt || !draft.userId || !draft.nickname) {
@@ -112,7 +128,7 @@ export async function completeEmailSignup(draftId: string) {
         emailKind: "VERIFIED",
         emailVerifiedAt: draft.emailVerifiedAt,
         password: draft.passwordHash,
-        name: draft.nickname,
+        nickname: draft.nickname,
         role: "USER",
         status: "ACTIVE",
         onboardingCompletedAt: new Date(),
@@ -161,7 +177,7 @@ export async function completeKakaoOnboarding(input: {
       where: { id: input.accountId },
       data: {
         userId: input.publicUserId,
-        name: input.nickname,
+        nickname: input.nickname,
         onboardingCompletedAt: now,
         lastLoginAt: now,
         consent: {

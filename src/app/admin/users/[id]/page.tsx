@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, formatKrw, requireAdmin } from "@/lib/admin";
+import { formatPhoneNumber, opsMemberName } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 
 import { UserRoleActions } from "./user-role-actions";
@@ -19,6 +20,8 @@ export default async function AdminUserDetailPage({ params }: Props) {
       id: true,
       email: true,
       name: true,
+      phoneNumber: true,
+      nickname: true,
       userId: true,
       role: true,
       createdAt: true,
@@ -55,8 +58,10 @@ export default async function AdminUserDetailPage({ params }: Props) {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{user.name ?? user.email}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{opsMemberName(user)}</h1>
           <p className="text-zinc-500">{user.email}</p>
+          {user.phoneNumber ? <p className="text-zinc-500">{formatPhoneNumber(user.phoneNumber)}</p> : null}
+          {user.nickname ? <p className="text-sm text-zinc-400">닉네임 {user.nickname}</p> : null}
         </div>
         <StatusBadge value={user.role} />
       </div>

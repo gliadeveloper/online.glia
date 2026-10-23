@@ -18,9 +18,9 @@ export async function GET(request: Request, context: RouteContext) {
     const entitlement = await prisma.coachingEntitlement.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         coachingOffering: {
-          select: { id: true, title: true, slug: true, coach: { select: { id: true, name: true, email: true } } },
+          select: { id: true, title: true, slug: true, coach: { select: { id: true, nickname: true, email: true } } },
         },
         sessions: { orderBy: { scheduledAt: "desc" } },
       },

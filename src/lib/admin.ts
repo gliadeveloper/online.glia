@@ -93,7 +93,7 @@ export async function getAdminOverview() {
       orderBy: { updatedAt: "desc" },
       take: 8,
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         form: { select: { id: true, slug: true, title: true, purpose: true } },
       },
     }),
@@ -101,7 +101,7 @@ export async function getAdminOverview() {
       orderBy: { createdAt: "desc" },
       take: 6,
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         lines: {
           include: {
             product: { select: { title: true } },
@@ -113,7 +113,7 @@ export async function getAdminOverview() {
       orderBy: { createdAt: "desc" },
       take: 10,
       include: {
-        actor: { select: { id: true, name: true, email: true } },
+        actor: { select: { id: true, nickname: true, email: true } },
       },
     }),
   ]);

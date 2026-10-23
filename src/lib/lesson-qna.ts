@@ -16,7 +16,7 @@ const COACH_TAKE = 50;
 
 const authorSelect = {
   id: true,
-  name: true,
+  nickname: true,
   email: true,
 } satisfies Prisma.UserSelect;
 

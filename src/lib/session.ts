@@ -31,7 +31,7 @@ export async function getCurrentUser() {
     select: {
       id: true,
       email: true,
-      name: true,
+      nickname: true,
       role: true,
       status: true,
       profile: { select: { avatarUrl: true } },
@@ -45,7 +45,7 @@ export async function getCurrentUser() {
   return {
     id: user.id,
     email: user.email,
-    name: user.name,
+    name: user.nickname,
     role: user.role,
     avatarUrl: profileAvatarSrc(user.profile?.avatarUrl) || null,
   };

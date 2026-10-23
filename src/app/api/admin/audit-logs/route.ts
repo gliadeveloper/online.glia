@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
       take: limit,
       include: {
-        actor: { select: { id: true, name: true, email: true } },
+        actor: { select: { id: true, nickname: true, email: true } },
       },
     });
 

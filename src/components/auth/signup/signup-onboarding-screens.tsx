@@ -216,6 +216,7 @@ function TermsContent() {
   const [terms, setTerms] = useState(false);
   const [privacy, setPrivacy] = useState(false);
   const [age14, setAge14] = useState(false);
+  const [marketing, setMarketing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -232,14 +233,16 @@ function TermsContent() {
       const response = await fetch("/api/auth/signup/complete", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step: "terms" }),
+        body: JSON.stringify({ step: "terms", marketingConsent: marketing }),
       });
       const data = (await response.json()) as { error?: string; code?: string };
       if (!response.ok) {
         setError(getAuthErrorMessage(data.code, data.error));
         return;
       }
-      router.push(`/signup/marketing${buildNextQuery(next)}`);
+      router.push(
+        `/signup/profile?marketing=${marketing ? "1" : "0"}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
+      );
     } catch {
       setError("네트워크 오류가 발생했습니다.");
     } finally {
@@ -300,6 +303,17 @@ function TermsContent() {
             <span>
               <span className="glia-auth__badge glia-auth__badge--required">필수</span>
               만 14세 이상입니다
+            </span>
+          </label>
+          <label className="glia-auth__check">
+            <input
+              type="checkbox"
+              checked={marketing}
+              onChange={(event) => setMarketing(event.target.checked)}
+            />
+            <span>
+              <span className="glia-auth__badge glia-auth__badge--optional">선택</span>
+              마케팅 정보 수신 동의
             </span>
           </label>
         </div>
@@ -402,7 +416,8 @@ function ProfileContent() {
   const [loading, setLoading] = useState(false);
 
   const nicknameValid = validateNickname(nickname).ok;
-  const userIdValid = validateUserId(userId.trim().toLowerCase()).ok;
+  const trimmedUserId = userId.trim().toLowerCase();
+  const userIdValid = trimmedUserId.length === 0 || validateUserId(trimmedUserId).ok;
   const canSubmit = userIdValid && nicknameValid && Boolean(avatarPresetId);
 
   async function handleSubmit(event: React.FormEvent) {
@@ -417,7 +432,7 @@ function ProfileContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: userId.trim().toLowerCase(),
+          userId: trimmedUserId || undefined,
           nickname: nickname.trim(),
           avatarPresetId,
           marketingConsent,
@@ -446,7 +461,7 @@ function ProfileContent() {
 
   return (
     <SignupStep
-      backHref={`/signup/marketing${buildNextQuery(next)}`}
+      backHref={`/signup/terms${buildNextQuery(next)}`}
       backLabel="이전 단계"
       title="프로필을"
       titleAccent="만들어보세요"
@@ -469,11 +484,10 @@ function ProfileContent() {
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
-              required
             />
             <p className="glia-auth__help">
-              코치를 검색하고 다른 사용자가 나를 찾을 때 사용하는 ID예요. 영문 소문자, 숫자,
-              밑줄로 3~20자까지 입력할 수 있어요.
+              다른 사람이 나를 찾을 때 쓰는 ID예요. 비워 두면 자동으로 만들어 드려요. 영문 소문자로
+              시작하는 3~20자의 영문 소문자, 숫자, 밑줄만 사용할 수 있어요.
             </p>
           </div>
 

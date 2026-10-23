@@ -9,7 +9,7 @@ export default async function AdminNewCoursePage() {
 
   const instructors = await prisma.user.findMany({
     where: { role: { in: ["COACH", "ADMIN"] } },
-    select: { id: true, name: true, email: true },
+    select: { id: true, nickname: true, email: true },
     orderBy: { email: "asc" },
   });
 
@@ -22,7 +22,7 @@ export default async function AdminNewCoursePage() {
       <CreateCoursePanel
         instructors={instructors.map((user) => ({
           id: user.id,
-          label: user.name ?? user.email,
+          label: user.nickname ?? user.email,
         }))}
       />
     </div>

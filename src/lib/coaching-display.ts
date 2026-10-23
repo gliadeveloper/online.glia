@@ -1,19 +1,19 @@
 export const coachProfileSelect = {
   id: true,
-  name: true,
+  nickname: true,
   email: true,
   profile: { select: { avatarUrl: true } },
 } as const;
 
 export type CoachProfile = {
   id: string;
-  name: string | null;
+  nickname: string | null;
   email: string;
   profile: { avatarUrl: string | null } | null;
 };
 
-export function displayCoachName(coach: Pick<CoachProfile, "name" | "email">) {
-  return coach.name?.trim() || coach.email;
+export function displayCoachName(coach: Pick<CoachProfile, "nickname" | "email">) {
+  return coach.nickname?.trim() || coach.email;
 }
 
 export function resolveEntitlementCoach<

@@ -1,11 +1,14 @@
 import { ApiError } from "@/lib/api";
 import { getCoachOrderStats } from "@/lib/coach-orders";
+import { memberOpsSelect } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 
 export type CoachCustomerRow = {
   userId: string;
   name: string | null;
+  nickname: string | null;
   email: string;
+  phoneNumber: string | null;
   enrollments: Array<{
     id: string;
     courseTitle: string;
@@ -27,12 +30,14 @@ export type CoachCustomerRow = {
 };
 
 function emptyCustomerRow(
-  user: { id: string; name: string | null; email: string },
+  user: { id: string; name: string | null; nickname: string | null; email: string; phoneNumber: string | null },
 ): CoachCustomerRow {
   return {
     userId: user.id,
     name: user.name,
+    nickname: user.nickname,
     email: user.email,
+    phoneNumber: user.phoneNumber,
     enrollments: [],
     coachingEntitlements: [],
     lastActivityAt: null,
@@ -68,7 +73,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
     prisma.enrollment.findMany({
       where: { course: { instructorId: coachId } },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: memberOpsSelect },
         course: { select: { id: true, title: true } },
       },
       orderBy: { enrolledAt: "desc" },
@@ -76,7 +81,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
     prisma.coachingEntitlement.findMany({
       where: { coachId },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: memberOpsSelect },
         coachingOffering: { select: { title: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -89,7 +94,7 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
             status: true,
             checkout: true,
             createdAt: true,
-            user: { select: { id: true, name: true, email: true } },
+            user: { select: memberOpsSelect },
           },
           orderBy: { createdAt: "desc" },
         })
@@ -166,13 +171,13 @@ export async function listCoachCustomers(coachId: string): Promise<CoachCustomer
 async function findCoachCustomerUser(customerUserId: string) {
   const byId = await prisma.user.findUnique({
     where: { id: customerUserId },
-    select: { id: true, name: true, email: true, createdAt: true },
+    select: { ...memberOpsSelect, createdAt: true },
   });
   if (byId) return byId;
 
   return prisma.user.findUnique({
     where: { userId: customerUserId },
-    select: { id: true, name: true, email: true, createdAt: true },
+    select: { ...memberOpsSelect, createdAt: true },
   });
 }
 

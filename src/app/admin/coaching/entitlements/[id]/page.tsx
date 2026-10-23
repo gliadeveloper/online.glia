@@ -16,9 +16,9 @@ export default async function AdminEntitlementDetailPage({ params }: Props) {
   const entitlement = await prisma.coachingEntitlement.findUnique({
     where: { id },
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, nickname: true, email: true } },
       coachingOffering: {
-        select: { id: true, title: true, slug: true, coach: { select: { name: true, email: true } } },
+        select: { id: true, title: true, slug: true, coach: { select: { nickname: true, email: true } } },
       },
       sessions: { orderBy: { scheduledAt: "desc" } },
     },
@@ -37,7 +37,7 @@ export default async function AdminEntitlementDetailPage({ params }: Props) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">
-            {entitlement.user.name ?? entitlement.user.email}
+            {entitlement.user.nickname ?? entitlement.user.email}
           </h1>
           <p className="text-zinc-600">{entitlement.coachingOffering.title}</p>
         </div>

@@ -176,7 +176,7 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
       <fieldset className="glia-mypage__fieldset">
         <label className="glia-mypage__field">
           <span className="glia-mypage__label">
-            이름 <span className="glia-mypage__req">필수</span>
+            닉네임 <span className="glia-mypage__req">필수</span>
           </span>
           <input
             className="glia-mypage__input"

@@ -4,6 +4,7 @@ import {
   createCoachingOffering,
   updateCoachingOffering,
 } from "@/lib/coaching-admin";
+import { memberOpsSelect } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 
 export { coachingOfferingInclude };
@@ -104,7 +105,7 @@ export async function listCoachEntitlements(coachId: string) {
     where: { coachId },
     orderBy: { createdAt: "desc" },
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: memberOpsSelect },
       coachingOffering: { select: { id: true, title: true, slug: true } },
       _count: { select: { sessions: true } },
     },

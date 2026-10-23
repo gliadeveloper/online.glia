@@ -8,7 +8,7 @@ import { normalizeProxiedR2MediaUrl } from "@/lib/media/proxied-media-url";
 
 const authorSelect = {
   id: true,
-  name: true,
+  nickname: true,
   email: true,
   profile: { select: { headline: true, avatarUrl: true } },
 } as const;
@@ -215,7 +215,7 @@ export const getPublishedPostShareBySlug = cache(async (slug: string) => {
       editedAt: true,
       updatedAt: true,
       parentPostId: true,
-      user: { select: { name: true, email: true } },
+      user: { select: { nickname: true, email: true } },
     },
   });
 });

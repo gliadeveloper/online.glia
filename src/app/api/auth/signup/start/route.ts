@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         duplicate: true,
         account: {
           email: maskEmail(existing.email),
-          maskedName: maskDisplayName(existing.name),
+          maskedName: maskDisplayName(existing.nickname),
           createdAt: existing.createdAt.toISOString(),
         },
       });

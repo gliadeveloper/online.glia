@@ -19,7 +19,7 @@ export type CoachPublishRow = {
   pendingReplyCount: number;
   pendingPreview: string | null;
   pendingAt: string | null;
-  user: { id: string; name: string | null; email: string };
+  user: { id: string; name?: string | null; nickname: string | null; email: string };
   entitlement: { id: string; coachingOffering: { title: string } };
 };
 
@@ -70,8 +70,12 @@ export function formatSeoulDateHeading(dateKey: string) {
   }).format(date);
 }
 
-export function displayName(user: { name: string | null; email: string }) {
-  return user.name?.trim() || user.email;
+export function displayName(user: {
+  name?: string | null;
+  nickname: string | null;
+  email: string;
+}) {
+  return user.name?.trim() || user.nickname?.trim() || user.email;
 }
 
 export function previewMessage(body: string, max = 80) {
@@ -139,7 +143,7 @@ export function toCoachPublishRow(session: {
   title: string;
   scheduledAt: Date;
   publicationStatus: CoachingSessionPublicationStatus;
-  user: { id: string; name: string | null; email: string };
+  user: { id: string; name?: string | null; nickname: string | null; email: string };
   entitlement: { id: string; coachingOffering: { title: string } };
   conversation: { messages: Array<{ bodyMarkdown: string; createdAt: Date }> } | null;
 }): CoachPublishRow {

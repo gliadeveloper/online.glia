@@ -172,7 +172,7 @@ export default async function CommunityPostPage({ params }: CommunityPostPagePro
             formId="post-comment-form"
             variant="inline"
             user={{
-              name: user.name,
+              nickname: user.name,
               email: user.email,
               profile: { avatarUrl: user.avatarUrl },
             }}

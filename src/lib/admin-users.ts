@@ -17,7 +17,7 @@ export async function updateUserRole(params: {
 }) {
   const user = await prisma.user.findUnique({
     where: { id: params.userId },
-    select: { id: true, email: true, name: true, role: true, status: true },
+    select: { id: true, email: true, nickname: true, role: true, status: true },
   });
 
   if (!user) {
@@ -52,7 +52,7 @@ export async function updateUserRole(params: {
     select: {
       id: true,
       email: true,
-      name: true,
+      nickname: true,
       role: true,
       userId: true,
       status: true,

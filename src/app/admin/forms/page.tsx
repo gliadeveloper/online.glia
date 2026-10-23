@@ -17,7 +17,7 @@ export default async function AdminFormsPage() {
     orderBy: { updatedAt: "desc" },
     include: {
       ...formDetailInclude,
-      createdBy: { select: { name: true, email: true } },
+      createdBy: { select: { nickname: true, email: true } },
       _count: { select: { submissions: true } },
     },
   });

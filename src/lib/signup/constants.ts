@@ -35,7 +35,7 @@ export function getAvatarPresetUrl(presetId: string) {
   )}`;
 }
 
-export function getSignupStepPath(step: "terms" | "marketing" | "profile") {
+export function getSignupStepPath(step: "terms" | "profile") {
   return `/signup/${step}`;
 }
 

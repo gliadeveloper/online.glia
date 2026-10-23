@@ -29,7 +29,7 @@ export default async function AdminCheckinsPage({ searchParams }: AdminCheckinsP
     orderBy: { updatedAt: "desc" },
     take: 100,
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, nickname: true, email: true } },
       form: { select: { slug: true, title: true, purpose: true } },
       answers: {
         include: {
@@ -107,7 +107,7 @@ export default async function AdminCheckinsPage({ searchParams }: AdminCheckinsP
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold text-zinc-900">
-                    {submission.user.name ?? submission.user.email}
+                    {submission.user.nickname ?? submission.user.email}
                   </p>
                   <p className="mt-0.5 text-sm text-zinc-500">{submission.user.email}</p>
                 </div>

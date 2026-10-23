@@ -101,7 +101,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
         <div className="border-b border-zinc-100 px-5 py-4">
           <h2 className="font-semibold">커리큘럼</h2>
           <p className="text-sm text-zinc-500">
-            강사 {course.instructor.name ?? course.instructor.email}
+            강사 {course.instructor.nickname ?? course.instructor.email}
           </p>
         </div>
         <ol className="divide-y divide-zinc-100">

@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       select: {
         id: true,
         email: true,
-        name: true,
+        nickname: true,
         role: true,
         password: true,
         status: true,
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
+        name: user.nickname,
         role: user.role,
       },
     });

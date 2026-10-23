@@ -294,7 +294,12 @@ model User {
   emailKind             EmailKind  @default(UNVERIFIED)
   emailVerifiedAt       DateTime?
   password              String?
+  /// Private legal name; only exposed to authorized administrators.
   name                  String?
+  /// Public nickname, initially copied from the legacy name column by migration.
+  nickname              String?
+  /// Nullable until existing members complete their details.
+  phoneNumber           String?
   role                  UserRole   @default(USER)
   status                UserStatus @default(ACTIVE)
   lastLoginAt           DateTime?
@@ -377,6 +382,8 @@ model SignupDraft {
   verifyCodeHash      String?
   verifyExpiresAt     DateTime?
   emailVerifiedAt     DateTime?
+  name                String?
+  phoneNumber         String?
   termsAcceptedAt     DateTime?
   marketingConsent    Boolean?
   marketingAcceptedAt DateTime?

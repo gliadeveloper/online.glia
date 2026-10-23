@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 type RouteContext = { params: Promise<{ id: string }> };
 
 const orderInclude = {
-  user: { select: { id: true, name: true, email: true } },
+  user: { select: { id: true, nickname: true, email: true } },
   lines: {
     include: {
       product: {

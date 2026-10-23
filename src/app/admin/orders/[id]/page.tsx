@@ -5,6 +5,7 @@ import { OrderActions } from "@/app/admin/orders/[id]/order-actions";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, formatKrw, requireAdmin } from "@/lib/admin";
 import { tossCancelOffer } from "@/lib/order-refund";
+import { formatPhoneNumber, opsMemberName } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -16,7 +17,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, name: true, nickname: true, email: true, phoneNumber: true } },
       lines: {
         include: {
           product: {
@@ -78,7 +79,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs text-zinc-500">고객</p>
-          <p className="mt-2 font-medium">{order.user.name ?? order.user.email}</p>
+          <p className="mt-2 font-medium">{opsMemberName(order.user)}</p>
+          <p className="mt-1 text-xs text-zinc-500">{order.user.email}</p>
+          {order.user.phoneNumber ? (
+            <p className="mt-1 text-xs text-zinc-500">{formatPhoneNumber(order.user.phoneNumber)}</p>
+          ) : null}
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs text-zinc-500">결제 금액</p>

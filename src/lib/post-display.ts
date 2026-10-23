@@ -1,6 +1,6 @@
 export type PostAuthor = {
   id: string;
-  name: string | null;
+  nickname: string | null;
   email: string;
   profile: { headline: string | null; avatarUrl: string | null } | null;
 };
@@ -31,8 +31,8 @@ export type PostSummary = {
 };
 
 export function displayAuthorName(user: {
-  name: string | null;
+  nickname: string | null;
   email: string;
 }): string {
-  return user.name ?? user.email.split("@")[0] ?? "익명";
+  return user.nickname ?? user.email.split("@")[0] ?? "익명";
 }

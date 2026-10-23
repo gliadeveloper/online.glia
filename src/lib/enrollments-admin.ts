@@ -16,7 +16,7 @@ export async function updateEnrollment(params: {
       completedAt: params.status === "COMPLETED" ? new Date() : undefined,
     },
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, nickname: true, email: true } },
       course: { select: { id: true, title: true } },
     },
   });
@@ -59,9 +59,9 @@ export async function updateCoachingEntitlementAdmin(params: {
       validUntil,
     },
     include: {
-      user: { select: { id: true, name: true, email: true } },
+      user: { select: { id: true, nickname: true, email: true } },
       coachingOffering: {
-        select: { id: true, title: true, slug: true, coach: { select: { id: true, name: true, email: true } } },
+        select: { id: true, title: true, slug: true, coach: { select: { id: true, nickname: true, email: true } } },
       },
       sessions: { orderBy: { scheduledAt: "desc" }, take: 10 },
     },

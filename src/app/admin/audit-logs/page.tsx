@@ -20,7 +20,7 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
     orderBy: { createdAt: "desc" },
     take: 200,
     include: {
-      actor: { select: { id: true, name: true, email: true } },
+      actor: { select: { id: true, nickname: true, email: true } },
     },
   });
 
@@ -82,7 +82,7 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
               <tr key={log.id} className="align-top hover:bg-zinc-50/80">
                 <td className="px-5 py-4 text-zinc-500">{formatDateTime(log.createdAt)}</td>
                 <td className="px-5 py-4">
-                  {log.actor?.name ?? log.actor?.email ?? "시스템"}
+                  {log.actor?.nickname ?? log.actor?.email ?? "시스템"}
                 </td>
                 <td className="px-5 py-4">
                   <StatusBadge value="PUBLISHED" label={log.action} />

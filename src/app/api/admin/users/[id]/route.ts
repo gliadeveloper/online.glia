@@ -20,7 +20,7 @@ export async function GET(request: Request, context: RouteContext) {
       select: {
         id: true,
         email: true,
-        name: true,
+        nickname: true,
         role: true,
         createdAt: true,
         enrollments: {

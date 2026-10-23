@@ -29,7 +29,7 @@ type CoachEntitlementBoardProps = {
     completedSessions: number;
     totalSessions: number;
     validUntil: string | null;
-    user: { id: string; name: string | null; email: string };
+    user: { id: string; nickname: string | null; email: string };
     coachingOffering: { title: string };
   };
   sessions: BoardSession[];

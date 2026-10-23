@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { MemberContactForm } from "@/components/account/member-contact-form";
+import type { MemberContactSnapshot } from "@/lib/member-contact";
+
 type ProductApplyButtonProps = {
   productId: string;
   label?: string;
@@ -35,6 +38,7 @@ export function ProductApplyButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(pendingOrderId ?? null);
+  const [contact, setContact] = useState<MemberContactSnapshot | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -90,6 +94,15 @@ export function ProductApplyButton({
       const data = (await response.json()) as { error?: string; id?: string; code?: string };
 
       if (!response.ok) {
+        if (data.code === "CONTACT_REQUIRED") {
+          const contactResponse = await fetch("/api/me/contact");
+          const contactData = (await contactResponse.json()) as { contact?: MemberContactSnapshot };
+          if (contactData.contact) {
+            setContact(contactData.contact);
+            setLoading(false);
+            return;
+          }
+        }
         setConfirmOpen(false);
         if (data.code === "APPLICATION_PENDING" || data.code === "ALREADY_OWNED") {
           setError(data.error ?? "신청할 수 없습니다.");
@@ -153,32 +166,61 @@ export function ProductApplyButton({
                 aria-labelledby="apply-confirm-title"
                 onClick={(event) => event.stopPropagation()}
               >
-                <h2 id="apply-confirm-title" className="shop-pdp-modal__title">
-                  이 프로그램으로 신청할까요?
-                </h2>
-                <p className="shop-pdp-modal__body">
-                  {productTitle ? <strong className="shop-pdp-modal__product">{productTitle}</strong> : null}
-                  {priceLabel ? <span className="shop-pdp-modal__price">{priceLabel}</span> : null}
-                  신청 후 코치가 확인하면 수강이 시작됩니다. 지금 결제가 진행되지는 않습니다.
-                </p>
-                <div className="shop-pdp-modal__actions">
-                  <button
-                    type="button"
-                    className="shop-pdp-apply-btn shop-pdp-modal__confirm"
-                    onClick={handleConfirm}
-                    disabled={loading}
-                  >
-                    {loading ? "신청 중…" : "신청하기"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmOpen(false)}
-                    disabled={loading}
-                    className="shop-pdp-modal__dismiss shell-focus-ring"
-                  >
-                    취소
-                  </button>
-                </div>
+                {contact && !contact.complete ? (
+                  <>
+                    <h2 id="apply-confirm-title" className="shop-pdp-modal__title">
+                      신청 전에 연락처를 남겨 주세요
+                    </h2>
+                    <MemberContactForm
+                      initial={contact}
+                      variant="modal"
+                      submitLabel="저장하고 신청하기"
+                      onSaved={() => {
+                        void handleConfirm();
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfirmOpen(false);
+                        setContact(null);
+                      }}
+                      disabled={loading}
+                      className="shop-pdp-modal__dismiss shell-focus-ring"
+                    >
+                      취소
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <h2 id="apply-confirm-title" className="shop-pdp-modal__title">
+                      이 프로그램으로 신청할까요?
+                    </h2>
+                    <p className="shop-pdp-modal__body">
+                      {productTitle ? <strong className="shop-pdp-modal__product">{productTitle}</strong> : null}
+                      {priceLabel ? <span className="shop-pdp-modal__price">{priceLabel}</span> : null}
+                      신청 후 코치가 확인하면 수강이 시작됩니다. 지금 결제가 진행되지는 않습니다.
+                    </p>
+                    <div className="shop-pdp-modal__actions">
+                      <button
+                        type="button"
+                        className="shop-pdp-apply-btn shop-pdp-modal__confirm"
+                        onClick={handleConfirm}
+                        disabled={loading}
+                      >
+                        {loading ? "신청 중…" : "신청하기"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmOpen(false)}
+                        disabled={loading}
+                        className="shop-pdp-modal__dismiss shell-focus-ring"
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>,
             document.body,

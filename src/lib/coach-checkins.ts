@@ -41,7 +41,7 @@ export async function listCoachCheckInMembers(coachId: string): Promise<CoachChe
     where: { coachId, revokedAt: null, user: { status: "ACTIVE" } },
     orderBy: { grantedAt: "desc" },
     select: {
-      user: { select: { id: true, userId: true, name: true, profile: { select: { avatarUrl: true } } } },
+      user: { select: { id: true, userId: true, nickname: true, profile: { select: { avatarUrl: true } } } },
     },
   });
 
@@ -69,7 +69,7 @@ export async function listCoachCheckInMembers(coachId: string): Promise<CoachChe
 
   return users.map((user) => ({
     publicUserId: user.userId,
-    nickname: user.name,
+    nickname: user.nickname,
     avatarUrl: user.profile?.avatarUrl ?? null,
     latestDailyDate: latest.get(user.id)?.daily ?? null,
     latestWeeklyDate: latest.get(user.id)?.weekly ?? null,
@@ -83,7 +83,7 @@ async function getAuthorizedMember(coachId: string, memberPublicUserId: string) 
       status: "ACTIVE",
       checkInAccessGrantedToCoaches: { some: { coachId, revokedAt: null } },
     },
-    select: { id: true, userId: true, name: true, profile: { select: { avatarUrl: true } } },
+    select: { id: true, userId: true, nickname: true, profile: { select: { avatarUrl: true } } },
   });
   if (!member || !member.userId) {
     throw new ApiError("열람 권한이 없거나 회원을 찾을 수 없습니다.", 404, "CHECKIN_ACCESS_NOT_FOUND");

@@ -6,7 +6,7 @@ import { useState } from "react";
 type Coach = {
   id: string;
   userId: string | null;
-  name: string | null;
+  nickname: string | null;
   profile: { avatarUrl: string | null; headline: string | null } | null;
 };
 
@@ -15,7 +15,7 @@ type ActiveCoach = { coach: Coach; grantedAt: string | Date };
 type PendingAction = { kind: "grant" | "revoke"; coach: Coach } | null;
 
 function CoachIdentity({ coach }: { coach: Coach }) {
-  const initial = (coach.name ?? coach.userId ?? "C").slice(0, 1).toUpperCase();
+  const initial = (coach.nickname ?? coach.userId ?? "C").slice(0, 1).toUpperCase();
 
   return (
     <div className="glia-ci-identity">
@@ -28,7 +28,7 @@ function CoachIdentity({ coach }: { coach: Coach }) {
         </span>
       )}
       <span>
-        <strong>{coach.name ?? "이름 미설정 코치"}</strong>
+        <strong>{coach.nickname ?? "이름 미설정 코치"}</strong>
         <small>@{coach.userId}</small>
         {coach.profile?.headline ? <em>{coach.profile.headline}</em> : null}
       </span>

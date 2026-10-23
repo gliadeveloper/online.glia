@@ -34,6 +34,14 @@ export default async function MyPage() {
         </header>
 
         <MyPageProfileSummary data={data} />
+        {data.contactComplete ? null : (
+          <aside className="glia-mypage__banner">
+            <p>
+              결제와 코칭 안내에 쓸 이름과 연락처가 아직 없습니다.{" "}
+              <a href="/mypage/edit#contact">회원 정보 입력</a>
+            </p>
+          </aside>
+        )}
         <MyPageMenu stats={data.stats} role={user.role} />
 
         <div className="glia-mypage__account">

@@ -23,7 +23,7 @@ type EntitlementRow = {
   publishedCount: number;
   pendingReplyCount: number;
   validUntil: string | null;
-  user: { id: string; name: string | null; email: string };
+  user: { id: string; nickname: string | null; email: string };
   coachingOffering: { id: string; title: string };
 };
 

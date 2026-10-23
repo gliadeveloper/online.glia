@@ -10,7 +10,7 @@ export default async function AdminNewCoachingOfferingPage() {
   const [coaches, courses] = await Promise.all([
     prisma.user.findMany({
       where: { role: { in: ["COACH", "ADMIN"] } },
-      select: { id: true, name: true, email: true },
+      select: { id: true, nickname: true, email: true },
     }),
     prisma.course.findMany({ select: { id: true, title: true }, orderBy: { title: "asc" } }),
   ]);
@@ -22,7 +22,7 @@ export default async function AdminNewCoachingOfferingPage() {
       </Link>
       <h1 className="text-3xl font-semibold tracking-tight">새 코칭 상품</h1>
       <CreateOfferingPanel
-        coaches={coaches.map((c) => ({ id: c.id, label: c.name ?? c.email }))}
+        coaches={coaches.map((c) => ({ id: c.id, label: c.nickname ?? c.email }))}
         courses={courses.map((c) => ({ id: c.id, label: c.title }))}
       />
     </div>

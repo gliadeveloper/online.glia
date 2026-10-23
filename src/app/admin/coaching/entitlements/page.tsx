@@ -13,13 +13,13 @@ export default async function AdminEntitlementsPage() {
       orderBy: { createdAt: "desc" },
       take: 100,
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         coachingOffering: {
-          select: { id: true, title: true, coach: { select: { name: true, email: true } } },
+          select: { id: true, title: true, coach: { select: { nickname: true, email: true } } },
         },
       },
     }),
-    prisma.user.findMany({ where: { role: "USER" }, select: { id: true, name: true, email: true } }),
+    prisma.user.findMany({ where: { role: "USER" }, select: { id: true, nickname: true, email: true } }),
     prisma.coachingOffering.findMany({ select: { id: true, title: true }, where: { isActive: true } }),
   ]);
 
@@ -31,7 +31,7 @@ export default async function AdminEntitlementsPage() {
       </div>
 
       <GrantEntitlementPanel
-        users={users.map((u) => ({ id: u.id, label: u.name ?? u.email }))}
+        users={users.map((u) => ({ id: u.id, label: u.nickname ?? u.email }))}
         offerings={offerings.map((o) => ({ id: o.id, label: o.title }))}
       />
 
@@ -51,7 +51,7 @@ export default async function AdminEntitlementsPage() {
               <tr key={e.id} className="hover:bg-zinc-50/80">
                 <td className="px-5 py-4">
                   <Link href={`/admin/coaching/entitlements/${e.id}`} className="font-medium hover:text-violet-700">
-                    {e.user.name ?? e.user.email}
+                    {e.user.nickname ?? e.user.email}
                   </Link>
                 </td>
                 <td className="px-5 py-4">{e.coachingOffering.title}</td>

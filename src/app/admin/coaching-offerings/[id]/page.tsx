@@ -67,7 +67,7 @@ export default async function AdminCoachingOfferingDetailPage({ params }: Props)
         <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
           <p className="text-xs text-zinc-500">코치</p>
           <p className="mt-2 font-medium">
-            {offering.coach?.name ?? offering.coach?.email ?? "미배정"}
+            {offering.coach?.nickname ?? offering.coach?.email ?? "미배정"}
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">

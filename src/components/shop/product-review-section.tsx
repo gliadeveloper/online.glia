@@ -10,7 +10,7 @@ type ProductReview = {
   rating: number;
   comment: string | null;
   createdAt: Date;
-  user: { name: string | null; email: string };
+  user: { nickname: string | null; email: string };
   course: { title: string };
 };
 

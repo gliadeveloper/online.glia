@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       orderBy: { enrolledAt: "desc" },
       take: Number(url.searchParams.get("limit") ?? 100),
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, nickname: true, email: true } },
         course: { select: { id: true, title: true, status: true } },
       },
     });

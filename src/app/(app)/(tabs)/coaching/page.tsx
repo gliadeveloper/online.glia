@@ -6,6 +6,7 @@ import {
   coachingEntitlementCardProps,
 } from "@/components/coaching/coaching-entitlement-card";
 import { getUserCoachingEntitlements } from "@/lib/coaching-customer";
+import { getMemberContact } from "@/lib/member-contact";
 import { getCurrentUser } from "@/lib/session";
 
 import "@/components/coaching/coaching-glia.css";
@@ -85,7 +86,10 @@ export default async function CoachingTabPage() {
     );
   }
 
-  const entitlements = await getUserCoachingEntitlements(user.id);
+  const [entitlements, contact] = await Promise.all([
+    getUserCoachingEntitlements(user.id),
+    getMemberContact(user.id),
+  ]);
   const stats: CoachingStats = {
     active: entitlements.filter((item) => item.status === "ACTIVE").length,
     completed: entitlements.filter((item) => item.status === "COMPLETED").length,
@@ -97,6 +101,11 @@ export default async function CoachingTabPage() {
       <CoachingHero stats={stats} />
 
       <div className="glia-coaching__body">
+        {entitlements.length > 0 && !contact?.complete ? (
+          <p className="glia-coaching__section-caption">
+            코칭 안내를 받으려면 <Link href="/mypage/edit#contact">이름과 연락처</Link>를 남겨 주세요.
+          </p>
+        ) : null}
         <section className="glia-coaching__section" aria-labelledby="coaching-product-list-heading">
           <header className="glia-coaching__section-head">
             <div>

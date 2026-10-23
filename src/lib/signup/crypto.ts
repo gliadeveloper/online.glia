@@ -34,6 +34,10 @@ export function generateVerificationCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
+export function generatePublicUserIdCandidate() {
+  return `u_${randomBytes(4).toString("hex")}`;
+}
+
 export async function hashVerificationCode(code: string) {
   const derived = (await scryptAsync(code, "signup-verify", 32)) as Buffer;
   return derived.toString("hex");

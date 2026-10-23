@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 const coachSelect = {
   id: true,
   userId: true,
-  name: true,
+  nickname: true,
   profile: { select: { avatarUrl: true, headline: true } },
 } as const;
 
@@ -27,7 +27,7 @@ export async function searchCoachesForCheckInAccess(params: { userId: string; qu
       status: "ACTIVE",
       OR: [
         { userId: { contains: query, mode: "insensitive" } },
-        { name: { contains: query, mode: "insensitive" } },
+        { nickname: { contains: query, mode: "insensitive" } },
       ],
     },
     orderBy: { userId: "asc" },

@@ -3,6 +3,7 @@ import type { Prisma } from "@/generated/prisma/client";
 
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatDateTime, requireAdmin } from "@/lib/admin";
+import { formatPhoneNumber, opsMemberName } from "@/lib/member-contact";
 import { isUserRole } from "@/lib/admin-users";
 import { prisma } from "@/lib/prisma";
 
@@ -15,6 +16,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   const { q, role } = await searchParams;
   const query = q?.trim() ?? "";
   const roleFilter = isUserRole(role) ? role : undefined;
+  const phoneQuery = query.replace(/\D/g, "");
 
   const where: Prisma.UserWhereInput = {
     ...(roleFilter ? { role: roleFilter } : {}),
@@ -23,7 +25,9 @@ export default async function AdminUsersPage({ searchParams }: Props) {
           OR: [
             { email: { contains: query, mode: "insensitive" } },
             { name: { contains: query, mode: "insensitive" } },
+            { nickname: { contains: query, mode: "insensitive" } },
             { userId: { contains: query, mode: "insensitive" } },
+            ...(phoneQuery.length >= 4 ? [{ phoneNumber: { contains: phoneQuery } }] : []),
           ],
         }
       : {}),
@@ -36,6 +40,8 @@ export default async function AdminUsersPage({ searchParams }: Props) {
       id: true,
       email: true,
       name: true,
+      phoneNumber: true,
+      nickname: true,
       userId: true,
       role: true,
       createdAt: true,
@@ -102,10 +108,11 @@ export default async function AdminUsersPage({ searchParams }: Props) {
               <tr key={user.id} className="hover:bg-zinc-50/80">
                 <td className="px-5 py-4">
                   <Link href={`/admin/users/${user.id}`} className="font-medium text-zinc-900 hover:text-violet-700">
-                    {user.name ?? "—"}
+                    {opsMemberName(user)}
                   </Link>
                   <p className="text-xs text-zinc-500">
                     {user.email}
+                    {user.phoneNumber ? ` · ${formatPhoneNumber(user.phoneNumber)}` : ""}
                     {user.userId ? ` · @${user.userId}` : ""}
                   </p>
                 </td>

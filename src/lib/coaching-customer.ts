@@ -78,7 +78,7 @@ export type UserCoachingEntitlementDetail = NonNullable<
 >;
 
 const homeFeedSessionInclude = {
-  coach: { select: { name: true, email: true } },
+  coach: { select: { nickname: true, email: true } },
   entitlement: {
     select: {
       coachingOffering: { select: { title: true } },

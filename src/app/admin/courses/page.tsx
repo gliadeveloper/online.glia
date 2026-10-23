@@ -54,7 +54,7 @@ export default async function AdminCoursesPage() {
                   <p className="font-mono text-xs text-zinc-500">{course.id}</p>
                 </td>
                 <td className="px-5 py-4 text-zinc-600">
-                  {course.instructor.name ?? course.instructor.email}
+                  {course.instructor.nickname ?? course.instructor.email}
                 </td>
                 <td className="px-5 py-4">{courseLevelLabels[course.level]}</td>
                 <td className="px-5 py-4">

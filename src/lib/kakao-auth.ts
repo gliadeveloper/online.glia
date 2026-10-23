@@ -212,7 +212,7 @@ export async function upsertUserFromKakao(
       });
 
       const nextName = resolveAppDisplayName(
-        existingIdentity.user.name,
+        existingIdentity.user.nickname,
         profile.nickname,
         providerAccountId,
       );
@@ -223,7 +223,7 @@ export async function upsertUserFromKakao(
       const user = await tx.user.update({
         where: { id: existingIdentity.userId },
         data: {
-          ...(nextName ? { name: nextName } : {}),
+          ...(nextName ? { nickname: nextName } : {}),
           lastLoginAt: new Date(),
           ...(profile.email && existingIdentity.user.emailKind === "PLACEHOLDER"
             ? {
@@ -276,13 +276,13 @@ export async function upsertUserFromKakao(
         },
       });
 
-      const nextName = resolveAppDisplayName(linkedUser.name, profile.nickname, providerAccountId);
+      const nextName = resolveAppDisplayName(linkedUser.nickname, profile.nickname, providerAccountId);
       const hasUploadedAvatar = Boolean(linkedUser.profile?.avatarUrl?.startsWith("/api/media/r2"));
 
       const user = await tx.user.update({
         where: { id: linkedUser.id },
         data: {
-          ...(nextName ? { name: nextName } : {}),
+          ...(nextName ? { nickname: nextName } : {}),
           emailKind: linkedUser.emailKind === "PLACEHOLDER" ? "VERIFIED" : linkedUser.emailKind,
           emailVerifiedAt: linkedUser.emailVerifiedAt ?? new Date(),
           lastLoginAt: new Date(),
@@ -306,7 +306,7 @@ export async function upsertUserFromKakao(
         email: emailInfo.email,
         emailKind: emailInfo.emailKind,
         emailVerifiedAt: emailInfo.emailKind === "VERIFIED" ? new Date() : null,
-        name: null,
+        nickname: null,
         role: "USER",
         status: "ACTIVE",
         onboardingCompletedAt: null,

@@ -5,6 +5,7 @@ import { OrderStatusPill } from "@/components/orders/order-status-pill";
 import { formatDateTime, formatKrw } from "@/lib/admin-format";
 import { orderStatusText, productKindLabels } from "@/lib/customer-labels";
 import type { CoachOrderDetail } from "@/lib/coach-orders";
+import { formatPhoneNumber, opsMemberName } from "@/lib/member-contact";
 import { tossCancelOffer } from "@/lib/order-refund";
 
 type CoachOrderDetailPanelProps = CoachOrderDetail;
@@ -50,9 +51,12 @@ export function CoachOrderDetailPanel({ order, coachProductIds }: CoachOrderDeta
         </div>
         <div className="px-5 py-4">
           <Link href={`/coach/customers/${order.user.id}`} className="font-medium text-emerald-700 hover:underline">
-            {order.user.name ?? order.user.email}
+            {opsMemberName(order.user)}
           </Link>
           <p className="text-sm text-zinc-500">{order.user.email}</p>
+          {order.user.phoneNumber ? (
+            <p className="text-sm text-zinc-500">{formatPhoneNumber(order.user.phoneNumber)}</p>
+          ) : null}
         </div>
       </section>
 

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       select: {
         id: true,
         email: true,
-        name: true,
+        nickname: true,
         role: true,
         createdAt: true,
         _count: {

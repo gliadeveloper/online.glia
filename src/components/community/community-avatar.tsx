@@ -3,7 +3,7 @@ import { displayAuthorName, type PostAuthor } from "@/lib/post-display";
 import { profileAvatarSrc } from "@/lib/profile-avatar";
 
 type CommunityAvatarProps = {
-  user: Pick<PostAuthor, "name" | "email"> & {
+  user: Pick<PostAuthor, "nickname" | "email"> & {
     profile?: { avatarUrl?: string | null } | null;
   };
   size?: "sm" | "md";

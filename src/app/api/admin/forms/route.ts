@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       orderBy: { updatedAt: "desc" },
       include: {
         ...formDetailInclude,
-        createdBy: { select: { id: true, name: true, email: true } },
+        createdBy: { select: { id: true, nickname: true, email: true } },
         _count: { select: { submissions: true } },
       },
     });

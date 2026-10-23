@@ -8,7 +8,7 @@ type TransactionClient = Prisma.TransactionClient;
 
 const authorSelect = {
   id: true,
-  name: true,
+  nickname: true,
   email: true,
 } as const;
 
@@ -24,14 +24,14 @@ type PostTarget = {
   slug: string;
   title: string;
   status: string;
-  user: { id: string; name: string | null; email: string };
+  user: { id: string; nickname: string | null; email: string };
 };
 
 type CommentTarget = {
   id: string;
   bodyMarkdown: string;
   status: string;
-  user: { id: string; name: string | null; email: string };
+  user: { id: string; nickname: string | null; email: string };
   post: { slug: string; title: string };
 };
 

@@ -54,7 +54,7 @@ export default async function AdminCoachingOfferingsPage() {
                   <p className="text-xs text-zinc-500">{offering.totalSessions}회 · {offering.validDays}일</p>
                 </td>
                 <td className="px-5 py-4 text-zinc-600">
-                  {offering.coach?.name ?? offering.coach?.email ?? "—"}
+                  {offering.coach?.nickname ?? offering.coach?.email ?? "—"}
                 </td>
                 <td className="px-5 py-4">{offering.totalSessions}회</td>
                 <td className="px-5 py-4">{offering.validDays}일</td>

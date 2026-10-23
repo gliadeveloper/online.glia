@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
+    select: { id: true, nickname: true, createdAt: true },
   });
 
   return NextResponse.json(users);
@@ -24,10 +25,10 @@ export async function POST(request: Request) {
   const user = await prisma.user.create({
     data: {
       email: body.email.trim(),
-      name: body.name?.trim() || null,
+      nickname: body.name?.trim() || null,
       password: body.password?.trim() || "changeme",
     },
   });
 
-  return NextResponse.json(user, { status: 201 });
+  return NextResponse.json({ id: user.id, nickname: user.nickname, createdAt: user.createdAt }, { status: 201 });
 }

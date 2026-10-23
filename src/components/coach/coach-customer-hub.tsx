@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type { CoachCustomerRow } from "@/lib/coach-customers";
+import { formatPhoneNumber, opsMemberName } from "@/lib/member-contact";
 
 type CoachCustomerHubProps = {
   customers: CoachCustomerRow[];
@@ -27,7 +28,9 @@ export function CoachCustomerHub({ customers }: CoachCustomerHubProps) {
     return customers.filter(
       (customer) =>
         customer.name?.toLowerCase().includes(normalized) ||
+        customer.nickname?.toLowerCase().includes(normalized) ||
         customer.email.toLowerCase().includes(normalized) ||
+        customer.phoneNumber?.includes(normalized.replace(/\D/g, "")) ||
         customer.enrollments.some((enrollment) =>
           enrollment.courseTitle.toLowerCase().includes(normalized),
         ) ||
@@ -67,8 +70,17 @@ export function CoachCustomerHub({ customers }: CoachCustomerHubProps) {
             >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-semibold text-zinc-900">{customer.name ?? "이름 없음"}</p>
-                <p className="text-sm text-zinc-500">{customer.email}</p>
+                <p className="font-semibold text-zinc-900">
+                  {opsMemberName({
+                    name: customer.name,
+                    nickname: customer.nickname,
+                    email: customer.email,
+                  })}
+                </p>
+                <p className="text-sm text-zinc-500">
+                  {customer.email}
+                  {customer.phoneNumber ? ` · ${formatPhoneNumber(customer.phoneNumber)}` : ""}
+                </p>
               </div>
               <div className="flex flex-col items-end gap-1">
                 {customer.pendingOrderCount > 0 ? (

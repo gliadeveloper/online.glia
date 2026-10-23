@@ -42,12 +42,12 @@ export default async function AdminCoachingSessionDetailPage({ params }: Props) 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
           <p className="text-xs text-zinc-500">학생</p>
-          <p className="mt-2 font-medium">{session.user.name ?? session.user.email}</p>
+          <p className="mt-2 font-medium">{session.user.nickname ?? session.user.email}</p>
           <p className="text-sm text-zinc-500">{session.user.email}</p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
           <p className="text-xs text-zinc-500">코치</p>
-          <p className="mt-2 font-medium">{session.coach.name ?? session.coach.email}</p>
+          <p className="mt-2 font-medium">{session.coach.nickname ?? session.coach.email}</p>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export default async function AdminCoachingSessionDetailPage({ params }: Props) 
                   <div>
                     <p className="font-medium">
                       {message.authorRole === "COACH" ? "코치" : "학생"} ·{" "}
-                      {message.author.name ?? message.author.email}
+                      {message.author.nickname ?? message.author.email}
                     </p>
                     <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-700">
                       {message.bodyMarkdown}
