@@ -115,6 +115,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         reviews={reviews}
         canReview={canReview}
         hasExistingReview={!!viewerReview}
+        needsNickname={Boolean(user && !user.name?.trim())}
         coupons={couponOffer.cards}
       />
     </ShopStackPage>

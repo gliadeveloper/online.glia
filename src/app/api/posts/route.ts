@@ -19,6 +19,7 @@ export async function POST(request: Request) {
       title?: string;
       bodyMarkdown?: string;
       parentPostSlug?: string | null;
+      nickname?: string | null;
     };
 
     const post = await createPublishedPost({
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
       title: body.title ?? "",
       bodyMarkdown: body.bodyMarkdown ?? "",
       parentPostSlug: body.parentPostSlug ?? null,
+      nickname: body.nickname,
     });
 
     return NextResponse.json({ slug: post.slug, id: post.id, title: post.title }, { status: 201 });

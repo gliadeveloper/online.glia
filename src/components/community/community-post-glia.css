@@ -682,6 +682,26 @@
   color: var(--glia-blue);
 }
 
+.app-trust-root .glia-post .community-comment-inline__nickname {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--glia-text-secondary);
+}
+
+.app-trust-root .glia-post .community-comment-inline__nickname input {
+  min-height: 2.75rem;
+  border: 1px solid var(--glia-border);
+  border-radius: var(--glia-radius-md);
+  background: var(--glia-surface);
+  padding: 0 0.875rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: var(--glia-text);
+}
+
 .app-trust-root .glia-post .community-comment-inline__form {
   display: flex;
   align-items: center;

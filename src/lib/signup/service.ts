@@ -104,13 +104,11 @@ export async function allocatePublicUserId() {
 
 export async function completeEmailSignup(draftId: string) {
   const draft = await getSignupDraftById(draftId);
-  if (!draft?.emailVerifiedAt || !draft.termsAcceptedAt || !draft.userId || !draft.nickname) {
+  if (!draft?.emailVerifiedAt || !draft.termsAcceptedAt) {
     throw new Error("SIGNUP_INCOMPLETE");
   }
-  if (!draft.avatarPresetId && !editableAvatarUrl(draft.avatarUrl)) {
-    throw new Error("AVATAR_REQUIRED");
-  }
 
+  const publicUserId = draft.userId || (await allocatePublicUserId());
   const avatarUrl = editableAvatarUrl(draft.avatarUrl) || null;
 
   const termsAcceptedAt = draft.termsAcceptedAt;
@@ -123,12 +121,12 @@ export async function completeEmailSignup(draftId: string) {
 
     const created = await tx.user.create({
       data: {
-        userId: draft.userId,
+        userId: publicUserId,
         email: draft.email,
         emailKind: "VERIFIED",
         emailVerifiedAt: draft.emailVerifiedAt,
         password: draft.passwordHash,
-        nickname: draft.nickname,
+        nickname: draft.nickname?.trim() || null,
         role: "USER",
         status: "ACTIVE",
         onboardingCompletedAt: new Date(),
@@ -158,17 +156,20 @@ export async function completeEmailSignup(draftId: string) {
 
 export async function completeKakaoOnboarding(input: {
   accountId: string;
-  publicUserId: string;
-  nickname: string;
-  avatarPresetId?: string | null;
+  publicUserId?: string | null;
   avatarUrl?: string | null;
   marketingConsent: boolean;
 }) {
-  if (!input.avatarPresetId && !editableAvatarUrl(input.avatarUrl)) {
-    throw new Error("AVATAR_REQUIRED");
+  const existing = await prisma.user.findUnique({
+    where: { id: input.accountId },
+    select: { userId: true, profile: { select: { avatarUrl: true } } },
+  });
+  if (!existing) {
+    throw new Error("USER_NOT_FOUND");
   }
 
-  const avatarUrl = editableAvatarUrl(input.avatarUrl) || null;
+  const publicUserId = existing.userId ?? input.publicUserId ?? (await allocatePublicUserId());
+  const avatarUrl = editableAvatarUrl(input.avatarUrl) || editableAvatarUrl(existing.profile?.avatarUrl) || null;
 
   const now = new Date();
 
@@ -176,8 +177,7 @@ export async function completeKakaoOnboarding(input: {
     const user = await tx.user.update({
       where: { id: input.accountId },
       data: {
-        userId: input.publicUserId,
-        nickname: input.nickname,
+        userId: publicUserId,
         onboardingCompletedAt: now,
         lastLoginAt: now,
         consent: {

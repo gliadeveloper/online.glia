@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { PublicNicknameField } from "@/components/account/public-nickname-field";
 import { formatReviewAuthor } from "@/lib/review-display";
 
 type ProductReview = {
@@ -22,6 +23,7 @@ type ProductReviewSectionProps = {
   isLoggedIn: boolean;
   canReview: boolean;
   hasExistingReview: boolean;
+  needsNickname?: boolean;
 };
 
 function StarRating({ rating }: { rating: number }) {
@@ -54,10 +56,12 @@ export function ProductReviewSection({
   isLoggedIn,
   canReview,
   hasExistingReview,
+  needsNickname = false,
 }: ProductReviewSectionProps) {
   const router = useRouter();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -74,7 +78,11 @@ export function ProductReviewSection({
       const response = await fetch(`/api/products/${productId}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating, comment }),
+        body: JSON.stringify({
+          rating,
+          comment,
+          ...(needsNickname ? { nickname } : {}),
+        }),
       });
       const data = (await response.json()) as { error?: string };
 
@@ -107,6 +115,17 @@ export function ProductReviewSection({
 
       {canReview && !hasExistingReview ? (
         <form onSubmit={handleSubmit} className="glia-pdp__review-form">
+          {needsNickname ? (
+            <PublicNicknameField
+              className="glia-pdp__review-nickname"
+              labelClassName="glia-pdp__review-label"
+              inputClassName="glia-pdp__review-textarea"
+              hintClassName="glia-pdp__review-hint"
+              value={nickname}
+              onChange={setNickname}
+              disabled={pending}
+            />
+          ) : null}
           <p className="glia-pdp__review-label">별점</p>
           <div className="glia-pdp__review-stars">
             {[1, 2, 3, 4, 5].map((value) => (

@@ -15,12 +15,13 @@ export async function POST(request: Request, context: RouteContext) {
       throw new ApiError("로그인이 필요합니다.", 401, "UNAUTHORIZED");
     }
     assertRateLimit(`lesson-qna:${userId}`, 12, 60_000);
-    const body = (await request.json()) as { body?: string };
+    const body = (await request.json()) as { body?: string; nickname?: string | null };
     const reply = await createLessonReply({
       userId,
       lessonId,
       questionId,
       body: body.body ?? "",
+      nickname: body.nickname,
     });
     return NextResponse.json({ reply });
   } catch (error) {

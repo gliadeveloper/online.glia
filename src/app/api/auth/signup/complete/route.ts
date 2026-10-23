@@ -15,7 +15,6 @@ import {
   completeKakaoOnboarding,
   getSignupDraftById,
 } from "@/lib/signup/service";
-import { validateNickname, validateUserId } from "@/lib/signup/validation";
 import { getCurrentUser } from "@/lib/session";
 
 async function getDraftId() {
@@ -23,86 +22,76 @@ async function getDraftId() {
   return cookieStore.get(SIGNUP_DRAFT_COOKIE)?.value ?? null;
 }
 
-export async function POST(request: Request) {
-  try {
-    const ip = getClientIp(request);
-    assertRateLimit(`signup:profile:${ip}`, 20);
+async function finishSignup(request: Request, marketingConsent: boolean) {
+  const now = new Date();
+  const draftId = await getDraftId();
+  const sessionUser = await getCurrentUser();
 
-    const body = (await request.json()) as {
-      userId?: string;
-      nickname?: string;
-      avatarPresetId?: string;
-      marketingConsent?: boolean;
-    };
-
-    const nicknameResult = validateNickname(body.nickname ?? "");
-    if (!nicknameResult.ok) {
-      throw new ApiError(nicknameResult.message, 400, "VALIDATION_ERROR");
-    }
-
-    const requestedUserId = body.userId?.trim().toLowerCase() ?? "";
-    let publicUserId = requestedUserId;
-    if (publicUserId) {
-      const userIdResult = validateUserId(publicUserId);
-      if (!userIdResult.ok) {
-        throw new ApiError(userIdResult.message, 400, "VALIDATION_ERROR");
-      }
-    } else {
-      publicUserId = await allocatePublicUserId();
-    }
-
-    if (!body.avatarPresetId) {
-      throw new ApiError("프로필 사진을 선택해 주세요.", 400, "AVATAR_REQUIRED");
-    }
-
-    const sessionUser = await getCurrentUser();
-    const draftId = await getDraftId();
-
-    if (sessionUser && !draftId) {
-      const onboardingState = await prisma.user.findUnique({
-        where: { id: sessionUser.id },
-        select: { onboardingCompletedAt: true },
-      });
-
-      if (!onboardingState?.onboardingCompletedAt) {
-        await completeKakaoOnboarding({
-          accountId: sessionUser.id,
-          publicUserId,
-          nickname: body.nickname!.trim(),
-          avatarPresetId: body.avatarPresetId,
-          marketingConsent: Boolean(body.marketingConsent),
-        });
-
-        return NextResponse.json({ ok: true, mode: "kakao" });
-      }
-    }
-
-    if (!draftId) {
-      throw new ApiError("회원가입 세션이 만료되었습니다.", 401, "DRAFT_EXPIRED");
-    }
-
+  if (draftId) {
     const draft = await getSignupDraftById(draftId);
-    if (!draft?.emailVerifiedAt || !draft.termsAcceptedAt) {
-      throw new ApiError("이전 단계를 먼저 완료해 주세요.", 409, "SIGNUP_INCOMPLETE");
+    if (!draft?.emailVerifiedAt) {
+      throw new ApiError("이메일 인증을 먼저 완료해 주세요.", 409, "EMAIL_NOT_VERIFIED");
     }
 
+    const publicUserId = draft.userId || (await allocatePublicUserId());
     await prisma.signupDraft.update({
       where: { id: draft.id },
       data: {
         userId: publicUserId,
-        nickname: body.nickname!.trim(),
-        avatarPresetId: body.avatarPresetId,
-        marketingConsent: Boolean(body.marketingConsent),
-        marketingAcceptedAt: body.marketingConsent ? new Date() : draft.marketingAcceptedAt,
+        termsAcceptedAt: draft.termsAcceptedAt ?? now,
+        marketingConsent,
+        marketingAcceptedAt: marketingConsent ? now : null,
       },
     });
 
     const created = await completeEmailSignup(draft.id);
-    const response = NextResponse.json({ ok: true, mode: "email" });
+    const response = NextResponse.json({
+      ok: true,
+      completed: true,
+      mode: "email",
+      user: { id: created.id, role: created.role },
+    });
     await attachSessionCookie(response, created.id, request);
     response.cookies.set(SIGNUP_DRAFT_COOKIE, "", { ...getSignupDraftCookieOptions(0), maxAge: 0 });
-
     return response;
+  }
+
+  if (sessionUser) {
+    const existing = await prisma.user.findUnique({
+      where: { id: sessionUser.id },
+      select: { id: true, role: true, onboardingCompletedAt: true },
+    });
+
+    if (existing?.onboardingCompletedAt) {
+      return NextResponse.json({
+        ok: true,
+        completed: true,
+        mode: "existing",
+        user: { id: existing.id, role: existing.role },
+      });
+    }
+
+    const user = await completeKakaoOnboarding({
+      accountId: sessionUser.id,
+      marketingConsent,
+    });
+    return NextResponse.json({
+      ok: true,
+      completed: true,
+      mode: "kakao",
+      user: { id: user.id, role: user.role },
+    });
+  }
+
+  throw new ApiError("회원가입 세션이 만료되었습니다.", 401, "DRAFT_EXPIRED");
+}
+
+export async function POST(request: Request) {
+  try {
+    const ip = getClientIp(request);
+    assertRateLimit(`signup:complete:${ip}`, 20);
+    const body = (await request.json().catch(() => ({}))) as { marketingConsent?: boolean };
+    return await finishSignup(request, Boolean(body.marketingConsent));
   } catch (error) {
     if (error instanceof RateLimitError) {
       return jsonError(new ApiError(error.message, 429, "RATE_LIMITED"));
@@ -118,7 +107,10 @@ export async function POST(request: Request) {
       "code" in error &&
       (error as { code?: string }).code === "P2002"
     ) {
-      return jsonError(new ApiError("이미 사용 중인 사용자 ID입니다.", 409, "USER_ID_TAKEN"));
+      return jsonError(new ApiError("이미 사용 중인 계정입니다.", 409, "USER_ID_TAKEN"));
+    }
+    if (error instanceof Error && error.message === "SIGNUP_INCOMPLETE") {
+      return jsonError(new ApiError("이전 단계를 먼저 완료해 주세요.", 409, "SIGNUP_INCOMPLETE"));
     }
     return jsonError(error);
   }
@@ -131,61 +123,20 @@ export async function PATCH(request: Request) {
       marketingConsent?: boolean;
     };
 
-    const draftId = await getDraftId();
-    const sessionUser = await getCurrentUser();
-
-    if (body.step === "terms") {
-      const now = new Date();
-      const marketingConsent = Boolean(body.marketingConsent);
-      if (draftId) {
-        const draft = await getSignupDraftById(draftId);
-        if (!draft?.emailVerifiedAt) {
-          throw new ApiError("이메일 인증을 먼저 완료해 주세요.", 409, "EMAIL_NOT_VERIFIED");
-        }
-        await prisma.signupDraft.update({
-          where: { id: draftId },
-          data: {
-            termsAcceptedAt: now,
-            marketingConsent,
-            marketingAcceptedAt: marketingConsent ? now : null,
-          },
-        });
-        return NextResponse.json({ ok: true, marketingConsent });
-      }
-
-      if (sessionUser) {
-        return NextResponse.json({ ok: true, mode: "kakao", marketingConsent });
-      }
-
-      throw new ApiError("회원가입 세션이 만료되었습니다.", 401, "DRAFT_EXPIRED");
+    if (body.step !== "terms" && body.step !== "marketing") {
+      throw new ApiError("잘못된 요청입니다.", 400, "VALIDATION_ERROR");
     }
 
-    if (body.step === "marketing") {
-      const now = new Date();
-      if (draftId) {
-        await prisma.signupDraft.update({
-          where: { id: draftId },
-          data: {
-            marketingConsent: Boolean(body.marketingConsent),
-            marketingAcceptedAt: body.marketingConsent ? now : null,
-          },
-        });
-        return NextResponse.json({ ok: true });
-      }
-
-      if (sessionUser) {
-        return NextResponse.json({
-          ok: true,
-          mode: "kakao",
-          marketingConsent: Boolean(body.marketingConsent),
-        });
-      }
-
-      throw new ApiError("회원가입 세션이 만료되었습니다.", 401, "DRAFT_EXPIRED");
-    }
-
-    throw new ApiError("잘못된 요청입니다.", 400, "VALIDATION_ERROR");
+    return await finishSignup(request, Boolean(body.marketingConsent));
   } catch (error) {
+    if (error instanceof Error && error.message === "EMAIL_ALREADY_REGISTERED") {
+      return jsonError(
+        new ApiError("이미 가입된 이메일입니다. 로그인해 주세요.", 409, "EMAIL_ALREADY_REGISTERED"),
+      );
+    }
+    if (error instanceof Error && error.message === "SIGNUP_INCOMPLETE") {
+      return jsonError(new ApiError("이전 단계를 먼저 완료해 주세요.", 409, "SIGNUP_INCOMPLETE"));
+    }
     return jsonError(error);
   }
 }

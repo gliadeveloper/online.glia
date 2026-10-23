@@ -74,6 +74,7 @@ export async function POST(request: Request, context: RouteContext) {
       rating?: number;
       comment?: string;
       courseId?: string;
+      nickname?: string | null;
     };
 
     const courseIds = getProductCourseIds(product.items);
@@ -90,6 +91,7 @@ export async function POST(request: Request, context: RouteContext) {
       courseId,
       rating: validateReviewRating(body.rating),
       comment: validateReviewComment(body.comment),
+      nickname: body.nickname,
     });
 
     return NextResponse.json(review, { status: 201 });

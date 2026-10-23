@@ -37,6 +37,7 @@ type ProductDetailPanelProps = {
   }>;
   canReview: boolean;
   hasExistingReview: boolean;
+  needsNickname?: boolean;
   coupons: ProductCouponCard[];
   pageTitle?: string;
   options?: ShopProductOption[];
@@ -61,6 +62,7 @@ export function ProductDetailPanel({
   reviews,
   canReview,
   hasExistingReview,
+  needsNickname = false,
   coupons,
   pageTitle,
   options = [],
@@ -76,7 +78,7 @@ export function ProductDetailPanel({
   const courses = getCourses(product);
   const instructor = getPrimaryInstructor(product);
   const supplies = (product.supplies ?? []).filter((item) => item.trim());
-  const instructorName = instructor?.nickname ?? instructor?.email.split("@")[0] ?? null;
+  const instructorName = instructor?.nickname?.trim() || null;
   const heroImages = getProductHeroImages(product);
   const programEyebrow =
     product.kind === "BUNDLE" ? "프로그램" : product.kind === "COACHING_ONLY" ? "코칭" : "VOD";
@@ -173,6 +175,7 @@ export function ProductDetailPanel({
               isLoggedIn={isLoggedIn}
               canReview={canReview}
               hasExistingReview={hasExistingReview}
+              needsNickname={needsNickname}
             />
 
             {instructor ? <ProductCreatorSection instructor={instructor} /> : null}

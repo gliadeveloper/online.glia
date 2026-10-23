@@ -792,6 +792,12 @@
   color: var(--glia-text);
 }
 
+.glia-pdp__review-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--glia-text-secondary);
+}
+
 .glia-pdp__review-stars {
   display: flex;
   gap: 0.15rem;

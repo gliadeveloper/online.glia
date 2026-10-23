@@ -2,6 +2,7 @@ import type { AuthProvider, EmailKind, User } from "@/generated/prisma/client";
 
 import { KakaoAuthError } from "@/lib/kakao-auth-error";
 import { prisma } from "@/lib/prisma";
+import { allocatePublicUserId } from "@/lib/signup/service";
 
 const KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
 const KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
@@ -149,21 +150,6 @@ function getKakaoProfile(data: KakaoUserResponse) {
   return { nickname, avatarUrl, email };
 }
 
-function resolveAppDisplayName(existingName: string | null | undefined, kakaoNickname: string, kakaoId: string) {
-  const current = existingName?.trim() || null;
-  const generated = generatedKakaoDisplayName(kakaoId);
-
-  if (current && current !== generated) {
-    return current;
-  }
-
-  if (kakaoNickname && kakaoNickname !== generated) {
-    return kakaoNickname;
-  }
-
-  return current;
-}
-
 type UpsertKakaoUserInput = {
   kakaoUser: KakaoUserResponse;
   accessToken: string;
@@ -211,11 +197,6 @@ export async function upsertUserFromKakao(
         },
       });
 
-      const nextName = resolveAppDisplayName(
-        existingIdentity.user.nickname,
-        profile.nickname,
-        providerAccountId,
-      );
       const hasUploadedAvatar = Boolean(
         existingIdentity.user.profile?.avatarUrl?.startsWith("/api/media/r2"),
       );
@@ -223,7 +204,6 @@ export async function upsertUserFromKakao(
       const user = await tx.user.update({
         where: { id: existingIdentity.userId },
         data: {
-          ...(nextName ? { nickname: nextName } : {}),
           lastLoginAt: new Date(),
           ...(profile.email && existingIdentity.user.emailKind === "PLACEHOLDER"
             ? {
@@ -276,13 +256,11 @@ export async function upsertUserFromKakao(
         },
       });
 
-      const nextName = resolveAppDisplayName(linkedUser.nickname, profile.nickname, providerAccountId);
       const hasUploadedAvatar = Boolean(linkedUser.profile?.avatarUrl?.startsWith("/api/media/r2"));
 
       const user = await tx.user.update({
         where: { id: linkedUser.id },
         data: {
-          ...(nextName ? { nickname: nextName } : {}),
           emailKind: linkedUser.emailKind === "PLACEHOLDER" ? "VERIFIED" : linkedUser.emailKind,
           emailVerifiedAt: linkedUser.emailVerifiedAt ?? new Date(),
           lastLoginAt: new Date(),
@@ -300,9 +278,11 @@ export async function upsertUserFromKakao(
     return { user, isNewUser: false };
   }
 
+  const publicUserId = await allocatePublicUserId();
   const user = await prisma.$transaction(async (tx) => {
     return tx.user.create({
       data: {
+        userId: publicUserId,
         email: emailInfo.email,
         emailKind: emailInfo.emailKind,
         emailVerifiedAt: emailInfo.emailKind === "VERIFIED" ? new Date() : null,

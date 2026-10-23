@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PublicNicknameField } from "@/components/account/public-nickname-field";
 import { TrustButton, TrustTextarea } from "@/components/corporate-trust/app-trust-ui";
 import { CommunityAvatar } from "@/components/community/community-avatar";
 import { Typography } from "@/components/typography/typography";
@@ -30,8 +31,10 @@ export function PostCommentComposer({
 }: PostCommentComposerProps) {
   const router = useRouter();
   const [body, setBody] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const needsNickname = Boolean(user) && !user?.nickname?.trim();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -42,7 +45,11 @@ export function PostCommentComposer({
       const response = await fetch(`/api/posts/${postSlug}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body, parentCommentId }),
+        body: JSON.stringify({
+          body,
+          parentCommentId,
+          ...(needsNickname ? { nickname } : {}),
+        }),
       });
 
       const data = (await response.json()) as { error?: string };
@@ -65,6 +72,14 @@ export function PostCommentComposer({
   if (variant === "dock") {
     return (
       <div className="community-comment-dock">
+        {needsNickname ? (
+          <PublicNicknameField
+            className="community-comment-dock__nickname"
+            value={nickname}
+            onChange={setNickname}
+            disabled={submitting}
+          />
+        ) : null}
         <form id={formId} onSubmit={handleSubmit} className="community-comment-dock__form">
           {user && <CommunityAvatar user={user} size="sm" />}
           <label htmlFor={`comment-${postSlug}`} className="sr-only">
@@ -82,7 +97,7 @@ export function PostCommentComposer({
           />
           <button
             type="submit"
-            disabled={submitting || body.trim().length === 0}
+            disabled={submitting || body.trim().length === 0 || (needsNickname && !nickname.trim())}
             className="community-comment-dock__send shell-focus-ring"
             aria-label="댓글 등록"
           >
@@ -113,6 +128,14 @@ export function PostCommentComposer({
   if (variant === "inline") {
     return (
       <div className="community-comment-inline">
+        {needsNickname ? (
+          <PublicNicknameField
+            className="community-comment-inline__nickname"
+            value={nickname}
+            onChange={setNickname}
+            disabled={submitting}
+          />
+        ) : null}
         <form id={formId} onSubmit={handleSubmit} className="community-comment-inline__form">
           {user && <CommunityAvatar user={user} size="sm" />}
           <label htmlFor={`comment-${postSlug}`} className="sr-only">
@@ -130,7 +153,7 @@ export function PostCommentComposer({
           />
           <button
             type="submit"
-            disabled={submitting || body.trim().length === 0}
+            disabled={submitting || body.trim().length === 0 || (needsNickname && !nickname.trim())}
             className="community-comment-inline__send shell-focus-ring"
             aria-label="댓글 등록"
           >
@@ -148,6 +171,9 @@ export function PostCommentComposer({
 
   return (
     <form id={formId} onSubmit={handleSubmit} className="community-comment-form">
+      {needsNickname ? (
+        <PublicNicknameField value={nickname} onChange={setNickname} disabled={submitting} />
+      ) : null}
       <label htmlFor={`comment-${postSlug}`} className="sr-only">
         댓글
       </label>
@@ -165,7 +191,11 @@ export function PostCommentComposer({
         <Typography as="p" role="caption" color="secondary">
           {body.length.toLocaleString("ko-KR")} / 2,000
         </Typography>
-        <TrustButton type="submit" variant="primary" disabled={submitting || body.trim().length === 0}>
+        <TrustButton
+          type="submit"
+          variant="primary"
+          disabled={submitting || body.trim().length === 0 || (needsNickname && !nickname.trim())}
+        >
           {submitting ? "등록 중…" : "댓글 등록"}
         </TrustButton>
       </div>

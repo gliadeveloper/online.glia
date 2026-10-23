@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
 import { profileAvatarSrc } from "@/lib/profile-avatar";
+import { validateNickname } from "@/lib/signup/validation";
 
 export { editableAvatarUrl, profileAvatarSrc } from "@/lib/profile-avatar";
 
@@ -29,12 +30,11 @@ export async function updateMyProfile(userId: string, input: ProfileUpdateInput)
     return profileAvatarSrc(trimmed) || null;
   })();
 
-  if (name !== undefined && name.length === 0) {
-    throw new ApiError("name is required", 400, "VALIDATION_ERROR");
-  }
-
-  if (name && name.length > 50) {
-    throw new ApiError("name must be 50 characters or less", 400, "VALIDATION_ERROR");
+  if (name !== undefined) {
+    const nicknameResult = validateNickname(name);
+    if (!nicknameResult.ok) {
+      throw new ApiError(nicknameResult.message, 400, "VALIDATION_ERROR");
+    }
   }
 
   if (headline && headline.length > 100) {

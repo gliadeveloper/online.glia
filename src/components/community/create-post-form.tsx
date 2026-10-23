@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PublicNicknameField } from "@/components/account/public-nickname-field";
 import { MarkdownComposer } from "@/components/community/markdown-composer";
 
 type CreatePostFormProps = {
@@ -11,12 +12,14 @@ type CreatePostFormProps = {
     slug: string;
     title: string;
   };
+  needsNickname?: boolean;
 };
 
-export function CreatePostForm({ parentPost }: CreatePostFormProps) {
+export function CreatePostForm({ parentPost, needsNickname = false }: CreatePostFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [bodyMarkdown, setBodyMarkdown] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,6 +47,7 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
           title,
           bodyMarkdown,
           parentPostSlug: parentPost?.slug ?? null,
+          ...(needsNickname ? { nickname } : {}),
         }),
       });
 
@@ -74,6 +78,18 @@ export function CreatePostForm({ parentPost }: CreatePostFormProps) {
           </Link>
         </div>
       )}
+
+      {needsNickname ? (
+        <PublicNicknameField
+          className="glia-write__field"
+          labelClassName="glia-write__label"
+          inputClassName="glia-write__input"
+          hintClassName="glia-write__help"
+          value={nickname}
+          onChange={setNickname}
+          disabled={submitting}
+        />
+      ) : null}
 
       <div className="glia-write__field">
         <label htmlFor="post-title" className="glia-write__label">

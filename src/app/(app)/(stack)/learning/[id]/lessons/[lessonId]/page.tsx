@@ -215,7 +215,13 @@ export default async function LearningLessonPage({ params }: LearningLessonPageP
         }
         actions={actions}
         body={showBody ? bodyContent : null}
-        qna={<LessonQnaPanel lessonId={lesson.id} initialQuestions={questions} />}
+        qna={
+          <LessonQnaPanel
+            lessonId={lesson.id}
+            initialQuestions={questions}
+            needsNickname={!user.name?.trim()}
+          />
+        }
         mobileNav={mobileNav}
       />
     </AppStackPage>

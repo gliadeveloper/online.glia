@@ -47,7 +47,7 @@ function listStatus(shopState: ProductShopState): { label: string; tone: "comple
 
 function instructorName(product: CatalogProduct) {
   const instructor = product.items.find((item) => item.course?.instructor)?.course?.instructor;
-  return instructor?.nickname ?? instructor?.email.split("@")[0] ?? null;
+  return instructor?.nickname?.trim() || null;
 }
 
 export function ProductListCard({

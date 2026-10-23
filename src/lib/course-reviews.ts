@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { ensurePublicNickname } from "@/lib/public-nickname";
 
 const authorSelect = {
   id: true,
@@ -106,7 +107,9 @@ export async function createCourseReview(params: {
   courseId: string;
   rating: number;
   comment?: string | null;
+  nickname?: string | null;
 }) {
+  await ensurePublicNickname(params.userId, params.nickname);
   const canReview = await canUserReviewProduct(params.userId, [params.courseId]);
   if (!canReview) {
     throw new Error("NOT_ENROLLED");

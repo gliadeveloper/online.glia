@@ -176,6 +176,12 @@
   color: var(--glia-text);
 }
 
+.app-trust-root .glia-write__help {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--glia-text-secondary);
+}
+
 .app-trust-root .glia-write__input,
 .app-trust-root .glia-write__textarea {
   width: 100%;

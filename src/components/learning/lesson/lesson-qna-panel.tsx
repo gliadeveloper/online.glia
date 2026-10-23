@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { PublicNicknameField } from "@/components/account/public-nickname-field";
 import { PostMarkdown } from "@/components/community/post-markdown";
 import type { LessonQnaQuestion, LessonQnaReply } from "@/lib/lesson-qna";
 import { LESSON_QNA_IMAGE_LIMIT } from "@/lib/media/lesson-qna-limits";
@@ -11,6 +12,7 @@ import { formatPostRelativeTime } from "@/lib/post-content";
 type LessonQnaPanelProps = {
   lessonId: string;
   initialQuestions: LessonQnaQuestion[];
+  needsNickname?: boolean;
 };
 
 type ThreadProps = {
@@ -18,9 +20,11 @@ type ThreadProps = {
   question: LessonQnaQuestion;
   open: boolean;
   showContext?: boolean;
+  needsNickname?: boolean;
   onToggle: () => void;
   onChange: (question: LessonQnaQuestion) => void;
   onRemove: () => void;
+  onNicknameSaved?: () => void;
 };
 
 async function readError(response: Response) {
@@ -42,9 +46,14 @@ function sortQuestions(items: LessonQnaQuestion[]) {
   );
 }
 
-export function LessonQnaPanel({ lessonId, initialQuestions }: LessonQnaPanelProps) {
+export function LessonQnaPanel({
+  lessonId,
+  initialQuestions,
+  needsNickname: initialNeedsNickname = false,
+}: LessonQnaPanelProps) {
   const [questions, setQuestions] = useState(initialQuestions);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [needsNickname, setNeedsNickname] = useState(initialNeedsNickname);
 
   useEffect(() => {
     const id = window.location.hash.replace(/^#qna-/, "");
@@ -66,7 +75,9 @@ export function LessonQnaPanel({ lessonId, initialQuestions }: LessonQnaPanelPro
 
       <QuestionComposer
         lessonId={lessonId}
+        needsNickname={needsNickname}
         onCreated={(question) => {
+          setNeedsNickname(false);
           setQuestions((current) =>
             sortQuestions([question, ...current.filter((item) => item.id !== question.id)]),
           );
@@ -85,12 +96,14 @@ export function LessonQnaPanel({ lessonId, initialQuestions }: LessonQnaPanelPro
               question={question}
               open={openId === question.id}
               onToggle={() => setOpenId((current) => (current === question.id ? null : question.id))}
+              needsNickname={needsNickname}
               onChange={(next) =>
                 setQuestions((current) =>
                   sortQuestions(current.map((item) => (item.id === next.id ? next : item))),
                 )
               }
               onRemove={() => setQuestions((current) => current.filter((item) => item.id !== question.id))}
+              onNicknameSaved={() => setNeedsNickname(false)}
             />
           ))}
         </ul>
@@ -104,9 +117,11 @@ export function LessonQnaThread({
   question,
   open,
   showContext = false,
+  needsNickname = false,
   onToggle,
   onChange,
   onRemove,
+  onNicknameSaved,
 }: ThreadProps) {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -277,7 +292,15 @@ export function LessonQnaThread({
           {question.isClosed ? (
             <p className="lesson-qna__note">닫힌 질문입니다. 새 답변을 달 수 없습니다.</p>
           ) : (
-            <ReplyComposer lessonId={lessonId} questionId={question.id} onChange={onChange} />
+            <ReplyComposer
+              lessonId={lessonId}
+              questionId={question.id}
+              needsNickname={needsNickname}
+              onChange={(next) => {
+                onNicknameSaved?.();
+                onChange(next);
+              }}
+            />
           )}
           {error ? <p className="lesson-qna__error">{error}</p> : null}
         </div>
@@ -436,13 +459,16 @@ function ReplyRow({
 
 function QuestionComposer({
   lessonId,
+  needsNickname,
   onCreated,
 }: {
   lessonId: string;
+  needsNickname: boolean;
   onCreated: (question: LessonQnaQuestion) => void;
 }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -453,7 +479,7 @@ function QuestionComposer({
       const response = await fetch(`/api/learning/lessons/${lessonId}/questions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, body }),
+        body: JSON.stringify({ title, body, ...(needsNickname ? { nickname } : {}) }),
       });
       if (!response.ok) {
         setError(await readError(response));
@@ -476,6 +502,16 @@ function QuestionComposer({
         void submit();
       }}
     >
+      {needsNickname ? (
+        <PublicNicknameField
+          className="lesson-qna__label"
+          inputClassName="lesson-qna__input"
+          hintClassName="lesson-qna__note"
+          value={nickname}
+          onChange={setNickname}
+          disabled={busy}
+        />
+      ) : null}
       <label className="lesson-qna__label">
         제목
         <input
@@ -493,7 +529,11 @@ function QuestionComposer({
       </div>
       <p className="lesson-qna__note">영상 시점은 설명에 분·초로 적고, 동작은 이미지로 넣으면 강사가 답하기 쉽습니다.</p>
       {error ? <p className="lesson-qna__error">{error}</p> : null}
-      <button type="submit" className="lesson-qna__btn" disabled={busy || !title.trim()}>
+      <button
+        type="submit"
+        className="lesson-qna__btn"
+        disabled={busy || !title.trim() || (needsNickname && !nickname.trim())}
+      >
         {busy ? "등록 중…" : "질문 등록"}
       </button>
     </form>
@@ -503,13 +543,16 @@ function QuestionComposer({
 function ReplyComposer({
   lessonId,
   questionId,
+  needsNickname,
   onChange,
 }: {
   lessonId: string;
   questionId: string;
+  needsNickname: boolean;
   onChange: (question: LessonQnaQuestion) => void;
 }) {
   const [body, setBody] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -520,7 +563,7 @@ function ReplyComposer({
       const response = await fetch(`/api/learning/lessons/${lessonId}/questions/${questionId}/replies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
+        body: JSON.stringify({ body, ...(needsNickname ? { nickname } : {}) }),
       });
       if (!response.ok) {
         setError(await readError(response));
@@ -548,12 +591,26 @@ function ReplyComposer({
         void submit();
       }}
     >
+      {needsNickname ? (
+        <PublicNicknameField
+          className="lesson-qna__label"
+          inputClassName="lesson-qna__input"
+          hintClassName="lesson-qna__note"
+          value={nickname}
+          onChange={setNickname}
+          disabled={busy}
+        />
+      ) : null}
       <div className="lesson-qna__label">
         답변
         <BodyField lessonId={lessonId} body={body} onChange={setBody} />
       </div>
       {error ? <p className="lesson-qna__error">{error}</p> : null}
-      <button type="submit" className="lesson-qna__btn" disabled={busy || !body.trim()}>
+      <button
+        type="submit"
+        className="lesson-qna__btn"
+        disabled={busy || !body.trim() || (needsNickname && !nickname.trim())}
+      >
         {busy ? "등록 중…" : "답변 등록"}
       </button>
     </form>

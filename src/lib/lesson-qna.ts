@@ -10,6 +10,7 @@ import {
 import { normalizeLessonQnaBody, normalizeLessonQnaTitle } from "@/lib/media/lesson-qna-media";
 import { prisma } from "@/lib/prisma";
 import { displayAuthorName } from "@/lib/post-display";
+import { ensurePublicNickname } from "@/lib/public-nickname";
 
 const QUESTION_TAKE = 100;
 const COACH_TAKE = 50;
@@ -248,7 +249,9 @@ export async function createLessonQuestion(params: {
   lessonId: string;
   title: string;
   body: string;
+  nickname?: string | null;
 }) {
+  await ensurePublicNickname(params.userId, params.nickname);
   const access = await assertLessonQnaAccess(params.userId, params.lessonId);
   const title = normalizeLessonQnaTitle(params.title);
   const body = normalizeLessonQnaBody(params.body, access.course.id);
@@ -347,7 +350,9 @@ export async function createLessonReply(params: {
   lessonId: string;
   questionId: string;
   body: string;
+  nickname?: string | null;
 }) {
+  await ensurePublicNickname(params.userId, params.nickname);
   const { access, question } = await requireQuestion(params.userId, params.lessonId, params.questionId);
   if (question.isClosed) {
     throw new ApiError("닫힌 질문에는 답변을 달 수 없습니다.", 400, "QUESTION_CLOSED");

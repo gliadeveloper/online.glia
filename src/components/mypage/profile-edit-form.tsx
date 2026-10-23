@@ -184,7 +184,7 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
             value={name}
             onChange={(event) => setName(event.target.value)}
             required
-            maxLength={50}
+            maxLength={20}
           />
         </label>
 

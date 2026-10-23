@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 
+import type { UserRole } from "@/generated/prisma/client";
+
 import { KakaoLoginButton } from "@/components/auth/login/kakao-login-button";
 import { SignupStep, SignupSuspenseFallback } from "@/components/auth/signup/signup-step";
 import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { siteBusiness } from "@/lib/site-business";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
-import { AVATAR_PRESETS } from "@/lib/signup/constants";
-import { validateNickname, validateUserId } from "@/lib/signup/validation";
 
 function buildNextQuery(next: string | null) {
   return next ? `?next=${encodeURIComponent(next)}` : "";
@@ -235,14 +235,17 @@ function TermsContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ step: "terms", marketingConsent: marketing }),
       });
-      const data = (await response.json()) as { error?: string; code?: string };
+      const data = (await response.json()) as {
+        error?: string;
+        code?: string;
+        user?: { role?: UserRole };
+      };
       if (!response.ok) {
         setError(getAuthErrorMessage(data.code, data.error));
         return;
       }
-      router.push(
-        `/signup/profile?marketing=${marketing ? "1" : "0"}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
-      );
+      router.push(resolvePostLoginPath(next, data.user?.role ?? "USER" satisfies UserRole));
+      router.refresh();
     } catch {
       setError("네트워크 오류가 발생했습니다.");
     } finally {
@@ -321,219 +324,7 @@ function TermsContent() {
         {error ? <SignupError message={error} /> : null}
 
         <button type="submit" disabled={!allChecked || loading} className="glia-auth__submit">
-          {loading ? "처리 중..." : "필수 동의하기"}
-        </button>
-      </form>
-    </SignupStep>
-  );
-}
-
-function MarketingContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const next = searchParams.get("next");
-  const [consent, setConsent] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function submit(accepted: boolean) {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/auth/signup/complete", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step: "marketing", marketingConsent: accepted }),
-      });
-      const data = (await response.json()) as { error?: string; code?: string };
-      if (!response.ok) {
-        setError(getAuthErrorMessage(data.code, data.error));
-        return;
-      }
-      router.push(
-        `/signup/profile?marketing=${accepted ? "1" : "0"}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
-      );
-    } catch {
-      setError("네트워크 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <SignupStep
-      backHref={`/signup/terms${buildNextQuery(next)}`}
-      backLabel="약관으로 돌아가기"
-      title="서비스 혜택 제공을 위한"
-      titleAccent="동의"
-      description="이벤트, 할인, 맞춤 콘텐츠 등 마케팅 정보 수신에 동의하실 수 있습니다. (선택)"
-    >
-      <label className="glia-auth__check glia-auth__check--bare">
-        <input
-          type="checkbox"
-          checked={consent}
-          onChange={(event) => setConsent(event.target.checked)}
-        />
-        <span>
-          <span className="glia-auth__badge glia-auth__badge--optional">선택</span>
-          마케팅 정보 수신 동의
-        </span>
-      </label>
-
-      {error ? <SignupError message={error} /> : null}
-
-      <div className="glia-auth__actions">
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => submit(consent)}
-          className="glia-auth__submit"
-        >
-          {loading ? "처리 중..." : "동의하기"}
-        </button>
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => submit(false)}
-          className="glia-auth__ghost"
-        >
-          동의 안 함
-        </button>
-      </div>
-    </SignupStep>
-  );
-}
-
-function ProfileContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const next = searchParams.get("next");
-  const marketingConsent = searchParams.get("marketing") === "1";
-  const [userId, setUserId] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [avatarPresetId, setAvatarPresetId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const nicknameValid = validateNickname(nickname).ok;
-  const trimmedUserId = userId.trim().toLowerCase();
-  const userIdValid = trimmedUserId.length === 0 || validateUserId(trimmedUserId).ok;
-  const canSubmit = userIdValid && nicknameValid && Boolean(avatarPresetId);
-
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!canSubmit) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/auth/signup/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: trimmedUserId || undefined,
-          nickname: nickname.trim(),
-          avatarPresetId,
-          marketingConsent,
-        }),
-      });
-      const data = (await response.json()) as {
-        error?: string;
-        code?: string;
-        mode?: "email" | "kakao";
-        user?: { role?: string };
-      };
-
-      if (!response.ok) {
-        setError(getAuthErrorMessage(data.code, data.error));
-        return;
-      }
-
-      router.push(resolvePostLoginPath(next, "USER"));
-      router.refresh();
-    } catch {
-      setError("네트워크 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <SignupStep
-      backHref={`/signup/terms${buildNextQuery(next)}`}
-      backLabel="이전 단계"
-      title="프로필을"
-      titleAccent="만들어보세요"
-      description="크리에이터를 비롯한 다른 사람들과 소통할 나만의 프로필이에요."
-    >
-      <form onSubmit={handleSubmit} className="glia-auth__form">
-        <fieldset className="glia-auth__fields glia-auth__fields--spaced">
-          <legend className="sr-only">프로필 정보</legend>
-
-          <div className="glia-auth__field">
-            <label htmlFor="profile-user-id" className="glia-auth__label">
-              사용자 ID
-            </label>
-            <input
-              id="profile-user-id"
-              value={userId}
-              onChange={(event) => setUserId(event.target.value.toLowerCase())}
-              className="glia-auth__input"
-              placeholder="예: coach_kim"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-            />
-            <p className="glia-auth__help">
-              다른 사람이 나를 찾을 때 쓰는 ID예요. 비워 두면 자동으로 만들어 드려요. 영문 소문자로
-              시작하는 3~20자의 영문 소문자, 숫자, 밑줄만 사용할 수 있어요.
-            </p>
-          </div>
-
-          <div className="glia-auth__field">
-            <label htmlFor="profile-nickname" className="glia-auth__label">
-              닉네임
-            </label>
-            <input
-              id="profile-nickname"
-              value={nickname}
-              onChange={(event) => setNickname(event.target.value)}
-              className="glia-auth__input"
-              placeholder="닉네임을 입력하세요"
-              required
-            />
-            <p className="glia-auth__help">한글 1–10자, 영문 및 숫자 2–20자까지 입력할 수 있어요.</p>
-          </div>
-
-          <div className="glia-auth__field">
-            <span className="glia-auth__label">프로필 사진</span>
-            <div className="glia-auth__avatars">
-              {AVATAR_PRESETS.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  data-selected={avatarPresetId === preset.id}
-                  className="glia-auth__avatar"
-                  onClick={() => setAvatarPresetId(preset.id)}
-                  aria-label={preset.label}
-                  aria-pressed={avatarPresetId === preset.id}
-                >
-                  <span
-                    className="glia-auth__avatar-swatch"
-                    style={{ backgroundColor: preset.color }}
-                    aria-hidden="true"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-        </fieldset>
-
-        {error ? <SignupError message={error} /> : null}
-
-        <button type="submit" disabled={!canSubmit || loading} className="glia-auth__submit">
-          {loading ? "저장 중..." : "프로필 저장하기"}
+          {loading ? "처리 중..." : "동의하고 시작하기"}
         </button>
       </form>
     </SignupStep>
@@ -564,18 +355,3 @@ export function SignupTermsScreen() {
   );
 }
 
-export function SignupMarketingScreen() {
-  return (
-    <Suspense fallback={<SignupSuspenseFallback />}>
-      <MarketingContent />
-    </Suspense>
-  );
-}
-
-export function SignupProfileScreen() {
-  return (
-    <Suspense fallback={<SignupSuspenseFallback />}>
-      <ProfileContent />
-    </Suspense>
-  );
-}

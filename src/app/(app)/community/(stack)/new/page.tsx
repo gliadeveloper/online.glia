@@ -56,7 +56,7 @@ export default async function CommunityNewPostPage({ searchParams }: CommunityNe
         </p>
       </header>
 
-      <CreatePostForm parentPost={parentPost ?? undefined} />
+      <CreatePostForm parentPost={parentPost ?? undefined} needsNickname={!user.name?.trim()} />
     </div>
   );
 }

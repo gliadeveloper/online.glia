@@ -32,7 +32,7 @@ export type PostSummary = {
 
 export function displayAuthorName(user: {
   nickname: string | null;
-  email: string;
+  email?: string | null;
 }): string {
-  return user.nickname ?? user.email.split("@")[0] ?? "익명";
+  return user.nickname?.trim() || "회원";
 }

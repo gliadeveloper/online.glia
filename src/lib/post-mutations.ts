@@ -2,6 +2,7 @@ import type { Prisma } from "@/generated/prisma/client";
 
 import { excerptFromMarkdown } from "@/lib/post-content";
 import { prisma } from "@/lib/prisma";
+import { ensurePublicNickname } from "@/lib/public-nickname";
 import {
   buildPostSlug,
   validateCommentBody,
@@ -16,7 +17,9 @@ export async function createPublishedPost(params: {
   title: string;
   bodyMarkdown: string;
   parentPostSlug?: string | null;
+  nickname?: string | null;
 }) {
+  await ensurePublicNickname(params.userId, params.nickname);
   const title = validatePostTitle(params.title);
   const bodyMarkdown = validateMarkdownBody(params.bodyMarkdown, { field: "post" });
   const now = new Date();
@@ -79,7 +82,9 @@ export async function createPostComment(params: {
   postSlug: string;
   body: string;
   parentCommentId?: string | null;
+  nickname?: string | null;
 }) {
+  await ensurePublicNickname(params.userId, params.nickname);
   const bodyMarkdown = validateCommentBody(params.body);
 
   const post = await prisma.post.findFirst({

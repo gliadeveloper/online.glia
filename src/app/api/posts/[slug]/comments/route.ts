@@ -20,13 +20,18 @@ export async function POST(request: Request, context: RouteContext) {
     assertRateLimit(`post:comment:${userId}`, 20, 60_000);
 
     const { slug } = await context.params;
-    const body = (await request.json()) as { body?: string; parentCommentId?: string | null };
+    const body = (await request.json()) as {
+      body?: string;
+      parentCommentId?: string | null;
+      nickname?: string | null;
+    };
 
     const comment = await createPostComment({
       userId,
       postSlug: slug,
       body: body.body ?? "",
       parentCommentId: body.parentCommentId ?? null,
+      nickname: body.nickname,
     });
 
     if (!comment) {

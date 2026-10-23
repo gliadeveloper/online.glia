@@ -31,12 +31,13 @@ export async function POST(request: Request, context: RouteContext) {
     const { lessonId } = await context.params;
     const userId = await requireUserId();
     assertRateLimit(`lesson-qna:${userId}`, 12, 60_000);
-    const body = (await request.json()) as { title?: string; body?: string };
+    const body = (await request.json()) as { title?: string; body?: string; nickname?: string | null };
     const question = await createLessonQuestion({
       userId,
       lessonId,
       title: body.title ?? "",
       body: body.body ?? "",
+      nickname: body.nickname,
     });
     return NextResponse.json({ question });
   } catch (error) {

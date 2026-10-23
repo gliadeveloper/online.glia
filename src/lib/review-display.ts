@@ -1,3 +1,3 @@
-export function formatReviewAuthor(user: { nickname: string | null; email: string }) {
-  return user.nickname ?? user.email.split("@")[0] ?? "수강생";
+export function formatReviewAuthor(user: { nickname: string | null; email?: string | null }) {
+  return user.nickname?.trim() || "회원";
 }

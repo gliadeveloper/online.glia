@@ -89,7 +89,8 @@ function greetingFor(user: HomeUser | null) {
   if (!user) {
     return "안녕하세요";
   }
-  return `${displayAuthorName({ nickname: user.name, email: user.email })}님, 안녕하세요`;
+  const greetingName = displayAuthorName({ nickname: user.name });
+  return greetingName === "회원" ? "안녕하세요" : `${greetingName}님, 안녕하세요`;
 }
 
 function guestCheckin(): HomeCheckin {

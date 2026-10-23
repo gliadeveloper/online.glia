@@ -288,7 +288,7 @@ enum IdentityStatus {
 
 model User {
   id                    String     @id @default(cuid())
-  /// Public, user-chosen identifier. Distinct from the internal CUID `id`.
+  /// Public, auto-generated identifier. Distinct from the internal CUID `id`.
   userId                String?    @unique
   email                 String     @unique
   emailKind             EmailKind  @default(UNVERIFIED)
