@@ -11,7 +11,7 @@ import { getCoachingSessionForUser } from "@/lib/coaching";
 import { markCoachingNotificationsRead } from "@/lib/home-notifications";
 import { coachingSessionHasBody } from "@/lib/coaching-session-content";
 import { StackNavBack, StackNavTitle } from "@/lib/stack-nav-context";
-import { getMemberContact } from "@/lib/member-contact";
+import { getMemberContact } from "@/lib/member-contact-server";
 import { getCurrentUser } from "@/lib/session";
 
 import "@/components/coaching/coaching-stack-glia.css";

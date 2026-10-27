@@ -5,7 +5,7 @@ import { ProductApplyButton } from "@/components/shop/product-apply-button";
 import { ProductOptionPicker } from "@/components/shop/product-option-picker";
 import { ProductCouponSheet } from "@/components/shop/product-coupon-sheet";
 import { ProductPayLink } from "@/components/shop/product-pay-link";
-import { formatKrw } from "@/lib/customer-labels";
+import { formatKrw, formatProductPrice } from "@/lib/customer-labels";
 import type { WidgetCheckoutOptions } from "@/lib/payments/toss/widget";
 import type { ShopProductOption } from "@/lib/product-groups";
 import type { CatalogProduct } from "@/lib/shop-products";
@@ -177,7 +177,7 @@ export function ProductDetailSidebar({
               <span>결제 금액</span>
               <div className="glia-pdp__total-price">
                 {discountRate ? <span className="glia-pdp__price-rate">{discountRate}%</span> : null}
-                <strong className="glia-pdp__price-sale">{formatKrw(price)}</strong>
+                <strong className="glia-pdp__price-sale">{formatProductPrice(price)}</strong>
               </div>
             </div>
             {discountRate && listPrice ? (
@@ -185,7 +185,9 @@ export function ProductDetailSidebar({
                 <span className="glia-pdp__price-list">{formatKrw(listPrice)}</span>
               </p>
             ) : null}
-            <ProductCouponSheet productId={product.id} isLoggedIn={isLoggedIn} coupons={coupons} />
+            {price > 0 ? (
+              <ProductCouponSheet productId={product.id} isLoggedIn={isLoggedIn} coupons={coupons} />
+            ) : null}
           </div>
         ) : (
           <p className="glia-pdp__buy-owned">수강 중 · 바로 학습 가능</p>
@@ -196,8 +198,12 @@ export function ProductDetailSidebar({
             <Link href={shopState.learnHref} className="shop-pdp-apply-btn">
               학습하기
             </Link>
-          ) : checkout.state === "ready" ? (
-            <ProductPayLink productId={product.id} isLoggedIn={isLoggedIn} />
+          ) : price === 0 || checkout.state === "ready" ? (
+            <ProductPayLink
+              productId={product.id}
+              isLoggedIn={isLoggedIn}
+              label={price === 0 ? "무료로 시작" : "결제하기"}
+            />
           ) : checkout.state === "unavailable" ? (
             <p className="shop-pdp-apply-error">{checkout.message}</p>
           ) : (
@@ -207,7 +213,7 @@ export function ProductDetailSidebar({
               disabled={shopState.kind === "pending"}
               pendingOrderId={shopState.kind === "pending" ? shopState.orderId : undefined}
               productTitle={product.title}
-              priceLabel={formatKrw(price)}
+              priceLabel={formatProductPrice(price)}
             />
           )}
         </div>

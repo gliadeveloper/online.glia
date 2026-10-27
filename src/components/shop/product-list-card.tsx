@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { getProductHighlights } from "@/components/shop/product-cover-visual";
-import { formatKrw } from "@/lib/customer-labels";
+import { formatProductPrice } from "@/lib/customer-labels";
 import { getProductPrice } from "@/lib/fulfillment";
 import { productDescriptionExcerpt } from "@/lib/shop-product-copy";
 import { getProductHeroImages } from "@/lib/shop-product-hero";
@@ -69,7 +69,7 @@ export function ProductListCard({
   const creator = instructorName(product);
   const priceLabel =
     priceText ??
-    (shopState.kind === "owned" ? "수강 중" : shopState.kind === "pending" ? "승인 대기" : formatKrw(price));
+    (shopState.kind === "owned" ? "수강 중" : shopState.kind === "pending" ? "승인 대기" : formatProductPrice(price));
 
   return (
     <Link href={href ?? `/shop/${product.id}`} className="glia-shop-item">

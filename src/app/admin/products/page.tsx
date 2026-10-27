@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { StatusBadge } from "@/components/admin/status-badge";
 import { formatKrw, requireAdmin } from "@/lib/admin";
+import { formatProductPrice } from "@/lib/customer-labels";
 import { getProductDisplayPrice, productInclude, productKindLabels } from "@/lib/products";
 import { prisma } from "@/lib/prisma";
 
@@ -57,12 +58,12 @@ export default async function AdminProductsPage() {
                   <StatusBadge value={product.kind} label={productKindLabels[product.kind]} />
                 </td>
                 <td className="px-5 py-4">
-                  <p className="font-medium">{formatKrw(getProductDisplayPrice(product))}</p>
-                  {product.salePrice && (
+                  <p className="font-medium">{formatProductPrice(getProductDisplayPrice(product))}</p>
+                  {product.salePrice != null && product.salePrice < product.listPrice ? (
                     <p className="text-xs text-zinc-400 line-through">
                       {formatKrw(product.listPrice)}
                     </p>
-                  )}
+                  ) : null}
                 </td>
                 <td className="px-5 py-4 text-zinc-600">
                   {product.items

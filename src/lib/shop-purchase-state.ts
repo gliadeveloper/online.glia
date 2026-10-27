@@ -302,7 +302,7 @@ export function deriveProductShopState(
   now: Date = new Date(),
 ): ProductShopState {
   const price = getProductPrice(product);
-  const priceLabel = `${price.toLocaleString("ko-KR")}원`;
+  const priceLabel = price === 0 ? "무료" : `${price.toLocaleString("ko-KR")}원`;
   const preview = buildPurchasePreview(assessment, product, now);
   const primaryCourse = assessment.courseItems[0];
   const learnHref = primaryCourse ? `/learning/${primaryCourse.courseId}` : "/learning";
@@ -382,8 +382,8 @@ export function deriveProductShopState(
 
   return {
     kind: "purchase",
-    checkoutLabel: `신청하기 · ${priceLabel}`,
-    buttonLabel: "신청하기",
+    checkoutLabel: price === 0 ? "무료로 시작" : `신청하기 · ${priceLabel}`,
+    buttonLabel: price === 0 ? "무료로 시작" : "신청하기",
     preview,
   };
 }

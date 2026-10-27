@@ -5,7 +5,7 @@ import { cache } from "react";
 import { Prisma } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
-import { getProductDisplayPrice } from "@/lib/customer-labels";
+import { formatProductPrice, getProductDisplayPrice } from "@/lib/customer-labels";
 import { prisma } from "@/lib/prisma";
 import { getActiveProducts, type CatalogProduct } from "@/lib/shop-products";
 
@@ -235,7 +235,7 @@ export const getActiveProductGroup = cache(async (productId: string): Promise<Sh
 function formatGroupPrice(prices: number[]) {
   const min = Math.min(...prices);
   const max = Math.max(...prices);
-  const minLabel = `${min.toLocaleString("ko-KR")}원`;
+  const minLabel = formatProductPrice(min);
   return min === max ? minLabel : `${minLabel}부터`;
 }
 

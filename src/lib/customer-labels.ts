@@ -79,3 +79,7 @@ export const submissionStatusLabels: Record<SubmissionStatus, string> = {
 export function formatKrw(amount: number) {
   return `${amount.toLocaleString("ko-KR")}원`;
 }
+
+export function formatProductPrice(amount: number) {
+  return amount === 0 ? "무료" : formatKrw(amount);
+}

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ProductWidgetCheckout } from "@/components/shop/product-widget-checkout";
-import { formatKrw } from "@/lib/customer-labels";
+import { formatKrw, formatProductPrice } from "@/lib/customer-labels";
 import type { CheckoutCouponOption } from "@/lib/shop-coupon";
 
 type ProductCheckoutPayProps = {
@@ -13,9 +13,9 @@ type ProductCheckoutPayProps = {
   basePrice: number;
   coupons: CheckoutCouponOption[];
   canDownloadMore: boolean;
-  clientKey: string;
-  variantKey: string;
-  customerKey: string;
+  clientKey?: string;
+  variantKey?: string;
+  customerKey?: string;
 };
 
 export function ProductCheckoutPay({
@@ -50,14 +50,19 @@ export function ProductCheckoutPay({
   const payable = basePrice - discount;
 
   async function completeFreeOrder() {
-    if (completing || !selected) return;
+    if (completing) return;
+    if (payable !== 0) return;
+    if (basePrice > 0 && !selected) return;
     setCompleting(true);
     setOrderError(null);
     try {
       const response = await fetch("/api/checkout/free", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId, couponIssueId: selected.issueId }),
+        body: JSON.stringify({
+          productId,
+          ...(selected ? { couponIssueId: selected.issueId } : {}),
+        }),
       });
       const data = await response.json() as { orderId?: string; error?: string };
       if (!response.ok || !data.orderId) {
@@ -117,7 +122,7 @@ export function ProductCheckoutPay({
       <section className="glia-checkout__summary" aria-label="결제 금액">
         <p className="glia-checkout__price-row">
           <span>상품 금액</span>
-          <strong>{formatKrw(basePrice)}</strong>
+          <strong>{formatProductPrice(basePrice)}</strong>
         </p>
         {discount > 0 ? (
           <p className="glia-checkout__price-row">
@@ -127,10 +132,11 @@ export function ProductCheckoutPay({
         ) : null}
         <p className="glia-checkout__price-row">
           <span>결제 금액</span>
-          <strong>{formatKrw(payable)}</strong>
+          <strong>{formatProductPrice(payable)}</strong>
         </p>
       </section>
 
+      {basePrice > 0 ? (
       <fieldset className="glia-checkout__coupon" disabled={completing}>
         <legend className="glia-checkout__label">쿠폰</legend>
         <form className="glia-checkout__coupon-code" onSubmit={redeemCode}>
@@ -194,24 +200,33 @@ export function ProductCheckoutPay({
           </div>
         )}
       </fieldset>
+      ) : null}
 
       <div className="glia-checkout__pay">
-        {payable === 0 && selected ? (
+        {payable === 0 ? (
           <>
-            <p className="glia-checkout__notice">전액 할인되어 추가 결제 없이 주문을 완료합니다.</p>
-            <button type="button" className="shop-pdp-apply-btn" onClick={completeFreeOrder} disabled={completing || redeeming}>
-              {completing ? "주문 완료 중…" : "0원으로 주문 완료"}
+            <p className="glia-checkout__notice">
+              {basePrice === 0
+                ? "무료 상품이라 결제 없이 바로 시작할 수 있습니다."
+                : "전액 할인되어 추가 결제 없이 주문을 완료합니다."}
+            </p>
+            <button type="button" className="shop-pdp-apply-btn" onClick={completeFreeOrder} disabled={completing || redeeming || (basePrice > 0 && !selected)}>
+              {completing ? "주문 완료 중…" : basePrice === 0 ? "무료로 시작" : "0원으로 주문 완료"}
             </button>
             {orderError ? <p className="glia-checkout__notice" role="alert">{orderError}</p> : null}
           </>
-        ) : <ProductWidgetCheckout
-          productId={productId}
-          couponIssueId={selected?.issueId ?? null}
-          clientKey={clientKey}
-          variantKey={variantKey}
-          customerKey={customerKey}
-          amount={payable}
-        />}
+        ) : clientKey && variantKey && customerKey ? (
+          <ProductWidgetCheckout
+            productId={productId}
+            couponIssueId={selected?.issueId ?? null}
+            clientKey={clientKey}
+            variantKey={variantKey}
+            customerKey={customerKey}
+            amount={payable}
+          />
+        ) : (
+          <p className="glia-checkout__notice">결제를 시작할 수 없습니다. 상품 화면에서 다시 시도해 주세요.</p>
+        )}
       </div>
     </>
   );

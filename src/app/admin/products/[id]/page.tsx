@@ -5,7 +5,8 @@ import { ProductActions } from "@/app/admin/products/[id]/product-actions";
 import { ProductEditPanel } from "@/app/admin/products/[id]/product-edit-panel";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { ProductDescriptionView } from "@/components/shop/product-description-view";
-import { formatKrw, requireAdmin } from "@/lib/admin";
+import { requireAdmin } from "@/lib/admin";
+import { formatProductPrice } from "@/lib/customer-labels";
 import { getProductDisplayPrice, productInclude, productKindLabels } from "@/lib/products";
 import { prisma } from "@/lib/prisma";
 
@@ -74,7 +75,7 @@ export default async function AdminProductDetailPage({ params }: Props) {
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <p className="text-xs text-zinc-500">판매가</p>
           <p className="mt-2 text-xl font-semibold">
-            {formatKrw(getProductDisplayPrice(product))}
+            {formatProductPrice(getProductDisplayPrice(product))}
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">

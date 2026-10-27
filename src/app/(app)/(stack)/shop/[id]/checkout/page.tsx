@@ -6,7 +6,7 @@ import { SiteLegalFooter } from "@/components/site/site-legal-footer";
 import { ProductCheckoutPay } from "@/components/shop/product-checkout-pay";
 import { ShopStackPage } from "@/components/shop/shop-stack-page";
 import { getProductPrice } from "@/lib/fulfillment";
-import { getMemberContact } from "@/lib/member-contact";
+import { getMemberContact } from "@/lib/member-contact-server";
 import { listWidgetCheckoutOptions } from "@/lib/payments/toss/options";
 import { tossCustomerKey } from "@/lib/payments/toss/verify";
 import { getShopCouponOffer } from "@/lib/shop-coupon";
@@ -44,12 +44,12 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
 
   return (
     <ShopStackPage className="shop-checkout-page">
-      <StackNavTitle title="결제" />
+      <StackNavTitle title={price === 0 ? "신청" : "결제"} />
       <div className="glia-checkout">
         <div className="glia-checkout__sheet">
           <header>
             <p className="glia-checkout__kicker">Payment</p>
-            <h1 className="glia-checkout__title">결제</h1>
+            <h1 className="glia-checkout__title">{price === 0 ? "신청" : "결제"}</h1>
           </header>
 
           <Link href={`/shop/${product.id}`} className="glia-checkout__back">
@@ -65,12 +65,6 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
               이미 진행 중인 주문이 있습니다.{" "}
               <Link href={`/orders/${shopState.orderId}`}>주문에서 확인해 주세요.</Link>
             </p>
-          ) : checkout.state === "unavailable" ? (
-            <p className="glia-checkout__notice">{checkout.message}</p>
-          ) : checkout.state === "off" ? (
-            <p className="glia-checkout__notice">
-              결제를 시작할 수 없습니다. <Link href={`/shop/${product.id}`}>상품 화면</Link>에서 신청해 주세요.
-            </p>
           ) : !contact?.complete ? (
             <MemberContactForm
               initial={contact ?? {
@@ -82,27 +76,35 @@ export default async function ProductCheckoutPage({ params }: CheckoutPageProps)
                 complete: false,
               }}
               variant="checkout"
-              submitLabel="연락처 저장 후 결제"
+              submitLabel={price === 0 ? "연락처 저장 후 시작" : "연락처 저장 후 결제"}
+            />
+          ) : price === 0 ? (
+            <ProductCheckoutPay
+              productId={product.id}
+              productHref={`/shop/${product.id}`}
+              basePrice={price}
+              coupons={[]}
+              canDownloadMore={false}
+            />
+          ) : checkout.state === "unavailable" ? (
+            <p className="glia-checkout__notice">{checkout.message}</p>
+          ) : checkout.state === "off" ? (
+            <p className="glia-checkout__notice">
+              결제를 시작할 수 없습니다. <Link href={`/shop/${product.id}`}>상품 화면</Link>에서 신청해 주세요.
+            </p>
+          ) : customerKey && checkout.state === "ready" ? (
+            <ProductCheckoutPay
+              productId={product.id}
+              productHref={`/shop/${product.id}`}
+              basePrice={price}
+              coupons={couponOffer.checkoutOptions}
+              canDownloadMore={couponOffer.cards.some((coupon) => coupon.downloadState === "ready")}
+              clientKey={checkout.clientKey}
+              variantKey={checkout.variantKey}
+              customerKey={customerKey}
             />
           ) : (
-            <>
-              {customerKey ? (
-                <>
-                  <ProductCheckoutPay
-                    productId={product.id}
-                    productHref={`/shop/${product.id}`}
-                    basePrice={price}
-                    coupons={couponOffer.checkoutOptions}
-                    canDownloadMore={couponOffer.cards.some((coupon) => coupon.downloadState === "ready")}
-                    clientKey={checkout.clientKey}
-                    variantKey={checkout.variantKey}
-                    customerKey={customerKey}
-                  />
-                </>
-              ) : (
-                <p className="glia-checkout__notice">결제 고객 정보를 만들지 못했습니다.</p>
-              )}
-            </>
+            <p className="glia-checkout__notice">결제 고객 정보를 만들지 못했습니다.</p>
           )}
         </div>
       </div>

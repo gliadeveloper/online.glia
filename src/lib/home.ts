@@ -12,7 +12,7 @@ import { displayAuthorName } from "@/lib/post-display";
 import { prisma } from "@/lib/prisma";
 import { getShopListings, type ShopListing } from "@/lib/product-groups";
 import type { CatalogProduct } from "@/lib/shop-products";
-import { formatKrw, getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
+import { formatKrw, formatProductPrice, getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
 
 const HOME_PRODUCT_LIMIT = 3;
 const CHECKIN_TIMEZONE = "Asia/Seoul";
@@ -133,7 +133,7 @@ function mapProductCard(product: CatalogProduct): HomeProductCard {
     href: `/shop/${product.id}`,
     title: product.title,
     kindLabel: productKindLabels[product.kind],
-    priceLabel: formatKrw(displayPrice),
+    priceLabel: formatProductPrice(displayPrice),
     listPriceLabel:
       product.salePrice != null && product.salePrice < product.listPrice
         ? formatKrw(product.listPrice)

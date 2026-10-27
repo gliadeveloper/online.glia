@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { formatKrw } from "@/lib/customer-labels";
+import { formatProductPrice } from "@/lib/customer-labels";
 import type { ShopProductOption } from "@/lib/product-groups";
 
 export function ProductOptionPicker({
@@ -26,7 +26,7 @@ export function ProductOptionPicker({
               aria-current={selected ? "true" : undefined}
             >
               <span>{option.label}</span>
-              <strong>{formatKrw(option.price)}</strong>
+              <strong>{formatProductPrice(option.price)}</strong>
             </Link>
           );
         })}

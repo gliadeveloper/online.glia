@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { ApiError, jsonError } from "@/lib/api";
-import { getMemberContact, updateMemberContact } from "@/lib/member-contact";
+import { getMemberContact, updateMemberContact } from "@/lib/member-contact-server";
 import { getSessionUserId } from "@/lib/session";
 
 export async function GET() {

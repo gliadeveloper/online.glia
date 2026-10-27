@@ -4,6 +4,7 @@ type ProductPayLinkProps = {
   productId: string;
   isLoggedIn: boolean;
   className?: string;
+  label?: string;
 };
 
 export function productCheckoutHref(productId: string, isLoggedIn: boolean) {
@@ -12,10 +13,15 @@ export function productCheckoutHref(productId: string, isLoggedIn: boolean) {
   return `/login?next=${encodeURIComponent(checkout)}`;
 }
 
-export function ProductPayLink({ productId, isLoggedIn, className }: ProductPayLinkProps) {
+export function ProductPayLink({
+  productId,
+  isLoggedIn,
+  className,
+  label = "결제하기",
+}: ProductPayLinkProps) {
   return (
     <Link href={productCheckoutHref(productId, isLoggedIn)} className={["shop-pdp-apply-btn", className].filter(Boolean).join(" ")}>
-      결제하기
+      {label}
     </Link>
   );
 }

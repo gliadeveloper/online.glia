@@ -9,7 +9,7 @@ import { ProductReviewSection } from "@/components/shop/product-review-section";
 import { ProductSectionNav } from "@/components/shop/product-section-nav";
 import { ProductOptionPicker } from "@/components/shop/product-option-picker";
 import { ProductDetailStickyBar } from "@/components/shop/product-purchase-panel";
-import { formatKrw } from "@/lib/customer-labels";
+import { formatProductPrice } from "@/lib/customer-labels";
 import { getProductPrice } from "@/lib/fulfillment";
 import { listWidgetCheckoutOptions } from "@/lib/payments/toss/options";
 import { getProductHeroImages } from "@/lib/shop-product-hero";
@@ -190,7 +190,7 @@ export function ProductDetailPanel({
         product={product}
         shopState={shopState}
         isLoggedIn={isLoggedIn}
-        priceLabel={formatKrw(price)}
+        priceLabel={formatProductPrice(price)}
         checkout={checkout}
         optionLabel={selectedOption?.label}
       />

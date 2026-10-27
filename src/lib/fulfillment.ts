@@ -14,7 +14,7 @@ import {
 } from "@/lib/enrollment-access";
 import { prisma } from "@/lib/prisma";
 import { lockCouponForOrder, restoreRefundedCoupon } from "@/lib/shop-coupon";
-import { assertMemberContactComplete } from "@/lib/member-contact";
+import { assertMemberContactComplete } from "@/lib/member-contact-server";
 import { assessProductCheckout, type CoachingGrantAction } from "@/lib/shop-purchase-state";
 
 type TransactionClient = Prisma.TransactionClient;
@@ -684,12 +684,13 @@ export async function grantTossOrder(params: { orderId: string; actorId: string;
 export async function checkoutFreeCoupon(params: {
   userId: string;
   productId: string;
-  couponIssueId: string;
+  couponIssueId?: string | null;
 }) {
+  const couponIssueId = params.couponIssueId?.trim() || null;
   const completed = await prisma.order.findFirst({
     where: {
       userId: params.userId,
-      couponIssueId: params.couponIssueId,
+      couponIssueId,
       checkout: "FREE",
       status: "PAID",
       total: 0,
@@ -697,19 +698,73 @@ export async function checkoutFreeCoupon(params: {
     },
     select: { id: true },
   });
-  if (completed) return { orderId: completed.id };
 
   const product = await loadActiveProductById(params.productId);
   if (!product) throw new ApiError("상품을 찾을 수 없습니다.", 404, "PRODUCT_NOT_FOUND");
   await assertMemberContactComplete(params.userId);
   const now = new Date();
   const assessment = await assessProductCheckout(params.userId, product, now);
-  if (!assessment.canCheckout) {
-    throw new ApiError(assessment.blockMessage ?? "이미 보유한 상품입니다.", 409, assessment.blockCode ?? "ALREADY_OWNED");
+  if (completed && !assessment.canCheckout) {
+    return { orderId: completed.id };
   }
+  if (!assessment.canCheckout) {
+    throw new ApiError(
+      assessment.blockMessage ?? "이미 보유한 상품입니다.",
+      409,
+      assessment.blockCode ?? "ALREADY_OWNED",
+    );
+  }
+
   const price = getProductPrice(product);
+  if (price === 0) {
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          userId: params.userId,
+          checkout: "FREE",
+          status: "PAID",
+          paidAt: now,
+          subtotal: 0,
+          discount: 0,
+          total: 0,
+          lines: { create: { productId: product.id, unitPrice: 0, lineTotal: 0 } },
+        },
+        include: { lines: true },
+      });
+      await runOrderFulfillment(tx, {
+        actorId: params.userId,
+        userId: params.userId,
+        orderId: order.id,
+        orderLineId: order.lines[0]!.id,
+        product,
+        now,
+        courseActionByItemId: new Map(assessment.courseItems.map((item) => [item.productItemId, item.action])),
+        coachingActionByItemId: new Map(assessment.coachingItems.map((item) => [item.productItemId, item.action])),
+      });
+      await writeAuditLog({
+        actorId: params.userId,
+        entityType: "Order",
+        entityId: order.id,
+        action: "FREE_PRODUCT_ORDER_GRANTED",
+        metadata: { productId: product.id },
+      }, tx);
+      return { orderId: order.id };
+    });
+  }
+
+  if (!couponIssueId) {
+    throw new ApiError("상품과 쿠폰을 확인해 주세요.", 400, "COUPON_REQUIRED");
+  }
+  if (completed) return { orderId: completed.id };
+
   return prisma.$transaction(async (tx) => {
-    const locked = await lockCouponForOrder(tx, { ...params, price, now });
+    const locked = await lockCouponForOrder(tx, {
+      userId: params.userId,
+      productId: params.productId,
+      couponIssueId,
+      price,
+      now,
+    });
     if (locked.total !== 0) {
       throw new ApiError("결제 금액이 변경되었습니다. 다시 확인해 주세요.", 409, "AMOUNT_MISMATCH");
     }
@@ -718,7 +773,7 @@ export async function checkoutFreeCoupon(params: {
       throw new ApiError("이미 진행 중인 결제가 있습니다.", 409, "COUPON_BUSY");
     }
     const used = await tx.shopCouponIssue.updateMany({
-      where: { id: params.couponIssueId, userId: params.userId, status: "RESERVED" },
+      where: { id: couponIssueId, userId: params.userId, status: "RESERVED" },
       data: { status: "USED", usedAt: now },
     });
     if (used.count !== 1) throw new ApiError("쿠폰을 사용하지 못했습니다.", 409, "COUPON_BUSY");
@@ -726,7 +781,7 @@ export async function checkoutFreeCoupon(params: {
       data: {
         userId: params.userId, checkout: "FREE", status: "PAID", paidAt: now,
         subtotal: price, discount: locked.discount, total: 0,
-        couponIssueId: params.couponIssueId,
+        couponIssueId,
         lines: { create: { productId: product.id, unitPrice: price, lineTotal: price } },
       },
       include: { lines: true },
@@ -740,7 +795,7 @@ export async function checkoutFreeCoupon(params: {
     await writeAuditLog({
       actorId: params.userId, entityType: "Order", entityId: order.id,
       action: "FREE_COUPON_ORDER_GRANTED",
-      metadata: { productId: product.id, couponIssueId: params.couponIssueId },
+      metadata: { productId: product.id, couponIssueId },
     }, tx);
     return { orderId: order.id };
   });

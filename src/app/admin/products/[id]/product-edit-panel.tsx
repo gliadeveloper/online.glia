@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
+import { ProductPriceFields } from "@/components/commerce/product-price-fields";
 import type { ProductKind } from "@/generated/prisma/client";
 import {
   ProductDescriptionEditor,
@@ -220,26 +221,13 @@ export function ProductEditPanel({
                     className="w-full rounded-xl border border-zinc-200 px-3 py-2"
                   />
                 </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <label className="space-y-2 text-sm">
-                    <span className="font-medium">정가</span>
-                    <input
-                      type="number"
-                      value={listPrice}
-                      onChange={(event) => setListPrice(event.target.value)}
-                      className="w-full rounded-xl border border-zinc-200 px-3 py-2"
-                    />
-                  </label>
-                  <label className="space-y-2 text-sm">
-                    <span className="font-medium">할인가</span>
-                    <input
-                      type="number"
-                      value={salePrice}
-                      onChange={(event) => setSalePrice(event.target.value)}
-                      className="w-full rounded-xl border border-zinc-200 px-3 py-2"
-                    />
-                  </label>
-                </div>
+                <ProductPriceFields
+                  listPrice={listPrice}
+                  salePrice={salePrice}
+                  onListPrice={setListPrice}
+                  onSalePrice={setSalePrice}
+                  disabled={busy}
+                />
                 <button
                   type="submit"
                   disabled={busy}

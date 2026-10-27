@@ -6,7 +6,7 @@ import {
   coachingEntitlementCardProps,
 } from "@/components/coaching/coaching-entitlement-card";
 import { getUserCoachingEntitlements } from "@/lib/coaching-customer";
-import { getMemberContact } from "@/lib/member-contact";
+import { getMemberContact } from "@/lib/member-contact-server";
 import { getCurrentUser } from "@/lib/session";
 
 import "@/components/coaching/coaching-glia.css";

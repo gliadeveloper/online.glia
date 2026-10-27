@@ -46,8 +46,13 @@ export function ProductDetailStickyBar({
       <div className="shop-pdp-sticky-bar">
         <div className="shop-pdp-sticky-bar__inner">
           {optionLabel ? <p className="shop-pdp-sticky-bar__option">{optionLabel} · {priceLabel}</p> : null}
-          {checkout.state === "ready" ? (
-            <ProductPayLink productId={product.id} isLoggedIn={isLoggedIn} className="shop-pdp-sticky-bar__cta" />
+          {priceLabel === "무료" || checkout.state === "ready" ? (
+            <ProductPayLink
+              productId={product.id}
+              isLoggedIn={isLoggedIn}
+              className="shop-pdp-sticky-bar__cta"
+              label={priceLabel === "무료" ? "무료로 시작" : "결제하기"}
+            />
           ) : checkout.state === "unavailable" ? (
             <p className="shop-pdp-apply-error">{checkout.message}</p>
           ) : (

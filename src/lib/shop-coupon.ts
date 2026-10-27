@@ -79,6 +79,10 @@ export async function getShopCouponOffer(
   price: number,
   now = new Date(),
 ): Promise<ShopCouponOffer> {
+  if (price < 1) {
+    return { cards: [], checkoutOptions: [] };
+  }
+
   const openStatuses: ShopCouponIssueStatus[] = ["ISSUED", "RESERVED"];
   const coupons = await prisma.shopCoupon.findMany({
     where: {

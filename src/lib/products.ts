@@ -86,6 +86,21 @@ function sameProductItemLinks(
   });
 }
 
+function assertWonAmount(value: number) {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new ApiError("가격은 0원 이상의 정수로 입력해 주세요.", 400, "VALIDATION_ERROR");
+  }
+}
+
+export function validateProductPrices(listPrice: number, salePrice?: number | null) {
+  assertWonAmount(listPrice);
+  if (salePrice == null) return;
+  assertWonAmount(salePrice);
+  if (salePrice > listPrice) {
+    throw new ApiError("할인가는 정가보다 클 수 없습니다.", 400, "VALIDATION_ERROR");
+  }
+}
+
 export async function createProduct(params: {
   actorId: string;
   title: string;
@@ -101,6 +116,7 @@ export async function createProduct(params: {
   activate?: boolean;
 }) {
   validateProductItems(params.kind, params.items);
+  validateProductPrices(params.listPrice, params.salePrice);
 
   const product = await prisma.product.create({
     data: {
@@ -154,6 +170,13 @@ export async function updateProduct(params: {
   const existing = await prisma.product.findUnique({ where: { id: params.productId } });
   if (!existing) {
     throw new ApiError("Product not found", 404, "PRODUCT_NOT_FOUND");
+  }
+
+  if (params.listPrice !== undefined || params.salePrice !== undefined) {
+    validateProductPrices(
+      params.listPrice ?? existing.listPrice,
+      params.salePrice === undefined ? existing.salePrice : params.salePrice,
+    );
   }
 
   const descriptionMetadata =

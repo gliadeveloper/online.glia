@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { ProductPriceFields } from "@/components/commerce/product-price-fields";
 import {
   ProductDescriptionEditor,
   type ProductDescriptionEditorHandle,
 } from "@/components/shop/product-description-editor";
 import { buildContentMetadataWithBlockNote } from "@/lib/blocknote-content";
-import { getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
+import { formatProductPrice, getProductDisplayPrice, productKindLabels } from "@/lib/customer-labels";
 import { uploadProductDescriptionImage } from "@/lib/media/product-image-upload-client";
 import { parseProductSupplies, suppliesToText } from "@/lib/product-supplies";
 import type { ProductKind } from "@/generated/prisma/client";
@@ -317,7 +318,7 @@ export function CoachProductList({ products }: { products: ProductRow[] }) {
               </div>
             </div>
             <p className="text-sm font-semibold text-zinc-900">
-              {getProductDisplayPrice(product).toLocaleString("ko-KR")}원
+              {formatProductPrice(getProductDisplayPrice(product))}
             </p>
           </Link>
         </li>
@@ -464,16 +465,13 @@ export function CoachCreateProductForm({ courses, offerings, groups }: CoachCrea
         <textarea value={supplies} onChange={(e) => setSupplies(e.target.value)} rows={4} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-2 text-sm">
-          <span className="font-medium">정가 (원)</span>
-          <input type="number" value={listPrice} onChange={(e) => setListPrice(e.target.value)} required className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-        </label>
-        <label className="block space-y-2 text-sm">
-          <span className="font-medium">할인가 (선택)</span>
-          <input type="number" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-        </label>
-      </div>
+      <ProductPriceFields
+        listPrice={listPrice}
+        salePrice={salePrice}
+        onListPrice={setListPrice}
+        onSalePrice={setSalePrice}
+        disabled={submitting}
+      />
 
       {(kind === "COURSE_ONLY" || kind === "BUNDLE") && (
         <>
@@ -729,16 +727,13 @@ export function CoachProductEditPanel(props: CoachProductEditPanelProps) {
           <textarea value={supplies} onChange={(e) => setSupplies(e.target.value)} rows={4} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
         </label>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block space-y-2 text-sm">
-            <span className="font-medium">정가</span>
-            <input type="number" value={listPrice} onChange={(e) => setListPrice(e.target.value)} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-          </label>
-          <label className="block space-y-2 text-sm">
-            <span className="font-medium">할인가</span>
-            <input type="number" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-          </label>
-        </div>
+        <ProductPriceFields
+          listPrice={listPrice}
+          salePrice={salePrice}
+          onListPrice={setListPrice}
+          onSalePrice={setSalePrice}
+          disabled={busy}
+        />
 
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />

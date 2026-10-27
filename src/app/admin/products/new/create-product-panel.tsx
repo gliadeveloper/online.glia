@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ProductPriceFields } from "@/components/commerce/product-price-fields";
 import type { ProductKind } from "@/generated/prisma/client";
 
 type Option = { id: string; label: string };
@@ -107,14 +108,15 @@ export function CreateProductPanel({ courses, offerings }: CreateProductPanelPro
           <span className="font-medium">준비물 (줄마다 한 항목)</span>
           <textarea value={supplies} onChange={(e) => setSupplies(e.target.value)} rows={4} className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
         </label>
-        <label className="space-y-2 text-sm">
-          <span className="font-medium">정가 (원)</span>
-          <input value={listPrice} onChange={(e) => setListPrice(e.target.value)} required type="number" className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-        </label>
-        <label className="space-y-2 text-sm">
-          <span className="font-medium">할인가 (원, 선택)</span>
-          <input value={salePrice} onChange={(e) => setSalePrice(e.target.value)} type="number" className="w-full rounded-xl border border-zinc-200 px-4 py-3" />
-        </label>
+        <div className="sm:col-span-2">
+          <ProductPriceFields
+            listPrice={listPrice}
+            salePrice={salePrice}
+            onListPrice={setListPrice}
+            onSalePrice={setSalePrice}
+            disabled={submitting}
+          />
+        </div>
         {(kind === "COURSE_ONLY" || kind === "BUNDLE") && (
           <label className="space-y-2 text-sm sm:col-span-2">
             <span className="font-medium">코스</span>
