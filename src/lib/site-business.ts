@@ -3,7 +3,7 @@ export const siteBusiness = {
   name: "웰니스몰글리아",
   representative: "옥아람",
   registrationNumber: "232-15-02502",
-  address: "경기도 용인시 기흥구 평촌3로 14",
+  address: "경기도 용인시 기흥구 평촌 3로 14,1층(동백동)",
   phone: "031-283-1909",
   email: "team.glia.support@gmail.com",
   supportEmail: "team.glia.support@gmail.com",
