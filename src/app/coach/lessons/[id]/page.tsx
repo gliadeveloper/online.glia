@@ -11,6 +11,21 @@ import { requireCoach } from "@/lib/coach";
 
 type Props = { params: Promise<{ id: string }> };
 
+function toSeoulDatetimeLocal(date: Date | null) {
+  if (!date) return "";
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const read = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  return `${read("year")}-${read("month")}-${read("day")}T${read("hour")}:${read("minute")}`;
+}
+
 export default async function CoachLessonPage({ params }: Props) {
   const user = await requireCoach();
   const { id } = await params;
@@ -43,6 +58,7 @@ export default async function CoachLessonPage({ params }: Props) {
         lessonTitle={lesson.title}
         contents={lesson.contents}
         courseTitle={course.title}
+        scheduledStartAt={toSeoulDatetimeLocal(lesson.scheduledStartAt)}
       />
 
       <LessonMaterialsManager

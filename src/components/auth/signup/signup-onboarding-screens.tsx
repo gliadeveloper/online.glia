@@ -12,6 +12,12 @@ import { SignupStep, SignupSuspenseFallback } from "@/components/auth/signup/sig
 import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { siteBusiness } from "@/lib/site-business";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
+import {
+  validateContactEmail,
+  validateLegalName,
+  validatePhoneNumber,
+  type MemberContactSnapshot,
+} from "@/lib/member-contact";
 
 function buildNextQuery(next: string | null) {
   return next ? `?next=${encodeURIComponent(next)}` : "";
@@ -31,7 +37,6 @@ function DuplicateContent() {
   const router = useRouter();
   const email = searchParams.get("email") ?? "";
   const maskedEmail = searchParams.get("maskedEmail") ?? email;
-  const maskedName = searchParams.get("maskedName") ?? "회원";
   const createdAt = searchParams.get("createdAt");
   const next = searchParams.get("next");
 
@@ -47,6 +52,8 @@ function DuplicateContent() {
     }
 
     const pending = JSON.parse(raw) as {
+      name: string;
+      phoneNumber: string;
       email: string;
       password: string;
       passwordConfirm: string;
@@ -70,10 +77,11 @@ function DuplicateContent() {
         setError(getAuthErrorMessage(data.code, data.error));
         return;
       }
+      const nextQuery = next ? `&next=${encodeURIComponent(next)}` : "";
       router.push(
         data.skipEmailVerification
           ? `/signup/terms${buildNextQuery(next)}`
-          : `/signup/verify?email=${encodeURIComponent(pending.email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
+          : `/signup/verify?email=${encodeURIComponent(pending.email)}${nextQuery}`,
       );
     } catch {
       setError("네트워크 오류가 발생했습니다.");
@@ -104,7 +112,6 @@ function DuplicateContent() {
           <span className="glia-auth__summary-label">가입일 {formattedDate}</span>
         ) : null}
         <p className="glia-auth__summary-value">{maskedEmail}</p>
-        <p className="glia-auth__summary-meta">닉네임 {maskedName}</p>
       </div>
 
       {error ? <SignupError message={error} /> : null}
@@ -353,5 +360,139 @@ export function SignupTermsScreen() {
       <TermsContent />
     </Suspense>
   );
+}
+
+function ContactContent({ initial, next }: { initial: MemberContactSnapshot; next: string | null }) {
+  const router = useRouter();
+  const [name, setName] = useState(initial.name);
+  const [phoneNumber, setPhoneNumber] = useState(initial.phoneNumber);
+  const [email, setEmail] = useState(initial.email);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const nameResult = validateLegalName(name);
+    if (!nameResult.ok) {
+      setError(nameResult.message);
+      return;
+    }
+    const phoneResult = validatePhoneNumber(phoneNumber);
+    if (!phoneResult.ok) {
+      setError(phoneResult.message);
+      return;
+    }
+    if (initial.needsEmail) {
+      const emailResult = validateContactEmail(email);
+      if (!emailResult.ok) {
+        setError(emailResult.message);
+        return;
+      }
+    }
+
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch("/api/me/contact", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: nameResult.value,
+          phoneNumber: phoneResult.value,
+          ...(initial.needsEmail ? { email } : {}),
+        }),
+      });
+      const data = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        setError(data.error ?? "연락처를 저장하지 못했습니다.");
+        return;
+      }
+      router.push(`/signup/terms${buildNextQuery(next)}`);
+      router.refresh();
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <SignupStep
+      title="가입에 필요한"
+      titleAccent="연락처"
+      description="이메일, 성명, 휴대폰 번호를 입력해 주세요. 알림에만 쓰고 커뮤니티에는 공개하지 않습니다."
+    >
+      <form onSubmit={handleSubmit} className="glia-auth__form">
+        <fieldset className="glia-auth__fields">
+          <legend className="sr-only">연락처</legend>
+
+          <div className="glia-auth__field">
+            <label htmlFor="kakao-signup-email" className="glia-auth__label">
+              이메일
+            </label>
+            <input
+              id="kakao-signup-email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="glia-auth__input"
+              readOnly={!initial.needsEmail}
+              required
+            />
+          </div>
+
+          <div className="glia-auth__field">
+            <label htmlFor="kakao-signup-name" className="glia-auth__label">
+              성명
+            </label>
+            <input
+              id="kakao-signup-name"
+              type="text"
+              autoComplete="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="glia-auth__input"
+              maxLength={20}
+              required
+            />
+          </div>
+
+          <div className="glia-auth__field">
+            <label htmlFor="kakao-signup-phone" className="glia-auth__label">
+              휴대폰 번호
+            </label>
+            <input
+              id="kakao-signup-phone"
+              type="tel"
+              autoComplete="tel"
+              inputMode="numeric"
+              value={phoneNumber}
+              onChange={(event) => setPhoneNumber(event.target.value)}
+              placeholder="010-0000-0000"
+              className="glia-auth__input"
+              required
+            />
+          </div>
+        </fieldset>
+
+        {error ? <SignupError message={error} /> : null}
+
+        <button type="submit" disabled={loading} className="glia-auth__submit">
+          {loading ? "저장 중..." : "다음"}
+        </button>
+      </form>
+    </SignupStep>
+  );
+}
+
+export function SignupContactScreen({
+  initial,
+  next,
+}: {
+  initial: MemberContactSnapshot;
+  next: string | null;
+}) {
+  return <ContactContent initial={initial} next={next} />;
 }
 

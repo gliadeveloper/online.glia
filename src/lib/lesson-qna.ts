@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 
+import { sendFaqReplyAlimtalk } from "@/lib/alimtalk/notify";
 import { ApiError } from "@/lib/api";
 import { getEnrollmentAccessState } from "@/lib/learning";
 import {
@@ -383,6 +384,14 @@ export async function createLessonReply(params: {
 
     return created;
   });
+
+  if (question.userId !== params.userId) {
+    try {
+      await sendFaqReplyAlimtalk(question.id, body);
+    } catch (error) {
+      console.error("[alimtalk] faq reply", error instanceof Error ? error.message : error);
+    }
+  }
 
   const listed = await listLessonQuestions(params.userId, params.lessonId);
   const parent = listed.find((item) => item.id === question.id);

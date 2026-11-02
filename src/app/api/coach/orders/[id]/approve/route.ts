@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { reportLiveReminders } from "@/lib/alimtalk/notify";
 import { ApiError, assertCoach, jsonError, resolveUserId } from "@/lib/api";
 import { approveProductApplication } from "@/lib/fulfillment";
 import { getCoachProductIds } from "@/lib/coach-orders";
@@ -29,6 +30,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     const approved = await approveProductApplication({ orderId: id, actorId: userId });
+    await reportLiveReminders(id);
     return NextResponse.json(approved);
   } catch (error) {
     return jsonError(error);

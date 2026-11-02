@@ -5,6 +5,7 @@ import {
   SIGNUP_DRAFT_COOKIE,
   getSignupDraftCookieOptions,
   SIGNUP_DRAFT_TTL_SECONDS,
+  isSignupEmailVerificationEnabled,
 } from "@/lib/signup/constants";
 import { assertRateLimit, getClientIp, RateLimitError } from "@/lib/signup/rate-limit";
 import {
@@ -13,7 +14,7 @@ import {
   markSignupDraftEmailVerified,
   sendSignupVerificationEmail,
 } from "@/lib/signup/service";
-import { isSignupEmailVerificationEnabled } from "@/lib/signup/constants";
+import { validateLegalName, validatePhoneNumber } from "@/lib/member-contact";
 import { maskDisplayName, maskEmail, validatePassword } from "@/lib/signup/validation";
 
 export async function POST(request: Request) {
@@ -22,6 +23,8 @@ export async function POST(request: Request) {
     assertRateLimit(`signup:start:${ip}`);
 
     const body = (await request.json()) as {
+      name?: string;
+      phoneNumber?: string;
       email?: string;
       password?: string;
       passwordConfirm?: string;
@@ -31,6 +34,15 @@ export async function POST(request: Request) {
     const email = body.email?.trim().toLowerCase();
     const password = body.password ?? "";
     const passwordConfirm = body.passwordConfirm ?? "";
+    const nameResult = validateLegalName(body.name ?? "");
+    const phoneResult = validatePhoneNumber(body.phoneNumber ?? "");
+
+    if (!nameResult.ok) {
+      throw new ApiError(nameResult.message, 400, "VALIDATION_ERROR");
+    }
+    if (!phoneResult.ok) {
+      throw new ApiError(phoneResult.message, 400, "VALIDATION_ERROR");
+    }
 
     if (!email) {
       throw new ApiError("이메일을 입력해 주세요.", 400, "VALIDATION_ERROR");
@@ -62,6 +74,8 @@ export async function POST(request: Request) {
     const { draft, code } = await createSignupDraft({
       email,
       password,
+      name: nameResult.value,
+      phoneNumber: phoneResult.value,
       ipAddress: ip,
     });
 

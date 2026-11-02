@@ -1,3 +1,7 @@
+import type { EmailKind } from "@/generated/prisma/browser";
+
+import { isContactComplete } from "@/lib/member-contact";
+
 export const SIGNUP_DRAFT_COOKIE = "glia_signup_draft";
 
 export function getSignupDraftCookieOptions(maxAgeSeconds: number) {
@@ -41,6 +45,27 @@ export function getSignupStepPath(step: "terms") {
 
 export function needsOnboarding(onboardingCompletedAt: Date | null | undefined) {
   return !onboardingCompletedAt;
+}
+
+/** While signup is unfinished, Kakao users enter email, legal name, and phone before terms. */
+export function signupOnboardingPath(
+  user: {
+    onboardingCompletedAt: Date | null;
+    name: string | null;
+    phoneNumber: string | null;
+    email: string;
+    emailKind: EmailKind;
+  },
+  next?: string | null,
+) {
+  if (!needsOnboarding(user.onboardingCompletedAt)) {
+    return null;
+  }
+  const query = next ? `?next=${encodeURIComponent(next)}` : "";
+  if (!isContactComplete(user)) {
+    return `/signup/contact${query}`;
+  }
+  return `/signup/terms${query}`;
 }
 
 /** Set SIGNUP_EMAIL_VERIFICATION_ENABLED=true when transactional email is ready. */

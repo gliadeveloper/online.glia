@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { reportLiveReminders } from "@/lib/alimtalk/notify";
 import { ApiError, jsonError, requireSessionUserId } from "@/lib/api";
 import { checkoutFreeCoupon } from "@/lib/fulfillment";
 
@@ -19,6 +20,7 @@ export async function POST(request: Request) {
       productId: body.productId.trim(),
       couponIssueId,
     });
+    await reportLiveReminders(result.orderId);
     return NextResponse.json(result);
   } catch (error) {
     return jsonError(error);

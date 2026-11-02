@@ -9,6 +9,7 @@ import { GliaAuthFooter } from "@/components/auth/glia/glia-auth-footer";
 import { KakaoLoginButton } from "@/components/auth/login/kakao-login-button";
 import { SignupStep, SignupSuspenseFallback } from "@/components/auth/signup/signup-step";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { validateLegalName, validatePhoneNumber } from "@/lib/member-contact";
 
 function SignupLandingContent() {
   const searchParams = useSearchParams();
@@ -44,6 +45,8 @@ export function SignupLandingScreen() {
 export function SignupEmailScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -55,6 +58,17 @@ export function SignupEmailScreen() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    const nameResult = validateLegalName(name);
+    if (!nameResult.ok) {
+      setError(nameResult.message);
+      return;
+    }
+    const phoneResult = validatePhoneNumber(phoneNumber);
+    if (!phoneResult.ok) {
+      setError(phoneResult.message);
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
@@ -62,7 +76,13 @@ export function SignupEmailScreen() {
       const response = await fetch("/api/auth/signup/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, passwordConfirm }),
+        body: JSON.stringify({
+          name: nameResult.value,
+          phoneNumber: phoneResult.value,
+          email,
+          password,
+          passwordConfirm,
+        }),
       });
 
       const data = (await response.json()) as {
@@ -78,13 +98,18 @@ export function SignupEmailScreen() {
         return;
       }
 
-      const nextQuery = next ? `&next=${encodeURIComponent(next)}` : "";
       const nextPath = next ? `?next=${encodeURIComponent(next)}` : "";
 
       if (data.duplicate && data.account) {
         sessionStorage.setItem(
           "glia_signup_pending",
-          JSON.stringify({ email, password, passwordConfirm }),
+          JSON.stringify({
+            name: nameResult.value,
+            phoneNumber: phoneResult.value,
+            email,
+            password,
+            passwordConfirm,
+          }),
         );
         const params = new URLSearchParams({
           email,
@@ -101,7 +126,7 @@ export function SignupEmailScreen() {
       router.push(
         data.skipEmailVerification
           ? `/signup/terms${nextPath}`
-          : `/signup/verify?email=${encodeURIComponent(email)}${nextQuery}`,
+          : `/signup/verify?email=${encodeURIComponent(email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
       );
     } catch {
       setError("네트워크 오류가 발생했습니다.");
@@ -121,6 +146,40 @@ export function SignupEmailScreen() {
       <form onSubmit={handleSubmit} className="glia-auth__form">
         <fieldset className="glia-auth__fields">
           <legend className="sr-only">계정 정보</legend>
+
+          <div className="glia-auth__field">
+            <label htmlFor="signup-name" className="glia-auth__label">
+              성명
+            </label>
+            <input
+              id="signup-name"
+              type="text"
+              autoComplete="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="glia-auth__input"
+              maxLength={20}
+              required
+            />
+            <p className="glia-auth__help">커뮤니티에는 공개되지 않고, 알림에만 사용합니다.</p>
+          </div>
+
+          <div className="glia-auth__field">
+            <label htmlFor="signup-phone" className="glia-auth__label">
+              휴대폰 번호
+            </label>
+            <input
+              id="signup-phone"
+              type="tel"
+              autoComplete="tel"
+              inputMode="numeric"
+              value={phoneNumber}
+              onChange={(event) => setPhoneNumber(event.target.value)}
+              placeholder="010-0000-0000"
+              className="glia-auth__input"
+              required
+            />
+          </div>
 
           <div className="glia-auth__field">
             <label htmlFor="signup-email" className="glia-auth__label">

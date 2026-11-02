@@ -1,3 +1,5 @@
+import { sendSignupAlimtalk } from "@/lib/alimtalk/notify";
+import { isContactComplete, validateLegalName, validatePhoneNumber } from "@/lib/member-contact";
 import { prisma } from "@/lib/prisma";
 import { editableAvatarUrl } from "@/lib/profile-avatar";
 import {
@@ -33,6 +35,8 @@ export async function findExistingAccountSummary(email: string) {
 export async function createSignupDraft(input: {
   email: string;
   password: string;
+  name: string;
+  phoneNumber: string;
   ipAddress?: string | null;
 }) {
   const email = input.email.trim().toLowerCase();
@@ -44,6 +48,8 @@ export async function createSignupDraft(input: {
   const draft = await prisma.signupDraft.create({
     data: {
       email,
+      name: input.name,
+      phoneNumber: input.phoneNumber,
       passwordHash: await hashPassword(input.password),
       verifyCodeHash: await hashVerificationCode(code),
       verifyExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
@@ -108,6 +114,12 @@ export async function completeEmailSignup(draftId: string) {
     throw new Error("SIGNUP_INCOMPLETE");
   }
 
+  const nameResult = validateLegalName(draft.name ?? "");
+  const phoneResult = validatePhoneNumber(draft.phoneNumber ?? "");
+  if (!nameResult.ok || !phoneResult.ok) {
+    throw new Error("SIGNUP_INCOMPLETE");
+  }
+
   const publicUserId = draft.userId || (await allocatePublicUserId());
   const avatarUrl = editableAvatarUrl(draft.avatarUrl) || null;
 
@@ -126,6 +138,8 @@ export async function completeEmailSignup(draftId: string) {
         emailKind: "VERIFIED",
         emailVerifiedAt: draft.emailVerifiedAt,
         password: draft.passwordHash,
+        name: nameResult.value,
+        phoneNumber: phoneResult.value,
         nickname: draft.nickname?.trim() || null,
         role: "USER",
         status: "ACTIVE",
@@ -151,6 +165,7 @@ export async function completeEmailSignup(draftId: string) {
     return created;
   });
 
+  await reportSignupAlimtalk(user.id);
   return user;
 }
 
@@ -162,10 +177,20 @@ export async function completeKakaoOnboarding(input: {
 }) {
   const existing = await prisma.user.findUnique({
     where: { id: input.accountId },
-    select: { userId: true, profile: { select: { avatarUrl: true } } },
+    select: {
+      userId: true,
+      name: true,
+      phoneNumber: true,
+      email: true,
+      emailKind: true,
+      profile: { select: { avatarUrl: true } },
+    },
   });
   if (!existing) {
     throw new Error("USER_NOT_FOUND");
+  }
+  if (!isContactComplete(existing)) {
+    throw new Error("SIGNUP_INCOMPLETE");
   }
 
   const publicUserId = existing.userId ?? input.publicUserId ?? (await allocatePublicUserId());
@@ -173,7 +198,7 @@ export async function completeKakaoOnboarding(input: {
 
   const now = new Date();
 
-  return prisma.$transaction(async (tx) => {
+  const user = await prisma.$transaction(async (tx) => {
     const user = await tx.user.update({
       where: { id: input.accountId },
       data: {
@@ -207,4 +232,15 @@ export async function completeKakaoOnboarding(input: {
 
     return user;
   });
+
+  await reportSignupAlimtalk(user.id);
+  return user;
+}
+
+async function reportSignupAlimtalk(userId: string) {
+  try {
+    await sendSignupAlimtalk(userId);
+  } catch (error) {
+    console.error("[alimtalk] signup", error instanceof Error ? error.message : error);
+  }
 }

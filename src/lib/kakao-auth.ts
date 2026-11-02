@@ -1,4 +1,4 @@
-import type { AuthProvider, EmailKind, User } from "@/generated/prisma/client";
+import type { AuthProvider, EmailKind, Prisma, User } from "@/generated/prisma/client";
 
 import { KakaoAuthError } from "@/lib/kakao-auth-error";
 import { prisma } from "@/lib/prisma";
@@ -137,18 +137,45 @@ function generatedKakaoDisplayName(kakaoId: string) {
 }
 
 function getKakaoProfile(data: KakaoUserResponse) {
+  const account = data.kakao_account;
   const kakaoId = String(data.id);
   const nickname =
-    data.kakao_account?.profile?.nickname?.trim() ||
+    account?.profile?.nickname?.trim() ||
     data.properties?.nickname?.trim() ||
     generatedKakaoDisplayName(kakaoId);
   const avatarUrl =
-    data.kakao_account?.profile?.profile_image_url ?? data.properties?.profile_image ?? null;
-  const email =
-    data.kakao_account?.is_email_valid === false ? undefined : data.kakao_account?.email;
+    account?.profile?.profile_image_url ?? data.properties?.profile_image ?? null;
+  const email = account?.is_email_valid === false ? undefined : account?.email?.trim().toLowerCase();
 
   return { nickname, avatarUrl, email };
 }
+
+async function fillKakaoContact(
+  tx: PrismaTransaction,
+  user: { id: string; emailKind: EmailKind; onboardingCompletedAt: Date | null },
+  contact: { email?: string },
+) {
+  if (!user.onboardingCompletedAt) return null;
+
+  const data: { email?: string; emailKind?: EmailKind; emailVerifiedAt?: Date } = {};
+
+  if (contact.email && user.emailKind === "PLACEHOLDER") {
+    const taken = await tx.user.findFirst({
+      where: { email: contact.email, id: { not: user.id } },
+      select: { id: true },
+    });
+    if (!taken) {
+      data.email = contact.email;
+      data.emailKind = "VERIFIED";
+      data.emailVerifiedAt = new Date();
+    }
+  }
+
+  if (Object.keys(data).length === 0) return null;
+  return tx.user.update({ where: { id: user.id }, data: { ...data, lastLoginAt: new Date() } });
+}
+
+type PrismaTransaction = Prisma.TransactionClient;
 
 type UpsertKakaoUserInput = {
   kakaoUser: KakaoUserResponse;
@@ -163,7 +190,6 @@ export async function upsertUserFromKakao(
 ): Promise<{ user: User; isNewUser: boolean }> {
   const providerAccountId = String(input.kakaoUser.id);
   const profile = getKakaoProfile(input.kakaoUser);
-  const emailInfo = normalizeEmail(profile.email, providerAccountId);
   const tokenExpiresAt =
     input.expiresIn != null && Number.isFinite(input.expiresIn)
       ? new Date(Date.now() + input.expiresIn * 1000)
@@ -203,16 +229,10 @@ export async function upsertUserFromKakao(
 
       const user = await tx.user.update({
         where: { id: existingIdentity.userId },
-        data: {
-          lastLoginAt: new Date(),
-          ...(profile.email && existingIdentity.user.emailKind === "PLACEHOLDER"
-            ? {
-                email: profile.email,
-                emailKind: "VERIFIED",
-                emailVerifiedAt: new Date(),
-              }
-            : {}),
-        },
+        data: { lastLoginAt: new Date() },
+      });
+      const contacted = await fillKakaoContact(tx, user, {
+        email: profile.email,
       });
 
       await tx.profile.upsert({
@@ -226,7 +246,7 @@ export async function upsertUserFromKakao(
         },
       });
 
-      return user;
+      return contacted ?? user;
     });
     return { user, isNewUser: false };
   }
@@ -261,10 +281,14 @@ export async function upsertUserFromKakao(
       const user = await tx.user.update({
         where: { id: linkedUser.id },
         data: {
-          emailKind: linkedUser.emailKind === "PLACEHOLDER" ? "VERIFIED" : linkedUser.emailKind,
-          emailVerifiedAt: linkedUser.emailVerifiedAt ?? new Date(),
           lastLoginAt: new Date(),
+          ...(linkedUser.emailKind !== "PLACEHOLDER" && !linkedUser.emailVerifiedAt
+            ? { emailVerifiedAt: new Date() }
+            : {}),
         },
+      });
+      const contacted = await fillKakaoContact(tx, user, {
+        email: profile.email,
       });
 
       await tx.profile.upsert({
@@ -273,19 +297,22 @@ export async function upsertUserFromKakao(
         create: { userId: user.id, avatarUrl: profile.avatarUrl },
       });
 
-      return user;
+      return contacted ?? user;
     });
     return { user, isNewUser: false };
   }
 
   const publicUserId = await allocatePublicUserId();
+  const placeholder = normalizeEmail(undefined, providerAccountId);
   const user = await prisma.$transaction(async (tx) => {
     return tx.user.create({
       data: {
         userId: publicUserId,
-        email: emailInfo.email,
-        emailKind: emailInfo.emailKind,
-        emailVerifiedAt: emailInfo.emailKind === "VERIFIED" ? new Date() : null,
+        email: placeholder.email,
+        emailKind: placeholder.emailKind,
+        emailVerifiedAt: null,
+        phoneNumber: null,
+        name: null,
         nickname: null,
         role: "USER",
         status: "ACTIVE",

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { scheduleLiveRemindersForUser } from "@/lib/alimtalk/notify";
 import { ApiError, assertAdmin, jsonError, resolveUserId } from "@/lib/api";
 import { adminGrantCourseAccess } from "@/lib/fulfillment";
 import { prisma } from "@/lib/prisma";
@@ -51,6 +52,12 @@ export async function POST(request: Request) {
       userId: body.targetUserId,
       courseId: body.courseId,
     });
+
+    try {
+      await scheduleLiveRemindersForUser(body.targetUserId, [body.courseId]);
+    } catch (error) {
+      console.error("[alimtalk] live enrollment", error instanceof Error ? error.message : error);
+    }
 
     return NextResponse.json(enrollment, { status: 201 });
   } catch (error) {

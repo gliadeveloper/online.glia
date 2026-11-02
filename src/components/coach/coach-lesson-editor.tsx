@@ -37,6 +37,7 @@ type CoachLessonEditorProps = {
   lessonTitle: string;
   contents: ContentRow[];
   courseTitle: string;
+  scheduledStartAt?: string;
 };
 
 export function CoachLessonEditor({
@@ -46,12 +47,14 @@ export function CoachLessonEditor({
   lessonTitle,
   contents,
   courseTitle,
+  scheduledStartAt = "",
 }: CoachLessonEditorProps) {
   const router = useRouter();
   const zoomContent = findZoomContent(contents);
   const videoContent = findVideoContent(contents);
   const savedContent = useRef({ video: videoContent, zoom: zoomContent });
   const [zoomUrl, setZoomUrl] = useState(zoomContent?.url?.trim() ?? "");
+  const [startsAt, setStartsAt] = useState(scheduledStartAt);
   const [youtubeUrl, setYoutubeUrl] = useState(getLessonYoutubeUrl(contents) ?? videoContent?.url?.trim() ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -118,6 +121,10 @@ export function CoachLessonEditor({
       setError("Zoom 회의 URL(zoom.us)을 입력하세요.");
       return;
     }
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(startsAt)) {
+      setError("수업 시작 시각을 입력하세요.");
+      return;
+    }
 
     setBusy(true);
     setError(null);
@@ -137,6 +144,7 @@ export function CoachLessonEditor({
           type: "LINK",
           title: "Zoom",
           url: trimmedZoom,
+          scheduledStartAt: startsAt,
         }),
       });
 
@@ -214,10 +222,20 @@ export function CoachLessonEditor({
           <div>
             <h2 className="font-semibold text-zinc-900">Zoom 링크</h2>
             <p className="mt-1 text-sm text-zinc-500">
-              수강생은 이 링크로 라이브 수업에 참여합니다. 종료 후 다시보기는 LIVE 레슨을 삭제하고
-              VIDEO 레슨을 새로 만든 뒤 YouTube URL을 등록하세요.
+              수강생은 이 링크로 라이브 수업에 참여합니다. 시작 시각은 한국 시간입니다. 저장하면
+              하루 전, 1시간 전, 15분 전 알림이 예약되고, 이미 10분 안으로 들어온 알림은 건너뜁니다.
             </p>
           </div>
+          <label className="block space-y-2 text-sm">
+            <span className="font-medium">수업 시작</span>
+            <input
+              type="datetime-local"
+              value={startsAt}
+              onChange={(event) => setStartsAt(event.target.value)}
+              required
+              className="w-full rounded-xl border border-zinc-200 px-4 py-3"
+            />
+          </label>
           <label className="block space-y-2 text-sm">
             <span className="font-medium">Zoom 회의 URL</span>
             <input

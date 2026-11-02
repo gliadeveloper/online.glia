@@ -16,6 +16,7 @@ import {
   verifyOAuthState,
 } from "@/lib/oauth-state";
 import { getRequestOrigin } from "@/lib/request-origin";
+import { signupOnboardingPath } from "@/lib/signup/constants";
 
 function loginErrorRedirect(request: Request, message: string) {
   const url = new URL("/login", getRequestOrigin(request));
@@ -61,7 +62,7 @@ export async function GET(request: Request) {
   try {
     const token = await exchangeKakaoCode(code);
     const kakaoUser = await fetchKakaoUser(token.access_token);
-    const { user, isNewUser } = await upsertUserFromKakao({
+    const { user } = await upsertUserFromKakao({
       kakaoUser,
       accessToken: token.access_token,
       refreshToken: token.refresh_token,
@@ -69,9 +70,9 @@ export async function GET(request: Request) {
       scopes: token.scope,
     });
 
-    const redirectPath = isNewUser || !user.onboardingCompletedAt
-      ? `/signup/terms${verifiedState.next ? `?next=${encodeURIComponent(verifiedState.next)}` : ""}`
-      : resolvePostLoginPath(verifiedState.next, user.role);
+    const redirectPath =
+      signupOnboardingPath(user, verifiedState.next) ??
+      resolvePostLoginPath(verifiedState.next, user.role);
     const origin = getRequestOrigin(request);
     const response = NextResponse.redirect(`${origin}${redirectPath}`);
 

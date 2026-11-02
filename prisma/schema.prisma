@@ -314,6 +314,7 @@ model User {
   organizationMembers            OrganizationMember[]
   instructedCourses              Course[]                      @relation("CourseInstructor")
   enrollments                    Enrollment[]
+  alimtalkReservations           AlimtalkReservation[]
   quizAttempts                   QuizAttempt[]
   submissions                    Submission[]
   gradedSubmissions              Submission[]                  @relation("SubmissionGrader")
@@ -627,6 +628,8 @@ model Lesson {
   order       Int        @default(0)
   duration    Int?
   isFree      Boolean    @default(false)
+  /// When a LIVE lesson starts. Reminders are reserved from this instant.
+  scheduledStartAt DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
@@ -640,9 +643,29 @@ model Lesson {
   notes       LessonNote[]
   discussions Discussion[]
   liveSession LiveSession?
+  alimtalkReservations AlimtalkReservation[]
 
   @@index([moduleId, order])
+  @@index([scheduledStartAt])
   @@map("lessons")
+}
+
+/// One reserved 알림톡 request for a learner and a live-lesson reminder.
+model AlimtalkReservation {
+  id           String   @id @default(cuid())
+  lessonId     String
+  userId       String
+  templateCode String
+  requestId    String
+  reserveAt    DateTime
+  createdAt    DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, userId, templateCode])
+  @@index([lessonId])
+  @@map("alimtalk_reservations")
 }
 
 model Content {

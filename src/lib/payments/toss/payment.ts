@@ -6,6 +6,7 @@ import { Prisma } from "@/generated/prisma/client";
 
 import { ApiError } from "@/lib/api";
 import { writeAuditLog } from "@/lib/audit";
+import { reportLiveReminders } from "@/lib/alimtalk/notify";
 import { getProductPrice, grantTossOrder, revokeFulfillment } from "@/lib/fulfillment";
 import { isPlaceholderEmail, opsMemberName } from "@/lib/member-contact";
 import { assertMemberContactComplete } from "@/lib/member-contact-server";
@@ -511,6 +512,7 @@ async function finishConfirmedOrder(
 
   if (order.status !== "PAID") {
     await grantTossOrder({ orderId: order.id, actorId: order.userId, now: new Date() });
+    await reportLiveReminders(order.id);
   }
 
   return { orderId: order.id, granted: true as const };

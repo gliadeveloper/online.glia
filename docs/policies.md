@@ -213,6 +213,10 @@
 
 상세: [lms-access-implementation.md](./lms-access-implementation.md)
 
+### 5.8 카카오 알림톡
+
+앱 안 알림(`NotificationEvent`)과 별개다. 검수된 정보성 템플릿만 네이버 클라우드 Simple & Easy Notification Service 알림톡 API로 접수한다. 가입 완료, 강의 질문 답글, 라이브 수업 예약 알림은 각 시점에 서버에서 보낸다. 시크릿은 서버 모듈 `src/lib/alimtalk/`에만 두고, 브라우저에서 호출하는 발송 Route는 만들지 않는다. 채널·템플릿 검수 전에는 환경 변수를 비워 둔다. 상세: [alimtalk-sens.md](./alimtalk-sens.md).
+
 ### 5.5 쿠폰 결제
 
 쿠폰은 발급 당시 할인·최소 주문 금액 조건을 적용한다. 전액 할인으로 결제액이 0원이면 토스를 호출하지 않고 `FREE` 주문을 완료한다. 주문·쿠폰 사용·권한 지급은 같은 트랜잭션으로 처리한다. 1–99원이 남는 할인은 적용하지 않는다. 상세: [구현 정책](./lms-access-implementation.md#전액-할인-쿠폰-주문).
@@ -352,6 +356,8 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 |------|------|
 | [lms-access-entitlements.md](./lms-access-entitlements.md) | 도메인·스키마 설계 |
 | [lms-access-implementation.md](./lms-access-implementation.md) | Shop·Fulfillment·UI **구현 정책** |
+| [alimtalk-sens.md](./alimtalk-sens.md) | 네이버 클라우드 SENS 알림톡 발송 모듈. 서버 전용 |
+| [회원탈퇴_DB_구성안.md](./회원탈퇴_DB_구성안.md) | 탈퇴 DB. 30일 복구 후 익명화, 거래 기록은 발생일 기준 분리 보관. 미구현 |
 
 ### Coach
 
@@ -392,6 +398,7 @@ Admin은 coach portal 기능의 **전역 superserset**. Coach는 본인 스코�
 | Chrome | `src/lib/chrome-policy.ts` |
 | Enrollment access | `src/lib/enrollment-access.ts` |
 | Shop state | `src/lib/shop-purchase-state.ts` |
+| 알림톡 발송 | `src/lib/alimtalk/send.ts` |
 | Coach commerce scope | `src/lib/coach-commerce.ts` |
 | Live lessons (Zoom) | `src/lib/coach-live-lessons.ts` · `src/lib/media/zoom.ts` |
 | Coach auth | `src/lib/coach.ts` |

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { reportLiveReminders } from "@/lib/alimtalk/notify";
 import { ApiError, jsonError, resolveUserId } from "@/lib/api";
 import { checkout } from "@/lib/fulfillment";
 
@@ -22,6 +23,10 @@ export async function POST(request: Request) {
       productId: body.productId.trim(),
       idempotencyKey: body.idempotencyKey?.trim(),
     });
+
+    if (order.status === "PAID") {
+      await reportLiveReminders(order.id);
+    }
 
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
