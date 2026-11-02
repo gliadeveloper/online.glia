@@ -13,9 +13,12 @@ import "@/components/account/member-contact-form.css";
 
 type MemberContactFormProps = {
   initial: MemberContactSnapshot;
-  variant?: "page" | "checkout" | "modal";
+  variant?: "page" | "checkout" | "modal" | "prompt";
   submitLabel?: string;
   onSaved?: () => void;
+  lede?: string | null;
+  nameLabel?: string;
+  showEmail?: boolean;
 };
 
 export function MemberContactForm({
@@ -23,6 +26,9 @@ export function MemberContactForm({
   variant = "page",
   submitLabel = "저장",
   onSaved,
+  lede,
+  nameLabel = "이름",
+  showEmail = true,
 }: MemberContactFormProps) {
   const router = useRouter();
   const [name, setName] = useState(initial.name);
@@ -69,32 +75,36 @@ export function MemberContactForm({
     }
   }
 
+  const compact = variant === "modal" || variant === "prompt";
   const formClass =
     variant === "checkout"
       ? "glia-checkout__contact member-contact-form"
-      : variant === "modal"
-        ? "member-contact-form member-contact-form--modal"
-        : "glia-mypage__form";
+      : variant === "prompt"
+        ? "member-contact-form member-contact-form--prompt"
+        : variant === "modal"
+          ? "member-contact-form member-contact-form--modal"
+          : "glia-mypage__form";
+  const defaultLede =
+    variant === "modal" || variant === "prompt"
+      ? "신청·결제 전에 이름과 연락처를 남겨 주세요. 커뮤니티에는 공개되지 않습니다."
+      : "결제 영수증과 코칭 안내는 이름과 연락처로 보내 드려요. 커뮤니티에는 공개되지 않습니다.";
+  const ledeText = lede === undefined ? defaultLede : lede;
 
   return (
     <form onSubmit={handleSubmit} className={formClass}>
-      {variant !== "modal" ? (
-        <p className={variant === "checkout" ? "glia-checkout__contact-lede" : "glia-mypage__section-lede"}>
-          결제 영수증과 코칭 안내는 이름과 연락처로 보내 드려요. 커뮤니티에는 공개되지 않습니다.
+      {ledeText ? (
+        <p className={variant === "checkout" ? "glia-checkout__contact-lede" : compact ? "member-contact-form__lede" : "glia-mypage__section-lede"}>
+          {ledeText}
         </p>
-      ) : (
-        <p className="member-contact-form__lede">
-          신청·결제 전에 이름과 연락처를 남겨 주세요. 커뮤니티에는 공개되지 않습니다.
-        </p>
-      )}
+      ) : null}
 
-      <fieldset className={variant === "page" ? "glia-mypage__fieldset" : "member-contact-form__fields"}>
-        <label className={variant === "page" ? "glia-mypage__field" : "member-contact-form__field"}>
-          <span className={variant === "page" ? "glia-mypage__label" : "member-contact-form__label"}>
-            이름 <span className={variant === "page" ? "glia-mypage__req" : "member-contact-form__req"}>필수</span>
+      <fieldset className={compact ? "member-contact-form__fields" : variant === "page" ? "glia-mypage__fieldset" : "member-contact-form__fields"}>
+        <label className={compact || variant !== "page" ? "member-contact-form__field" : "glia-mypage__field"}>
+          <span className={compact || variant !== "page" ? "member-contact-form__label" : "glia-mypage__label"}>
+            {nameLabel} <span className={compact || variant !== "page" ? "member-contact-form__req" : "glia-mypage__req"}>필수</span>
           </span>
           <input
-            className={variant === "page" ? "glia-mypage__input" : "member-contact-form__input"}
+            className={compact || variant !== "page" ? "member-contact-form__input" : "glia-mypage__input"}
             type="text"
             autoComplete="name"
             value={name}
@@ -104,12 +114,12 @@ export function MemberContactForm({
           />
         </label>
 
-        <label className={variant === "page" ? "glia-mypage__field" : "member-contact-form__field"}>
-          <span className={variant === "page" ? "glia-mypage__label" : "member-contact-form__label"}>
-            휴대폰 번호 <span className={variant === "page" ? "glia-mypage__req" : "member-contact-form__req"}>필수</span>
+        <label className={compact || variant !== "page" ? "member-contact-form__field" : "glia-mypage__field"}>
+          <span className={compact || variant !== "page" ? "member-contact-form__label" : "glia-mypage__label"}>
+            휴대폰 번호 <span className={compact || variant !== "page" ? "member-contact-form__req" : "glia-mypage__req"}>필수</span>
           </span>
           <input
-            className={variant === "page" ? "glia-mypage__input" : "member-contact-form__input"}
+            className={compact || variant !== "page" ? "member-contact-form__input" : "glia-mypage__input"}
             type="tel"
             autoComplete="tel"
             inputMode="numeric"
@@ -130,7 +140,8 @@ export function MemberContactForm({
           />
         </label>
 
-        <label className={variant === "page" ? "glia-mypage__field" : "member-contact-form__field"}>
+        {showEmail ? (
+        <label className={compact || variant !== "page" ? "member-contact-form__field" : "glia-mypage__field"}>
           <span className={variant === "page" ? "glia-mypage__label" : "member-contact-form__label"}>
             이메일
             {initial.needsEmail ? (
@@ -152,6 +163,7 @@ export function MemberContactForm({
             </span>
           ) : null}
         </label>
+        ) : null}
       </fieldset>
 
       {error ? (
@@ -170,9 +182,11 @@ export function MemberContactForm({
           className={
             variant === "page"
               ? "glia-mypage__btn glia-mypage__btn--primary"
-              : variant === "checkout"
-                ? "shop-pdp-apply-btn"
-                : "shop-pdp-apply-btn shop-pdp-modal__confirm"
+              : variant === "prompt"
+                ? "corp-trust-btn-primary corp-trust-focus contact-prompt__submit"
+                : variant === "checkout"
+                  ? "shop-pdp-apply-btn"
+                  : "shop-pdp-apply-btn shop-pdp-modal__confirm"
           }
         >
           {loading ? "저장 중…" : submitLabel}

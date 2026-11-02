@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { clearContactPromptDismissal } from "@/components/account/contact-prompt";
+
 export function LogoutButton() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -10,6 +12,7 @@ export function LogoutButton() {
   async function handleLogout() {
     setLoading(true);
     try {
+      clearContactPromptDismissal();
       await fetch("/api/auth/logout", { method: "POST" });
       router.push("/login");
       router.refresh();

@@ -55,12 +55,50 @@ export function CoachLessonEditor({
   const zoomContent = findZoomContent(contents);
   const videoContent = findVideoContent(contents);
   const savedContent = useRef({ video: videoContent, zoom: zoomContent });
+  const [savedTitle, setSavedTitle] = useState(lessonTitle);
+  const [title, setTitle] = useState(lessonTitle);
   const [zoomUrl, setZoomUrl] = useState(zoomContent?.url?.trim() ?? "");
   const [startsAt, setStartsAt] = useState(scheduledStartAt);
   const [supplyText, setSupplyText] = useState(supplies);
   const [youtubeUrl, setYoutubeUrl] = useState(getLessonYoutubeUrl(contents) ?? videoContent?.url?.trim() ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  async function saveTitle(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmed = title.trim();
+    if (!trimmed) {
+      setError("레슨 제목을 입력하세요.");
+      return;
+    }
+    if ([...trimmed].length > 120) {
+      setError("레슨 제목은 120자 이내로 입력하세요.");
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/coach/lessons/${lessonId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      const data = (await response.json()) as { title?: string; error?: string };
+      if (!response.ok) {
+        setError(data.error ?? "레슨 제목 저장에 실패했습니다.");
+        return;
+      }
+      const nextTitle = data.title ?? trimmed;
+      setTitle(nextTitle);
+      setSavedTitle(nextTitle);
+      router.refresh();
+    } catch {
+      setError("네트워크 오류");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function saveYoutubeVideo(event: React.FormEvent) {
     event.preventDefault();
@@ -171,9 +209,37 @@ export function CoachLessonEditor({
     <div className="space-y-6">
       <div>
         <p className="text-xs text-zinc-500">{courseTitle}</p>
-        <h1 className="text-2xl font-semibold text-zinc-900">{lessonTitle}</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900">{savedTitle}</h1>
         <p className="mt-1 text-sm text-zinc-500">{lessonType}</p>
       </div>
+
+      <form
+        onSubmit={saveTitle}
+        className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm"
+      >
+        <label className="block space-y-2 text-sm">
+          <span className="font-medium">레슨 제목</span>
+          <input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            required
+            maxLength={120}
+            className="w-full rounded-xl border border-zinc-200 px-4 py-3"
+          />
+        </label>
+        {lessonType === "LIVE" ? (
+          <p className="text-xs text-zinc-500">
+            시작 시각이 남아 있는 수업은 제목을 저장하면 알림톡의 수업 이름도 이 제목으로 다시 예약됩니다.
+          </p>
+        ) : null}
+        <button
+          type="submit"
+          disabled={busy || title.trim() === savedTitle}
+          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+        >
+          제목 저장
+        </button>
+      </form>
 
       {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 

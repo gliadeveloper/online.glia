@@ -22,6 +22,9 @@ export function CoachCustomerDetailPanel({ detail }: { detail: CoachCustomerDeta
     <div className="space-y-6">
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
         <p className="text-2xl font-semibold text-zinc-900">{opsMemberName(user)}</p>
+        {user.nickname?.trim() && user.nickname.trim() !== user.name?.trim() ? (
+          <p className="mt-1 text-sm text-zinc-600">닉네임 {user.nickname.trim()}</p>
+        ) : null}
         <p className="mt-1 text-sm text-zinc-500">{user.email}</p>
         {user.phoneNumber ? (
           <p className="mt-1 text-sm text-zinc-500">{formatPhoneNumber(user.phoneNumber)}</p>

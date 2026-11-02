@@ -10,6 +10,12 @@ type CoachCustomerHubProps = {
   customers: CoachCustomerRow[];
 };
 
+function distinctNickname(customer: { name: string | null; nickname: string | null }) {
+  const nickname = customer.nickname?.trim();
+  if (!nickname || nickname === customer.name?.trim()) return null;
+  return nickname;
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -56,13 +62,15 @@ export function CoachCustomerHub({ customers }: CoachCustomerHubProps) {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="이름, 이메일, 코스·코칭명 검색"
+          placeholder="이름, 닉네임, 이메일, 코스·코칭명 검색"
           className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm shadow-sm"
         />
       </label>
 
       <ul className="space-y-3">
-        {filtered.map((customer) => (
+        {filtered.map((customer) => {
+          const nickname = distinctNickname(customer);
+          return (
           <li key={customer.userId}>
             <Link
               href={`/coach/customers/${customer.userId}`}
@@ -78,6 +86,7 @@ export function CoachCustomerHub({ customers }: CoachCustomerHubProps) {
                   })}
                 </p>
                 <p className="text-sm text-zinc-500">
+                  {nickname ? `닉네임 ${nickname} · ` : ""}
                   {customer.email}
                   {customer.phoneNumber ? ` · ${formatPhoneNumber(customer.phoneNumber)}` : ""}
                 </p>
@@ -138,7 +147,8 @@ export function CoachCustomerHub({ customers }: CoachCustomerHubProps) {
             )}
             </Link>
           </li>
-        ))}
+          );
+        })}
       </ul>
 
       {filtered.length === 0 && (

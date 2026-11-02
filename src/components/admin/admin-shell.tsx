@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { clearContactPromptDismissal } from "@/components/account/contact-prompt";
+
 const navSections = [
   {
     label: "Overview",
@@ -100,6 +102,7 @@ export function AdminShell({ userName, userEmail, children }: AdminShellProps) {
   const router = useRouter();
 
   async function logout() {
+    clearContactPromptDismissal();
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();

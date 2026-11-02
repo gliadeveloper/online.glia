@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { clearContactPromptDismissal } from "@/components/account/contact-prompt";
+
 const navItems = [
   { href: "/coach", label: "홈", exact: true },
   { href: "/coach/products", label: "상품", exact: false },
@@ -36,6 +38,7 @@ export function CoachShell({
   const router = useRouter();
 
   async function logout() {
+    clearContactPromptDismissal();
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();
