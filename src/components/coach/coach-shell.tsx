@@ -12,6 +12,7 @@ const navItems = [
   { href: "/coach/checkins", label: "체크인", exact: false },
   { href: "/coach/courses", label: "코스", exact: false },
   { href: "/coach/live", label: "라이브", exact: false },
+  { href: "/coach/alimtalk", label: "알림톡", exact: false },
   { href: "/coach/questions", label: "질문", exact: false },
   { href: "/coach/coaching", label: "코칭", exact: false },
 ];

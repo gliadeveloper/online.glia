@@ -80,6 +80,15 @@ export function signupMessage(name: string) {
   };
 }
 
+/** Alimtalk #{list}. Empty lessons say 없음. The joined line is capped at 80 characters. */
+export function formatSupplyList(supplies: string[]) {
+  const text = supplies
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(", ");
+  return [...(text || "없음")].slice(0, 80).join("");
+}
+
 export function liveMessage(
   code: LiveReminderCode,
   values: { name: string; className: string; startTime: string; list: string; id: string },

@@ -630,6 +630,8 @@ model Lesson {
   isFree      Boolean    @default(false)
   /// When a LIVE lesson starts. Reminders are reserved from this instant.
   scheduledStartAt DateTime?
+  /// Per-lesson items the learner should bring. One string per item.
+  supplies         String[]   @default([])
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

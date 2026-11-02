@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api";
 import { getLessonDetail } from "@/lib/assessment-admin";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { requireCoach } from "@/lib/coach";
+import { suppliesToText } from "@/lib/product-supplies";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -59,6 +60,7 @@ export default async function CoachLessonPage({ params }: Props) {
         contents={lesson.contents}
         courseTitle={course.title}
         scheduledStartAt={toSeoulDatetimeLocal(lesson.scheduledStartAt)}
+        supplies={suppliesToText(lesson.supplies)}
       />
 
       <LessonMaterialsManager

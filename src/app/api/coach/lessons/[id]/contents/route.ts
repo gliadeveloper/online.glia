@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { ApiError, assertCoach, jsonError, requireSessionUserId } from "@/lib/api";
 import { assertCoachOwnsLesson } from "@/lib/coach-courses";
 import { setLessonScheduledStart } from "@/lib/alimtalk/notify";
+import { parseProductSupplies } from "@/lib/product-supplies";
 import { createContent } from "@/lib/curriculum-admin";
 import type { ContentType, Prisma } from "@/generated/prisma/client";
 
@@ -18,6 +19,7 @@ export async function POST(request: Request, context: RouteContext) {
       body?: string;
       metadata?: Prisma.InputJsonValue | null;
       scheduledStartAt?: string;
+      supplies?: string;
     };
 
     const userId = await requireSessionUserId();
@@ -40,7 +42,11 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (body.scheduledStartAt) {
       try {
-        await setLessonScheduledStart(lessonId, body.scheduledStartAt);
+        await setLessonScheduledStart(
+          lessonId,
+          body.scheduledStartAt,
+          parseProductSupplies(body.supplies) ?? [],
+        );
       } catch (error) {
         if (error instanceof Error && error.message === "LIVE_START_IN_PAST") {
           throw new ApiError("수업 시작 시각은 현재 이후여야 합니다.", 400, "LIVE_START_IN_PAST");

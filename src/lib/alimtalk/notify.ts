@@ -2,7 +2,13 @@ import "server-only";
 
 import { getSensAlimtalkConfig } from "@/lib/alimtalk/config";
 import { cancelAlimtalkReservation, sendAlimtalk } from "@/lib/alimtalk/send";
-import { faqReplyMessage, liveMessage, signupMessage, type LiveReminderCode } from "@/lib/alimtalk/templates";
+import {
+  faqReplyMessage,
+  formatSupplyList,
+  liveMessage,
+  signupMessage,
+  type LiveReminderCode,
+} from "@/lib/alimtalk/templates";
 import { prisma } from "@/lib/prisma";
 
 const LIVE_OFFSET_MS: Record<LiveReminderCode, number> = {
@@ -106,7 +112,7 @@ async function reserveLiveReminders(
 
   const className = clip(`${lesson.module.course.title} ${lesson.title}`.replace(/\s+/g, " ").trim(), 80);
   const startTime = formatSeoul(start);
-  const list = clip(lesson.materials.map((item) => item.title).join(", ") || "없음", 80);
+  const list = formatSupplyList(lesson.supplies);
   const id = `${lesson.module.course.id}/lessons/${lesson.id}`;
 
   for (const code of Object.keys(LIVE_OFFSET_MS) as LiveReminderCode[]) {
@@ -151,7 +157,11 @@ async function reserveLiveReminders(
   }
 }
 
-export async function setLessonScheduledStart(lessonId: string, startsAt: string) {
+export async function setLessonScheduledStart(
+  lessonId: string,
+  startsAt: string,
+  supplies?: string[],
+) {
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
     select: { id: true, type: true },
@@ -165,7 +175,10 @@ export async function setLessonScheduledStart(lessonId: string, startsAt: string
 
   await prisma.lesson.update({
     where: { id: lessonId },
-    data: { scheduledStartAt },
+    data: {
+      scheduledStartAt,
+      ...(supplies !== undefined ? { supplies } : {}),
+    },
   });
   await syncLessonLiveReminders(lessonId);
 }
@@ -190,7 +203,7 @@ const liveLessonSelect = {
   id: true,
   title: true,
   scheduledStartAt: true,
-  materials: { orderBy: { sortOrder: "asc" as const }, select: { title: true } },
+  supplies: true,
   module: {
     select: {
       course: {

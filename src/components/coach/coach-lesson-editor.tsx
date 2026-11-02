@@ -38,6 +38,7 @@ type CoachLessonEditorProps = {
   contents: ContentRow[];
   courseTitle: string;
   scheduledStartAt?: string;
+  supplies?: string;
 };
 
 export function CoachLessonEditor({
@@ -48,6 +49,7 @@ export function CoachLessonEditor({
   contents,
   courseTitle,
   scheduledStartAt = "",
+  supplies = "",
 }: CoachLessonEditorProps) {
   const router = useRouter();
   const zoomContent = findZoomContent(contents);
@@ -55,6 +57,7 @@ export function CoachLessonEditor({
   const savedContent = useRef({ video: videoContent, zoom: zoomContent });
   const [zoomUrl, setZoomUrl] = useState(zoomContent?.url?.trim() ?? "");
   const [startsAt, setStartsAt] = useState(scheduledStartAt);
+  const [supplyText, setSupplyText] = useState(supplies);
   const [youtubeUrl, setYoutubeUrl] = useState(getLessonYoutubeUrl(contents) ?? videoContent?.url?.trim() ?? "");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -145,6 +148,7 @@ export function CoachLessonEditor({
           title: "Zoom",
           url: trimmedZoom,
           scheduledStartAt: startsAt,
+          supplies: supplyText,
         }),
       });
 
@@ -235,6 +239,19 @@ export function CoachLessonEditor({
               required
               className="w-full rounded-xl border border-zinc-200 px-4 py-3"
             />
+          </label>
+          <label className="block space-y-2 text-sm">
+            <span className="font-medium">이 회차 준비물</span>
+            <textarea
+              value={supplyText}
+              onChange={(event) => setSupplyText(event.target.value)}
+              rows={4}
+              placeholder={"줄마다 하나씩 입력\nZoom 앱\n이어폰"}
+              className="w-full rounded-xl border border-zinc-200 px-4 py-3"
+            />
+            <span className="block text-xs text-zinc-500">
+              이 수업 알림톡의 준비물에만 들어갑니다. 상품 상세의 공통 준비물과는 따로입니다.
+            </span>
           </label>
           <label className="block space-y-2 text-sm">
             <span className="font-medium">Zoom 회의 URL</span>
