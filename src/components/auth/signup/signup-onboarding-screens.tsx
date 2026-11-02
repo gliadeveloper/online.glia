@@ -13,7 +13,7 @@ import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { siteBusiness } from "@/lib/site-business";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import {
-  formatSignupPhoneInput,
+  formatPhoneInput,
   PHONE_INPUT_LIMIT_MESSAGE,
   validateContactEmail,
   validateLegalName,
@@ -471,7 +471,7 @@ function ContactContent({ initial, next }: { initial: MemberContactSnapshot; nex
               inputMode="numeric"
               value={phoneNumber}
               onChange={(event) => {
-                const next = formatSignupPhoneInput(event.target.value);
+                const next = formatPhoneInput(event.target.value);
                 setPhoneNumber(next.value);
                 setError((current) =>
                   next.overflow

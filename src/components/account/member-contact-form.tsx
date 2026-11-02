@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import type { MemberContactSnapshot } from "@/lib/member-contact";
+import {
+  formatPhoneInput,
+  PHONE_INPUT_LIMIT_MESSAGE,
+  type MemberContactSnapshot,
+} from "@/lib/member-contact";
 
 import "@/components/account/member-contact-form.css";
 
@@ -110,7 +114,17 @@ export function MemberContactForm({
             autoComplete="tel"
             inputMode="numeric"
             value={phoneNumber}
-            onChange={(event) => setPhoneNumber(event.target.value)}
+            onChange={(event) => {
+              const next = formatPhoneInput(event.target.value);
+              setPhoneNumber(next.value);
+              setError((current) =>
+                next.overflow
+                  ? PHONE_INPUT_LIMIT_MESSAGE
+                  : current === PHONE_INPUT_LIMIT_MESSAGE
+                    ? null
+                    : current,
+              );
+            }}
             placeholder="010-0000-0000"
             required
           />

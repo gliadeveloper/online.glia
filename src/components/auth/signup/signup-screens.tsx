@@ -10,7 +10,7 @@ import { KakaoLoginButton } from "@/components/auth/login/kakao-login-button";
 import { SignupStep, SignupSuspenseFallback } from "@/components/auth/signup/signup-step";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import {
-  formatSignupPhoneInput,
+  formatPhoneInput,
   PHONE_INPUT_LIMIT_MESSAGE,
   validateLegalName,
   validatePhoneNumber,
@@ -180,7 +180,7 @@ export function SignupEmailScreen() {
               inputMode="numeric"
               value={phoneNumber}
               onChange={(event) => {
-                const next = formatSignupPhoneInput(event.target.value);
+                const next = formatPhoneInput(event.target.value);
                 setPhoneNumber(next.value);
                 setError((current) =>
                   next.overflow
