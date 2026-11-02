@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
+import { HomeIcon } from "@/components/shell/nav-icons";
 import { Typography } from "@/components/typography/typography";
 import { typoRoleClass } from "@/lib/typography";
 import { resolveStackNav } from "@/lib/stack-nav";
@@ -55,7 +57,16 @@ function StackBackButton({
   );
 }
 
-/** Mobile stack: sole chrome — back + page title. */
+function StackHomeLink({ className }: { className: string }) {
+  return (
+    <Link href="/" className={className} aria-label="홈">
+      <HomeIcon className="size-5 shrink-0" />
+      <span className="sr-only sm:not-sr-only">홈</span>
+    </Link>
+  );
+}
+
+/** Mobile stack: sole chrome — back, page title, home. */
 export function BackNav() {
   const pathname = usePathname();
   const resolved = resolveStackNav(pathname);
@@ -101,29 +112,34 @@ export function BackNav() {
   return (
     <nav
       id="context-nav"
-      aria-label="이전 단계"
+      aria-label="화면 이동"
       data-slot="context-nav"
       className="back-nav-trust lg:hidden"
     >
       <div className="back-nav-trust__inner">
-        <StackBackButton
-          fallbackHref={backHref}
-          className={`back-nav-trust__back shell-focus-ring ${typoRoleClass("bodySecondary")}`}
-          iconSize={20}
-          showLabel
-        />
+        <div className="back-nav-trust__leading">
+          <StackBackButton
+            fallbackHref={backHref}
+            className={`back-nav-trust__back shell-focus-ring ${typoRoleClass("bodySecondary")}`}
+            iconSize={20}
+            showLabel
+          />
+          <StackHomeLink
+            className={`back-nav-trust__back back-nav-trust__home shell-focus-ring ${typoRoleClass("bodySecondary")}`}
+          />
+        </div>
 
         <Typography
           as="h1"
           role="contextTitle"
           weight="semibold"
           color="primary"
-          className="back-nav-trust__title min-w-0 flex-1 truncate text-center"
+          className="back-nav-trust__title min-w-0 truncate text-center"
         >
           {displayTitle}
         </Typography>
 
-        <span className="back-nav-trust__spacer" aria-hidden="true" />
+        <span className="back-nav-trust__balance" aria-hidden="true" />
       </div>
     </nav>
   );
