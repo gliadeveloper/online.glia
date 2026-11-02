@@ -1,5 +1,7 @@
 "use client";
 
+import { NICKNAME_MAX_LENGTH, NICKNAME_RULE_HINT } from "@/lib/signup/validation";
+
 type PublicNicknameFieldProps = {
   value: string;
   onChange: (value: string) => void;
@@ -29,11 +31,11 @@ export function PublicNicknameField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="커뮤니티에 보일 이름"
-        maxLength={20}
+        maxLength={NICKNAME_MAX_LENGTH}
         required
         disabled={disabled}
       />
-      <span className={hintClassName}>글과 댓글에 이렇게 표시돼요. 실명과는 따로예요.</span>
+      <span className={hintClassName}>글과 댓글에 이렇게 표시돼요. {NICKNAME_RULE_HINT}</span>
     </label>
   );
 }

@@ -7,6 +7,7 @@ import {
   ALLOWED_AVATAR_IMAGE_TYPES,
   MAX_AVATAR_IMAGE_BYTES,
 } from "@/lib/media/avatar-image-constants";
+import { NICKNAME_MAX_LENGTH, NICKNAME_RULE_HINT } from "@/lib/signup/validation";
 
 type ProfileEditFormProps = {
   initial: {
@@ -184,8 +185,9 @@ export function ProfileEditForm({ initial }: ProfileEditFormProps) {
             value={name}
             onChange={(event) => setName(event.target.value)}
             required
-            maxLength={20}
+            maxLength={NICKNAME_MAX_LENGTH}
           />
+          <span className="glia-mypage__photo-hint">{NICKNAME_RULE_HINT}</span>
         </label>
 
         <label className="glia-mypage__field">

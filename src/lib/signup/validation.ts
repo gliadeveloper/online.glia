@@ -48,34 +48,37 @@ export function validateUserId(userId: string): UserIdValidationResult {
   return { ok: true };
 }
 
+/** Instagram username length. Hangul stays allowed because this is the public display name. */
+export const NICKNAME_MAX_LENGTH = 30;
+
+export const NICKNAME_RULE_HINT =
+  "한글, 영문, 숫자, 밑줄(_), 마침표(.)를 30자까지 쓸 수 있어요. 마침표는 맨 앞·맨 뒤나 연속으로 쓸 수 없어요.";
+
 export function validateNickname(nickname: string): NicknameValidationResult {
   const trimmed = nickname.trim();
   if (!trimmed) {
     return { ok: false, message: "닉네임을 입력해 주세요." };
   }
 
-  const hasHangul = /[가-힣]/.test(trimmed);
-  const hangulOnly = /^[가-힣]+$/.test(trimmed);
-  const latinOnly = /^[A-Za-z0-9]+$/.test(trimmed);
-
-  if (hasHangul && hangulOnly) {
-    if (trimmed.length < 1 || trimmed.length > 10) {
-      return { ok: false, message: "한글 닉네임은 1~10자까지 입력할 수 있어요." };
-    }
-    return { ok: true };
+  if ([...trimmed].length > NICKNAME_MAX_LENGTH) {
+    return { ok: false, message: "닉네임은 30자까지 입력할 수 있어요." };
   }
 
-  if (latinOnly) {
-    if (trimmed.length < 2 || trimmed.length > 20) {
-      return { ok: false, message: "영문 및 숫자 닉네임은 2~20자까지 입력할 수 있어요." };
-    }
-    return { ok: true };
+  if (!/^[0-9A-Za-z가-힣._]+$/.test(trimmed)) {
+    return {
+      ok: false,
+      message: "닉네임은 한글, 영문, 숫자, 밑줄(_), 마침표(.)만 사용할 수 있어요.",
+    };
   }
 
-  return {
-    ok: false,
-    message: "한글 1~10자, 또는 영문·숫자 2~20자만 사용할 수 있어요.",
-  };
+  if (trimmed.startsWith(".") || trimmed.endsWith(".") || trimmed.includes("..")) {
+    return {
+      ok: false,
+      message: "마침표는 맨 앞이나 맨 뒤에 올 수 없고, 연속으로 쓸 수 없어요.",
+    };
+  }
+
+  return { ok: true };
 }
 
 export function maskDisplayName(name: string | null | undefined) {
