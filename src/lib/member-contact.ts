@@ -44,6 +44,22 @@ export function normalizePhoneNumber(input: string) {
   return digits;
 }
 
+export const PHONE_INPUT_LIMIT_MESSAGE = "휴대폰 번호는 11자를 넘을 수 없습니다.";
+
+/** Signup keypad input. Digits only, shown as 010-0000-0000, capped at 11 digits. */
+export function formatSignupPhoneInput(raw: string) {
+  const digits = raw.replace(/\D/g, "");
+  const overflow = digits.length > 11;
+  const clipped = digits.slice(0, 11);
+  let value = clipped;
+  if (clipped.length > 7) {
+    value = `${clipped.slice(0, 3)}-${clipped.slice(3, 7)}-${clipped.slice(7)}`;
+  } else if (clipped.length > 3) {
+    value = `${clipped.slice(0, 3)}-${clipped.slice(3)}`;
+  }
+  return { value, overflow };
+}
+
 export function formatPhoneNumber(input: string | null | undefined) {
   if (!input) return "";
   const digits = normalizePhoneNumber(input);

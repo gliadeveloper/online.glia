@@ -9,7 +9,12 @@ import { GliaAuthFooter } from "@/components/auth/glia/glia-auth-footer";
 import { KakaoLoginButton } from "@/components/auth/login/kakao-login-button";
 import { SignupStep, SignupSuspenseFallback } from "@/components/auth/signup/signup-step";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
-import { validateLegalName, validatePhoneNumber } from "@/lib/member-contact";
+import {
+  formatSignupPhoneInput,
+  PHONE_INPUT_LIMIT_MESSAGE,
+  validateLegalName,
+  validatePhoneNumber,
+} from "@/lib/member-contact";
 
 function SignupLandingContent() {
   const searchParams = useSearchParams();
@@ -174,7 +179,17 @@ export function SignupEmailScreen() {
               autoComplete="tel"
               inputMode="numeric"
               value={phoneNumber}
-              onChange={(event) => setPhoneNumber(event.target.value)}
+              onChange={(event) => {
+                const next = formatSignupPhoneInput(event.target.value);
+                setPhoneNumber(next.value);
+                setError((current) =>
+                  next.overflow
+                    ? PHONE_INPUT_LIMIT_MESSAGE
+                    : current === PHONE_INPUT_LIMIT_MESSAGE
+                      ? null
+                      : current,
+                );
+              }}
               placeholder="010-0000-0000"
               className="glia-auth__input"
               required

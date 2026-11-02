@@ -13,6 +13,8 @@ import { resolvePostLoginPath } from "@/lib/auth-redirect";
 import { siteBusiness } from "@/lib/site-business";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import {
+  formatSignupPhoneInput,
+  PHONE_INPUT_LIMIT_MESSAGE,
   validateContactEmail,
   validateLegalName,
   validatePhoneNumber,
@@ -468,7 +470,17 @@ function ContactContent({ initial, next }: { initial: MemberContactSnapshot; nex
               autoComplete="tel"
               inputMode="numeric"
               value={phoneNumber}
-              onChange={(event) => setPhoneNumber(event.target.value)}
+              onChange={(event) => {
+                const next = formatSignupPhoneInput(event.target.value);
+                setPhoneNumber(next.value);
+                setError((current) =>
+                  next.overflow
+                    ? PHONE_INPUT_LIMIT_MESSAGE
+                    : current === PHONE_INPUT_LIMIT_MESSAGE
+                      ? null
+                      : current,
+                );
+              }}
               placeholder="010-0000-0000"
               className="glia-auth__input"
               required
